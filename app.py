@@ -219,7 +219,13 @@ Default mode is "native". "docker_utils" use a docker for ffmpeg and calibre.
                 sys.exit(1)
 
             # Condition 1: If --ebooks_dir exists, check value and set 'ebooks_dir'
-            if 'ebooks_dir' in args:
+            if 'ebook' in args:
+                progress_status, audiobook_file = convert_ebook(args)
+                if audiobook_file is None:
+                    error = f'Conversion failed: {progress_status}'
+                    print(error)
+                    sys.exit(1)
+            elif 'ebooks_dir' in args:
                 # Check if the directory exists
                 if not os.path.exists(args['ebooks_dir']):
                     error = f'Error: The provided --ebooks_dir "{args["ebooks_dir"]}" does not exist.'
@@ -235,12 +241,7 @@ Default mode is "native". "docker_utils" use a docker for ffmpeg and calibre.
                     error = f'Conversion failed: {progress_status}'
                     print(error)
                     sys.exit(1)
-            elif 'ebook' in args:
-                progress_status, audiobook_file = convert_ebook(args)
-                if audiobook_file is None:
-                    error = f'Conversion failed: {progress_status}'
-                    print(error)
-                    sys.exit(1)
+
 
             else:
                 error = 'Error: In headless mode, you must specify either an ebook file using --ebook or an ebook directory using --ebooks_dir.'
