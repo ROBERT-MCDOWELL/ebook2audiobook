@@ -97,6 +97,11 @@ def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None)->tup
 
 class TTSUtils:
 
+    # Engines without a voice-conversion stage (bark, tortoise, yourtts, xtts)
+    # never assign these; shared helpers may still read them.
+    engine_zs = None
+    tts_zs_key = None
+
     def cleanup_memory(self)->None:
         import torch
         gc.collect()
@@ -557,7 +562,7 @@ class TTSUtils:
                                     gc.collect()
                                     self.engine = loaded_tts.get(self.tts_key, False)
                                     if not self.engine:
-                                        self._load_engine()
+                                        self.engine = self.load_engine()
                                     return new_current_voice
                                 else:
                                     error = 'normalize_audio() error:'

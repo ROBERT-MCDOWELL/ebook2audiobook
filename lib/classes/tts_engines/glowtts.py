@@ -70,12 +70,12 @@ class GlowTTS(TTSUtils, TTSRegistry, name='glowtts'):
             msg = f"Loading TTS {self.tts_key} model, it takes a while, please be patient…"
             print(msg)
             self.cleanup_memory()
+            #if self.session['custom_model'] is not None:
+            #    msg = f"{self.session['tts_engine']} custom model not implemented yet!"
+            #    raise NotImplementedError(msg)
+            self.tts_key = self.model_path
             engine = loaded_tts.get(self.tts_key)
             if not engine:
-                #if self.session['custom_model'] is not None:
-                #    msg = f"{self.session['tts_engine']} custom model not implemented yet!"
-                #    raise NotImplementedError(msg)
-                self.tts_key = self.model_path
                 engine = self._load_api(self.tts_key, self.model_path, self.device)
             if engine:
                 msg = f"TTS {self.tts_key} Loaded!"

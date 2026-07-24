@@ -40,7 +40,7 @@ class Tortoise(TTSUtils, TTSRegistry, name='tortoise'):
                 error = f'Invalid fine_tuned model {fine_tuned}. Available models: {list(self.models.keys())}'
                 raise ValueError(error)
             model_cfg = self.models[fine_tuned]
-            for required_key in ('repo', 'samplerate', 'sub'):
+            for required_key in ('repo', 'samplerate', 'sub', 'voice'):
                 if required_key not in model_cfg:
                     error = f'fine_tuned model {fine_tuned} is missing required key {required_key}.'
                     raise ValueError(error)
@@ -66,12 +66,12 @@ class Tortoise(TTSUtils, TTSRegistry, name='tortoise'):
         msg = f"Loading TTS {self.tts_key} model, it takes a while, please be patient…"
         print(msg)
         self.cleanup_memory()
+        #if self.session['custom_model'] is not None:
+        #    error = f"{self.session['tts_engine']} custom model not implemented yet!"
+        #    raise NotImplementedError(error)
+        self.tts_key = self.model_path
         engine = loaded_tts.get(self.tts_key)
         if not engine:
-            #if self.session['custom_model'] is not None:
-            #    error = f"{self.session['tts_engine']} custom model not implemented yet!"
-            #    raise NotImplementedError(error)
-            self.tts_key = self.model_path
             try:
                 engine = self._load_api(self.tts_key, self.model_path, self.device)
             except Exception as e:

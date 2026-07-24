@@ -60,22 +60,16 @@ class YourTTS(TTSUtils, TTSRegistry, name='yourtts'):
             print(msg)
             return engine
         try:
-            model_cfg = self.models[self.session['fine_tuned']]
-            model_path = model_cfg['repo']
-        except KeyError as e:
-            error = f"Invalid fine_tuned model '{self.session['fine_tuned']}'"
-            raise KeyError(error) from e
-        try:
-            engine = self._load_api(self.tts_key, model_path, self.device)
+            engine = self._load_api(self.tts_key, self.model_path, self.device)
             if engine is None:
-                error = '_load_api() returned None'
+                error = 'load_engine(): engine is None'
                 raise RuntimeError(error)
             msg = f'TTS {self.tts_key} Loaded!'
             print(msg)
             return engine
         except Exception as e:
-            error = 'load_engine(): engine is None'
-            raise RuntimeError(error)
+            error = f'load_engine() error: {e}'
+            raise RuntimeError(error) from e
 
     def convert(self, sentence_file:str, sentence:str, **kwargs)->tuple:
         try:

@@ -63,19 +63,21 @@ class Fairseq(TTSUtils, TTSRegistry, name='fairseq'):
             msg = f"Loading TTS {self.tts_key} model, it takes a while, please be patient…"
             print(msg)
             self.cleanup_memory()
+            if self.session['custom_model'] is not None:
+                model_path = self.session['custom_model']
+                custom_model_name = os.path.basename(os.path.normpath(model_path))
+                self.tts_key = f"{self.tts_engine}-{custom_model_name}"
+            else:
+                self.tts_key = self.model_path
             engine = loaded_tts.get(self.tts_key)
             if not engine:
                 if self.session['custom_model'] is not None:
-                    model_path = self.session['custom_model']
                     files = default_engine_settings[self.tts_engine]['files']
                     config_path = os.path.join(model_path, files[0])
                     checkpoint_path = os.path.join(model_path, files[1])
                     vocab_path = os.path.join(model_path, files[2])
-                    custom_model_name = os.path.basename(os.path.normpath(model_path))
-                    self.tts_key = f"{self.tts_engine}-{custom_model_name}"
                     engine = self._load_checkpoint(tts_engine=self.tts_engine, key=self.tts_key, checkpoint_path=checkpoint_path, config_path=config_path, vocab_path=vocab_path, device=self.device)
                 else:
-                    self.tts_key = self.model_path
                     engine = self._load_api(self.tts_key, self.model_path, self.device)
             if engine:
                 msg = f'TTS {self.tts_key} Loaded!'

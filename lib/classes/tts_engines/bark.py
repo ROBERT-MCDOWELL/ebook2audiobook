@@ -29,7 +29,7 @@ class Bark(TTSUtils, TTSRegistry, name='bark'):
                 error = f'Invalid fine_tuned model {fine_tuned}. Available models: {list(self.models.keys())}'
                 raise ValueError(error)
             model_cfg = self.models[fine_tuned]
-            for required_key in ('repo', 'samplerate'):
+            for required_key in ('repo', 'samplerate', 'voice'):
                 if required_key not in model_cfg:
                     error = f'fine_tuned model {fine_tuned} is missing required key {required_key}.'
                     raise ValueError(error)

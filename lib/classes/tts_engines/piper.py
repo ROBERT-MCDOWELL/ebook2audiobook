@@ -67,28 +67,27 @@ class Piper(TTSUtils, TTSRegistry, name='piper'):
             msg = f"Loading TTS {self.tts_key} model, it takes a while, please be patient…"
             print(msg)
             self.cleanup_memory()
+            if self.session['custom_model'] is not None:
+                self.model_path = self.session['custom_model']
+                model_name = os.path.basename(os.path.normpath(self.model_path))
+            else:
+                piper_lang = self.engine_langs[self.language]
+                voice_file = self.session.get('block_voice', self.session['voice'])
+                voice_name = Path(voice_file).stem if voice_file is not None else None
+                model_name = voice_name if any(voice_name in voices for voices in self.sub_list.values()) else self.sub_list[piper_lang][0]
+                self.model_path = os.path.join(self.cache_dir, self.tts_engine, model_name)
+            self.tts_key = f"{self.tts_engine}-{model_name}"
             engine = loaded_tts.get(self.tts_key)
             if not engine:
                 if self.session['custom_model'] is not None:
-                    self.model_path = self.session['custom_model']
                     files = default_engine_settings[self.tts_engine]['files']
                     config_path = os.path.join(self.model_path, files[0])
                     checkpoint_path = os.path.join(self.model_path, files[1])
-                    model_name = os.path.basename(os.path.normpath(self.model_path))
-                    self.tts_key = f"{self.tts_engine}-{model_name}"
                     engine = self._load_checkpoint(tts_engine=self.tts_engine, key=self.tts_key, checkpoint_path=checkpoint_path, config_path=config_path, device=self.device)
                 else:
-                    piper_lang = self.engine_langs[self.language]
-                    voice_file = self.session.get('block_voice', self.session['voice'])
-                    voice_name = Path(voice_file).stem if voice_file is not None else None
-                    model_name = voice_name if any(voice_name in voices for voices in self.sub_list.values()) else self.sub_list[piper_lang][0]
-                    engine_path = os.path.join(self.cache_dir, self.tts_engine)
-                    os.makedirs(engine_path, exist_ok=True)
-                    self.model_path = os.path.join(engine_path, model_name)
                     os.makedirs(self.model_path, exist_ok=True)
                     config_path = os.path.join(self.model_path, f'{model_name}.onnx.json')
                     checkpoint_path = os.path.join(self.model_path, f'{model_name}.onnx')
-                    self.tts_key = f"{self.tts_engine}-{model_name}"
                     engine = self._load_checkpoint(tts_engine=self.tts_engine, key=self.tts_key, checkpoint_path=checkpoint_path, config_path=config_path, device=self.device)
             if engine:
                 self.params['samplerate'] = int(getattr(engine, 'output_sample_rate', None) or getattr(getattr(engine, 'config', None), 'sample_rate', self.params['samplerate']))
