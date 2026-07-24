@@ -1114,10 +1114,32 @@ def convert2epub(session_id:str)->bool:
                     print(f'OCR completed for {page_count} image page(s).')
                 else:
                     return False
-            msg = f"Running command: {ebook_convert} {file_input} {session['epub_path']}"
+            env = dict(os.environ)
+            for key in ('PYTHONPATH', 'PYTHONHOME', 'PYTHONSTARTUP', 'PYTHONEXECUTABLE', 'PYTHONNOUSERSITE', 'LD_LIBRARY_PATH', 'LD_PRELOAD', 'DYLD_LIBRARY_PATH', 'DYLD_INSERT_LIBRARIES'):
+                env.pop(key, None)
+            prefixes = [os.path.normcase(os.path.normpath(p)) for p in (os.environ.get('CONDA_PREFIX'), os.environ.get('VIRTUAL_ENV'), sys.prefix if sys.prefix != sys.base_prefix else None) if p]
+            env['PATH'] = os.pathsep.join([p for p in env.get('PATH', '').split(os.pathsep) if p and not any(os.path.normcase(os.path.normpath(p)) == pre or os.path.normcase(os.path.normpath(p)).startswith(pre + os.sep) for pre in prefixes)])
+            env.setdefault('LANG', 'C.UTF-8')
+            env.setdefault('LC_ALL', 'C.UTF-8')
+            if sys.platform == systems['LINUX'] and not env.get('DISPLAY') and not env.get('WAYLAND_DISPLAY'):
+                env.setdefault('QT_QPA_PLATFORM', 'offscreen')
+            cmd_prefix = [ebook_convert]
+            if sys.platform != systems['WINDOWS']:
+                try:
+                    with open(ebook_convert, 'rb') as f:
+                        head = f.readline(256)
+                    if head.startswith(b'#!'):
+                        shebang = head[2:].decode('utf-8', 'replace').strip()
+                        if shebang.startswith('/usr/bin/env') and 'python' in shebang:
+                            interpreter = shutil.which(shebang.split()[-1], path=env['PATH'])
+                            if interpreter:
+                                cmd_prefix = [interpreter, ebook_convert]
+                except OSError:
+                    pass
+            msg = f"Running command: {' '.join(cmd_prefix)} {file_input} {session['epub_path']}"
             print(msg)
-            cmd = [
-                    ebook_convert, file_input, session['epub_path'],
+            cmd = cmd_prefix + [
+                    file_input, session['epub_path'],
                     '--input-encoding=utf-8',
                     '--output-profile=generic_eink',
                     '--flow-size=0',
@@ -1138,7 +1160,8 @@ def convert2epub(session_id:str)->bool:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                encoding='utf-8'
+                encoding='utf-8',
+                env=env
             )
             if result.returncode != 0:
                 error = f'ebook-convert exited {result.returncode}\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}'
