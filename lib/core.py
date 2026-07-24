@@ -1140,6 +1140,15 @@ def convert2epub(session_id:str)->bool:
                 text=True,
                 encoding='utf-8'
             )
+            if result.returncode != 0:
+                error = f'ebook-convert exited {result.returncode}\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}'
+                print(error)
+                show_alert(session_id, {"type": "error", "msg": error})
+                return False
+            if not os.path.exists(session['epub_path']) or os.path.getsize(session['epub_path']) == 0:
+                error = f"ebook-convert produced no output: {session['epub_path']}"
+                print(error)
+                return False
             print(result.stdout)
             return True
         except subprocess.CalledProcessError as e:
