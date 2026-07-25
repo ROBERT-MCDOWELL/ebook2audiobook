@@ -1389,7 +1389,7 @@ def build_interface(args:dict)->gr.Blocks:
                 except Exception as e:
                     error = f'_refresh_interface(): {e}'
                     exception_alert(session_id, error)
-                outputs = tuple([gr.update() for _ in range(13)])
+                outputs = tuple([gr.update() for _ in range(14)])
                 return outputs
 
             def _change_gr_audiobook_list(session_id:str, selected:str|None)->dict:
