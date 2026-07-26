@@ -2752,11 +2752,6 @@ def convert_chapters2audio(session_id:str)->bool:
                 if new_voice != old_voice:
                     is_voice_changed = True
                     block['voice'] = new_voice
-                    # NOTE: do NOT write new_voice into prev_blocks (blocks_saved) here.
-                    # the per-block skip test below compares block_hash(block) against
-                    # block_hash(prev_blocks[id]); if blocks_saved already held the new voice,
-                    # the hashes would match and a voice change would be silently skipped.
-                    # blocks_saved is refreshed from blocks_current at the end of the run.
             if is_voice_changed:
                 blocks_current['blocks'] = blocks
                 session['blocks_current'] = blocks_current
