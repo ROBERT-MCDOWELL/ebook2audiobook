@@ -1156,7 +1156,7 @@ class DeviceInstaller():
             if missing_packages:
                 msg = '\nInstalling missing or upgrade packages…\n'
                 print(msg)
-                subprocess.call([sys.executable, '-m', 'pip', 'cache', 'purge'])
+                subprocess.call([sys.executable, '-m', 'pip', 'cache', 'purge'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 try:
                     subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', '--ignore-installed', '--no-deps', '--root-user-action=ignore', 'pip'])
                 except subprocess.CalledProcessError as e:
