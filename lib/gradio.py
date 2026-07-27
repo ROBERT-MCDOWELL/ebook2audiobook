@@ -2538,9 +2538,26 @@ def build_interface(args:dict)->gr.Blocks:
                                                 if has_prev and voice_name_of(prev_voice) != voice_name_of(current_voice):
                                                     prev_label = voice_name_of(prev_voice) or 'default'
                                                     curr_label = voice_name_of(current_voice) or 'default'
+                                                    # only blocks that follow the global voice are re-pointed by
+                                                    # sync_globals_to_blocks(); blocks with their own voice keep it,
+                                                    # so their hash is unchanged and they are NOT reconverted.
+                                                    _ok, total_blocks, following = count_blocks_global_voice(db_matches[0])
+                                                    own_voice = total_blocks - following
                                                     msg += (f"<br/><br/>NOTE: the previous global voice was <b>{prev_label}</b> but the current "
-                                                            f"global voice is <b>{curr_label}</b>. If you keep this current voice the whole ebook "
-                                                            f"will be converted again.")
+                                                            f"global voice is <b>{curr_label}</b>.")
+                                                    if _ok and total_blocks > 0:
+                                                        if following == 0:
+                                                            msg += (f" All {total_blocks} blocks use their own voice, so none of them "
+                                                                    f"will be reconverted because of this change.")
+                                                        elif own_voice == 0:
+                                                            msg += (f" If you keep this current voice all {total_blocks} blocks "
+                                                                    f"will be converted again.")
+                                                        else:
+                                                            msg += (f" If you keep this current voice <b>{following}</b> of {total_blocks} blocks "
+                                                                    f"will be converted again; the other <b>{own_voice}</b> keep their own "
+                                                                    f"block voice and will not be reconverted.")
+                                                    else:
+                                                        msg += " If you keep this current voice the whole ebook will be converted again."
                                                 return gr.update(value=_show_gr_modal(session['status'], msg), visible=True), event
                                             else:
                                                 session['status'] = status_tags['SKIP']

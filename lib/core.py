@@ -712,6 +712,31 @@ def read_stamp_voice(db_path:str)->tuple:
         print(f'read_stamp_voice() error: {e}')
         return False, None
 
+def count_blocks_global_voice(db_path:str)->tuple:
+    # how many convertible blocks actually follow the global voice, and how many have their own.
+    # mirrors sync_globals_to_blocks(): a block follows the global voice when its stored voice
+    # equals the stamp's voice (raw comparison, NULL-safe via IS), so only those get re-pointed
+    # and therefore reconverted when the global voice changes.
+    try:
+        if not os.path.exists(db_path):
+            return False, 0, 0
+        with sqlite3.connect(db_path) as conn:
+            row = conn.execute('SELECT voice FROM stamp WHERE id=1').fetchone()
+            if row is None:
+                return False, 0, 0
+            stamp_voice = row[0]
+            total = conn.execute(
+                "SELECT COUNT(*) FROM blocks WHERE keep=1 AND TRIM(COALESCE(text,'')) <> ''"
+            ).fetchone()[0]
+            following = conn.execute(
+                "SELECT COUNT(*) FROM blocks WHERE keep=1 AND TRIM(COALESCE(text,'')) <> '' AND voice IS ?",
+                (stamp_voice,)
+            ).fetchone()[0]
+            return True, total, following
+    except Exception as e:
+        print(f'count_blocks_global_voice() error: {e}')
+        return False, 0, 0
+
 def save_db_stamp(session_id:str)->None:
     try:
         session = context.get_session(session_id)
