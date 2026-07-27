@@ -687,6 +687,31 @@ def load_db_blocks(db_path:str)->dict:
         print(error)
         return {}
 
+def voice_name_of(voice:str|None)->str|None:
+    # normalize a voice (raw selection OR already-extracted path) to the stable stem the stamp
+    # is keyed on. mirrors convert_ebook()'s transform (basename -> splitext -> '&'->'And' ->
+    # get_sanitized), so the SAME voice compares equal whether it is stored extracted or raw.
+    if not voice:
+        return None
+    name = os.path.splitext(os.path.basename(voice))[0].replace('&', 'And')
+    return get_sanitized(name)
+
+def read_stamp_voice(db_path:str)->tuple:
+    # lightweight read of the global voice stored by a previous (partial) conversion.
+    # returns (exists, voice): exists=False means there is no prior stamp to compare against,
+    # which is distinct from a prior stamp whose voice was None (global default).
+    try:
+        if not os.path.exists(db_path):
+            return False, None
+        with sqlite3.connect(db_path) as conn:
+            row = conn.execute('SELECT voice FROM stamp WHERE id=1').fetchone()
+            if row is None:
+                return False, None
+            return True, row[0]
+    except Exception as e:
+        print(f'read_stamp_voice() error: {e}')
+        return False, None
+
 def save_db_stamp(session_id:str)->None:
     try:
         session = context.get_session(session_id)

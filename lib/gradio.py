@@ -2522,6 +2522,25 @@ def build_interface(args:dict)->gr.Blocks:
                                                 session['status'] = status_tags['OVERRIDE']
                                                 session['audiobook_overridden'] = final_file
                                                 msg = f"Warning! audio sentences or final file {final_name} of this conversion already exists. If you continue resume will restart from the last sentence converted!"
+                                                # audio exists, so the previous global voice matters: if it differs from
+                                                # the one selected now, every block will be reconverted (block_hash
+                                                # includes the voice). warn in the same modal rather than a second one.
+                                                if ebook_mode == ebook_modes['DIRECTORY']:
+                                                    voice_map = dict(session.get('voice_map') or {})
+                                                    current_voice = voice_map.get(os.path.abspath(source),
+                                                                    voice_map.get(os.path.basename(source), session.get('voice')))
+                                                else:
+                                                    current_voice = session.get('voice')
+                                                # process_dir is md5(ebook_name) but the db is named from filename_noext,
+                                                # which can differ (e.g. translate suffix); glob rather than reconstruct.
+                                                db_matches = glob(os.path.join(process_dir, f"{file_prefixes['current']}*.db"))
+                                                has_prev, prev_voice = read_stamp_voice(db_matches[0]) if db_matches else (False, None)
+                                                if has_prev and voice_name_of(prev_voice) != voice_name_of(current_voice):
+                                                    prev_label = voice_name_of(prev_voice) or 'default'
+                                                    curr_label = voice_name_of(current_voice) or 'default'
+                                                    msg += (f"<br/><br/>NOTE: the previous global voice was <b>{prev_label}</b> but the current "
+                                                            f"global voice is <b>{curr_label}</b>. If you keep this current voice the whole ebook "
+                                                            f"will be converted again.")
                                                 return gr.update(value=_show_gr_modal(session['status'], msg), visible=True), event
                                             else:
                                                 session['status'] = status_tags['SKIP']
