@@ -737,6 +737,44 @@ def count_blocks_global_voice(db_path:str)->tuple:
         print(f'count_blocks_global_voice() error: {e}')
         return False, 0, 0
 
+def build_voice_change_note(process_dir:str, current_voice:str|None, html:bool=True)->str|None:
+    # shared by the gradio modal and the headless CLI prompt: returns the NOTE text when a
+    # previous conversion used a different global voice, else None. only blocks that follow the
+    # global voice are re-pointed by sync_globals_to_blocks() and therefore reconverted; blocks
+    # with their own voice keep it and are skipped by the block_hash() comparison.
+    try:
+        # process_dir is md5(ebook_name) but the db is named from filename_noext, which can
+        # differ (e.g. translate suffix); glob rather than reconstruct the name.
+        db_matches = glob(os.path.join(process_dir, f"{file_prefixes['current']}*.db"))
+        if not db_matches:
+            return None
+        db_path = db_matches[0]
+        has_prev, prev_voice = read_stamp_voice(db_path)
+        if not has_prev or voice_name_of(prev_voice) == voice_name_of(current_voice):
+            return None
+        prev_label = voice_name_of(prev_voice) or 'default'
+        curr_label = voice_name_of(current_voice) or 'default'
+        b0, b1, br = ('<b>', '</b>', '<br/><br/>') if html else ('', '', '\n')
+        note = (f'{br}NOTE: the previous global voice was {b0}{prev_label}{b1} but the current '
+                f'global voice is {b0}{curr_label}{b1}.')
+        ok, total, following = count_blocks_global_voice(db_path)
+        if not ok or total == 0:
+            return note + ' If you keep this current voice the whole ebook will be converted again.'
+        own_voice = total - following
+        if following == 0:
+            note += (f' All {total} blocks use their own voice, so none of them will be '
+                     f'reconverted because of this change.')
+        elif own_voice == 0:
+            note += f' If you keep this current voice all {total} blocks will be converted again.'
+        else:
+            note += (f' If you keep this current voice {b0}{following}{b1} of {total} blocks will be '
+                     f'converted again; the other {b0}{own_voice}{b1} keep their own block voice '
+                     f'and will not be reconverted.')
+        return note
+    except Exception as e:
+        print(f'build_voice_change_note() error: {e}')
+        return None
+
 def save_db_stamp(session_id:str)->None:
     try:
         session = context.get_session(session_id)
@@ -3680,6 +3718,11 @@ def convert_ebook(args:dict)->tuple:
                 audio_sentences_exist = any(Path(session['sentences_dir']).rglob(f'*.{default_audio_proc_format}'))
                 if audio_pre_final_exist or audio_sentences_exist:
                     msg = f"Warning! audio sentences or final file {ebook_name} of this conversion already exists!"
+                    # audio exists, so the previous global voice matters: warn before the prompt,
+                    # since [r]esume with a different global voice reconverts the affected blocks.
+                    voice_note = build_voice_change_note(session['process_dir'], session.get('voice'), html=False)
+                    if voice_note:
+                        msg += voice_note
                     print(msg)
                     while True:
                         choice = input("[s]kip / [r]esume / [d]elete and convert again: ").strip().lower()
