@@ -688,18 +688,12 @@ def load_db_blocks(db_path:str)->dict:
         return {}
 
 def voice_name_of(voice:str|None)->str|None:
-    # normalize a voice (raw selection OR already-extracted path) to the stable stem the stamp
-    # is keyed on. mirrors convert_ebook()'s transform (basename -> splitext -> '&'->'And' ->
-    # get_sanitized), so the SAME voice compares equal whether it is stored extracted or raw.
     if not voice:
         return None
     name = os.path.splitext(os.path.basename(voice))[0].replace('&', 'And')
     return get_sanitized(name)
 
 def read_stamp_voice(db_path:str)->tuple:
-    # lightweight read of the global voice stored by a previous (partial) conversion.
-    # returns (exists, voice): exists=False means there is no prior stamp to compare against,
-    # which is distinct from a prior stamp whose voice was None (global default).
     try:
         if not os.path.exists(db_path):
             return False, None
@@ -713,10 +707,6 @@ def read_stamp_voice(db_path:str)->tuple:
         return False, None
 
 def count_blocks_global_voice(db_path:str)->tuple:
-    # how many convertible blocks actually follow the global voice, and how many have their own.
-    # mirrors sync_globals_to_blocks(): a block follows the global voice when its stored voice
-    # equals the stamp's voice (raw comparison, NULL-safe via IS), so only those get re-pointed
-    # and therefore reconverted when the global voice changes.
     try:
         if not os.path.exists(db_path):
             return False, 0, 0
@@ -738,13 +728,7 @@ def count_blocks_global_voice(db_path:str)->tuple:
         return False, 0, 0
 
 def build_voice_change_note(process_dir:str, current_voice:str|None, html:bool=True)->str|None:
-    # shared by the gradio modal and the headless CLI prompt: returns the NOTE text when a
-    # previous conversion used a different global voice, else None. only blocks that follow the
-    # global voice are re-pointed by sync_globals_to_blocks() and therefore reconverted; blocks
-    # with their own voice keep it and are skipped by the block_hash() comparison.
     try:
-        # process_dir is md5(ebook_name) but the db is named from filename_noext, which can
-        # differ (e.g. translate suffix); glob rather than reconstruct the name.
         db_matches = glob(os.path.join(process_dir, f"{file_prefixes['current']}*.db"))
         if not db_matches:
             return None
