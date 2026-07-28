@@ -7,7 +7,20 @@ from importlib.metadata import version, PackageNotFoundError
 from lib.conf import *
 
 class DeviceInstaller():
-    
+
+    # packages whose version/variant depends on the device, not on the interpreter.
+    # kept out of requirements.txt and resolved by select_pkg().
+    # names are PEP 503 normalized (hyphens) to match the head parsed from
+    # requirements.txt, which writes 'huggingface_hub' with an underscore.
+    device_pkgs = ['onnxruntime', 'pyannote-audio', 'huggingface-hub', 'transformers']
+
+    # mutually exclusive distributions: only one of each list may end up installed.
+    # select_pkg() decides which, finalize_exclusive_packages() removes the others
+    # AFTER the requirements pass (a transitive requirement can reintroduce a loser).
+    exclusive_pkgs = {
+        'onnxruntime': ['onnxruntime', 'onnxruntime-gpu', 'onnxruntime-directml'],
+    }
+
     def __init__(self):
         self.system = sys.platform
         self.arch = self.check_arch
@@ -1032,11 +1045,19 @@ class DeviceInstaller():
         self.remove_obsolete_packages()
         overrides = {}
         packages = []
+        # device-dependent requirements, resolved in the same pip pass as
+        # requirements.txt so every floor is visible to one resolver run.
+        # ORDER MATTERS: select_pkg('pyannote-audio') reads the installed torch
+        # version, so this must run after install_device_packages().
         onnx_pkg = 'onnxruntime'
         if self.system != systems['MACOS']:
-            onnx_pkg = self.check_onnxruntime_pkg()
-        if onnx_pkg is not None:
-            packages.append(onnx_pkg)
+            onnx_pkg = self.select_pkg('onnxruntime')
+        packages.append(onnx_pkg)
+        if onnx_pkg == 'onnxruntime-directml':
+            packages.append('protobuf<7')
+        packages.append(self.select_pkg('pyannote-audio'))
+        packages.append(self.select_pkg('huggingface-hub'))
+        packages.append(self.select_pkg('transformers'))
         if self.system == systems['MACOS'] and platform.machine().lower() in ('x86_64', 'amd64'):
             overrides['llvmlite'] = 'llvmlite==0.44.0'
             overrides['numba'] = 'numba==0.61.0'
@@ -1051,8 +1072,12 @@ class DeviceInstaller():
                         pkg = pkg.split('#', 1)[0].strip()
                         if not pkg:
                             continue
-                    head = re.split(r'[<>=!\[;]', pkg, 1)[0].strip().lower()
-                    if head in {'torch', 'torchaudio'}:
+                    head = re.sub(r'[-_.]+', '-', re.split(r'[<>=!\[;]', pkg, 1)[0].strip().lower())
+                    # torch/torchaudio: installed by install_device_packages().
+                    # device_pkgs: decided by select_pkg() above. Skipping them here
+                    # keeps a stale requirements.txt line from overriding the
+                    # device-specific choice.
+                    if head in {'torch', 'torchaudio'} or head in self.device_pkgs:
                         continue
                     if head in overrides:
                         if overrides[head] is None:
@@ -1164,18 +1189,8 @@ class DeviceInstaller():
                     print(msg)
                 base_cmd = [sys.executable, '-m', 'pip', 'install', '--no-cache-dir', '--root-user-action=ignore']
                 try:
-                    # batch install: one resolution over all pins at once instead of
-                    # one pip subprocess per package. Avoids install/downgrade churn
-                    # (an unpinned package pulling a newer transformers, later undone
-                    # by the pinned version) and collapses the resolver's post-install
-                    # conflict summary from N near-identical dumps down to one.
                     subprocess.check_call(base_cmd + missing_packages)
                 except subprocess.CalledProcessError:
-                    # fallback: per-package to isolate failures. This base image ships
-                    # some packages with no RECORD (and dirty dist-info under
-                    # overlayfs), so the implicit uninstall during an upgrade can fail
-                    # with uninstall-no-record-file / Errno 39. Retry without touching
-                    # the existing install so pip just overwrites it.
                     for raw_pkg in missing_packages:
                         try:
                             subprocess.check_call(base_cmd + [raw_pkg])
@@ -1188,6 +1203,7 @@ class DeviceInstaller():
                                 return 1
                 msg = '\nAll required packages are installed.'
                 print(msg)
+            self.finalize_exclusive_packages()
             return self.check_voices()
         except Exception as e:
             error = f'install_python_packages() error: {e}'
@@ -1195,11 +1211,6 @@ class DeviceInstaller():
             return 1
 
     def remove_obsolete_packages(self)->int:
-        # packages removed from requirements.txt that must also be uninstalled
-        # from existing envs when users update.
-        # unidic: replaced by unidic-lite. fugashi prefers full unidic when
-        # importable, but its dicdir is empty without 'python -m unidic download',
-        # so a leftover install breaks Japanese TTS (mecabrc not found).
         obsolete_packages = ['unidic']
         try:
             for pkg_name in obsolete_packages:
@@ -1289,38 +1300,71 @@ class DeviceInstaller():
                 return True
         return False
 
-    def check_onnxruntime_pkg(self)->Union[str, None]:
-        name, tag, msg = self.check_hardware
-        if self.python_version >= (3, 12) and (devices['CUDA']['found'] or devices['XPU']['found'] or devices['ROCM']['found'] or devices['JETSON']['found']):
-            if self.get_package_version('onnxruntime-gpu'):
-                return None
-            if self.get_package_version('onnxruntime-directml'):
-                subprocess.call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'onnxruntime-directml'])
-            if self.get_package_version('onnxruntime'):
-                subprocess.call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'onnxruntime'])
-            return 'onnxruntime-gpu'
-        if name == devices['CPU']['proc'] or self.python_version < (3, 12) or self.system != systems['WINDOWS']:
-            if self.get_package_version('onnxruntime-directml'):
-                subprocess.call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'onnxruntime-directml'])
-            if self.get_package_version('onnxruntime-gpu'):
-                subprocess.call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'onnxruntime-gpu'])
-            return 'onnxruntime'
-        if not self.has_directml_gpu():
-            if self.get_package_version('onnxruntime-directml'):
-                subprocess.call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'onnxruntime-directml'])
-            return 'onnxruntime'
-        if self.get_package_version('onnxruntime-directml'):
-            return None
+    def has_torchcodec_stack(self)->bool:
+        # single source of truth for the whole dependency universe:
+        #   torch >= 2.9 -> torchcodec exists -> pyannote 4 -> hub 1.x -> transformers 5
+        #   torch <  2.9 -> no torchcodec     -> pyannote 3.4.0 -> hub <1.0 -> transformers 4.57.6
+        # torch_matrix tags with codec '' (cu118/cu121/cu124, rocm<=6.2.4, jetson*)
+        # top out below 2.9 and must stay on the old branch.
+        # (2, 9) is the same boundary _needs_reinstall() uses to decide whether
+        # torchcodec gets installed at all.
+        torch_version = self.get_package_version('torch') or ''
+        return self.version_tuple(torch_version, 2) >= (2, 9)
+
+    def select_pkg(self, pkg:str)->str:
+        # device-dependent requirements that PEP 508 markers cannot express.
+        # returns a pip requirement string, no side effects: removing the losing
+        # alternatives is finalize_exclusive_packages()'s job, after the
+        # requirements pass.
+        match pkg:
+            case 'onnxruntime':
+                name, tag, msg = self.check_hardware
+                if self.python_version >= (3, 12) and (devices['CUDA']['found'] or devices['XPU']['found'] or devices['ROCM']['found'] or devices['JETSON']['found']):
+                    return 'onnxruntime-gpu'
+                if name == devices['CPU']['proc'] or self.python_version < (3, 12) or self.system != systems['WINDOWS']:
+                    return 'onnxruntime'
+                if not self.has_directml_gpu():
+                    return 'onnxruntime'
+                return 'onnxruntime-directml'
+            case 'pyannote-audio':
+                # pyannote 4 dropped the torchaudio/sox/soundfile backends and
+                # requires torchcodec>=0.7, which only exists from torch 2.8 on.
+                return 'pyannote-audio>=4.0.0' if self.has_torchcodec_stack() else 'pyannote-audio==3.4.0'
+            case 'huggingface-hub':
+                # pyannote 3.4.0 predates hub 1.0 and calls APIs it removed, but
+                # only declares a floor (huggingface-hub>=0.13.0) — a floor cannot
+                # pull a version down, so the cap has to come from here.
+                return 'huggingface-hub>=1.0' if self.has_torchcodec_stack() else 'huggingface-hub>=0.36.2,<1.0'
+            case 'transformers':
+                # not a pyannote dependency (it arrives via sentence-transformers /
+                # coqui-tts) but transformers 5 requires hub>=1.0, so it is pinned
+                # by the same decision.
+                return 'transformers>=5.0.0' if self.has_torchcodec_stack() else 'transformers==4.57.6'
+            case _:
+                raise ValueError(f'select_pkg(): no rule for {pkg}')
+
+    def finalize_exclusive_packages(self)->int:
+        # runs AFTER the requirements pass. transitive requirements reintroduce
+        # packages that were removed before it: piper-tts declares
+        # 'onnxruntime<2,>=1', which lands plain onnxruntime alongside
+        # onnxruntime-gpu. Both ship the same module, so import order decides
+        # which one the process actually gets.
         try:
-            if self.get_package_version('onnxruntime'):
-                subprocess.call([sys.executable, '-m', 'pip', 'uninstall', '-y', 'onnxruntime'])
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--no-cache-dir', 'onnxruntime-directml', 'protobuf<7'])
-            return None
+            for pkg, choices in self.exclusive_pkgs.items():
+                keep = re.split(r'[<>=!\[;]', self.select_pkg(pkg), 1)[0].strip()
+                for choice in choices:
+                    if choice == keep or not self.get_package_version(choice):
+                        continue
+                    msg = f'Removing {choice} (this device uses {keep})…'
+                    print(msg)
+                    subprocess.call([sys.executable, '-m', 'pip', 'uninstall', '-y', '--root-user-action=ignore', choice])
+            return 0
         except Exception as e:
-            error = f'check_onnxruntime_pkg(): {e}'
+            error = f'finalize_exclusive_packages() error: {e}'
             print(error)
-            return 'onnxruntime'
-          
+            return 0
+
+
     def install_device_packages(self, device_info_str:str)->int:
 
         def _tag_ok(installed_tag):

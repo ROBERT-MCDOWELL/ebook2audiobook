@@ -5,6 +5,3 @@ julius
 lameenc
 openunmix
 pyyaml
-torch
-torchaudio
-tqdm
