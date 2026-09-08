@@ -467,7 +467,7 @@ header_css = '''
             border-radius: 0px !important;
             background-color: #ebedf0 !important;
             color: #ffffff !important;
-            border_style: none !important;
+            border-style: none !important;
         }
         #gr_audiobook_player audio::-webkit-media-controls-panel {
             width: 100% !important;
