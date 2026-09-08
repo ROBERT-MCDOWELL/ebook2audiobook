@@ -410,7 +410,7 @@ header_css = '''
             text-align: center !important;
             
         }
-        #gr_session textarea, #gr_progress textarea, gr_audiobook_sentence textarea {
+        #gr_session textarea, #gr_progress textarea, #gr_audiobook_sentence textarea {
             overflow: hidden !important;
             overflow-y: auto !important;
             scrollbar-width: none !important;
