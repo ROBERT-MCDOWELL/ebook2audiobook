@@ -5,7 +5,6 @@ header_css = None
 
 def build_interface(args:dict)->gr.Blocks:
     from lib.classes.tts_engines.common.preset_loader import load_engine_presets
-    global theme, header_css
     try:
         script_mode = args['script_mode']
         is_gui_process = args['is_gui_process']
