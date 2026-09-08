@@ -42,9 +42,9 @@ phonemizer
 indic-nlp-library
 pytesseract
 torchvggish
+gradio
 stanza==1.10.1
 argostranslate==1.11.0
 pandas<3.0,>=1.0
-gradio==5.49.1
 coqui-tts[languages]==0.27.5
 piper-tts==1.4.2
