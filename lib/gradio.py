@@ -457,7 +457,7 @@ header_css = '''
         #gr_row_voice_player, #gr_row_custom_model_list, #gr_row_session, #gr_row_audiobook_list {
             height: 60px !important;
         }
-        #gr_audiobook_player :is(.share, .download, .volume, .empty, .source-selection, .control-wrapper, .settings-wrapper, label), #gr_audiobook_files label[data-testid="block-label"] {
+        #gr_audiobook_player :is(.volume, .empty, .source-selection, .control-wrapper, .settings-wrapper, label), #gr_audiobook_files label[data-testid="block-label"] {
             display: none !important;
         }
         #gr_audiobook_player audio {
@@ -476,6 +476,7 @@ header_css = '''
             border-radius: 0px !important;
             background-color: #ebedf0 !important;
             color: #ffffff !important;
+            border-style: none !important;
         }
         #gr_voice_player_hidden {
             z-index: -100 !important;
