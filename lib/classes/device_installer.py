@@ -12,7 +12,7 @@ class DeviceInstaller():
     # kept out of requirements.txt and resolved by select_pkg().
     # names are PEP 503 normalized (hyphens) to match the head parsed from
     # requirements.txt, which writes 'huggingface_hub' with an underscore.
-    device_pkgs = ['onnxruntime', 'pyannote-audio', 'huggingface-hub', 'transformers']
+    device_pkgs = ['onnxruntime', 'pyannote-audio', 'huggingface-hub', 'transformers', 'gradio']
 
     # mutually exclusive distributions: only one of each list may end up installed.
     # select_pkg() decides which, finalize_exclusive_packages() removes the others
@@ -1288,6 +1288,7 @@ class DeviceInstaller():
         packages.append(self.select_pkg('pyannote-audio'))
         packages.append(self.select_pkg('huggingface-hub'))
         packages.append(self.select_pkg('transformers'))
+        packages.append(self.select_pkg('gradio'))
         if self.system == systems['MACOS'] and platform.machine().lower() in ('x86_64', 'amd64'):
             # last llvmlite/numba with macOS x86_64 wheels. Newer llvmlite has no
             # wheel and needs LLVM 22 to build from source, which fails against the
@@ -1384,37 +1385,47 @@ class DeviceInstaller():
                 pkg_spec_part = re.split(r'[<>=!]', clean_pkg, maxsplit=1)
                 spec_str = clean_pkg[len(pkg_spec_part[0]):].strip()
                 if spec_str:
-                    req_match = re.search(r'(==|!=|>=|<=|>|<)\s*(\d+\.\d+(?:\.\d+)?)', spec_str)
-                    if req_match:
-                        op, req_ver = req_match.groups()
+                    norm_match = re.match(r'^(\d+\.\d+(?:\.\d+)?)', installed_version)
+                    short_version = norm_match.group(1) if norm_match else installed_version
+                    installed_v = self.version_tuple(short_version, 3)
+                    
+                    # FIX: Evaluate ALL specifiers (e.g. both >=0.36.2 and <1.0)
+                    violated = False
+                    for op, req_ver in re.findall(r'(==|!=|>=|<=|>|<)\s*(\d+\.\d+(?:\.\d+)?)', spec_str):
                         req_v = self.version_tuple(req_ver, 3)
-                        norm_match = re.match(r'^(\d+\.\d+(?:\.\d+)?)', installed_version)
-                        short_version = norm_match.group(1) if norm_match else installed_version
-                        installed_v = self.version_tuple(short_version, 3)
                         if op == '==' and installed_v != req_v:
-                            msg = f'{pkg_name} (installed {installed_version}) != required {req_ver}.'
+                            msg = f'{pkg_name} (installed {installed_version}) violates {op}{req_ver} from {clean_pkg}.'
                             print(msg)
-                            missing_packages.append(raw_pkg)
+                            violated = True
+                            break
                         elif op == '>=' and installed_v < req_v:
-                            msg = f'{pkg_name} (installed {installed_version}) < required {req_ver}.'
+                            msg = f'{pkg_name} (installed {installed_version}) violates {op}{req_ver} from {clean_pkg}.'
                             print(msg)
-                            missing_packages.append(raw_pkg)
+                            violated = True
+                            break
                         elif op == '<=' and installed_v > req_v:
-                            msg = f'{pkg_name} (installed {installed_version}) > allowed {req_ver}.'
+                            msg = f'{pkg_name} (installed {installed_version}) violates {op}{req_ver} from {clean_pkg}.'
                             print(msg)
-                            missing_packages.append(raw_pkg)
+                            violated = True
+                            break
                         elif op == '>' and installed_v <= req_v:
-                            msg = f'{pkg_name} (installed {installed_version}) <= required {req_ver}.'
+                            msg = f'{pkg_name} (installed {installed_version}) violates {op}{req_ver} from {clean_pkg}.'
                             print(msg)
-                            missing_packages.append(raw_pkg)
+                            violated = True
+                            break
                         elif op == '<' and installed_v >= req_v:
-                            msg = f'{pkg_name} (installed {installed_version}) >= restricted {req_ver}.'
+                            msg = f'{pkg_name} (installed {installed_version}) violates {op}{req_ver} from {clean_pkg}.'
                             print(msg)
-                            missing_packages.append(raw_pkg)
+                            violated = True
+                            break
                         elif op == '!=' and installed_v == req_v:
-                            msg = f'{pkg_name} (installed {installed_version}) == excluded {req_ver}.'
+                            msg = f'{pkg_name} (installed {installed_version}) violates {op}{req_ver} from {clean_pkg}.'
                             print(msg)
-                            missing_packages.append(raw_pkg)
+                            violated = True
+                            break
+                            
+                    if violated and raw_pkg not in missing_packages:
+                        missing_packages.append(raw_pkg)
             if missing_packages:
                 msg = '\nInstalling missing or upgrade packages…\n'
                 print(msg)
@@ -1434,6 +1445,17 @@ class DeviceInstaller():
                 # empty on every platform except macOS Intel, where apply_pins() is
                 # a no-op, so nothing else changes behaviour.
                 pins = [spec for spec in overrides.values() if spec]
+                
+                # FIX: Force device pins into the pip resolver so transitive 
+                # dependencies cannot override bounds like huggingface-hub<1.0
+                for dpkg in ['onnxruntime', 'pyannote-audio', 'huggingface-hub', 'transformers', 'gradio']:
+                    try:
+                        pin = self.select_pkg(dpkg)
+                        if pin not in pins:
+                            pins.append(pin)
+                    except Exception:
+                        pass
+
                 try:
                     # batch install: one resolution over all pins at once instead of
                     # one pip subprocess per package. Avoids install/downgrade churn
@@ -1642,12 +1664,14 @@ class DeviceInstaller():
                 # pyannote 3.4.0 predates hub 1.0 and calls APIs it removed, but
                 # only declares a floor (huggingface-hub>=0.13.0) — a floor cannot
                 # pull a version down, so the cap has to come from here.
-                return 'huggingface-hub>=1.0' if self.has_torchcodec_stack() else 'huggingface-hub>=0.36.2,<1.0'
+                return 'huggingface-hub>=1.16.0,<2.0' if self.has_torchcodec_stack() else 'huggingface-hub>=0.36.2,<1.0'
             case 'transformers':
                 # not a pyannote dependency (it arrives via sentence-transformers /
                 # coqui-tts) but transformers 5 requires hub>=1.0, so it is pinned
                 # by the same decision.
                 return 'transformers>=5.0.0,<5.1' if self.has_torchcodec_stack() else 'transformers==4.57.6'
+            case 'gradio':
+                return 'gradio==6.26.0' if self.has_torchcodec_stack() else 'gradio==5.49.1'
             case _:
                 raise ValueError(f'select_pkg(): no rule for {pkg}')
 
