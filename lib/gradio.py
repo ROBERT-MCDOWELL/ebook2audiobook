@@ -343,6 +343,7 @@ header_css = '''
             flex-direction: column !important;
             align-items: center !important;
             justify-content: center !important;
+            border-style: none !important;
         }
         #gr_ebook_src button>div, #gr_ebook_textarea button>div, #gr_custom_model_file button>div, #gr_voice_file button>div {
             font-size: 12px !important;
