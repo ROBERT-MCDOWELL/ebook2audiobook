@@ -466,10 +466,9 @@ Default to config.json model.""")
             passed_args_set = {arg for arg in passed_arguments if arg.startswith('--')}
             if passed_args_set.issubset(allowed_arguments):
                 try:
-                    from lib.gradio import theme, header_css, build_interface
+                    from lib.gradio import build_interface
                     c.progress_bar = c.gr.Progress(track_tqdm=False)
                     app = build_interface(args)
-                    print(theme, header_css)
                     if app is not None:
                         app.queue(
                             default_concurrency_limit=interface_concurrency_limit
