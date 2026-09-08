@@ -474,7 +474,8 @@ Default to config.json model.""")
                             default_concurrency_limit=interface_concurrency_limit
                         ).launch(
                             theme=theme,
-                            css=header_css, 
+                            css=header_css,
+                            footer_links=["settings"],
                             debug=bool(int(os.environ.get('GRADIO_DEBUG', '0'))),
                             show_error=debug_mode, favicon_path='./favicon.ico', 
                             server_name=interface_host, 
