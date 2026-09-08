@@ -460,7 +460,12 @@ header_css = '''
         #gr_audiobook_player {
             border-style: none !important;
         }
-        #gr_audiobook_player :is(.volume, .empty, .source-selection, .control-wrapper, .settings-wrapper, label), #gr_audiobook_files label[data-testid="block-label"] {
+        #gr_audiobook_player :is(.volume, .empty, .source-selection, .control-wrapper, .settings-wrapper, label), 
+        #gr_audiobook_player button[aria-label="Download"],
+        #gr_audiobook_player button[aria-label="Share"],
+        #gr_audiobook_player .download-button,
+        #gr_audiobook_player .share-button,
+        #gr_audiobook_files label[data-testid="block-label"] {
             display: none !important;
         }
         #gr_audiobook_player audio {
