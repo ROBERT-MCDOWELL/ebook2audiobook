@@ -466,13 +466,15 @@ Default to config.json model.""")
             passed_args_set = {arg for arg in passed_arguments if arg.startswith('--')}
             if passed_args_set.issubset(allowed_arguments):
                 try:
-                    from lib.gradio import build_interface
+                    from lib.gradio import theme, header_css, build_interface
                     c.progress_bar = c.gr.Progress(track_tqdm=False)
                     app = build_interface(args)
                     if app is not None:
                         app.queue(
                             default_concurrency_limit=interface_concurrency_limit
                         ).launch(
+                            theme=theme,
+                            css=header_css, 
                             debug=bool(int(os.environ.get('GRADIO_DEBUG', '0'))),
                             show_error=debug_mode, favicon_path='./favicon.ico', 
                             server_name=interface_host, 
