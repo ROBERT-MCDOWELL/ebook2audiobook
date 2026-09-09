@@ -1,7 +1,7 @@
 from lib.core import *
 
 gr_audio_signature = inspect.signature(gr.Audio).parameters
-gr_launch_signature = inspect.signature(gr.Blocks).parameters
+gr_blocks_signature = inspect.signature(gr.Blocks).parameters
 
 theme = gr.themes.Origin(
     primary_hue='green',
@@ -705,7 +705,7 @@ def build_interface(args:dict)->gr.Blocks:
         js_show_elements = 'window.gr_ebook_textarea_counter();'
 
         gr_blocks_kwargs = {"title": title, "delete_cache": (604800, 86400)}
-        if 'theme' in gr_audio_signature:
+        if 'footer_links' in gr_blocks_signature:
             gr_blocks_kwargs['theme'] = theme
             gr_blocks_kwargs['css'] = header_css
 

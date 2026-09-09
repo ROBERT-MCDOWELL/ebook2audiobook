@@ -466,7 +466,7 @@ Default to config.json model.""")
             passed_args_set = {arg for arg in passed_arguments if arg.startswith('--')}
             if passed_args_set.issubset(allowed_arguments):
                 try:
-                    from lib.gradio import gr_launch_signature, theme, header_css, build_interface
+                    from lib.gradio import gr_blocks_signature, theme, header_css, build_interface
                     c.progress_bar = c.gr.Progress(track_tqdm=False)
                     app = build_interface(args)
                     if app is not None:
@@ -479,7 +479,7 @@ Default to config.json model.""")
                             "share": args['share'], 
                             "max_file_size": max_upload_size
                         }
-                        if 'footer_links' in gr_launch_signature:
+                        if 'footer_links' in gr_blocks_signature:
                             launch_kwargs['theme'] = theme
                             launch_kwargs['css'] = header_css
                             launch_kwargs['footer_links'] = ["settings"]
