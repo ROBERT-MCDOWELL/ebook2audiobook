@@ -477,7 +477,7 @@ Default to config.json model.""")
                             "server_name": interface_host,
                             "server_port": interface_port,
                             "share": args['share'],
-                            "max_file_size": max_upload_size
+                            "max_file_size": max_upload_size,
                             "theme": theme,
                             "css": header_css,
                             "footer_links" = ["settings"]
