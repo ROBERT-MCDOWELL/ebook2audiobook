@@ -282,7 +282,7 @@ header_css = '''
             font-size: 30px !important;
         }
         .gr-convert-btn:hover { background-color: #34d058 !important; }
-        .gr-convert-btn:active, .button-red:active {
+        .gr-convert-btn:active{
             background: var(--body-text-color) !important;
             color: var(--body-background-fill) !important;
         }
@@ -307,7 +307,7 @@ header_css = '''
             font-size: 30px !important;
         }
         .gr-abs-upload-btn:hover { background-color: #34d058 !important; }
-        .gr-abs-upload-btn:active, .button-red:active {
+        .gr-abs-upload-btn:active{
             background: var(--body-text-color) !important;
             color: var(--body-background-fill) !important;
         }
@@ -650,14 +650,6 @@ header_css = '''
             margin-left: 30px !important;
             margin-right: 30px !important;
             border-radius: 9px !important;
-        }
-        .button-green { background-color: #28a745 !important; color: white !important; }
-        .button-green:hover { background-color: #34d058 !important; }
-        .button-red  {background-color: #dc3545 !important; color: white !important; }
-        .button-red:hover  { background-color: #ff6f71 !important; }
-        .button-green:active, .button-red:active {
-            background: var(--body-text-color) !important;
-            color: var(--body-background-fill) !important;
         }
         .spinner {
             margin: 15px auto !important;
@@ -1120,10 +1112,15 @@ def build_interface(args:dict)->gr.Blocks:
                 if type in [status_tags['DELETION'], status_tags['OVERRIDE']]:
                     cancel_btn = f'#gr_{type}_cancel_btn'
                     confirm_btn = f'#gr_{type}_confirm_btn'
+                    
+                    # Define inline styles to bypass Gradio's CSS reset
+                    style_red = "width:50px; height:50px; background-color: #dc3545 !important; color: white !important; border: none !important; border-radius: 4px; cursor: pointer;"
+                    style_green = "width:50px; height:50px; background-color: #28a745 !important; color: white !important; border: none !important; border-radius: 4px; cursor: pointer;"
+
                     return f'''
-                    <div class="confirm-buttons">
-                        <button class="button-red" style="width:50px; height:50px" onclick="document.querySelector('{cancel_btn}').click()">✖</button>
-                        <button class="button-green" style="width:50px; height:50px" onclick="document.querySelector('{confirm_btn}').click()">✔</button>
+                    <div class="confirm-buttons" style="display: flex; gap: 10px;">
+                        <button style="{style_red}" onclick="document.querySelector('{cancel_btn}').click()">✖</button>
+                        <button style="{style_green}" onclick="document.querySelector('{confirm_btn}').click()">✔</button>
                     </div>
                     '''
                 else:
