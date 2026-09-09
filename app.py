@@ -479,6 +479,7 @@ Default to config.json model.""")
                             "share": args['share'], 
                             "max_file_size": max_upload_size
                         }
+                        print(gr_launch_signature)
                         if 'theme' in gr_launch_signature:
                             launch_kwargs['theme'] = theme
                             launch_kwargs['css'] = header_css
