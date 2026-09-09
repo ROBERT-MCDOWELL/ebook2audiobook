@@ -470,7 +470,7 @@ Default to config.json model.""")
                     c.progress_bar = c.gr.Progress(track_tqdm=False)
                     app = build_interface(args)
                     if app is not None:
-                        launch_kwargs = {
+                        gr_blocks_kwargs = {
                             "debug": bool(int(os.environ.get('GRADIO_DEBUG', '0'))),
                             "show_error": debug_mode,
                             "favicon_path": './favicon.ico',
@@ -480,10 +480,12 @@ Default to config.json model.""")
                             "max_file_size": max_upload_size
                         }
                         if 'footer_links' in gr_blocks_signature:
-                            launch_kwargs['theme'] = theme
-                            launch_kwargs['css'] = header_css
-                            launch_kwargs['footer_links'] = ["settings"]
-                        app.queue(default_concurrency_limit=interface_concurrency_limit).launch(**launch_kwargs)
+                            gr_blocks_kwargs['theme'] = theme
+                            gr_blocks_kwargs['css'] = header_css
+                            gr_blocks_kwargs['footer_links'] = ["settings"]
+                        else:
+                            gr_blocks_kwargs['show_api'] = False
+                        app.queue(default_concurrency_limit=interface_concurrency_limit).launch(**gr_blocks_kwargs)
                 except OSError as e:
                     error = f'Connection error: {e}'
                     c.exception_alert(None, error)
