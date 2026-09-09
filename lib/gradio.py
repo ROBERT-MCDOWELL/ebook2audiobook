@@ -708,7 +708,7 @@ def build_interface(args:dict)->gr.Blocks:
         if 'theme' in gr_blocks_signature:
             gr_blocks_kwargs['theme'] = theme
             gr_blocks_kwargs['css'] = header_css
-        print(gr_blocks_signature)
+
         with gr.Blocks(**gr_blocks_kwargs) as app:
             with gr.Group(visible=True, elem_id='gr_group_main', elem_classes='gr-group-main') as gr_group_main:
                 with gr.Tabs(elem_id='gr_tabs') as gr_tabs:
@@ -4241,6 +4241,7 @@ def build_interface(args:dict)->gr.Blocks:
             os.environ['no_proxy'] = ' ,'.join(all_ips)
             return app
     except Exception as e:
+        traceback.print_exc()
         error = f'An unexpected error occurred: {e}'
         exception_alert(None, error)
     return None
