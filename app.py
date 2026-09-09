@@ -466,23 +466,26 @@ Default to config.json model.""")
             passed_args_set = {arg for arg in passed_arguments if arg.startswith('--')}
             if passed_args_set.issubset(allowed_arguments):
                 try:
-                    from lib.gradio import theme, header_css, build_interface
+                    from lib.gradio import gr_launch_signature, theme, header_css, build_interface
                     c.progress_bar = c.gr.Progress(track_tqdm=False)
                     app = build_interface(args)
                     if app is not None:
-                        app.queue(
-                            default_concurrency_limit=interface_concurrency_limit
-                        ).launch(
-                            theme=theme,
-                            css=header_css,
-                            footer_links=["settings"],
-                            debug=bool(int(os.environ.get('GRADIO_DEBUG', '0'))),
-                            show_error=debug_mode, favicon_path='./favicon.ico', 
-                            server_name=interface_host, 
-                            server_port=interface_port, 
-                            share= args['share'], 
-                            max_file_size=max_upload_size
-                        )
+                        launch_kwargs = {
+                            "debug": bool(int(os.environ.get('GRADIO_DEBUG', '0'))),
+                            "show_error": debug_mode, 
+                            "favicon_path": './favicon.ico', 
+                            "server_name": interface_host, 
+                            "server_port": interface_port, 
+                            "share": args['share'], 
+                            "max_file_size": max_upload_size
+                        }
+                        if 'theme' in gr_audio_signature:
+                            launch_kwargs['theme'] = theme
+                            launch_kwargs['css'] = header_css
+                            launch_kwargs['footer_links'] = ["settings"]
+                        else:
+                            launch_kwargs['show_api'] = False
+                        app.queue(default_concurrency_limit=interface_concurrency_limit).launch(**launch_kwargs)
                 except OSError as e:
                     error = f'Connection error: {e}'
                     c.exception_alert(None, error)

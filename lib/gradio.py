@@ -1,5 +1,8 @@
 from lib.core import *
 
+gr_audio_signature = inspect.signature(gr.Audio).parameters
+gr_launch_signature = inspect.signature(gr.Blocks).parameters
+
 theme = gr.themes.Origin(
     primary_hue='green',
     secondary_hue='amber',
@@ -671,7 +674,6 @@ header_css = '''
 
 def build_interface(args:dict)->gr.Blocks:
     from lib.classes.tts_engines.common.preset_loader import load_engine_presets
-    gr_audio_signature = inspect.signature(gr.Audio).parameters
     try:
         script_mode = args['script_mode']
         is_gui_process = args['is_gui_process']
@@ -701,8 +703,13 @@ def build_interface(args:dict)->gr.Blocks:
         visible_gr_tab_abs_params = interface_component_options['gr_tab_abs_params']
         js_hide_elements = 'document.querySelector("#ebook_textarea_toolbar")?.remove();'
         js_show_elements = 'window.gr_ebook_textarea_counter();'
-        
-        with gr.Blocks(title=title, delete_cache=(604800, 86400)) as app:
+
+        gr_blocks_kwargs = {"title": title, "delete_cache": (604800, 86400)}
+        if 'theme' in gr_audio_signature:
+            gr_blocks_kwargs['theme'] = theme
+            gr_blocks_kwargs['css'] = header_css
+
+        with gr.Blocks(**gr_blocks_kwargs) as app:
             with gr.Group(visible=True, elem_id='gr_group_main', elem_classes='gr-group-main') as gr_group_main:
                 with gr.Tabs(elem_id='gr_tabs') as gr_tabs:
                     with gr.Tab('Dashboard', elem_id='gr_tab_main', elem_classes='gr-tab') as gr_tab_main:
