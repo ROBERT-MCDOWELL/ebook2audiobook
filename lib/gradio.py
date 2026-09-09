@@ -705,9 +705,6 @@ def build_interface(args:dict)->gr.Blocks:
         js_show_elements = 'window.gr_ebook_textarea_counter();'
 
         gr_blocks_kwargs = {"title": title, "delete_cache": (604800, 86400)}
-        if 'footer_links' not in gr_blocks_signature:
-            gr_blocks_kwargs['theme'] = theme
-            gr_blocks_kwargs['css'] = header_css
 
         with gr.Blocks(**gr_blocks_kwargs) as app:
             with gr.Group(visible=True, elem_id='gr_group_main', elem_classes='gr-group-main') as gr_group_main:
