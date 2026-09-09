@@ -48,6 +48,9 @@ header_css = '''
             display: inline-block !important;
             vertical-align: middle !important;
         }
+        table.file-preview tr {
+            padding: 0;
+        }
         body:has(#gr_convert_btn:disabled) table.file-preview button.label-clear-button {
             display: none !important;
         }
