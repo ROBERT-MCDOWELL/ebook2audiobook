@@ -479,6 +479,7 @@ Default to config.json model.""")
                             "share": args['share'],
                             "max_file_size": max_upload_size
                         }
+                        print(gr_blocks_signature)
                         if 'footer_links' in gr_blocks_signature:
                             gr_blocks_kwargs['theme'] = theme
                             gr_blocks_kwargs['css'] = header_css
