@@ -38,6 +38,7 @@ for /f "delims=" %%e in ('
 
 :: Capture all arguments into ARGS
 set "ARGS=%*"
+
 set "NATIVE=native"
 set "BUILD_DOCKER=build_docker"
 set "FULL_DOCKER=full_docker"
@@ -45,18 +46,22 @@ set "SCRIPT_MODE=%NATIVE%"
 set "APP_NAME=ebook2audiobook"
 set /p APP_VERSION=<"%SAFE_SCRIPT_DIR%\VERSION.txt"
 set "APP_FILE=%APP_NAME%.cmd"
+
 set "OS_LANG="
 for /f "skip=1 tokens=3" %%A in ('reg query "HKCU\Control Panel\International" /v LocaleName 2^>nul') do set "OS_LANG=%%A"
 if defined OS_LANG set "OS_LANG=%OS_LANG:~0,2%"
 if not defined OS_LANG set "OS_LANG=en"
+
 set "TEST_HOST=127.0.0.1"
 set "TEST_PORT=7860"
 set "ICON_PATH=%SAFE_SCRIPT_DIR%\tools\icons\windows\appIcon.ico"
 set "STARTMENU_DIR=%APPDATA%\Microsoft\Windows\Start Menu\Programs\%APP_NAME%"
 set "STARTMENU_LNK=%STARTMENU_DIR%\%APP_NAME%.lnk"
 set "DESKTOP_LNK=%SAFE_USERPROFILE%\Desktop\%APP_NAME%.lnk"
+
 set "ARCH=%PROCESSOR_ARCHITECTURE%" & if defined PROCESSOR_ARCHITEW6432 set "ARCH=%PROCESSOR_ARCHITEW6432%"
 if /i "%ARCH%"=="ARM64" (set "PYTHON_ARCH=arm64") else if /i "%ARCH%"=="AMD64" (set "PYTHON_ARCH=amd64")
+
 set "MIN_PYTHON_VERSION=3.10"
 set "MAX_PYTHON_VERSION=3.12"
 set "PYTHON_VERSION=3.12"
@@ -78,21 +83,19 @@ set "DEVICE_INFO_STR="
 set "TMP=%SAFE_SCRIPT_DIR%\run"
 set "TEMP=%SAFE_SCRIPT_DIR%\run"
 if not exist "%TMP%" mkdir "%TMP%" >nul 2>&1
-set "CONDA_URL=https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Windows-x86_64.exe"
-set "CONDA_INSTALLER=Miniforge3-Windows-x86_64.exe"
+
+set "UV_INSTALL_DIR=%SAFE_USERPROFILE%\.local\bin"
+set "UV_INSTALLER_PS1=https://astral.sh/uv/install.ps1"
 set "SCOOP_HOME=%SAFE_USERPROFILE%\scoop"
 set "SCOOP_SHIMS=%SCOOP_HOME%\shims"
 set "SCOOP_APPS=%SCOOP_HOME%\apps"
-set "CONDA_HOME=%SAFE_USERPROFILE%\Miniforge3"
-set "CONDA_ENV=%CONDA_HOME%\condabin\conda.bat"
-set "CONDA_PATH=%CONDA_HOME%\condabin"
 set "ESPEAK_DATA_PATH=%SCOOP_HOME%\apps\espeak-ng\current\eSpeak NG\espeak-ng-data"
 set "NODE_PATH=%SCOOP_HOME%\apps\nodejs\current"
 set "TESSDATA_PREFIX=%SAFE_SCRIPT_DIR%\models\tessdata"
 set "TESSDATA_BASE_URL=https://github.com/tesseract-ocr/tessdata_best/raw/main"
 set "FFMPEG_BIN=%USERPROFILE%\scoop\apps\ffmpeg-shared\current\bin"
 set "FFMPEG_VARIANT=none"
-set "PATH=%SCOOP_SHIMS%;%SCOOP_APPS%;%NODE_PATH%;%FFMPEG_BIN%;%PATH%"
+set "PATH=%UV_INSTALL_DIR%;%SCOOP_SHIMS%;%SCOOP_APPS%;%NODE_PATH%;%FFMPEG_BIN%;%PATH%"
 set "INSTALLED_LOG=%SAFE_SCRIPT_DIR%\.installed"
 set "UNINSTALLER=%SAFE_SCRIPT_DIR%\uninstall.cmd"
 set "BROWSER_HELPER=%SAFE_SCRIPT_DIR%\.bh.ps1"
@@ -101,9 +104,7 @@ set "WSL_VERSION="
 set "DOCKER_IN_WSL=0"
 set "DOCKER_DESKTOP=0"
 set "PODMAN_DESKTOP=0"
-
 IF NOT DEFINED DEVICE_TAG SET "DEVICE_TAG="
-
 set "missing_prog_array="
 
 :: Refresh environment variables (append registry Path to current PATH)
@@ -166,13 +167,13 @@ shift
 goto parse_args
 
 :parse_args_done
+
 if defined arguments.script_mode (
     set "script_mode_valid=0"
     if /i "%arguments.script_mode%"=="%BUILD_DOCKER%" set "script_mode_valid=1"
     if /i "%arguments.script_mode%"=="%FULL_DOCKER%" set "script_mode_valid=1"
     if /i "%arguments.script_mode%"=="%NATIVE%" set "script_mode_valid=1"
 )
-
 if defined arguments.script_mode if "%script_mode_valid%"=="1" (
     set "SCRIPT_MODE=%arguments.script_mode%"
 )
@@ -180,26 +181,29 @@ if defined arguments.script_mode if "%script_mode_valid%"=="0" (
     echo Error: Invalid script mode argument: %arguments.script_mode%
     goto :failed
 )
+
 if defined arguments.docker_device (
     if /i "%arguments.docker_device%"=="true" (
         echo Error: --docker_device has no value
         goto :failed
     )
-	set "DOCKER_DEVICE_STR=%arguments.docker_device%"
+    set "DOCKER_DEVICE_STR=%arguments.docker_device%"
 )
+
 if defined arguments.docker_mode (
     if not "%arguments.docker_mode%"=="podman" (
-		if not "%arguments.docker_mode%"=="compose" (
-			if /i "%arguments.docker_mode%"=="true" (
-				echo Error: --docker_mode has no value
-			) else (
-				echo Error: --docker_mode accepts only podman or compose as value
-			)
-			goto :failed
-		)
+        if not "%arguments.docker_mode%"=="compose" (
+            if /i "%arguments.docker_mode%"=="true" (
+                echo Error: --docker_mode has no value
+            ) else (
+                echo Error: --docker_mode accepts only podman or compose as value
+            )
+            goto :failed
+        )
     )
-	set "DOCKER_MODE=%arguments.docker_mode%"
+    set "DOCKER_MODE=%arguments.docker_mode%"
 )
+
 if defined arguments.script_mode (
     if /i "%arguments.script_mode%"=="true" (
         echo Error: --script_mode requires a value
@@ -224,10 +228,12 @@ if defined arguments.script_mode (
         endlocal
     )
 )
+
 rem .installed must not be created in build_docker mode; check after SCRIPT_MODE is resolved
 if not exist "%INSTALLED_LOG%" if /i not "%SCRIPT_MODE%"=="%BUILD_DOCKER%" (
     type nul > "%INSTALLED_LOG%"
 )
+
 if defined arguments.headless (
     if /i "%arguments.headless%"=="false" (
         setlocal enabledelayedexpansion
@@ -248,6 +254,7 @@ if defined arguments.headless (
         endlocal
     )
 )
+
 if defined arguments.share (
     if defined arguments.headless (
         if /i "%arguments.headless%"=="true" (
@@ -256,13 +263,16 @@ if defined arguments.share (
         )
     )
 )
+
 if defined arguments.version (
-	echo v%APP_VERSION%
-	goto :eof
+    echo v%APP_VERSION%
+    goto :eof
 )
+
 goto :main
 
 ::::::::::::::: DESKTOP APP
+
 :make_shortcut
 set "shortcut=%~1"
 "%PS_EXE%" %PS_ARGS% -Command "$s=New-Object -ComObject WScript.Shell; $sc=$s.CreateShortcut('%shortcut%'); $sc.TargetPath='cmd.exe'; $sc.Arguments='/k ""cd /d """"%SAFE_SCRIPT_DIR%"""" && """"%APP_FILE%""""""'; $sc.WorkingDirectory='%SAFE_SCRIPT_DIR%'; $sc.IconLocation='%ICON_PATH%'; $sc.Save()"
@@ -293,6 +303,7 @@ if /i not "%HEADLESS_FOUND%"=="%ARGS%" (
     start "%APP_NAME%" /min "%PS_EXE%" %PS_ARGS% -File "%BROWSER_HELPER%" -HostName "%TEST_HOST%" -Port %TEST_PORT%
 )
 exit /b 0
+
 :::::: END OF DESKTOP APP
 
 :get_iso3_lang
@@ -324,27 +335,27 @@ exit /b
 :check_python
 where.exe python >nul 2>&1
 if errorlevel 1 (
-	echo Python is not installed.
-	exit /b 1
+    echo Python is not installed.
+    exit /b 1
 )
 for /f "tokens=2 delims= " %%v in ('python --version 2^>^&1') do set "INSTALLED_VERSION=%%v"
 for /f "tokens=1-3 delims=." %%a in ("%INSTALLED_VERSION%") do (
-	set "INS_MAJOR=%%a"
-	set "INS_MINOR=%%b"
-	set "INS_PATCH=0"
+    set "INS_MAJOR=%%a"
+    set "INS_MINOR=%%b"
+    set "INS_PATCH=0"
 )
 for /f "tokens=1-3 delims=." %%a in ("%MIN_PYTHON_VERSION%") do (
-	set "REQ_MAJOR=%%a"
-	set "REQ_MINOR=%%b"
-	set "REQ_PATCH=0"
+    set "REQ_MAJOR=%%a"
+    set "REQ_MINOR=%%b"
+    set "REQ_PATCH=0"
 )
 set "PYTHON_OK=1"
 if %INS_MAJOR% lss %REQ_MAJOR% set "PYTHON_OK=0"
 if %INS_MAJOR% equ %REQ_MAJOR% if %INS_MINOR% lss %REQ_MINOR% set "PYTHON_OK=0"
 if %INS_MAJOR% equ %REQ_MAJOR% if %INS_MINOR% equ %REQ_MINOR% if %INS_PATCH% lss %REQ_PATCH% set "PYTHON_OK=0"
 if "%PYTHON_OK%"=="0" (
-	echo Python %INSTALLED_VERSION% found but %MIN_PYTHON_VERSION% or higher is required.
-	exit /b 1
+    echo Python %INSTALLED_VERSION% found but %MIN_PYTHON_VERSION% or higher is required.
+    exit /b 1
 )
 exit /b 0
 
@@ -382,12 +393,12 @@ for %%p in (%HOST_PROGRAMS%) do (
     if "!_found!"=="0" (
         where.exe /Q !prog! >nul 2>&1
         if errorlevel 1 (
-			set "missing_prog_array=!missing_prog_array! %%p"
-		) else (
-			if "%%p"=="ffmpeg-shared" (
-				call :check_ffmpeg_shared
-			)
-		)
+            set "missing_prog_array=!missing_prog_array! %%p"
+        ) else (
+            if "%%p"=="ffmpeg-shared" (
+                call :check_ffmpeg_shared
+            )
+        )
     )
 )
 endlocal & set "missing_prog_array=%missing_prog_array%"
@@ -403,20 +414,20 @@ if exist "%SCOOP_HOME%\apps\ffmpeg-shared\current\bin\avcodec-*.dll" (
 ) else if exist "%SCOOP_HOME%\apps\ffmpeg\current\bin\ffmpeg.exe" (
     set "ffmpeg_pkg=static"
 ) else (
-	exit /b 0
+    exit /b 0
 )
 if "%ffmpeg_pkg%"=="static" (
-	echo Static ffmpeg detected, swapping to ffmpeg-shared…
-	call scoop uninstall ffmpeg || (echo [xx] uninstall failed & exit /b 1)
-	call scoop install ffmpeg-shared || (echo [xx] install failed & exit /b 1)
- 	if exist "%INSTALLED_LOG%" (
- 		findstr /v /x /c:"ffmpeg" "%INSTALLED_LOG%" > "%tmp_file%" 2>nul
- 	) else (
- 		type nul > "%tmp_file%"
- 	)
-	>>"%tmp_file%" echo ffmpeg-shared
-	move /y "%tmp_file%" "%INSTALLED_LOG%" >nul
-	echo swap complete, .installed updated.
+    echo Static ffmpeg detected, swapping to ffmpeg-shared…
+    call scoop uninstall ffmpeg || (echo [xx] uninstall failed & exit /b 1)
+    call scoop install ffmpeg-shared || (echo [xx] install failed & exit /b 1)
+    if exist "%INSTALLED_LOG%" (
+        findstr /v /x /c:"ffmpeg" "%INSTALLED_LOG%" > "%tmp_file%" 2>nul
+    ) else (
+        type nul > "%tmp_file%"
+    )
+    >>"%tmp_file%" echo ffmpeg-shared
+    move /y "%tmp_file%" "%INSTALLED_LOG%" >nul
+    echo swap complete, .installed updated.
 )
 endlocal
 exit /b 0
@@ -474,84 +485,76 @@ exit /b 0
 
 :install_wsl
 if "%SCRIPT_MODE%"=="%BUILD_DOCKER%" (
-	echo WSL2 is required to build Linux containers.
-	echo.
-	echo ==================================================
-	echo WSL and %DOCKER_WSL_CONTAINER% will now be installed.
-	echo ==================================================
-	pause
-	wsl --unregister %DOCKER_WSL_CONTAINER% >nul 2>&1
-	wsl --update
-	wsl --install -d %DOCKER_WSL_CONTAINER% --no-launch
-	echo.
-	echo %DOCKER_WSL_CONTAINER% setup complete. Configuring for Docker...
-	wsl --shutdown
-	timeout /t 3 /nobreak >nul
-	wsl --user root -- echo "%DOCKER_WSL_CONTAINER% OK" >nul 2>&1
-	if errorlevel 1 (
-		echo %ESC%[31m=============== %DOCKER_WSL_CONTAINER% installation failed.%ESC%[0m
-		goto :failed
-	)
-	for /f %%A in ('powershell -NoProfile -Command "Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss' | Where-Object { (Get-ItemProperty $_.PSPath).DistributionName -eq '%DOCKER_WSL_CONTAINER%' } | Select-Object -ExpandProperty PSChildName"') do (
-		reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Lxss\%%A" /v DefaultUid /t REG_DWORD /d 0 /f >nul
-	)
-	echo [wsl2] > "%USERPROFILE%\.wslconfig"
-	echo memory=4GB >> "%USERPROFILE%\.wslconfig"
-	wsl --shutdown
-	echo %ESC%[33m=============== WSL2 OK ===============%ESC%[0m
+    echo WSL2 is required to build Linux containers.
+    echo.
+    echo ==================================================
+    echo WSL and %DOCKER_WSL_CONTAINER% will now be installed.
+    echo ==================================================
+    pause
+    wsl --unregister %DOCKER_WSL_CONTAINER% >nul 2>&1
+    wsl --update
+    wsl --install -d %DOCKER_WSL_CONTAINER% --no-launch
+    echo.
+    echo %DOCKER_WSL_CONTAINER% setup complete. Configuring for Docker...
+    wsl --shutdown
+    timeout /t 3 /nobreak >nul
+    wsl --user root -- echo "%DOCKER_WSL_CONTAINER% OK" >nul 2>&1
+    if errorlevel 1 (
+        echo %ESC%[31m=============== %DOCKER_WSL_CONTAINER% installation failed.%ESC%[0m
+        goto :failed
+    )
+    for /f %%A in ('powershell -NoProfile -Command "Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss' | Where-Object { (Get-ItemProperty $_.PSPath).DistributionName -eq '%DOCKER_WSL_CONTAINER%' } | Select-Object -ExpandProperty PSChildName"') do (
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Lxss\%%A" /v DefaultUid /t REG_DWORD /d 0 /f >nul
+    )
+    echo [wsl2] > "%USERPROFILE%\.wslconfig"
+    echo memory=4GB >> "%USERPROFILE%\.wslconfig"
+    wsl --shutdown
+    echo %ESC%[33m=============== WSL2 OK ===============%ESC%[0m
 )
 goto :restart_script
 
 :install_docker
 if "%SCRIPT_MODE%"=="%BUILD_DOCKER%" (
-	echo Installing Docker inside WSL2…
-	wsl --user root -d %DOCKER_WSL_CONTAINER% -- bash -c "echo 'WSL is ready'" >nul 2>&1
-	if errorlevel 1 (
-		echo %ESC%[31m=============== WSL %DOCKER_WSL_CONTAINER% is not ready. Initializing…%ESC%[0m
-		wsl --user root -d %DOCKER_WSL_CONTAINER% -- bash -c "apt-get update" >nul 2>&1
-		wsl --shutdown
-		timeout /t 3 /nobreak >nul
-	)
-	echo Downloading and installing Docker…
-	wsl --user root -d %DOCKER_WSL_CONTAINER% -- bash -c "apt-get update && apt-get install -y curl"
-	wsl --user root -d %DOCKER_WSL_CONTAINER% -- bash -c "curl -fsSL https://get.docker.com | SKIP_SLEEP=1 sh"
-	if errorlevel 1 (
-		echo %ESC%[31m=============== docker install failed.%ESC%[0m
-		echo Try running: wsl --user root -d %DOCKER_WSL_CONTAINER%
-		echo Then manually run: curl -fsSL https://get.docker.com ^| sh
-		goto :failed
-	)
-	echo Enabling systemd…
-	wsl --user root -d %DOCKER_WSL_CONTAINER% -- bash -c "echo '[boot]' > /etc/wsl.conf && echo 'systemd=true' >> /etc/wsl.conf"
-	wsl --shutdown
-	echo %ESC%[33m=============== docker OK ===============%ESC%[0m
+    echo Installing Docker inside WSL2…
+    wsl --user root -d %DOCKER_WSL_CONTAINER% -- bash -c "echo 'WSL is ready'" >nul 2>&1
+    if errorlevel 1 (
+        echo %ESC%[31m=============== WSL %DOCKER_WSL_CONTAINER% is not ready. Initializing…%ESC%[0m
+        wsl --user root -d %DOCKER_WSL_CONTAINER% -- bash -c "apt-get update" >nul 2>&1
+        wsl --shutdown
+        timeout /t 3 /nobreak >nul
+    )
+    echo Downloading and installing Docker…
+    wsl --user root -d %DOCKER_WSL_CONTAINER% -- bash -c "apt-get update && apt-get install -y curl"
+    wsl --user root -d %DOCKER_WSL_CONTAINER% -- bash -c "curl -fsSL https://get.docker.com | SKIP_SLEEP=1 sh"
+    if errorlevel 1 (
+        echo %ESC%[31m=============== docker install failed.%ESC%[0m
+        echo Try running: wsl --user root -d %DOCKER_WSL_CONTAINER%
+        echo Then manually run: curl -fsSL https://get.docker.com ^| sh
+        goto :failed
+    )
+    echo Enabling systemd…
+    wsl --user root -d %DOCKER_WSL_CONTAINER% -- bash -c "echo '[boot]' > /etc/wsl.conf && echo 'systemd=true' >> /etc/wsl.conf"
+    wsl --shutdown
+    echo %ESC%[33m=============== docker OK ===============%ESC%[0m
 )
 goto :restart_script
 
-:install_conda
+:install_uv
 if not "%SCRIPT_MODE%"=="%BUILD_DOCKER%" (
-	echo Installing Miniforge…
-	call "%PS_EXE%" %PS_ARGS% -Command "Invoke-WebRequest -Uri '%CONDA_URL%' -OutFile '%CONDA_INSTALLER%'"
-	call start /wait "" "%CONDA_INSTALLER%" /InstallationType=JustMe /RegisterPython=0 /S /D="%SAFE_USERPROFILE%\Miniforge3"
-	set "PATH=%CONDA_PATH%;%CONDA_HOME%\Scripts;%PATH%"
-	where.exe /Q conda
-	if not errorlevel 1 (
-		echo %ESC%[32m=============== Miniforge3 OK ===============%ESC%[0m
-		findstr /i /x "Miniforge3" "%INSTALLED_LOG%" >nul 2>&1
-		if errorlevel 1 (
-			echo Miniforge3>>"%INSTALLED_LOG%"
-		)
-	) else (
-		echo %ESC%[31m=============== Miniforge3 failed.%ESC%[0m
-		goto :failed
-	)
-	if not exist "%SAFE_USERPROFILE%\.condarc" (
-		call conda config --set auto_activate_base false
-	)
-	call conda update --all -y
-	call conda clean --index-cache -y
-	call conda clean --packages --tarballs -y
-	del "%CONDA_INSTALLER%"
+    echo Installing uv…
+    call "%PS_EXE%" %PS_ARGS% -Command "irm %UV_INSTALLER_PS1% | iex"
+    set "PATH=%UV_INSTALL_DIR%;%PATH%"
+    where.exe /Q uv
+    if not errorlevel 1 (
+        echo %ESC%[32m=============== uv OK ===============%ESC%[0m
+        findstr /i /x "uv" "%INSTALLED_LOG%" >nul 2>&1
+        if errorlevel 1 (
+            echo uv>>"%INSTALLED_LOG%"
+        )
+    ) else (
+        echo %ESC%[31m=============== uv failed.%ESC%[0m
+        goto :failed
+    )
 )
 goto :restart_script
 
@@ -567,118 +570,115 @@ endlocal & exit /b %RC%
 echo Installing missing programs…
 setlocal EnableDelayedExpansion
 for %%p in (%missing_prog_array%) do (
-	set "prog=%%p"
-	call "%PS_EXE%" %PS_ARGS% -Command "scoop install %%p"
-	if "%%p"=="tesseract" (
-		where.exe /Q !prog!
-		if not errorlevel 1 (
-			call :get_iso3_lang "%OS_LANG%"
-			echo Detected system language: %OS_LANG% → downloading OCR language: !ISO3_LANG!
-			set "tessdata=%SCOOP_APPS%\tesseract\current\tessdata"
-			if not exist "!tessdata!" mkdir "!tessdata!"
-			if not exist "!tessdata!\!ISO3_LANG!.traineddata" (
-				call :download_tessdata "!ISO3_LANG!" "!tessdata!" || goto :failed
-			)
-			if exist "!tessdata!\!ISO3_LANG!.traineddata" (
-				echo Tesseract OCR language !ISO3_LANG! installed in !tessdata!
-			) else (
-				echo Failed to install OCR language !ISO3_LANG!
-			)
-		)
-	)
-	if "%%p"=="python" (
-		set "PY_FOUND="
-		where.exe /Q python  && set PY_FOUND=1
-		where.exe /Q python3 && set PY_FOUND=1
-		where.exe /Q py      && set PY_FOUND=1
-		if not defined PY_FOUND (
-			echo %ESC%[31m=============== %%p failed.%ESC%[0m
-			goto :failed
-		)
-	)
-	if "%%p"=="nodejs" (
-		set "prog=node"
-	)
-	if "%%p"=="ffmpeg-shared" (
-		set "prog=ffmpeg"
-		if exist "%SAFE_USERPROFILE%\scoop\apps\ffmpeg-shared\current\bin\ffmpeg.exe" (
-			set "_FFMPEG_PATH=%SAFE_USERPROFILE%\scoop\apps\ffmpeg-shared\current\bin"
-			echo !PATH! | findstr /i /c:"!_FFMPEG_PATH!" >nul 2>&1 || (
-				set "PATH=!_FFMPEG_PATH!;!PATH!"
-			)
-		)
-	)
-	if "%%p"=="rustup" (
-		if exist "%SAFE_USERPROFILE%\scoop\apps\rustup\current\.cargo\bin\rustup.exe" (
-			set "_RUSTUP_PATH=%SAFE_USERPROFILE%\scoop\apps\rustup\current\.cargo\bin"
-			echo !PATH! | findstr /i /c:"!_RUSTUP_PATH!" >nul 2>&1 || (
-				set "PATH=!_RUSTUP_PATH!;!PATH!"
-			)
-		)
-	)
-	where.exe /Q !prog!
-	if not errorlevel 1 (
-		echo %ESC%[32m=============== %%p OK! ===============%ESC%[0m
-		findstr /i /x "%%p" "%INSTALLED_LOG%" >nul 2>&1
-		if errorlevel 1 (
-			echo %%p>>"%INSTALLED_LOG%"
-		)
-	) else (
-		echo %ESC%[31m=============== %%p failed.%ESC%[0m
-		goto :failed
-	)
+    set "prog=%%p"
+    call "%PS_EXE%" %PS_ARGS% -Command "scoop install %%p"
+    if "%%p"=="tesseract" (
+        where.exe /Q !prog!
+        if not errorlevel 1 (
+            call :get_iso3_lang "%OS_LANG%"
+            echo Detected system language: %OS_LANG% → downloading OCR language: !ISO3_LANG!
+            set "tessdata=%SCOOP_APPS%\tesseract\current\tessdata"
+            if not exist "!tessdata!" mkdir "!tessdata!"
+            if not exist "!tessdata!\!ISO3_LANG!.traineddata" (
+                call :download_tessdata "!ISO3_LANG!" "!tessdata!" || goto :failed
+            )
+            if exist "!tessdata!\!ISO3_LANG!.traineddata" (
+                echo Tesseract OCR language !ISO3_LANG! installed in !tessdata!
+            ) else (
+                echo Failed to install OCR language !ISO3_LANG!
+            )
+        )
+    )
+    if "%%p"=="python" (
+        set "PY_FOUND="
+        where.exe /Q python  && set PY_FOUND=1
+        where.exe /Q python3 && set PY_FOUND=1
+        where.exe /Q py      && set PY_FOUND=1
+        if not defined PY_FOUND (
+            echo %ESC%[31m=============== %%p failed.%ESC%[0m
+            goto :failed
+        )
+    )
+    if "%%p"=="nodejs" (
+        set "prog=node"
+    )
+    if "%%p"=="ffmpeg-shared" (
+        set "prog=ffmpeg"
+        if exist "%SAFE_USERPROFILE%\scoop\apps\ffmpeg-shared\current\bin\ffmpeg.exe" (
+            set "_FFMPEG_PATH=%SAFE_USERPROFILE%\scoop\apps\ffmpeg-shared\current\bin"
+            echo !PATH! | findstr /i /c:"!_FFMPEG_PATH!" >nul 2>&1 || (
+                set "PATH=!_FFMPEG_PATH!;!PATH!"
+            )
+        )
+    )
+    if "%%p"=="rustup" (
+        if exist "%SAFE_USERPROFILE%\scoop\apps\rustup\current\.cargo\bin\rustup.exe" (
+            set "_RUSTUP_PATH=%SAFE_USERPROFILE%\scoop\apps\rustup\current\.cargo\bin"
+            echo !PATH! | findstr /i /c:"!_RUSTUP_PATH!" >nul 2>&1 || (
+                set "PATH=!_RUSTUP_PATH!;!PATH!"
+            )
+        )
+    )
+    where.exe /Q !prog!
+    if not errorlevel 1 (
+        echo %ESC%[32m=============== %%p OK! ===============%ESC%[0m
+        findstr /i /x "%%p" "%INSTALLED_LOG%" >nul 2>&1
+        if errorlevel 1 (
+            echo %%p>>"%INSTALLED_LOG%"
+        )
+    ) else (
+        echo %ESC%[31m=============== %%p failed.%ESC%[0m
+        goto :failed
+    )
 )
 endlocal & set "PATH=%PATH%"
-call "%PS_EXE%" %PS_ARGS% -Command "$cp=[System.Environment]::GetEnvironmentVariable('Path','User'); $np=$cp; @('%SCOOP_SHIMS%','%SCOOP_APPS%','%CONDA_PATH%','%NODE_PATH%') | Where-Object {$_ -and $cp -notlike ('*'+$_+'*')} | ForEach-Object {$np+=(';'+$_)}; [System.Environment]::SetEnvironmentVariable('Path',$np,'User')"
+call "%PS_EXE%" %PS_ARGS% -Command "$cp=[System.Environment]::GetEnvironmentVariable('Path','User'); $np=$cp; @('%SCOOP_SHIMS%','%SCOOP_APPS%','%UV_INSTALL_DIR%','%NODE_PATH%') | Where-Object {$_ -and $cp -notlike ('*'+$_+'*')} | ForEach-Object {$np+=(';'+$_)}; [System.Environment]::SetEnvironmentVariable('Path',$np,'User')"
 set "missing_prog_array="
 goto :main
 
-:check_conda
-where.exe /Q conda
+:check_uv
+where.exe /Q uv
 if errorlevel 1 (
-	echo Conda is not installed.
-	exit /b 1
+    echo uv is not installed.
+    exit /b 1
 )
-set "DETECTED_BASE="
-for /f "usebackq delims=" %%B in (`conda info --base 2^>nul`) do set "DETECTED_BASE=%%B"
-if not defined DETECTED_BASE (
-	echo Failed to query 'conda info --base'; aborting.
-	exit /b 3
-)
-set "CONDA_HOME=%DETECTED_BASE%"
-set "CONDA_PATH=%DETECTED_BASE%\condabin"
-set "CONDA_ENV=%DETECTED_BASE%\condabin\conda.bat"
-set "PATH=%CONDA_PATH%;%PATH%"
+
 set "CURRENT_ENV="
-if defined CONDA_DEFAULT_ENV (
-	if /i not "%CONDA_DEFAULT_ENV%"=="base" (
-		set "CURRENT_ENV=%CONDA_PREFIX%"
-	)
-)
 if defined VIRTUAL_ENV (
-	set "CURRENT_ENV=%VIRTUAL_ENV%"
+    set "CURRENT_ENV=%VIRTUAL_ENV%"
 )
 if defined CURRENT_ENV (
-	echo Current python virtual environment detected: %CURRENT_ENV%.
-	echo =============== This script runs with its own virtual env and must be out of any other virtual environment when it's launched.
-	exit /b 2
+    if /i not "%CURRENT_ENV%"=="%SAFE_SCRIPT_DIR%\%PYTHON_ENV%" (
+        echo Current python virtual environment detected: %CURRENT_ENV%.
+        echo =============== This script runs with its own virtual env and must be out of any other virtual environment when it's launched.
+        exit /b 2
+    )
 )
-if /i "%CONDA_DEFAULT_ENV%"=="base" (
-	call conda deactivate >nul 2>&1
-)
+
 if not exist "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%\.provisioned" (
-	if exist "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%" (
-		echo Detected incomplete %PYTHON_ENV% — removing and recreating...
-		rmdir /s /q "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%"
-	)
-	echo Creating ./%PYTHON_ENV% with python %PYTHON_VERSION%...
-	call "%CONDA_HOME%\Scripts\activate.bat"
-	call conda create --prefix "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%" -c conda-forge python=%PYTHON_VERSION% pip -y
-	if errorlevel 1 exit /b 3
-	call conda activate "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%"
-	call :provision_env
-	if errorlevel 1 exit /b 3
-	> "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%\.provisioned" echo %APP_VERSION%
+    if exist "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%" (
+        echo Detected incomplete %PYTHON_ENV% — removing and recreating...
+        rmdir /s /q "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%"
+    )
+    echo Creating ./%PYTHON_ENV% with python %PYTHON_VERSION% via uv...
+
+    uv python find %PYTHON_VERSION% >nul 2>&1
+    if errorlevel 1 (
+        echo Installing Python %PYTHON_VERSION% via uv...
+        uv python install %PYTHON_VERSION%
+        if errorlevel 1 exit /b 3
+    )
+
+    uv venv "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%" --python %PYTHON_VERSION%
+    if errorlevel 1 exit /b 3
+
+    set "VIRTUAL_ENV=%SAFE_SCRIPT_DIR%\%PYTHON_ENV%"
+    set "PATH=%VIRTUAL_ENV%\Scripts;%PATH%"
+
+    call :provision_env
+    if errorlevel 1 exit /b 3
+
+    > "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%\.provisioned" echo %APP_VERSION%
 )
 exit /b 0
 
@@ -687,18 +687,18 @@ setlocal enabledelayedexpansion
 set "RC=0"
 call :check_device_info %SCRIPT_MODE%
 if errorlevel 1 (
-	set "RC=1"
-	goto :provision_env_end
+    set "RC=1"
+    goto :provision_env_end
 )
 call :install_device_packages
 if errorlevel 1 (
-	set "RC=1"
-	goto :provision_env_end
+    set "RC=1"
+    goto :provision_env_end
 )
 call :install_python_packages
 if errorlevel 1 (
-	set "RC=1"
-	goto :provision_env_end
+    set "RC=1"
+    goto :provision_env_end
 )
 :provision_env_end
 endlocal & exit /b %RC%
@@ -726,26 +726,26 @@ exit /b 0
 
 :check_docker
 if "%DOCKER_MODE%"=="podman" (
-	where.exe /Q podman-compose.exe
-	if not errorlevel 1 (
-		podman-compose version >nul 2>&1
-		if not errorlevel 1 (
-			echo Podman Desktop detected.
-			set "PODMAN_DESKTOP=1"
-			exit /b 0
-		)
-	)
-	echo Podman is not installed.
-	exit /b 1
+    where.exe /Q podman-compose.exe
+    if not errorlevel 1 (
+        podman-compose version >nul 2>&1
+        if not errorlevel 1 (
+            echo Podman Desktop detected.
+            set "PODMAN_DESKTOP=1"
+            exit /b 0
+        )
+    )
+    echo Podman is not installed.
+    exit /b 1
 )
 where.exe /Q docker.exe
 if not errorlevel 1 (
-	docker version >nul 2>&1
-	if not errorlevel 1 (
-		echo Docker Desktop detected.
-		set "DOCKER_DESKTOP=1"
-		exit /b 0
-	)
+    docker version >nul 2>&1
+    if not errorlevel 1 (
+        echo Docker Desktop detected.
+        set "DOCKER_DESKTOP=1"
+        exit /b 0
+    )
 )
 wsl --user root -d %DOCKER_WSL_CONTAINER% -- which docker >nul 2>&1
 if errorlevel 1 (
@@ -788,8 +788,8 @@ set "ARG=%~1"
 set "DEVICE_INFO_STR="
 for /f "delims=" %%I in ('python -c "import sys; from lib.classes.device_installer import DeviceInstaller as D; print(D().check_device_info(sys.argv[1]))" "%ARG%"') do set "DEVICE_INFO_STR=%%I"
 if not defined DEVICE_INFO_STR (
-	echo DEVICE_INFO_STR is empty
-	exit /b 1
+    echo DEVICE_INFO_STR is empty
+    exit /b 1
 )
 exit /b 0
 
@@ -807,13 +807,13 @@ exit /b 0
 
 :install_device_packages
 "%PS_EXE%" %PS_ARGS% -Command ^
-"python -c \"import sys, os; from lib.classes.device_installer import DeviceInstaller; device = DeviceInstaller(); sys.exit(device.install_device_packages(os.environ.get('DEVICE_INFO_STR', '')))\""
+    "python -c \"import sys, os; from lib.classes.device_installer import DeviceInstaller; device = DeviceInstaller(); sys.exit(device.install_device_packages(os.environ.get('DEVICE_INFO_STR', '')))\""
 exit /b %errorlevel%
 
 :install_python_packages
 echo Installing python dependencies…
 "%PS_EXE%" %PS_ARGS% -Command ^
-"python -c \"import sys; from lib.classes.device_installer import DeviceInstaller; device = DeviceInstaller(); sys.exit(device.install_python_packages())\""
+    "python -c \"import sys; from lib.classes.device_installer import DeviceInstaller; device = DeviceInstaller(); sys.exit(device.install_python_packages())\""
 exit /b %errorlevel%
 
 :check_sitecustomized
@@ -852,17 +852,17 @@ if defined ARG (
     set "ARG_ESCAPED="
 )
 if "%DOCKER_MODE%"=="podman" (
-	if "%PODMAN_DESKTOP%"=="0" (
-		echo podman-compose is not running.
-		endlocal 
-		exit /b 1
-	)
+    if "%PODMAN_DESKTOP%"=="0" (
+        echo podman-compose is not running.
+        endlocal
+        exit /b 1
+    )
 ) else if "%DOCKER_MODE%"=="compose" (
-	if "%DOCKER_DESKTOP%"=="0" (
-		echo docker compose is not running.
-		endlocal 
-		exit /b 1
-	)
+    if "%DOCKER_DESKTOP%"=="0" (
+        echo docker compose is not running.
+        endlocal
+        exit /b 1
+    )
 )
 set "DOCKER_IMG_NAME=%DOCKER_IMG_NAME%:%DEVICE_TAG%"
 set "cmd_options="
@@ -900,10 +900,10 @@ if /i "%DEVICE_TAG%"=="cpu" (
 )
 set "SERVICE=ebook2audiobook-%COMPOSE_PROFILES%"
 if "%DOCKER_DESKTOP%"=="1" (
-	set "wsl_cmd="
+    set "wsl_cmd="
     set "WSL_DIR=%SAFE_SCRIPT_DIR%"
 ) else (
-	set "wsl_cmd=wsl --user root -d %DOCKER_WSL_CONTAINER% --"
+    set "wsl_cmd=wsl --user root -d %DOCKER_WSL_CONTAINER% --"
     for /f "delims=" %%i in ('wsl --user root -d %DOCKER_WSL_CONTAINER% -- wslpath "%SAFE_SCRIPT_DIR:\=/%"') do set "WSL_DIR=%%i"
 )
 call :get_iso3_lang "%OS_LANG%"
@@ -912,76 +912,76 @@ if "%DOCKER_MODE%"=="podman" (
     echo Using podman build
     cd /d "%SAFE_SCRIPT_DIR%"
     podman build --format docker --no-cache --network=host --build-arg PYTHON_VERSION="%py_vers%" --build-arg APP_VERSION="%APP_VERSION%" --build-arg DEVICE_TAG="%DEVICE_TAG%" --build-arg DOCKER_DEVICE_STR="%ARG_ESCAPED%" --build-arg DOCKER_PROGRAMS_STR="%DOCKER_PROGRAMS%" --build-arg CALIBRE_INSTALLER_URL="%DOCKER_CALIBRE_INSTALLER_URL%" --build-arg ISO3_LANG="%ISO3_LANG%" -t "%DOCKER_IMG_NAME%" -f Dockerfile .
-	if errorlevel 1 (
-		echo Build failed
-		endlocal 
-		exit /b 1
-	)
-	echo Docker image ready. To run your docker:
-	echo Podman Compose:
-	echo 	GUI mode:
-	echo 		podman-compose -f podman-compose.yml --profile %COMPOSE_PROFILES% up
-	echo 	Headless mode:
-	echo   		podman-compose -f podman-compose.yml --profile %COMPOSE_PROFILES% run --rm -v "/mnt/c/Users/myname/whatever/custom_voice:/app/custom_voice" %SERVICE% --headless --ebook "/app/ebooks/tests/test_eng.txt" --tts_engine yourtts --language eng --voice "/app/Desktop/myvoice.wav" etc.
+    if errorlevel 1 (
+        echo Build failed
+        endlocal
+        exit /b 1
+    )
+    echo Docker image ready. To run your docker:
+    echo Podman Compose:
+    echo 	GUI mode:
+    echo 		podman-compose -f podman-compose.yml --profile %COMPOSE_PROFILES% up
+    echo 	Headless mode:
+    echo   		podman-compose -f podman-compose.yml --profile %COMPOSE_PROFILES% run --rm -v "/mnt/c/Users/myname/whatever/custom_voice:/app/custom_voice" %SERVICE% --headless --ebook "/app/ebooks/tests/test_eng.txt" --tts_engine yourtts --language eng --voice "/app/Desktop/myvoice.wav" etc.
 ) else if "%DOCKER_MODE%"=="compose" (
     if "%DOCKER_DESKTOP%"=="1" (
-		echo Using docker compose
+        echo Using docker compose
         docker compose --profile "%COMPOSE_PROFILES%" build --no-cache --build-arg PYTHON_VERSION="%py_vers%" --build-arg APP_VERSION="%APP_VERSION%" --build-arg DEVICE_TAG="%DEVICE_TAG%" --build-arg DOCKER_DEVICE_STR="%ARG_ESCAPED%" --build-arg DOCKER_PROGRAMS_STR="%DOCKER_PROGRAMS%" --build-arg CALIBRE_INSTALLER_URL="%DOCKER_CALIBRE_INSTALLER_URL%" --build-arg ISO3_LANG="%ISO3_LANG%"
     ) else (
-		echo Using docker compose into WSL2 %DOCKER_WSL_CONTAINER%
+        echo Using docker compose into WSL2 %DOCKER_WSL_CONTAINER%
         %wsl_cmd% bash -c "cd '%WSL_DIR%' && docker compose --progress=plain --profile '%COMPOSE_PROFILES%' build --no-cache --build-arg PYTHON_VERSION='%py_vers%' --build-arg APP_VERSION='%APP_VERSION%' --build-arg DEVICE_TAG='%DEVICE_TAG%' --build-arg DOCKER_DEVICE_STR=\"%ARG_ESCAPED%\" --build-arg DOCKER_PROGRAMS_STR='%DOCKER_PROGRAMS%' --build-arg CALIBRE_INSTALLER_URL='%DOCKER_CALIBRE_INSTALLER_URL%' --build-arg ISO3_LANG='%ISO3_LANG%'"
     )
-	if errorlevel 1 (
-		echo Build failed
-		endlocal 
-		exit /b 1
-	)
-	if defined wsl_cmd (
-		set "env_prefix=DEVICE_TAG=%DEVICE_TAG%"
-	) else (
-		set "env_prefix=set "DEVICE_TAG=%DEVICE_TAG%" ^&^&"
-	)
-	echo Docker image ready. To run your docker:
-	echo Docker Compose:
-	echo 	GUI mode:
-	echo 		!env_prefix! docker compose --profile %COMPOSE_PROFILES% up --no-log-prefix
-	echo 	Headless mode:
-	echo   		!env_prefix! docker compose --profile %COMPOSE_PROFILES% run --rm -v "/mnt/c/Users/myname/whatever/custom_voice:/app/custom_voice" %SERVICE% --headless --ebook "/app/ebooks/tests/test_eng.txt" --tts_engine yourtts --language eng --voice "/app/Desktop/myvoice.wav" etc.
+    if errorlevel 1 (
+        echo Build failed
+        endlocal
+        exit /b 1
+    )
+    if defined wsl_cmd (
+        set "env_prefix=DEVICE_TAG=%DEVICE_TAG%"
+    ) else (
+        set "env_prefix=set "DEVICE_TAG=%DEVICE_TAG%" ^&^&"
+    )
+    echo Docker image ready. To run your docker:
+    echo Docker Compose:
+    echo 	GUI mode:
+    echo 		!env_prefix! docker compose --profile %COMPOSE_PROFILES% up --no-log-prefix
+    echo 	Headless mode:
+    echo   		!env_prefix! docker compose --profile %COMPOSE_PROFILES% run --rm -v "/mnt/c/Users/myname/whatever/custom_voice:/app/custom_voice" %SERVICE% --headless --ebook "/app/ebooks/tests/test_eng.txt" --tts_engine yourtts --language eng --voice "/app/Desktop/myvoice.wav" etc.
 ) else (
-	if "%DOCKER_DESKTOP%"=="1" (
-		:: echo Using docker buildx
-		:: docker buildx use default
+    if "%DOCKER_DESKTOP%"=="1" (
+        :: echo Using docker buildx
+        :: docker buildx use default
         :: docker buildx build --shm-size=4g --progress=plain --no-cache --platform linux/amd64 --build-arg PYTHON_VERSION="%py_vers%" --build-arg APP_VERSION="%APP_VERSION%" --build-arg DEVICE_TAG="%DEVICE_TAG%" --build-arg DOCKER_DEVICE_STR="%ARG_ESCAPED%" --build-arg DOCKER_PROGRAMS_STR="%DOCKER_PROGRAMS%" --build-arg CALIBRE_INSTALLER_URL="%DOCKER_CALIBRE_INSTALLER_URL%" --build-arg ISO3_LANG="%ISO3_LANG%" -t "%DOCKER_IMG_NAME%" .
-		echo Using docker build
-		docker build --shm-size=4g --progress=plain --no-cache --build-arg PYTHON_VERSION="%py_vers%" --build-arg APP_VERSION="%APP_VERSION%" --build-arg DEVICE_TAG="%DEVICE_TAG%" --build-arg DOCKER_DEVICE_STR="%ARG_ESCAPED%" --build-arg DOCKER_PROGRAMS_STR="%DOCKER_PROGRAMS%" --build-arg CALIBRE_INSTALLER_URL="%DOCKER_CALIBRE_INSTALLER_URL%" --build-arg ISO3_LANG="%ISO3_LANG%" -t "%DOCKER_IMG_NAME%" .
-		docker image prune --force
-	) else (
-		echo Using docker build into WSL2 %DOCKER_WSL_CONTAINER%
-		%wsl_cmd% bash -c "service docker status >/dev/null 2>&1 || service docker start"
-		timeout /t 3 /nobreak >nul
-		:: buildx builder setup no longer needed with docker build
-		:: %wsl_cmd% bash -c "cd '%WSL_DIR%' && docker buildx use wslbuilder 2>/dev/null || docker buildx create --name wslbuilder --use"
-		:: if errorlevel 1 (
-		:: 	echo Failed to setup buildx builder
-		:: 	endlocal 
-		:: 	exit /b 1
-		:: )
-		%wsl_cmd% bash -c "cd '%WSL_DIR%' && docker build --shm-size=4g --progress=plain --no-cache --build-arg PYTHON_VERSION='%py_vers%' --build-arg APP_VERSION='%APP_VERSION%' --build-arg DEVICE_TAG='%DEVICE_TAG%' --build-arg DOCKER_DEVICE_STR='%ARG_ESCAPED%' --build-arg DOCKER_PROGRAMS_STR='%DOCKER_PROGRAMS%' --build-arg CALIBRE_INSTALLER_URL='%DOCKER_CALIBRE_INSTALLER_URL%' --build-arg ISO3_LANG='%ISO3_LANG%' -t '%DOCKER_IMG_NAME%' ."
-		if errorlevel 1 (
-			echo Build failed
-			endlocal 
-			exit /b 1
-		)
-		%wsl_cmd% docker image prune --force
-		echo Docker image ready. To run your docker:
-		echo GUI mode:
-		echo     %wsl_cmd% docker run -v ".\ebooks:/app/ebooks" -v ".\audiobooks:/app/audiobooks" -v ".\models:/app/models" -v ".\voices:/app/voices" -v ".\tmp:/app/tmp" !cmd_options!--rm -it -p 7860:7860 %DOCKER_IMG_NAME%
-		echo Headless mode:
-		echo     %wsl_cmd% docker run -v ".\ebooks:/app/ebooks" -v ".\audiobooks:/app/audiobooks" -v ".\models:/app/models" -v ".\voices:/app/voices" -v ".\tmp:/app/tmp" -v "D:\path\to\custom\voices:/app/custom_voice" !cmd_options!--rm -it -p 7860:7860 %DOCKER_IMG_NAME% --headless --ebook "/app/ebooks/myfile.pdf" [--voice /app/custom_voice/voice.wav etc..]
-	)
+        echo Using docker build
+        docker build --shm-size=4g --progress=plain --no-cache --build-arg PYTHON_VERSION="%py_vers%" --build-arg APP_VERSION="%APP_VERSION%" --build-arg DEVICE_TAG="%DEVICE_TAG%" --build-arg DOCKER_DEVICE_STR="%ARG_ESCAPED%" --build-arg DOCKER_PROGRAMS_STR="%DOCKER_PROGRAMS%" --build-arg CALIBRE_INSTALLER_URL="%DOCKER_CALIBRE_INSTALLER_URL%" --build-arg ISO3_LANG="%ISO3_LANG%" -t "%DOCKER_IMG_NAME%" .
+        docker image prune --force
+    ) else (
+        echo Using docker build into WSL2 %DOCKER_WSL_CONTAINER%
+        %wsl_cmd% bash -c "service docker status >/dev/null 2>&1 || service docker start"
+        timeout /t 3 /nobreak >nul
+        :: buildx builder setup no longer needed with docker build
+        :: %wsl_cmd% bash -c "cd '%WSL_DIR%' && docker buildx use wslbuilder 2>/dev/null || docker buildx create --name wslbuilder --use"
+        :: if errorlevel 1 (
+        :: 	echo Failed to setup buildx builder
+        :: 	endlocal
+        :: 	exit /b 1
+        :: )
+        %wsl_cmd% bash -c "cd '%WSL_DIR%' && docker build --shm-size=4g --progress=plain --no-cache --build-arg PYTHON_VERSION='%py_vers%' --build-arg APP_VERSION='%APP_VERSION%' --build-arg DEVICE_TAG='%DEVICE_TAG%' --build-arg DOCKER_DEVICE_STR='%ARG_ESCAPED%' --build-arg DOCKER_PROGRAMS_STR='%DOCKER_PROGRAMS%' --build-arg CALIBRE_INSTALLER_URL='%DOCKER_CALIBRE_INSTALLER_URL%' --build-arg ISO3_LANG='%ISO3_LANG%' -t '%DOCKER_IMG_NAME%' ."
+        if errorlevel 1 (
+            echo Build failed
+            endlocal
+            exit /b 1
+        )
+        %wsl_cmd% docker image prune --force
+        echo Docker image ready. To run your docker:
+        echo GUI mode:
+        echo     %wsl_cmd% docker run -v ".\ebooks:/app/ebooks" -v ".\audiobooks:/app/audiobooks" -v ".\models:/app/models" -v ".\voices:/app/voices" -v ".\tmp:/app/tmp" !cmd_options!--rm -it -p 7860:7860 %DOCKER_IMG_NAME%
+        echo Headless mode:
+        echo     %wsl_cmd% docker run -v ".\ebooks:/app/ebooks" -v ".\audiobooks:/app/audiobooks" -v ".\models:/app/models" -v ".\voices:/app/voices" -v ".\tmp:/app/tmp" -v "D:\path\to\custom\voices:/app/custom_voice" !cmd_options!--rm -it -p 7860:7860 %DOCKER_IMG_NAME% --headless --ebook "/app/ebooks/myfile.pdf" [--voice /app/custom_voice/voice.wav etc..]
+    )
 )
 if "%DOCKER_DESKTOP%"=="1" (
-	set "wsl_cmd=wsl --user root -d %DOCKER_WSL_CONTAINER% --"
+    set "wsl_cmd=wsl --user root -d %DOCKER_WSL_CONTAINER% --"
 )
 endlocal
 exit /b 0
@@ -991,98 +991,96 @@ exit /b 0
 :main
 if defined arguments.help (
     if /i "%arguments.help%"=="true" (
-		call :check_python
-		if errorlevel 1 goto :install_python
-		call :check_docker
-		if "%DOCKER_DESKTOP%"=="0" (
-			ifi "%PODMAN_DESKTOP"=="0" (
-				wsl --user root -d %DOCKER_WSL_CONTAINER% -- which docker >nul 2>&1
-				if not errorlevel 1 (
-					set DOCKER_IN_WSL=1
-				)
-			)
-		)
+        call :check_python
+        if errorlevel 1 goto :install_python
+        call :check_docker
+        if "%DOCKER_DESKTOP%"=="0" (
+            if "%PODMAN_DESKTOP%"=="0" (
+                wsl --user root -d %DOCKER_WSL_CONTAINER% -- which docker >nul 2>&1
+                if not errorlevel 1 (
+                    set DOCKER_IN_WSL=1
+                )
+            )
+        )
         call python -u "%SAFE_SCRIPT_DIR%\app.py" %ARGS%
         goto :eof
     )
 ) else (
     if "%SCRIPT_MODE%"=="%BUILD_DOCKER%" (
         if "%DOCKER_DEVICE_STR%"=="" (
-			setlocal enabledelayedexpansion
-			call :check_python
-			if errorlevel 1 goto :install_python
-			call :check_wsl
-			if errorlevel 1 goto :install_wsl
+            setlocal enabledelayedexpansion
+            call :check_python
+            if errorlevel 1 goto :install_python
+            call :check_wsl
+            if errorlevel 1 goto :install_wsl
             call :check_docker
             if errorlevel 1	(
-				if not "%DOCKER_MODE%"=="podman" (
-					goto :install_docker
-				) else (
-					goto :failed
-				)
+                if not "%DOCKER_MODE%"=="podman" (
+                    goto :install_docker
+                ) else (
+                    goto :failed
+                )
             )
-			call :check_docker_daemon
+            call :check_docker_daemon
             if errorlevel 1 goto :failed
             call :check_device_info %SCRIPT_MODE%
             if errorlevel 1 goto :failed
-			call :install_device_packages
+            call :install_device_packages
             if "!DEVICE_TAG!"=="" (
                 call :json_get tag
                 if errorlevel 1 goto :failed
             )
-			if "%PODMAN_DESKTOP%"=="1" (
-				podman image exists "localhost/%DOCKER_IMG_NAME%:!DEVICE_TAG!" >nul 2>&1
-			) else if "%DOCKER_DESKTOP%"=="1" (
-				docker image inspect "%DOCKER_IMG_NAME%:!DEVICE_TAG!" >nul 2>&1
-			) else (
-				wsl --user root -d %DOCKER_WSL_CONTAINER% -- docker image inspect "%DOCKER_IMG_NAME%:!DEVICE_TAG!" >nul 2>&1
-			)
-			if not errorlevel 1 (
-				echo [STOP] Docker image "%DOCKER_IMG_NAME%:!DEVICE_TAG!" already exists.
-				if "%DOCKER_DESKTOP%"=="1" (
-					echo To rebuild, first remove it with: docker rmi %DOCKER_IMG_NAME%:!DEVICE_TAG! --force
-				) else (
-					echo To rebuild, first remove it with: wsl -d %DOCKER_WSL_CONTAINER% -- docker rmi %DOCKER_IMG_NAME%:!DEVICE_TAG! --force
-				)
-				goto :failed
-			)
+            if "%PODMAN_DESKTOP%"=="1" (
+                podman image exists "localhost/%DOCKER_IMG_NAME%:!DEVICE_TAG!" >nul 2>&1
+            ) else if "%DOCKER_DESKTOP%"=="1" (
+                docker image inspect "%DOCKER_IMG_NAME%:!DEVICE_TAG!" >nul 2>&1
+            ) else (
+                wsl --user root -d %DOCKER_WSL_CONTAINER% -- docker image inspect "%DOCKER_IMG_NAME%:!DEVICE_TAG!" >nul 2>&1
+            )
+            if not errorlevel 1 (
+                echo [STOP] Docker image "%DOCKER_IMG_NAME%:!DEVICE_TAG!" already exists.
+                if "%DOCKER_DESKTOP%"=="1" (
+                    echo To rebuild, first remove it with: docker rmi %DOCKER_IMG_NAME%:!DEVICE_TAG! --force
+                ) else (
+                    echo To rebuild, first remove it with: wsl -d %DOCKER_WSL_CONTAINER% -- docker rmi %DOCKER_IMG_NAME%:!DEVICE_TAG! --force
+                )
+                goto :failed
+            )
             call :build_docker_image "!DEVICE_INFO_STR!"
             if errorlevel 1 goto :failed
-			endlocal
+            endlocal
         ) else (
-			echo The Docker image is only available with a Linux container
+            echo The Docker image is only available with a Linux container
         )
     ) else if "%SCRIPT_MODE%"=="%NATIVE%" (
-		call :check_scoop
-		if errorlevel 1 goto :install_scoop
-		call :check_scoop_buckets
-		if errorlevel 1 goto :install_scoop_buckets
-		call :check_programs
-		if errorlevel 1 goto :install_programs
-		call :check_conda
-		if errorlevel 3 goto :failed
-		if errorlevel 2 goto :eof
-		if errorlevel 1 goto :install_conda
-        call conda activate "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%"
-		if errorlevel 1 goto :failed
+        call :check_scoop
+        if errorlevel 1 goto :install_scoop
+        call :check_scoop_buckets
+        if errorlevel 1 goto :install_scoop_buckets
+        call :check_programs
+        if errorlevel 1 goto :install_programs
+        call :check_uv
+        if errorlevel 3 goto :failed
+        if errorlevel 2 goto :eof
+        if errorlevel 1 goto :install_uv
+
+        set "VIRTUAL_ENV=%SAFE_SCRIPT_DIR%\%PYTHON_ENV%"
+        set "PATH=%VIRTUAL_ENV%\Scripts;%PATH%"
+
         call :check_sitecustomized
         if errorlevel 1 goto :failed
         call :build_gui
         call python.exe -u "%SAFE_SCRIPT_DIR%\app.py" --script_mode %SCRIPT_MODE% %ARGS%
-		call conda deactivate >nul && call conda deactivate >nul
     ) else if "%SCRIPT_MODE%"=="%FULL_DOCKER%" (
         call :check_sitecustomized
         if errorlevel 1 goto :failed
         call python.exe -u "%SAFE_SCRIPT_DIR%\app.py" --script_mode %SCRIPT_MODE% %ARGS%
-	)
+    )
 )
 goto :eof
 
 :failed
 echo =============== ebook2audiobook is not correctly installed.
-where.exe /Q conda && (
-    call conda deactivate >nul && call conda deactivate >nul
-)
 exit /b 1
 
 :quit
