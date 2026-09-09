@@ -472,19 +472,17 @@ Default to config.json model.""")
                     if app is not None:
                         launch_kwargs = {
                             "debug": bool(int(os.environ.get('GRADIO_DEBUG', '0'))),
-                            "show_error": debug_mode, 
-                            "favicon_path": './favicon.ico', 
-                            "server_name": interface_host, 
-                            "server_port": interface_port, 
-                            "share": args['share'], 
+                            "show_error": debug_mode,
+                            "favicon_path": './favicon.ico',
+                            "server_name": interface_host,
+                            "server_port": interface_port,
+                            "share": args['share'],
                             "max_file_size": max_upload_size
                         }
                         if 'footer_links' in gr_blocks_signature:
                             launch_kwargs['theme'] = theme
                             launch_kwargs['css'] = header_css
                             launch_kwargs['footer_links'] = ["settings"]
-                        else:
-                            launch_kwargs['show_api'] = False
                         app.queue(default_concurrency_limit=interface_concurrency_limit).launch(**launch_kwargs)
                 except OSError as e:
                     error = f'Connection error: {e}'
