@@ -49,7 +49,7 @@ header_css = '''
             vertical-align: middle !important;
         }
         table.file-preview tr {
-            padding: 0;
+            padding: 0 !important;
         }
         body:has(#gr_convert_btn:disabled) table.file-preview button.label-clear-button {
             display: none !important;
@@ -468,6 +468,9 @@ header_css = '''
         #gr_audiobook_player button[aria-label="Share"],
         #gr_audiobook_player .download-button,
         #gr_audiobook_player .share-button,
+        #gr_audiobook_files {
+            border-style: none !important;
+        }
         #gr_audiobook_files label[data-testid="block-label"] {
             display: none !important;
         }
