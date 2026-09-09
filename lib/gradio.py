@@ -780,9 +780,9 @@ def build_interface(args:dict)->gr.Blocks:
                             gr_playback_time = gr.Number(elem_id="gr_playback_time", label='', interactive=False, visible='hidden', value=0.0)
                             gr_audiobook_sentence = gr.Textbox(elem_id='gr_audiobook_sentence', label='', value='…', interactive=False, lines=3, max_lines=3)
                             gr_audio_kwargs = {"elem_id": "gr_audiobook_player", "label": "", "type": "filepath", "autoplay": False, "interactive": False, "waveform_options": gr.WaveformOptions(show_recording_waveform=False), "container": True, "visible": True}
-                            if 'buttons' in audio_params:
+                            if 'buttons' in gr_audio_signature:
                                 gr_audio_kwargs['buttons'] = False
-                            elif 'show_download_button' in audio_params:
+                            elif 'show_download_button' in gr_audio_signature:
                                 gr_audio_kwargs['show_download_button'] = False
                             gr_audiobook_player = gr.Audio(**gr_audio_kwargs)
                             with gr.Row(elem_id='gr_row_audiobook_list', visible=True) as gr_row_audiobook_list:
