@@ -466,7 +466,7 @@ Default to config.json model.""")
             passed_args_set = {arg for arg in passed_arguments if arg.startswith('--')}
             if passed_args_set.issubset(allowed_arguments):
                 try:
-                    from lib.gradio import gr_blocks_signature, theme, header_css, build_interface
+                    from lib.gradio import theme, header_css, build_interface
                     c.progress_bar = c.gr.Progress(track_tqdm=False)
                     app = build_interface(args)
                     if app is not None:
