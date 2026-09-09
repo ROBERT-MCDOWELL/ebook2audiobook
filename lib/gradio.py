@@ -57,6 +57,9 @@ header_css = '''
         span[data-testid="block-info"] {
             font-size: 12px !important;
         }
+        audio div.top-panel {
+            display: none !important;
+        }
         /////////////////////
         .wrap-inner {
             border: 1px solid #666666;
