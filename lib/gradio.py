@@ -57,9 +57,6 @@ header_css = '''
         span[data-testid="block-info"] {
             font-size: 12px !important;
         }
-        audio div.top-panel {
-            display: none !important;
-        }
         /////////////////////
         .wrap-inner {
             border: 1px solid #666666;
@@ -339,7 +336,7 @@ header_css = '''
             background: none !important;
             border: none !important;
         }
-        #gr_audiobook_player label {
+        #gr_audiobook_player label, #gr_audiobook_player div.top-panel {
             display: none !important;
         }
         #gr_ebook_src, #gr_custom_model_file, #gr_voice_file {
