@@ -639,7 +639,7 @@ header_css = '''
             cursor: pointer !important;
         }
         .gr-blocks-buttons:hover { background-color: #34d058 !important; }
-        .gr-blocks-buttons:active, .button-red:active {
+        .gr-blocks-buttons:active {
             background: var(--body-text-color) !important;
             color: var(--body-background-fill) !important;
         }
