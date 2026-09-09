@@ -1336,8 +1336,10 @@ def build_interface(args:dict)->gr.Blocks:
                     session = context.get_session(session_id)
                     if not session or not session.get('id', False):
                         return (gr.update(interactive=True), 'Session not found')
-                    if not audiobook or not os.path.isfile(str(audiobook)):
-                        return (gr.update(interactive=True), 'No audiobook to upload')
+                    if not audiobook:
+                        return (gr.update(interactive=True), 'No audiobook file to upload!')
+                    elif not os.path.isfile(str(audiobook)):
+                        return (gr.update(interactive=True), 'Audiobook file does not exist!')
                     from lib.classes.audiobookshelf import upload_to_abs
                     from urllib.parse import urlparse
                     title = Path(audiobook).stem
@@ -1425,8 +1427,8 @@ def build_interface(args:dict)->gr.Blocks:
                         if session.get('audiobook') != selected:
                             session['audiobook'] = selected
                         visible = session['audiobook'] is not None
-                        audiobook_file = Path(selected).name if selected else ''
-                        return gr.update(visible=visible), gr.update(value=audiobook_file)
+                        audiobook = selected if selected else ''
+                        return gr.update(visible=visible), gr.update(value=audiobook)
                 except Exception as e:
                     error = f'_change_gr_audiobook_list(): {e}'
                     exception_alert(session_id, error)
