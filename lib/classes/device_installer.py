@@ -65,8 +65,8 @@ class DeviceInstaller():
                 return c
         raise FileNotFoundError('uv binary not found. Install: https://docs.astral.sh/uv/getting-started/installation/')
 
-    def _uv_pip(self, *args)->list:
-        return [self.uv_bin, 'pip', '--python', sys.executable, *args]
+    def _uv_pip(self, subcommand:str, *args)->list:
+        return [self.uv_bin, 'pip', subcommand, '--python', sys.executable, *args]
 
     @cached_property
     def check_platform(self)->str:
