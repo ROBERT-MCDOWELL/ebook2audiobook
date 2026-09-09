@@ -54,11 +54,10 @@ Requires-Dist: phonemizer
 Requires-Dist: indic-nlp-library
 Requires-Dist: pytesseract
 Requires-Dist: torchvggish
-Requires-Dist: sentence-transformers
+Requires-Dist: gradio
 Requires-Dist: stanza==1.10.1
 Requires-Dist: argostranslate==1.11.0
 Requires-Dist: pandas<3.0,>=1.0
-Requires-Dist: gradio==5.49.1
 Requires-Dist: coqui-tts[languages]==0.27.5
 Requires-Dist: piper-tts==1.4.2
 Dynamic: license-file
