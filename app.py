@@ -480,7 +480,7 @@ Default to config.json model.""")
                             "max_file_size": max_upload_size,
                             "theme": theme,
                             "css": header_css,
-                            "footer_links" = ["settings"]
+                            "footer_links": ["settings"]
                         }
                         app.queue(default_concurrency_limit=interface_concurrency_limit).launch(**gr_blocks_kwargs)
                 except OSError as e:
