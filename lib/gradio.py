@@ -57,7 +57,7 @@ header_css = '''
         span[data-testid="block-info"] {
             font-size: 12px !important;
         }
-        audio div.top-panel {
+        audio div top-panel {
             display: none !important;
         }
         /////////////////////
