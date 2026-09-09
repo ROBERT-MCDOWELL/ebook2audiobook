@@ -6,7 +6,7 @@
 # WHICH IS LESS GENERIC FOR THE DEVELOPERS
 
 import argparse, asyncio, csv, difflib, fnmatch, sqlite3, hashlib, io, json, math, os, pytesseract, gc
-import random, shutil, subprocess, sys, tempfile, threading, time, uvicorn, copy, base64
+import random, shutil, subprocess, sys, tempfile, threading, time, uvicorn, copy, base64, inspect
 import traceback, socket, unicodedata, urllib.request, uuid, zipfile, pymupdf, multiprocessing
 import ebooklib, psutil, requests, stanza, importlib, queue, pykakasi
 import regex as re, gradio as gr
