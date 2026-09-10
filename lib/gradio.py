@@ -1112,40 +1112,32 @@ def build_interface(args:dict)->gr.Blocks:
                 if type in [status_tags['DELETION'], status_tags['OVERRIDE']]:
                     cancel_btn = f'#gr_{type}_cancel_btn'
                     confirm_btn = f'#gr_{type}_confirm_btn'
-                    
-                    # Base styles
-                    base_style = (
-                        "display:inline-flex;align-items:center;justify-content:center;"
-                        "width:50px;height:50px;border:solid 1px;border-radius:6px;"
-                        "font-size:20px;cursor:pointer;user-select:none;"
-                        "transition:background-color 0.2s;"
-                    )
-                    
-                    # Red button styles
-                    red_normal = base_style + "background-color:#dc3545;color:white;"
-                    red_hover = base_style + "background-color:#ff6f71;color:white;"
-                    red_active = base_style + "background-color:var(--body-text-color);color:var(--body-background-fill);"
-                    
-                    # Green button styles
-                    green_normal = base_style + "background-color:#28a745;color:white;"
-                    green_hover = base_style + "background-color:#34d058;color:white;"
-                    green_active = base_style + "background-color:var(--body-text-color);color:var(--body-background-fill);"
-                    
                     return f'''
+                    <style>
+                        .confirm-buttons .btn {{
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 50px;
+                            height: 50px;
+                            border: solid 1px;
+                            border-radius: 6px;
+                            font-size: 20px;
+                            cursor: pointer;
+                            user-select: none;
+                        }}
+                        .confirm-buttons .btn-red {{ background-color: #dc3545; color: white; }}
+                        .confirm-buttons .btn-red:hover {{ background-color: #ff6f71; }}
+                        .confirm-buttons .btn-green {{ background-color: #28a745; color: white; }}
+                        .confirm-buttons .btn-green:hover {{ background-color: #34d058; }}
+                        .confirm-buttons .btn:active {{
+                            background: var(--body-text-color) !important;
+                            color: var(--body-background-fill) !important;
+                        }}
+                    </style>
                     <div class="confirm-buttons">
-                        <div role="button" tabindex="0" style="{red_normal}"
-                             onclick="document.querySelector('{cancel_btn}').click()"
-                             onmouseenter="this.style.cssText='{red_hover}'"
-                             onmouseleave="this.style.cssText='{red_normal}'"
-                             onmousedown="this.style.cssText='{red_active}'"
-                             onmouseup="this.style.cssText='{red_hover}'">✖</div>
-                             
-                        <div role="button" tabindex="0" style="{green_normal}"
-                             onclick="document.querySelector('{confirm_btn}').click()"
-                             onmouseenter="this.style.cssText='{green_hover}'"
-                             onmouseleave="this.style.cssText='{green_normal}'"
-                             onmousedown="this.style.cssText='{green_active}'"
-                             onmouseup="this.style.cssText='{green_hover}'">✔</div>
+                        <div class="btn btn-red" onclick="document.querySelector('{cancel_btn}').click()">✖</div>
+                        <div class="btn btn-green" onclick="document.querySelector('{confirm_btn}').click()">✔</div>
                     </div>
                     '''
                 else:
