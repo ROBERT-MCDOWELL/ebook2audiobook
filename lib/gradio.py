@@ -659,15 +659,15 @@ header_css = '''
             height: 50px !important;
         }
         .button-green:hover { background-color: #34d058 !important; }
-        .button-red {
+        #btn_cancel {
             border: solid 1px !important;
             background-color: #dc3545 !important;
             color: white !important;
             width: 50px !important;
             height: 50px !important;
         }
-        .button-red:hover  { background-color: #ff6f71 !important; }
-        .button-green:active, .button-red:active {
+        #btn_cancel:hover  { background-color: #ff6f71 !important; }
+        .button-green:active, #btn_cancel:active {
             background: var(--body-text-color) !important;
             color: var(--body-background-fill) !important;
         }
@@ -1134,8 +1134,8 @@ def build_interface(args:dict)->gr.Blocks:
                     confirm_btn = f'#gr_{type}_confirm_btn'
                     return f'''
                     <div class="confirm-buttons">
-                        <button class="button-red" onclick="document.querySelector('{cancel_btn}').click()">✖</button>
-                        <button class="button-green" onclick="document.querySelector('{confirm_btn}').click()">✔</button>
+                        <button id="btn_cancel" class="button-red" onclick="document.querySelector('{cancel_btn}').click()">✖</button>
+                        <button id="btn_confirm" class="button-green" onclick="document.querySelector('{confirm_btn}').click()">✔</button>
                     </div>
                     '''
                 else:
