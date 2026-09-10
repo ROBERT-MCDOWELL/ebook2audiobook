@@ -1134,7 +1134,7 @@ def build_interface(args:dict)->gr.Blocks:
                     confirm_btn = f'#gr_{type}_confirm_btn'
                     return f'''
                     <div class="confirm-buttons">
-                        <button id="btn_cancel" class="button-red" onclick="document.querySelector('{cancel_btn}').click()">✖</button>
+                        <button id="btn_cancel" class="button-red" style="background-color:red" onclick="document.querySelector('{cancel_btn}').click()">✖</button>
                         <button id="btn_confirm" class="button-green" onclick="document.querySelector('{confirm_btn}').click()">✔</button>
                     </div>
                     '''
