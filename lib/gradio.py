@@ -1132,10 +1132,28 @@ def build_interface(args:dict)->gr.Blocks:
                 if type in [status_tags['DELETION'], status_tags['OVERRIDE']]:
                     cancel_btn = f'#gr_{type}_cancel_btn'
                     confirm_btn = f'#gr_{type}_confirm_btn'
+                    
+                    # Base styles to make divs look and act like buttons
+                    base_style = (
+                        "display:inline-flex;align-items:center;justify-content:center;"
+                        "width:50px;height:50px;border:none;border-radius:6px;"
+                        "font-size:20px;cursor:pointer;user-select:none;"
+                        "transition:background-color 0.2s;"
+                    )
+                    
+                    red_style = base_style + "background-color:#dc3545;color:white;"
+                    green_style = base_style + "background-color:#28a745;color:white;"
+                    
                     return f'''
                     <div class="confirm-buttons">
-                        <button id="btn_cancel" class="button-red" style="background-color:red" onclick="document.querySelector('{cancel_btn}').click()">✖</button>
-                        <button id="btn_confirm" class="button-green" onclick="document.querySelector('{confirm_btn}').click()">✔</button>
+                        <div role="button" tabindex="0" style="{red_style}"
+                             onclick="document.querySelector('{cancel_btn}').click()"
+                             onmouseenter="this.style.backgroundColor='#ff6f71'"
+                             onmouseleave="this.style.backgroundColor='#dc3545'">✖</div>
+                        <div role="button" tabindex="0" style="{green_style}"
+                             onclick="document.querySelector('{confirm_btn}').click()"
+                             onmouseenter="this.style.backgroundColor='#34d058'"
+                             onmouseleave="this.style.backgroundColor='#28a745'">✔</div>
                     </div>
                     '''
                 else:
