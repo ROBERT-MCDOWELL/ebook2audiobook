@@ -660,7 +660,6 @@ header_css = '''
         }
         .button-green:hover { background-color: #34d058 !important; }
         #btn_cancel {
-            border: solid 1px !important;
             background-color: #dc3545 !important;
             color: white !important;
             width: 50px !important;
