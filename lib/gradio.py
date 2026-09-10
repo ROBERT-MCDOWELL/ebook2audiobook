@@ -652,6 +652,7 @@ header_css = '''
             border-radius: 9px !important;
         }
         .button-green {
+            border: solid 1px !important
             background-color: #28a745 !important;
             color: white !important;
             width: 50px !important;
@@ -659,6 +660,7 @@ header_css = '''
         }
         .button-green:hover { background-color: #34d058 !important; }
         .button-red {
+            border: solid 1px !important;
             background-color: #dc3545 !important;
             color: white !important;
             width: 50px !important;
