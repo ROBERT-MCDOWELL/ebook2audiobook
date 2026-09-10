@@ -651,26 +651,6 @@ header_css = '''
             margin-right: 30px !important;
             border-radius: 9px !important;
         }
-        .button-green {
-            border: solid 1px !important
-            background-color: #28a745 !important;
-            color: white !important;
-            width: 50px !important;
-            height: 50px !important;
-        }
-        .button-green:hover { background-color: #34d058 !important; }
-        .button-red {
-            border: solid 1px !important;
-            background-color: #dc3545 !important;
-            color: white !important;
-            width: 50px !important;
-            height: 50px !important;
-        }
-        .button-red:hover  { background-color: #ff6f71 !important; }
-        .button-green:active, .button-red:active {
-            background: var(--body-text-color) !important;
-            color: var(--body-background-fill) !important;
-        }
         .spinner {
             margin: 15px auto !important;
             border: 4px solid rgba(255, 255, 255, 0.2) !important;
@@ -1133,27 +1113,39 @@ def build_interface(args:dict)->gr.Blocks:
                     cancel_btn = f'#gr_{type}_cancel_btn'
                     confirm_btn = f'#gr_{type}_confirm_btn'
                     
-                    # Base styles to make divs look and act like buttons
+                    # Base styles
                     base_style = (
                         "display:inline-flex;align-items:center;justify-content:center;"
-                        "width:50px;height:50px;border:none;border-radius:6px;"
+                        "width:50px;height:50px;border:solid 1px;border-radius:6px;"
                         "font-size:20px;cursor:pointer;user-select:none;"
                         "transition:background-color 0.2s;"
                     )
                     
-                    red_style = base_style + "background-color:#dc3545;color:white;"
-                    green_style = base_style + "background-color:#28a745;color:white;"
+                    # Red button styles
+                    red_normal = base_style + "background-color:#dc3545;color:white;"
+                    red_hover = base_style + "background-color:#ff6f71;color:white;"
+                    red_active = base_style + "background-color:var(--body-text-color);color:var(--body-background-fill);"
+                    
+                    # Green button styles
+                    green_normal = base_style + "background-color:#28a745;color:white;"
+                    green_hover = base_style + "background-color:#34d058;color:white;"
+                    green_active = base_style + "background-color:var(--body-text-color);color:var(--body-background-fill);"
                     
                     return f'''
                     <div class="confirm-buttons">
-                        <div role="button" tabindex="0" style="{red_style}"
+                        <div role="button" tabindex="0" style="{red_normal}"
                              onclick="document.querySelector('{cancel_btn}').click()"
-                             onmouseenter="this.style.backgroundColor='#ff6f71'"
-                             onmouseleave="this.style.backgroundColor='#dc3545'">✖</div>
-                        <div role="button" tabindex="0" style="{green_style}"
+                             onmouseenter="this.style.cssText='{red_hover}'"
+                             onmouseleave="this.style.cssText='{red_normal}'"
+                             onmousedown="this.style.cssText='{red_active}'"
+                             onmouseup="this.style.cssText='{red_hover}'">✖</div>
+                             
+                        <div role="button" tabindex="0" style="{green_normal}"
                              onclick="document.querySelector('{confirm_btn}').click()"
-                             onmouseenter="this.style.backgroundColor='#34d058'"
-                             onmouseleave="this.style.backgroundColor='#28a745'">✔</div>
+                             onmouseenter="this.style.cssText='{green_hover}'"
+                             onmouseleave="this.style.cssText='{green_normal}'"
+                             onmousedown="this.style.cssText='{green_active}'"
+                             onmouseup="this.style.cssText='{green_hover}'">✔</div>
                     </div>
                     '''
                 else:
