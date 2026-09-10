@@ -660,12 +660,12 @@ header_css = '''
         }
         .button-green:hover { background-color: #34d058 !important; }
         #btn_cancel {
-            background-color: #dc3545 !important;
+            background: #dc3545 !important;
             color: white !important;
             width: 50px !important;
             height: 50px !important;
         }
-        #btn_cancel:hover  { background-color: #ff6f71 !important; }
+        #btn_cancel:hover  { background: #ff6f71 !important; }
         .button-green:active, #btn_cancel:active {
             background: var(--body-text-color) !important;
             color: var(--body-background-fill) !important;
