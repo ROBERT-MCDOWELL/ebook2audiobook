@@ -926,13 +926,14 @@ def build_interface(args:dict)->gr.Blocks:
                         ) as acc:
                             with gr.Row(elem_id=f'block_options_row_{i}', elem_classes=[acc_class, 'no-wrap']) as block_options_row:
                                 acc_keep = gr.Checkbox(
-                                    label=None,
+                                    show_label=False,
                                     elem_id=f'block_keep_{i}',
                                     elem_classes=['accordion-block-keep'],
                                     value=True,
                                     interactive=True,
+                                    visible=True,
                                     scale=0,
-                                    visible=True
+                                    min_width=20
                                 )
                                 acc_voice_list = gr.Dropdown(
                                     show_label=False,
