@@ -1664,7 +1664,8 @@ class DeviceInstaller():
                 # not a pyannote dependency (it arrives via sentence-transformers /
                 # coqui-tts) but transformers 5 requires hub>=1.0, so it is pinned
                 # by the same decision.
-                return 'transformers>=5.0.0,<5.1' if self.has_torchcodec_stack() else 'transformers==4.57.6'
+                #return 'transformers>=5.0.0,<5.1' if self.has_torchcodec_stack() else 'transformers==4.57.6'
+                return 'transformers>=5.0.0,<5.1'
             case 'gradio':
                 #return 'gradio==6.26.0' if self.has_torchcodec_stack() else 'gradio==5.49.1'
                 return 'gradio==6.26.0'
