@@ -942,7 +942,8 @@ def build_interface(args:dict)->gr.Blocks:
                                     choices=voice_options,
                                     type='value',
                                     interactive=True,
-                                    scale=3
+                                    scale=3,
+                                    min_width=100
                                 )
                                 acc_reset_btn = gr.Button(
                                     '↺',
