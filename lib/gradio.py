@@ -932,7 +932,7 @@ def build_interface(args:dict)->gr.Blocks:
                                     value=True,
                                     interactive=True,
                                     visible=True,
-                                    scale=0,
+                                    scale=1,
                                     min_width=20
                                 )
                                 acc_voice_list = gr.Dropdown(
@@ -950,7 +950,7 @@ def build_interface(args:dict)->gr.Blocks:
                                     elem_classes=['accordion-block-reset'],
                                     variant='secondary',
                                     interactive=True,
-                                    scale=0,
+                                    scale=1,
                                     min_width=40
                                 )
                             acc_text = gr.Textbox(
