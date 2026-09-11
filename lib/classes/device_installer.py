@@ -1666,7 +1666,7 @@ class DeviceInstaller():
                 return 'transformers>=5.0.0,<5.1' if self.has_torchcodec_stack() else 'transformers==4.57.6'
             case 'gradio':
                 #return 'gradio==6.26.0' if self.has_torchcodec_stack() else 'gradio==5.49.1'
-                return 'gradio==6.26.0
+                return 'gradio==6.26.0'
             case _:
                 raise ValueError(f'select_pkg(): no rule for {pkg}')
 
