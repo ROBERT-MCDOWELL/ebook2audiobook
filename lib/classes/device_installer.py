@@ -1658,7 +1658,8 @@ class DeviceInstaller():
                 # pyannote 3.4.0 predates hub 1.0 and calls APIs it removed, but
                 # only declares a floor (huggingface-hub>=0.13.0) — a floor cannot
                 # pull a version down, so the cap has to come from here.
-                return 'huggingface-hub>=1.16.0,<2.0' if self.has_torchcodec_stack() else 'huggingface-hub>=0.36.2,<1.0'
+                #return 'huggingface-hub>=1.16.0,<2.0' if self.has_torchcodec_stack() else 'huggingface-hub>=0.36.2,<1.0'
+                return 'huggingface-hub>=1.16.0,<2.0'
             case 'transformers':
                 # not a pyannote dependency (it arrives via sentence-transformers /
                 # coqui-tts) but transformers 5 requires hub>=1.0, so it is pinned
