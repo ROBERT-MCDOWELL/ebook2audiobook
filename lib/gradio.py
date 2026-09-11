@@ -1120,7 +1120,7 @@ def build_interface(args:dict)->gr.Blocks:
                             justify-content: center;
                             width: 50px;
                             height: 50px;
-                            border: solid 1px;
+                            border: none;
                             border-radius: 6px;
                             font-size: 20px;
                             cursor: pointer;
