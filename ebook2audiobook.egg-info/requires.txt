@@ -42,7 +42,8 @@ phonemizer
 indic-nlp-library
 pytesseract
 torchvggish
-gradio
+transformers>=5.0.0,<5.1
+gradio==6.27.0
 stanza==1.10.1
 argostranslate==1.11.0
 pandas<3.0,>=1.0
