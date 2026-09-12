@@ -10,7 +10,8 @@ class DeviceInstaller():
     # kept out of requirements.txt and resolved by select_pkg().
     # names are PEP 503 normalized (hyphens) to match the head parsed from
     # requirements.txt, which writes 'huggingface_hub' with an underscore.
-    device_pkgs = ['onnxruntime', 'pyannote-audio', 'huggingface-hub', 'transformers', 'gradio']
+    #device_pkgs = ['onnxruntime', 'pyannote-audio', 'huggingface-hub', 'transformers', 'gradio']
+    device_pkgs = ['onnxruntime']
 
     # mutually exclusive distributions: only one of each list may end up installed.
     # select_pkg() decides which, finalize_exclusive_packages() removes the others
@@ -1440,7 +1441,7 @@ class DeviceInstaller():
                 pins = [spec for spec in overrides.values() if spec]
                 # FIX: Force device pins into the pip resolver so transitive
                 # dependencies cannot override bounds like huggingface-hub<1.0
-                for dpkg in ['onnxruntime', 'pyannote-audio', 'huggingface-hub', 'transformers', 'gradio']:
+                for dpkg in device_pkgs:
                     try:
                         pin = self.select_pkg(dpkg)
                         if pin not in pins:
@@ -1650,24 +1651,24 @@ class DeviceInstaller():
                 if not self.has_directml_gpu():
                     return 'onnxruntime'
                 return 'onnxruntime-directml'
-            case 'pyannote-audio':
+            #case 'pyannote-audio':
                 # pyannote 4 dropped the torchaudio/sox/soundfile backends and
                 # requires torchcodec>=0.7, which only exists from torch 2.8 on.
-                return 'pyannote-audio>=4.0.0' if self.has_torchcodec_stack() else 'pyannote-audio==3.4.0'
-            case 'huggingface-hub':
+                #return 'pyannote-audio>=4.0.0' if self.has_torchcodec_stack() else 'pyannote-audio==3.4.0'
+            #case 'huggingface-hub':
                 # pyannote 3.4.0 predates hub 1.0 and calls APIs it removed, but
                 # only declares a floor (huggingface-hub>=0.13.0) — a floor cannot
                 # pull a version down, so the cap has to come from here.
                 #return 'huggingface-hub>=1.16.0,<2.0' if self.has_torchcodec_stack() else 'huggingface-hub>=0.36.2,<1.0'
-                return 'huggingface-hub>=1.16.0,<2.0'
+                #return 'huggingface-hub>=1.16.0,<2.0'
             #case 'transformers':
                 # not a pyannote dependency (it arrives via sentence-transformers /
                 # coqui-tts) but transformers 5 requires hub>=1.0, so it is pinned
                 # by the same decision.
                 #return 'transformers>=5.0.0,<5.1' if self.has_torchcodec_stack() else 'transformers==4.57.6'
-            case 'gradio':
+            #case 'gradio':
                 #return 'gradio==6.26.0' if self.has_torchcodec_stack() else 'gradio==5.49.1'
-                return 'gradio==6.26.0'
+                #return 'gradio==6.26.0'
             case _:
                 raise ValueError(f'select_pkg(): no rule for {pkg}')
 
