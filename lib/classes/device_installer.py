@@ -1986,20 +1986,37 @@ class DeviceInstaller():
         from pathlib import Path, PurePosixPath
         from urllib.parse import urlparse, unquote
         import zipfile
-        from huggingface_hub import hf_hub_download
+        import json
+        from typing import Optional
+        from huggingface_hub import hf_hub_download, get_hf_file_metadata, hf_hub_url
         from tqdm import tqdm
         voices_dir:Path = Path('./voices')
+        version_file:Path = voices_dir / '.version.json'
         def has_wav()->bool:
             return any(voices_dir.rglob('*.wav'))
         try:
             voices_dir.mkdir(parents=True, exist_ok=True)
-            if has_wav():
-                return 0
             parts:tuple = PurePosixPath(unquote(urlparse(voices_url).path)).parts
             i:int = parts.index('datasets')
-            repo_id:str = f"{parts[i+1]}/{parts[i+2]}"
+            repo_id:str = f'{parts[i+1]}/{parts[i+2]}'
             r:int = parts.index('resolve')
             filename:str = '/'.join(parts[r+2:])
+            remote_etag:Optional[str] = None
+            try:
+                url:str = hf_hub_url(repo_id, filename, repo_type='dataset')
+                metadata = get_hf_file_metadata(url)
+                remote_etag = metadata.etag
+            except Exception:
+                pass
+            local_etag:Optional[str] = None
+            if version_file.exists():
+                try:
+                    with open(version_file, 'r') as f:
+                        local_etag = json.load(f).get('etag')
+                except Exception:
+                    pass
+            if has_wav() and (remote_etag is None or local_etag == remote_etag):
+                return 0
             zip_path:Path = Path(hf_hub_download(repo_id=repo_id, filename=filename, repo_type='dataset', local_dir='.'))
             print(f'Downloaded {zip_path.stat().st_size / (1024*1024):.1f} MB to {zip_path}')
             with zipfile.ZipFile(zip_path, 'r') as zf:
@@ -2007,7 +2024,11 @@ class DeviceInstaller():
                 desc:str = 'Extracting voices'
                 for member in tqdm(members, desc=desc, unit='file'):
                     zf.extract(member, './')
-            zip_path.unlink()
+            if remote_etag:
+                with open(version_file, 'w') as f:
+                    json.dump({"etag": remote_etag}, f)
+            if zip_path.exists():
+                zip_path.unlink()
             return 0 if has_wav() else 1
         except Exception as e:
             error:str = f'check_voices() error: {e}'
