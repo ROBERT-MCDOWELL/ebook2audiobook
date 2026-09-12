@@ -1441,7 +1441,7 @@ class DeviceInstaller():
                 pins = [spec for spec in overrides.values() if spec]
                 # FIX: Force device pins into the pip resolver so transitive
                 # dependencies cannot override bounds like huggingface-hub<1.0
-                for dpkg in device_pkgs:
+                for dpkg in self.device_pkgs:
                     try:
                         pin = self.select_pkg(dpkg)
                         if pin not in pins:
