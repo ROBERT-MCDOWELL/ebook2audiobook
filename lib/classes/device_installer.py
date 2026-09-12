@@ -1281,10 +1281,10 @@ class DeviceInstaller():
         packages.append(onnx_pkg)
         if onnx_pkg == 'onnxruntime-directml':
             packages.append('protobuf<7')
-        packages.append(self.select_pkg('pyannote-audio'))
-        packages.append(self.select_pkg('huggingface-hub'))
-        packages.append(self.select_pkg('transformers'))
-        packages.append(self.select_pkg('gradio'))
+        #packages.append(self.select_pkg('pyannote-audio'))
+        #packages.append(self.select_pkg('huggingface-hub'))
+        #packages.append(self.select_pkg('transformers'))
+        #packages.append(self.select_pkg('gradio'))
 
         if self.system == systems['MACOS'] and platform.machine().lower() in ('x86_64', 'amd64'):
             # last llvmlite/numba with macOS x86_64 wheels. Newer llvmlite has no
