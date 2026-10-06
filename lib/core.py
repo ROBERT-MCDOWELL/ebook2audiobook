@@ -6,7 +6,7 @@
 # WHICH IS LESS GENERIC FOR THE DEVELOPERS
 
 import argparse, asyncio, csv, difflib, fnmatch, sqlite3, hashlib, io, json, math, os, gc
-import random, shutil, subprocess, sys, tempfile, threading, time, uvicorn, copy, base64
+import random, shutil, subprocess, sys, tempfile, threading, time, uvicorn, copy, base64, posixpath
 import traceback, socket, unicodedata, urllib.request, uuid, zipfile, multiprocessing
 import ebooklib, psutil, requests, stanza, importlib, queue, pykakasi
 import regex as re, gradio as gr
@@ -37,6 +37,7 @@ from queue import Queue, Empty
 from types import MappingProxyType
 from langdetect import detect
 from unidecode import unidecode
+from urllib.parse import unquote
 from phonemizer import phonemize
 from pypinyin import pinyin, Style
 
@@ -93,6 +94,37 @@ file_prefixes = {
     "saved": "__saved_",
     'current': "__current_"
 }
+
+footnote_markup = {
+    # in-text markers: epub3, dpub-aria, generic, calibre docx, pandoc/python-markdown, sphinx, indesign, libreoffice, ms word, google docs, mediawiki
+    "REF": ', '.join([
+        '[epub\\:type~="noteref"]', '[role~="doc-noteref"]',
+        'a.footnote', 'a.endnote', 'a.noteref', 'a.footnote-ref',
+        'a.footnote-reference',
+        'a._idFootnoteLink', 'a._idEndnoteLink',
+        'a.sdfootnoteanc', 'a.sdendnoteanc',
+        'a[style*="mso-footnote-id"]', 'a[style*="mso-endnote-id"]',
+        'a[id^="ftnt_ref"]',
+        'sup.reference'
+    ]),
+    # note bodies: epub3 (+ deprecated rearnote), dpub-aria, generic, pandoc/python-markdown/sphinx/calibre docx, indesign, libreoffice, ms word, mediawiki
+    "BODY": ', '.join([
+        '[epub\\:type~="footnote"]', '[epub\\:type~="footnotes"]', '[epub\\:type~="endnote"]', '[epub\\:type~="endnotes"]',
+        '[epub\\:type~="rearnote"]', '[epub\\:type~="rearnotes"]', '[epub\\:type~="backlink"]',
+        '[role~="doc-footnote"]', '[role~="doc-endnote"]', '[role~="doc-endnotes"]', '[role~="doc-backlink"]',
+        '.footnote', '.footnotes', '.endnote', '.endnotes',
+        '.footnote-list', '.footnote-back', '.footnote-backref', '.notes-header',
+        '._idFootnotes', '._idFootnote', '._idEndnotes', '._idEndnote',
+        'div[id^="sdfootnote"]', 'div[id^="sdendnote"]',
+        'div[style*="mso-element:footnote"]', 'div[style*="mso-element:endnote"]',
+        'ol.references', '.reflist', '.mw-references-wrap'
+    ]),
+    # containers a note reached only through its noteref href can live in
+    "BLOCK": ['p', 'li', 'dd', 'dt', 'dl', 'aside', 'div', 'blockquote']
+}
+
+footnote_marker_re = re.compile(r'^[\[\(]?(?:\d{1,4}|[a-z]{1,2}|[ivxlc]{1,6}|[*†‡§¶#]{1,3})[\]\)]?\.?$', re.IGNORECASE)
+footnote_href_re = re.compile(r'#[^#]*(?:note|fn|ftn|edn)', re.IGNORECASE)
 
 ########### Classes
 
@@ -531,6 +563,7 @@ def compare_dict_keys(d1, d2):
 def ocr2xhtml(img: Image.Image, lang:str)->tuple[str|bool, str|None]:
     try:
         import pytesseract
+        from html import escape as html_escape
         debug = True
         try:
             data = pytesseract.image_to_data(img, lang=lang, output_type=pytesseract.Output.DATAFRAME)
@@ -606,10 +639,10 @@ def ocr2xhtml(img: Image.Image, lang:str)->tuple[str|bool, str|None]:
             elif (i == 0 or (i > 0 and merged_lines[i-1] == '')) and len(p.split()) <= 10:
                 is_heading = True
             if is_heading:
-                xhtml_parts.append(f'<h2>{p}</h2>')
+                xhtml_parts.append(f'<h2>{html_escape(p)}</h2>')
                 debug_dump.append(f'[H2] {p}')
             else:
-                xhtml_parts.append(f'<p>{p}</p>')
+                xhtml_parts.append(f'<p>{html_escape(p)}</p>')
                 debug_dump.append(f'[P ] {p}')
         if debug:
             print('=== OCR DEBUG OUTPUT ===')
@@ -1323,6 +1356,103 @@ def get_cover(epubBook:EpubBook, session_id:str)->bool|str:
         DependencyError(e)
         return False
 
+def get_note_marker(ref:Tag)->str:
+    return ref.get_text(strip=True).strip('[]().:, ')
+
+def find_noterefs(soup:BeautifulSoup)->list[Tag]:
+    # explicit markup first, then heuristic links: marker-like text + (superscript, [bracketed] or note-like fragment)
+    explicit = soup.select(footnote_markup['REF'])
+    explicit_ids = {id(node) for node in explicit}
+    in_notes = {id(node) for node in soup.select(footnote_markup['BODY']) if node.name not in ('a', 'sup', 'span')}
+    refs = []
+    seen = set()
+    for node in explicit + soup.select('a[href*="#"]'):
+        if id(node) in seen or any(id(p) in seen or id(p) in in_notes for p in node.parents):
+            continue
+        if id(node) not in explicit_ids:
+            text = node.get_text(strip=True)
+            if not footnote_marker_re.match(text):
+                continue
+            if not (node.find_parent('sup') or node.find('sup') or text.startswith('[') or footnote_href_re.search(node['href'])):
+                continue
+        seen.add(id(node))
+        refs.append(node)
+    return refs
+
+def get_note_targets(all_docs:list[Any])->dict[str, dict[str, str]]:
+    # {doc_name: {fragment: marker}} for every noteref, endnotes usually live in another doc than their markers
+    note_targets = {}
+    for doc in all_docs:
+        try:
+            doc_name = posixpath.normpath(doc.get_name())
+            soup = BeautifulSoup(doc.get_body_content(), 'html.parser')
+            for ref in find_noterefs(soup):
+                link = ref if ref.name == 'a' and ref.get('href') else ref.find('a', href=True)
+                if not link:
+                    continue
+                path, _, frag = link['href'].partition('#')
+                if not frag or ':' in path:
+                    continue
+                target_doc = posixpath.normpath(posixpath.join(posixpath.dirname(doc_name), unquote(path))) if path else doc_name
+                note_targets.setdefault(target_doc, {}).setdefault(unquote(frag), get_note_marker(ref))
+        except Exception as e:
+            print(f'get_note_targets() skipped {doc.get_name()}: {e}')
+    return note_targets
+
+def get_note_block(anchor:Tag, marker:str)->Tag|None:
+    # a note opens with its anchor and its marker ("1", "[1]", "1."), anything else is running text and is kept
+    block = anchor if anchor.name in footnote_markup['BLOCK'] else anchor.find_parent(footnote_markup['BLOCK'])
+    if block is None or not marker or block.find(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
+        return None
+    prefix = ''
+    if block is not anchor:
+        for node in block.descendants:
+            if node is anchor:
+                break
+            if isinstance(node, NavigableString):
+                prefix += node
+    if prefix.strip().strip('[]().:, ') not in ('', marker):
+        return None
+    if not re.match(rf'^[\[\(]?\s*{re.escape(marker)}(?!\w)', block.get_text(' ', strip=True)):
+        return None
+    return block
+
+def remove_footnotes(soup:BeautifulSoup, note_targets:dict|None=None)->int:
+    # returns the number of note bodies removed (markers not counted)
+    removed = 0
+    # 1) note bodies declared by markup
+    for node in soup.select(footnote_markup['BODY']):
+        if node.decomposed or node.name in ('html', 'body'):
+            continue
+        if node.name not in ('a', 'sup', 'span'):
+            removed += 1
+        node.decompose()
+    # 2) notes only reachable through a noteref href (kindle/docx sources converted by calibre often carry no semantics)
+    if note_targets:
+        anchors = {}
+        for tag in soup.find_all(True):
+            for key in (tag.get('id'), tag.get('name')):
+                if key:
+                    anchors.setdefault(key, tag)
+        for frag, marker in note_targets.items():
+            anchor = anchors.get(frag)
+            if anchor is None or anchor.decomposed:
+                continue
+            block = get_note_block(anchor, marker)
+            if block is not None:
+                block.decompose()
+                removed += 1
+    # 3) in-text markers, with their <sup> wrapper when it holds nothing else
+    for ref in find_noterefs(soup):
+        if ref.decomposed:
+            continue
+        parent = ref.parent
+        if parent is not None and parent.name == 'sup' and parent.get_text(strip=True) == ref.get_text(strip=True):
+            parent.decompose()
+        else:
+            ref.decompose()
+    return removed
+
 def get_blocks(session_id:str, epubBook:EpubBook)->list:
     try:
         msg = legends['msg_vocab_warning']
@@ -1353,6 +1483,7 @@ def get_blocks(session_id:str, epubBook:EpubBook)->list:
                 print(error)
                 return []
             title = get_ebook_title(epubBook, all_docs)
+            note_targets = get_note_targets(all_docs)
             blocks = []
             stanza_nlp = False
             if session['language'] in year_to_decades_languages:
@@ -1399,7 +1530,7 @@ def get_blocks(session_id:str, epubBook:EpubBook)->list:
                     zip_names = set(zf.namelist())
                     zip_basenames = {os.path.basename(n): n for n in zip_names}
                     for doc_idx, doc in enumerate(all_docs):
-                        text = filter_blocks(session_id, doc_idx, doc, stanza_nlp, is_num2words_compat, non_text_filter, zf, zip_names, zip_basenames)
+                        text = filter_blocks(session_id, doc_idx, doc, stanza_nlp, is_num2words_compat, non_text_filter, zf, zip_names, zip_basenames, note_targets.get(posixpath.normpath(doc.get_name())))
                         if text is None:
                             error = legends['error_doc_extract'].format(doc=doc_idx + 1)
                             show_alert(session_id, {"type": "warning", "msg": error})
@@ -1431,7 +1562,7 @@ def get_blocks(session_id:str, epubBook:EpubBook)->list:
         DependencyError(error)
         return []
 
-def filter_blocks(session_id:str, idx:int, doc:EpubHtml, stanza_nlp:Pipeline, is_num2words_compat:bool, non_text_filter:NonTextFilter, zf:zipfile.ZipFile=None, zip_names:set=None, zip_basenames:dict=None)->str|None:
+def filter_blocks(session_id:str, idx:int, doc:EpubHtml, stanza_nlp:Pipeline, is_num2words_compat:bool, non_text_filter:NonTextFilter, zf:zipfile.ZipFile=None, zip_names:set=None, zip_basenames:dict=None, note_targets:dict|None=None)->str|None:
 
     def _tuple_row(node:Any, last_text_char:str|None=None, in_heading:bool=False)->Generator[tuple[str, Any], None, None]|None:
         try:
@@ -1544,15 +1675,30 @@ def filter_blocks(session_id:str, idx:int, doc:EpubHtml, stanza_nlp:Pipeline, is
                 msg = legends['msg_no_body_part_skip']
                 print(msg)
                 return ''
+            # whole doc declared as notes (body only, a trailing notes <section> must not skip its chapter)
+            body_type = f"{body.get('epub:type', '')} {body.get('role', '')}".lower()
+            if any(part in body_type for part in ('footnote', 'endnote', 'rearnote')):
+                msg = legends['msg_no_body_part_skip']
+                print(msg)
+                return ''
             # remove scripts/styles
             for tag in soup(['script', 'style']):
                 tag.decompose()
+            # remove footnotes/endnotes: markers, declared note bodies and notes reached through a noteref href
+            had_text = bool(body.get_text(strip=True))
+            notes_removed = remove_footnotes(soup, note_targets)
+            if had_text:
+                has_prose = any(s.strip() for s in body.find_all(string=True) if not s.find_parent(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']))
+                # notes-only doc: nothing left, or only its headings ("Notes", "Chapter 1"...)
+                if not body.get_text(strip=True) or (notes_removed > 1 and not has_prose):
+                    msg = legends['msg_no_body_part_skip']
+                    print(msg)
+                    return ''
             if not body.get_text(strip=True):
                 images = body.find_all('img') + body.find_all('image')
                 if images and zf:
                     msg = legends['msg_doc_images_ocr'].format(idx=idx, count=len(images))
                     show_alert(session_id, {"type": "info", "msg": msg})
-                    ocr_parts = []
                     doc_dir = os.path.dirname(doc.get_name())
                     for img_tag in images:
                         img_ref = (
@@ -1563,6 +1709,7 @@ def filter_blocks(session_id:str, idx:int, doc:EpubHtml, stanza_nlp:Pipeline, is
                         )
                         if not img_ref:
                             continue
+                        img_ref = unquote(img_ref)
                         img_zip_path = os.path.normpath(os.path.join(doc_dir, img_ref)).replace('\\', '/')
                         if img_zip_path not in zip_names:
                             img_zip_path = zip_basenames.get(os.path.basename(img_ref))
@@ -1575,7 +1722,8 @@ def filter_blocks(session_id:str, idx:int, doc:EpubHtml, stanza_nlp:Pipeline, is
                             img = img.convert('RGB')
                             xhtml_content, error = ocr2xhtml(img, lang)
                             if xhtml_content:
-                                ocr_parts.append(xhtml_content)
+                                # OCR text takes the image's place so _tuple_row() reads it in page order
+                                img_tag.replace_with(BeautifulSoup(f'<div>{xhtml_content}</div>', 'html.parser').div)
                             else:
                                 show_alert(session_id, {"type": "warning", "msg": error})
                         except Exception as ocr_err:
@@ -2794,20 +2942,30 @@ def generate_interludes(session_id:str)->None:
     try:
         session = context.get_session(session_id)
         if not (session and session.get('id', False)):
-            return        # Music Interlude unchecked / no --enable_interlude: no thing to generate
+            return
+        # Music Interlude unchecked / no --enable_interlude: no thing to generate
         if not session.get('interlude_enabled', False):
-            return        interludes_dir = session.get('interludes_dir')
+            return
+        interludes_dir = session.get('interludes_dir')
         if not interludes_dir:
-            return        from lib.classes.interlude_generator import InterludeGenerator        os.makedirs(interludes_dir, exist_ok=True)        blocks = session['blocks_current']['blocks']        # same chapter selection and global positions as combine_audio_chapters(), so the interlude file names always match
+            return
+        from lib.classes.interlude_generator import InterludeGenerator
+        os.makedirs(interludes_dir, exist_ok=True)
+        blocks = session['blocks_current']['blocks']
+        # same chapter selection and global positions as combine_audio_chapters(), so the interlude file names always match
         positions = [x for x, b in enumerate(blocks) if b['keep'] and b['text'].strip()]
         if not positions:
-            return        progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)        # terminal bars always (Loading weights: terminal in headless mode only), progress_bar too in GUI mode
+            return
+        progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
+        # terminal bars always (Loading weights: terminal in headless mode only), progress_bar too in GUI mode
         generator = InterludeGenerator(
             session['device'],
             2 if session['output_channel'] == 'stereo' else 1,
             progress_bar if session['is_gui_process'] else None
-        )        msg = f'Generating {len(positions) + 1} interludes via MusicGen...'
-        show_alert(session_id, {'type': 'info', 'msg': msg})        # book genre: detected once from the metadata and the opening pages, then kept in book_genre.json so every
+        )
+        msg = f'Generating {len(positions) + 1} interludes via MusicGen...'
+        show_alert(session_id, {'type': 'info', 'msg': msg})
+        # book genre: detected once from the metadata and the opening pages, then kept in book_genre.json so every
         # run of this book uses the same one. Set "genre" there to one of the "available" values to force another
         genre_file = os.path.join(interludes_dir, 'book_genre.json')
         try:
@@ -2816,22 +2974,29 @@ def generate_interludes(session_id:str)->None:
                 if stored_genre in generator.genre_styles or stored_genre == 'neutral':
                     generator.genre = stored_genre
         except (OSError, ValueError):
-            pass        genre_saved = generator.genre is not None        # genre excerpts: the metadata (title, subject, description) counts double; then the middle three fifths of the book,
+            pass
+        genre_saved = generator.genre is not None
+        # genre excerpts: the metadata (title, subject, description) counts double; then the middle three fifths of the book,
         # since its first and last fifth hold the title page, copyright, contents, dedication, acknowledgements or appendices.
         # That middle is read as one continuous text so short chapters count too (poetry, picture books, books split into
         # many small parts): 8 windows of about 1200 characters, evenly spread and cut on whole words; a short book is
-        # simply covered by consecutive windows        # language guard: the classifier only understands the languages it was pretrained on. The chapter text is in the
+        # simply covered by consecutive windows
+        # language guard: the classifier only understands the languages it was pretrained on. The chapter text is in the
         # translation's language when translation is on, the metadata always stays in the book's own language
         text_language = session['translate'] if session.get('translate_enabled') and session.get('translate') else session['language']
         text_iso1 = session.get('translate_iso1') if session.get('translate_enabled') and session.get('translate') else session.get('language_iso1')
         text_supported = text_iso1 in generator.classifier_languages
-        meta_supported = session.get('language_iso1') in generator.classifier_languages        if not text_supported:
+        meta_supported = session.get('language_iso1') in generator.classifier_languages
+        if not text_supported:
             msg = legends['msg_interludes_unknown_lang'].format(lang=text_language, suffix='' if generator.genre or meta_supported else legends['msg_interludes_neutral_genre'])
-            print(msg)        metadata = session.get('metadata') or {}
+            print(msg)
+        metadata = session.get('metadata') or {}
         meta_text = ' '.join(re.sub(r'<[^>]+>', ' ', '. '.join(str(metadata.get(k)) for k in ('title', 'subject', 'description') if metadata.get(k))).split())
-        book_text = [(meta_text, 2.0)] if meta_text and meta_supported else []        middle = positions[len(positions) // 5:len(positions) - len(positions) // 5] or positions
+        book_text = [(meta_text, 2.0)] if meta_text and meta_supported else []
+        middle = positions[len(positions) // 5:len(positions) - len(positions) // 5] or positions
         stream = ' '.join(' '.join(blocks[x]['text'].split()) for x in middle)
-        span = 1200        for i in range(8 if text_supported else 0):
+        span = 1200
+        for i in range(8 if text_supported else 0):
             start = i * span if len(stream) <= span * 8 else max(0, int(len(stream) * (i + 0.5) / 8) - span // 2)
             if start >= len(stream):
                 break
@@ -2841,57 +3006,76 @@ def generate_interludes(session_id:str)->None:
             if start + span < len(stream):
                 excerpt = excerpt.rsplit(' ', 1)[0]
             if excerpt.strip():
-                book_text.append((excerpt, 1.0))        total_interludes = len(positions) + 1        # Intro interlude: always before the first voice
+                book_text.append((excerpt, 1.0))
+        total_interludes = len(positions) + 1
+        # Intro interlude: always before the first voice
         first_x = positions[0]
         intro_fname = f'intro-{first_x}.{default_audio_proc_format}'
-        intro_fpath = os.path.join(interludes_dir, intro_fname)        if not os.path.exists(intro_fpath):
+        intro_fpath = os.path.join(interludes_dir, intro_fname)
+        if not os.path.exists(intro_fpath):
             if session['cancellation_requested']:
-                return            text_next = blocks[first_x]['text'][:500]
-            prompt = generator.generate_prompt(text_next, book_text, text_supported)            if not genre_saved and generator.genre:
+                return
+            text_next = blocks[first_x]['text'][:500]
+            prompt = generator.generate_prompt(text_next, book_text, text_supported)
+            if not genre_saved and generator.genre:
                 with open(genre_file, 'w', encoding='utf-8') as f:
                     json.dump({
                         'genre': generator.genre,
                         'scores': generator.genre_scores,
                         'available': list(generator.genre_styles.keys()) + ['neutral']
                     }, f, ensure_ascii=False, indent=1)
-                genre_saved = True            duration = random.randint(*interlude_duration_range)            generator.generate_interlude(
+                genre_saved = True
+            duration = random.randint(*interlude_duration_range)
+            generator.generate_interlude(
                 prompt,
                 intro_fpath,
                 duration=duration,
                 samplerate=default_audio_proc_samplerate,
                 desc=f'Interlude 1/{total_interludes}',
                 is_cancelled=lambda: session['cancellation_requested']
-            )        for n, x in enumerate(positions):
+            )
+        for n, x in enumerate(positions):
             if session['cancellation_requested']:
-                return            fname = f'{x}-{x + 1}.{default_audio_proc_format}'
-            fpath = os.path.join(interludes_dir, fname)            if not os.path.exists(fpath):
-                text_prev = blocks[x]['text'][-500:]                # the last chapter always gets one too: it closes the audiobook
-                text_next = blocks[positions[n + 1]]['text'][:500] if n + 1 < len(positions) else ''                prompt = generator.generate_prompt(f'{text_prev} {text_next}'.strip(), book_text, text_supported)                if not genre_saved and generator.genre:
+                return
+            fname = f'{x}-{x + 1}.{default_audio_proc_format}'
+            fpath = os.path.join(interludes_dir, fname)
+            if not os.path.exists(fpath):
+                text_prev = blocks[x]['text'][-500:]
+                # the last chapter always gets one too: it closes the audiobook
+                text_next = blocks[positions[n + 1]]['text'][:500] if n + 1 < len(positions) else ''
+                prompt = generator.generate_prompt(f'{text_prev} {text_next}'.strip(), book_text, text_supported)
+                if not genre_saved and generator.genre:
                     with open(genre_file, 'w', encoding='utf-8') as f:
                         json.dump({
                             'genre': generator.genre,
                             'scores': generator.genre_scores,
                             'available': list(generator.genre_styles.keys()) + ['neutral']
                         }, f, ensure_ascii=False, indent=1)
-                    genre_saved = True                duration = random.randint(*interlude_duration_range)                generator.generate_interlude(
+                    genre_saved = True
+                duration = random.randint(*interlude_duration_range)
+                generator.generate_interlude(
                     prompt,
                     fpath,
                     duration=duration,
                     samplerate=default_audio_proc_samplerate,
                     desc=f'Interlude {n + 2}/{total_interludes}',
                     is_cancelled=lambda: session['cancellation_requested']
-                )    except Exception as e:
+                )
+    except Exception as e:
         error = f'generate_interludes() error: {e}'
-        exception_alert(session_id, error)    finally:
+        exception_alert(session_id, error)
+    finally:
         if generator is not None:
             # MusicGen and the classifier live in e2a's process: release them before the final merge
             generator = None
-            gc.collect()            if sys.platform == 'linux':
+            gc.collect()
+            if sys.platform == 'linux':
                 try:
                     import ctypes
                     ctypes.CDLL('libc.so.6').malloc_trim(0)
                 except Exception:
-                    pass            try:
+                    pass
+            try:
                 import torch
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
@@ -3563,18 +3747,26 @@ def combine_audio_chapters(session_id:str)->list[str]|None:
                             ],
                             check=True
                         )
-                        fm.write(f"file '{intro_music_path.as_posix()}'\n")                        music_pos = intro_samples                        # Optional subtitle cue for the intro.
+                        fm.write(f"file '{intro_music_path.as_posix()}'\n")
+                        music_pos = intro_samples
+                        # Optional subtitle cue for the intro.
                         if voice_rate > 0 and (intro_delay_samples / voice_rate) >= 0.5:
-                            intro_cue_text = 'Intro'                            try:
+                            intro_cue_text = 'Intro'
+                            try:
                                 with open(Path(intro_path).with_suffix('.json'), 'r', encoding='utf-8') as f_intro:
-                                    intro_cue_data = json.load(f_intro)                                    intro_cue_text = str(intro_cue_data.get('prompt') or intro_cue_text)                                    if intro_cue_data.get('label'):
+                                    intro_cue_data = json.load(f_intro)
+                                    intro_cue_text = str(intro_cue_data.get('prompt') or intro_cue_text)
+                                    if intro_cue_data.get('label'):
                                         details = ' — '.join(
                                             str(intro_cue_data[k])
                                             for k in ('emotion', 'percussion', 'instruments')
                                             if intro_cue_data.get(k)
-                                        ) or re.sub(r',\s*instrumental\s*$', '', intro_cue_text)                                        intro_cue_text = f"{intro_cue_data['label']} — {details}" if details else str(intro_cue_data['label'])                                    intro_cue_text = ' '.join(intro_cue_text.split())
+                                        ) or re.sub(r',\s*instrumental\s*$', '', intro_cue_text)
+                                        intro_cue_text = f"{intro_cue_data['label']} — {details}" if details else str(intro_cue_data['label'])
+                                    intro_cue_text = ' '.join(intro_cue_text.split())
                             except (OSError, ValueError):
-                                pass                            part_cues.append((0.0, intro_delay_samples / voice_rate, first_global_idx, f'♪ {intro_cue_text}'))
+                                pass
+                            part_cues.append((0.0, intro_delay_samples / voice_rate, first_global_idx, f'♪ {intro_cue_text}'))
                 for n, idx in enumerate(indices):
                     if session['cancellation_requested']:
                         return None
@@ -3685,14 +3877,26 @@ def combine_audio_chapters(session_id:str)->list[str]|None:
                 else 'pan=stereo|c0=c0|c1=c0'
                 if out_layout == 'stereo'
                 else 'pan=mono|c0=0.5*c0+0.5*c1'
-            )            target_samples = max(voice_pos, music_pos)            voice_filters = []            # Delay the voice track by the intro length so the first voice enters when the intro starts fading out.
+            )
+            target_samples = max(voice_pos, music_pos)
+            voice_filters = []
+            # Delay the voice track by the intro length so the first voice enters when the intro starts fading out.
             if intro_delay_samples > 0 and voice_rate > 0:
-                intro_delay_ms = int(round(intro_delay_samples * 1000 / voice_rate))                if voice_layout == 'mono':
+                intro_delay_ms = int(round(intro_delay_samples * 1000 / voice_rate))
+                if voice_layout == 'mono':
                     delay_expr = str(intro_delay_ms)
                 else:
-                    delay_expr = f'{intro_delay_ms}|{intro_delay_ms}'                voice_filters.append(f'adelay={delay_expr}')            voice_filters.append(voice_to_out)            if music_pos > 0 and target_samples > 0:
-                voice_filters.append(f'apad=whole_len={target_samples}')            voice_chain = '[0:a]' + ','.join(voice_filters)            music_chain = f'[1:a]aformat=sample_rates={voice_rate}:channel_layouts={out_layout}'            if music_pos > 0 and target_samples > 0:
-                music_chain += f',apad=whole_len={target_samples}'            cmd = [ffmpeg, '-hide_banner', '-nostats', '-safe', '0', '-f', 'concat', '-i', voice_list]            if music_pos > 0:
+                    delay_expr = f'{intro_delay_ms}|{intro_delay_ms}'
+                voice_filters.append(f'adelay={delay_expr}')
+            voice_filters.append(voice_to_out)
+            if music_pos > 0 and target_samples > 0:
+                voice_filters.append(f'apad=whole_len={target_samples}')
+            voice_chain = '[0:a]' + ','.join(voice_filters)
+            music_chain = f'[1:a]aformat=sample_rates={voice_rate}:channel_layouts={out_layout}'
+            if music_pos > 0 and target_samples > 0:
+                music_chain += f',apad=whole_len={target_samples}'
+            cmd = [ffmpeg, '-hide_banner', '-nostats', '-safe', '0', '-f', 'concat', '-i', voice_list]
+            if music_pos > 0:
                 cmd += [
                     '-safe', '0', '-f', 'concat', '-i', music_list,
                     '-filter_complex',
@@ -3702,9 +3906,13 @@ def combine_audio_chapters(session_id:str)->list[str]|None:
                 cmd += [
                     '-filter_complex',
                     f'{voice_chain}[out]'
-                ]            # default_audio_proc_format is a container name: only 'flac' is also an encoder name, 'wav'/'ogg' need theirs
-            out_codec = {'wav': 'pcm_s16le', 'ogg': 'libvorbis'}.get(default_audio_proc_format, default_audio_proc_format)            cmd += ['-map', '[out]', '-c:a', out_codec]            if out_codec == 'flac':
-                cmd += ['-sample_fmt', 's16']            cmd += [
+                ]
+            # default_audio_proc_format is a container name: only 'flac' is also an encoder name, 'wav'/'ogg' need theirs
+            out_codec = {'wav': 'pcm_s16le', 'ogg': 'libvorbis'}.get(default_audio_proc_format, default_audio_proc_format)
+            cmd += ['-map', '[out]', '-c:a', out_codec]
+            if out_codec == 'flac':
+                cmd += ['-sample_fmt', 's16']
+            cmd += [
                 '-map_metadata', '-1',
                 '-threads', '0',
                 '-progress', 'pipe:2',
