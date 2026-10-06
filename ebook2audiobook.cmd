@@ -364,15 +364,15 @@ if errorlevel 1 (
 	)
 	echo Installing Scoop…
 	"%PS_EXE%" %PS_ARGS% -Command "irm get.scoop.sh -OutFile '%TEMP%\install_scoop.ps1'"
-	"%PS_EXE%" %PS_ARGS% -File "%TEMP%\install_scoop.ps1" -RunAsAdmin
-	del "%TEMP%\install_scoop.ps1" >nul 2>&1
-	if errorlevel 1 (
+	"%PS_EXE%" %PS_ARGS% -File "%TEMP%\install_scoop.ps1" -RunAsAdmin || (
+		del "%TEMP%\install_scoop.ps1" >nul 2>&1
 		net session >nul 2>&1
 		if not errorlevel 1 (
 			goto :restart_script
 		)
 		exit /b 1
 	)
+	del "%TEMP%\install_scoop.ps1" >nul 2>&1
 	findstr /i /x "scoop" "%INSTALLED_LOG%" >nul 2>&1
 	if errorlevel 1 echo scoop>>"%INSTALLED_LOG%"
 	"%PS_EXE%" %PS_ARGS% -Command "scoop bucket add muggle https://github.com/hu3rror/scoop-muggle.git"
@@ -396,7 +396,7 @@ if defined _MISSING_BUCKETS (
 	echo Scoop Buckets are not installed.
 	echo Installing Scoop Buckets…
 	"%PS_EXE%" %PS_ARGS% -Command "$WarningPreference='SilentlyContinue'; scoop install git; scoop bucket add muggle %SCOOP_BUCKETS_URL%; scoop bucket add extras; scoop bucket add versions"
-	call git config --global credential.helper
+	call "%SCOOP_SHIMS%\git.exe" config --global credential.helper
 	del "%SAFE_SCRIPT_DIR%\.after-scoop" >nul 2>&1
 	echo %ESC%[32m=============== Scoop Buckets OK ===============%ESC%[0m
 )
