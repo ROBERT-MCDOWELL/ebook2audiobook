@@ -85,6 +85,14 @@ def format_fields(text:str)->Optional[list]:
     except ValueError:
         return None
 
+def missing_tokens(src:str, dst:str)->list:
+    lost:list = []
+    for t in set(PROTECT.findall(src)):
+        inner:str = t[1:-1] if len(t) > 2 and t[0] == t[-1] == '"' else t
+        if dst.count(inner) < src.count(inner):
+            lost.append(t)
+    return sorted(lost)
+
 def protect(text:str)->tuple:
     tokens:list = []
     def repl(m)->str:
@@ -201,6 +209,9 @@ def translate_value(text:str, code:str)->tuple:
     result:str = '\n'.join(out)
     if format_fields(result) != format_fields(text):
         return None, 'format placeholders differ from English'
+    lost:list = missing_tokens(text, result)
+    if lost:
+        return None, f'reserved token(s) missing: {" ".join(lost)}'
     return result, 'segment mode, review wording' if segmented else ''
 
 def main()->int:
@@ -208,6 +219,7 @@ def main()->int:
     parser.add_argument('--check', action='store_true', help='only report out-of-sync files, no network, no write, exit 1 if any')
     parser.add_argument('--langs', nargs='+', metavar='ISO3', help='translate only these languages (default: all)')
     parser.add_argument('--redo', nargs='+', metavar='KEY', default=[], help='retranslate these keys in the selected languages')
+    parser.add_argument('--fix', action='store_true', help='retranslate existing keys whose reserved tokens differ from English in the selected languages')
     args = parser.parse_args()
     eng:dict = load_assign(ENG_FILE, 'legends')
     baseline:Optional[dict] = load_assign(BASELINE, 'legends') if BASELINE.exists() else None
@@ -239,16 +251,20 @@ def main()->int:
         path:Path = LANG_DIR / f'legends_{iso3}.py'
         tr:dict = load_assign(path, 'legends') if path.exists() else {}
         orphans:list = [k for k in tr if k not in eng]
-        stale:list = [k for k in eng if k in tr and (k in changed or (k in args.redo and iso3 in selected) or format_fields(tr[k]) != format_fields(eng[k]))]
+        broken:list = [k for k in eng if k in tr and missing_tokens(eng[k], tr[k])]
+        stale:list = [k for k in eng if k in tr and (k in changed or (iso3 in selected and (k in args.redo or (args.fix and k in broken))) or format_fields(tr[k]) != format_fields(eng[k]))]
+        broken = [k for k in broken if k not in stale]
         missing:list = [k for k in eng if k not in tr]
-        state[iso3] = dict(path=path, tr=tr, orphans=orphans, stale=stale, missing=missing, exists=path.exists())
-        if (orphans or stale or missing or not path.exists()) and iso3 in selected:
+        state[iso3] = dict(path=path, tr=tr, orphans=orphans, stale=stale, missing=missing, broken=broken, exists=path.exists())
+        if (orphans or stale or missing or broken or not path.exists()) and iso3 in selected:
             out_of_sync += 1
-            print(f'[{iso3}] {"file missing, " if not path.exists() else ""}{len(missing)} missing, {len(stale)} stale, {len(orphans)} orphan(s)')
+            print(f'[{iso3}] {"file missing, " if not path.exists() else ""}{len(missing)} missing, {len(stale)} stale, {len(broken)} broken, {len(orphans)} orphan(s)')
             if args.check:
                 for label, keys in (('missing', missing), ('stale', stale), ('orphan', orphans)):
                     if keys and path.exists():
                         print(f'[{iso3}]   {label}: {", ".join(keys)}')
+                for k in broken:
+                    print(f'[{iso3}]   broken: {k} lacks {" ".join(missing_tokens(eng[k], tr[k]))}')
     if args.check:
         print('all legends files in sync' if not out_of_sync else f'{out_of_sync} file(s) out of sync')
         return 1 if out_of_sync else 0
@@ -269,7 +285,7 @@ def main()->int:
         if not s['missing'] and s['exists']:
             continue
         code:str = targets[iso3]
-        known:dict = {eng[k]: v for k, v in s['tr'].items() if k in eng}
+        known:dict = {eng[k]: v for k, v in s['tr'].items() if k in eng and not missing_tokens(eng[k], v)}
         done:int = 0
         rejected:Optional[str] = None
         for key in s['missing']:
@@ -308,6 +324,10 @@ def main()->int:
     if failed:
         for iso3, keys in failed.items():
             print(f'[{iso3}] not translated: {", ".join(keys)}', file=sys.stderr)
+        return 1
+    broken_left:int = sum(len(state[iso3]['broken']) for iso3 in selected)
+    if broken_left:
+        print(f'{broken_left} existing translation(s) lack reserved tokens from English, list them with --check, retranslate with --fix', file=sys.stderr)
         return 1
     print('legends files in sync')
     return 0
