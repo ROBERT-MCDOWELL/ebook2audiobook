@@ -4,8 +4,9 @@
 # protocol (one JSON object per line):
 #   stdout <- {"ready": true, "samplerate": 44100, "backbone": "...", "device": "..."} once loaded
 #             {"ready": false, "error": "..."} then exit 1 if loading failed
-#   stdin  -> {"op": "tts", "text", "language", "voice", "file", "emotion", "speaking_rate",
-#              "pitch_std", "fmax", "cfg_scale", "min_p", "max_new_tokens"}
+#   stdin  -> {"op": "tts", "text", "language", "voice", "file", "emotion_enabled", "emotion",
+#              "speaking_rate", "pitch_std", "fmax", "cfg_scale", "dnsmos", "vqscore",
+#              "linear", "confidence", "quadratic", "min_p", "max_new_tokens"}
 #   stdout <- {"ok": true, "file": "...", "samplerate": 44100, "samples": n}
 #             {"ok": false, "error": "...", "oom": bool}
 #   EOF on stdin -> exit 0 (that is how e2a unloads the model and frees its VRAM)
@@ -82,6 +83,10 @@ def main()->int:
                 fmax=float(req['fmax']),
                 pitch_std=float(req['pitch_std']),
                 speaking_rate=float(req['speaking_rate']),
+                vqscore_8=[float(req.get('vqscore', 0.78))] * 8,
+                dnsmos_ovrl=float(req.get('dnsmos', 4.0)),
+                # emotion off = unconditional, as upstream's UI defaults to
+                unconditional_keys=[] if req.get('emotion_enabled') else ['emotion'],
                 device=device
             )
             conditioning = model.prepare_conditioning(cond_dict)
@@ -89,7 +94,12 @@ def main()->int:
                 conditioning,
                 max_new_tokens=int(req['max_new_tokens']),
                 cfg_scale=float(req['cfg_scale']),
-                sampling_params=dict(min_p=float(req['min_p'])),
+                sampling_params=dict(
+                    min_p=float(req.get('min_p', 0.0)),
+                    linear=float(req.get('linear', 0.0)),
+                    conf=float(req.get('confidence', 0.0)),
+                    quad=float(req.get('quadratic', 0.0))
+                ),
                 progress_bar=False,
                 disable_torch_compile=not use_compile
             )

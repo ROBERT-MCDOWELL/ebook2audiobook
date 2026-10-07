@@ -277,6 +277,14 @@ Default to config.json model.""")
 Default to config.json model.""")
     headless_optional_group.add_argument(cli_options[27], type=float, default=default_engine_settings[TTS_ENGINES['BARK']]['waveform_temp'], help=f"""(bark only, optional) Waveform Temperature for the model.
 Default to config.json model.""")
+    headless_optional_group.add_argument(cli_options[37], type=float, default=default_engine_settings[TTS_ENGINES['ZONOS']]['speaking_rate'], help=f"""(zonos only, optional) Speaking rate: 10 is slow, 15 is natural narration, 30 is very fast.
+Default {default_engine_settings[TTS_ENGINES['ZONOS']]['speaking_rate']}.""")
+    headless_optional_group.add_argument(cli_options[38], type=float, default=default_engine_settings[TTS_ENGINES['ZONOS']]['pitch_std'], help=f"""(zonos only, optional) Pitch variation: 20-45 is normal speech, 60-150 is expressive.
+Default {default_engine_settings[TTS_ENGINES['ZONOS']]['pitch_std']}.""")
+    headless_optional_group.add_argument(cli_options[39], type=float, default=default_engine_settings[TTS_ENGINES['ZONOS']]['cfg_scale'], help=f"""(zonos only, optional) CFG scale, how strongly voice and settings are followed (1-5).
+Default {default_engine_settings[TTS_ENGINES['ZONOS']]['cfg_scale']}.""")
+    headless_optional_group.add_argument(cli_options[40], type=str, default=None, help=f"""(zonos only, optional) Enable emotion with 8 comma-separated values from 0.0 to 1.0:
+Happiness,Sadness,Disgust,Fear,Surprise,Anger,Other,Neutral. Off by default (the model picks the delivery).""")
     headless_optional_group.add_argument(cli_options[28], type=str, help='Path to the output directory. Default is set in ./lib/conf.py')
     headless_optional_group.add_argument(cli_options[29], type=str, default='', help='Audiobookshelf server URL (e.g. http://localhost:13378).')
     headless_optional_group.add_argument(cli_options[30], type=str, default='', help='Audiobookshelf API token.')
@@ -387,6 +395,21 @@ Default to config.json model.""")
             args['xtts_enable_text_splitting'] = False
             args['bark_text_temp'] = args['text_temp']
             args['bark_waveform_temp'] = args['waveform_temp']
+            args['zonos_speaking_rate'] = args['speaking_rate']
+            args['zonos_pitch_std'] = args['pitch_std']
+            args['zonos_cfg_scale'] = args['cfg_scale']
+            args['zonos_emotion_enabled'] = args['emotion'] is not None
+            if args['emotion'] is not None:
+                try:
+                    args['zonos_emotion'] = [float(v) for v in str(args['emotion']).split(',')]
+                except ValueError:
+                    args['zonos_emotion'] = []
+                if len(args['zonos_emotion']) != 8 or any(v < 0.0 or v > 1.0 for v in args['zonos_emotion']):
+                    error = legends['error_zonos_emotion_format']
+                    print(error)
+                    sys.exit(1)
+                for name, value in zip(['happiness', 'sadness', 'disgust', 'fear', 'surprise', 'anger', 'other', 'neutral'], args['zonos_emotion']):
+                    args[f'zonos_emotion_{name}'] = value
             args['translate_enabled'] = False
             _user_translate_raw = args.get('translate')
             args['translate'] = None

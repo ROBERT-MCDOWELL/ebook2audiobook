@@ -30,7 +30,8 @@ cli_options = [
     '--speed', '--enable_text_splitting', '--text_temp',
     '--waveform_temp', '--output_dir', 
     '--abs_url', '--abs_api_token', '--abs_library', '--enable_interlude',
-    '--version', '--workflow', '--docker_device', '--help'
+    '--version', '--workflow', '--docker_device', '--help',
+    '--speaking_rate', '--pitch_std', '--cfg_scale', '--emotion'
 ]
 
 workflow_id = 'ba800d22-ee51-11ef-ac34-d4ae52cfd9ce'
@@ -224,6 +225,7 @@ interface_concurrency_limit = 1 # or None for unlimited multiple parallele user 
 interface_component_options = {
     "gr_tab_xtts_params": True,
     "gr_tab_bark_params": True,
+    "gr_tab_zonos_params": True,
     "gr_group_voice_file": True,
     "gr_group_custom_model": True,
     "gr_tab_abs_params": True

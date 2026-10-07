@@ -56,15 +56,26 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             self.fine_tuned_params = {
                 key.removeprefix('zonos_'): cast_type(self.session[key]) if self.session.get(key) is not None else cast_type(settings[key.removeprefix('zonos_')])
                 for key, cast_type in {
-                    'zonos_emotion': lambda v: [float(x) for x in v],
+                    'zonos_emotion_enabled': bool,
                     'zonos_speaking_rate': float,
                     'zonos_pitch_std': float,
                     'zonos_fmax': float,
                     'zonos_cfg_scale': float,
+                    'zonos_dnsmos': float,
+                    'zonos_vqscore': float,
+                    'zonos_linear': float,
+                    'zonos_confidence': float,
+                    'zonos_quadratic': float,
                     'zonos_min_p': float,
                     'zonos_max_new_tokens': int
                 }.items()
             }
+            # Happiness, Sadness, Disgust, Fear, Surprise, Anger, Other, Neutral: one session key
+            # per slider (as xtts / bark), the list order zonos expects
+            self.fine_tuned_params['emotion'] = [
+                float(self.session[key]) if self.session.get(key) is not None else float(settings['emotion'][i])
+                for i, key in enumerate(['zonos_emotion_happiness', 'zonos_emotion_sadness', 'zonos_emotion_disgust', 'zonos_emotion_fear', 'zonos_emotion_surprise', 'zonos_emotion_anger', 'zonos_emotion_other', 'zonos_emotion_neutral'])
+            ]
             # --- own uv venv: lib/classes/tts_engines/venvs/zonos ---
             # torch/torchaudio are mirrored from python_env (same version, same local
             # tag, same index) so the worker gets the build device_installer already

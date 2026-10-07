@@ -252,11 +252,24 @@ class SessionContext:
             "bark_text_temp": default_engine_settings[TTS_ENGINES['BARK']]['text_temp'],
             "bark_waveform_temp": default_engine_settings[TTS_ENGINES['BARK']]['waveform_temp'],
             ####### Zonos settings
-            "zonos_emotion": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'],
+            "zonos_emotion_enabled": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled'],
+            "zonos_emotion_happiness": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][0],
+            "zonos_emotion_sadness": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][1],
+            "zonos_emotion_disgust": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][2],
+            "zonos_emotion_fear": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][3],
+            "zonos_emotion_surprise": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][4],
+            "zonos_emotion_anger": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][5],
+            "zonos_emotion_other": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][6],
+            "zonos_emotion_neutral": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][7],
             "zonos_speaking_rate": default_engine_settings[TTS_ENGINES['ZONOS']]['speaking_rate'],
             "zonos_pitch_std": default_engine_settings[TTS_ENGINES['ZONOS']]['pitch_std'],
             "zonos_fmax": default_engine_settings[TTS_ENGINES['ZONOS']]['fmax'],
             "zonos_cfg_scale": default_engine_settings[TTS_ENGINES['ZONOS']]['cfg_scale'],
+            "zonos_dnsmos": default_engine_settings[TTS_ENGINES['ZONOS']]['dnsmos'],
+            "zonos_vqscore": default_engine_settings[TTS_ENGINES['ZONOS']]['vqscore'],
+            "zonos_linear": default_engine_settings[TTS_ENGINES['ZONOS']]['linear'],
+            "zonos_confidence": default_engine_settings[TTS_ENGINES['ZONOS']]['confidence'],
+            "zonos_quadratic": default_engine_settings[TTS_ENGINES['ZONOS']]['quadratic'],
             "zonos_min_p": default_engine_settings[TTS_ENGINES['ZONOS']]['min_p'],
             "zonos_max_new_tokens": default_engine_settings[TTS_ENGINES['ZONOS']]['max_new_tokens'],
             ####### Audiobook editor
@@ -4361,6 +4374,9 @@ def convert_ebook(args:dict)->tuple:
             session['xtts_enable_text_splitting'] = bool(args['xtts_enable_text_splitting'])
             session['bark_text_temp'] =  float(args['bark_text_temp'])
             session['bark_waveform_temp'] =  float(args['bark_waveform_temp'])
+            for zonos_key, zonos_cast in (('zonos_emotion_enabled', bool), ('zonos_emotion_happiness', float), ('zonos_emotion_sadness', float), ('zonos_emotion_disgust', float), ('zonos_emotion_fear', float), ('zonos_emotion_surprise', float), ('zonos_emotion_anger', float), ('zonos_emotion_other', float), ('zonos_emotion_neutral', float), ('zonos_speaking_rate', float), ('zonos_pitch_std', float), ('zonos_cfg_scale', float), ('zonos_dnsmos', float), ('zonos_vqscore', float), ('zonos_linear', float), ('zonos_confidence', float), ('zonos_quadratic', float), ('zonos_min_p', float)):
+                if args.get(zonos_key) is not None:
+                    session[zonos_key] = zonos_cast(args[zonos_key])
             session['output_format'] = str(args['output_format'])
             session['output_channel'] = str(args['output_channel'])
             session['output_split'] = bool(args['output_split'])

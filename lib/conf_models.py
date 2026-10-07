@@ -74,6 +74,43 @@ max_custom_model = 100
 max_custom_voices = 1000
 
 default_engine_settings = {
+    TTS_ENGINES['ZONOS']: {
+        # runs in its own uv venv (lib/classes/tts_engines/venvs/zonos) behind a persistent worker
+        "repo": "Zyphra/Zonos-v0.1-transformer",
+        "repo_hybrid": "Zyphra/Zonos-v0.1-hybrid",
+        "source": "https://github.com/Zyphra/Zonos/archive/bc40d98e1e1ab54fc65c483be127a90e3c7c0645.tar.gz",
+        "python": "3.12",
+        "torch_min": "2.5.1",
+        "packages": ["setuptools", "packaging", "tqdm", "safetensors", "inflect>=7.5.0", "kanjize>=1.5.0", "numpy>=2.2.2", "phonemizer>=3.3.0", "sudachipy>=0.6.10", "sudachidict-full>=20241021", "transformers>=4.48.1,<5", "soundfile>=0.13.1", "huggingface-hub>=0.28.1"],
+        "packages_hybrid": ["mamba-ssm>=2.2.4", "causal-conv1d>=1.5.0.post8", "flash-attn>=2.7.3"],
+        # robust languages only (most of the 200k h are en, then zh, ja, fr, es, de); values are espeak codes
+        "languages": {"eng": "en-us", "deu": "de", "fra": "fr-fr", "jpn": "ja", "spa": "es", "zho": "cmn"},
+        "samplerate": 44100,
+        # conditioning and sampling defaults follow Zyphra's own gradio interface, except fmax:
+        # 22050 is upstream's value for voice cloning, which e2a always does.
+        # emotion is unconditional unless enabled (upstream UI default): the model picks the
+        # delivery from text and voice instead of one fixed mood for the whole book.
+        "emotion_enabled": False,
+        # Happiness, Sadness, Disgust, Fear, Surprise, Anger, Other, Neutral
+        "emotion": [0.3077, 0.0256, 0.0256, 0.0256, 0.0256, 0.0256, 0.2564, 0.3077],
+        "speaking_rate": 15.0,
+        "pitch_std": 45.0,
+        "fmax": 22050.0,
+        "cfg_scale": 2.0,
+        # audio quality targets, used by the hybrid model only
+        "dnsmos": 4.0,
+        "vqscore": 0.78,
+        # NovelAI unified sampler (linear 0 disables it), min_p 0 disables min_p
+        "linear": 0.5,
+        "confidence": 0.4,
+        "quadratic": 0.0,
+        "min_p": 0.0,
+        "max_new_tokens": 86 * 30,
+        "files": [],
+        "voice": default_speaker,
+        "voices": {},
+        "rating": {"VRAM": 6, "CPU": 1, "RAM": 8, "Realism": 5}
+    },
     TTS_ENGINES['XTTS']: {
         "repo": "coqui/XTTS-v2",
         "languages": {"ara": "ar", "ces": "cs", "deu": "de", "eng": "en", "fra": "fr", "hin": "hi", "hun": "hu", "ita": "it", "jpn": "ja", "kor": "ko", "nld": "nl", "pol": "pl", "por": "pt", "rus": "ru", "spa": "es", "tur": "tr", "zho": "zh-cn"},
@@ -286,30 +323,5 @@ default_engine_settings = {
         "voice": None,
         "voices": {"Machinella-5": "female-en-5", "ElectroMale-2": "male-en-2", 'Machinella-4': 'female-pt-4\n', 'ElectroMale-3': 'male-pt-3\n'},
         "rating": {"VRAM": 1, "CPU": 5, "RAM": 1, "Realism": 2}
-    },
-    TTS_ENGINES['ZONOS']: {
-        # runs in its own uv venv (lib/classes/tts_engines/venvs/zonos) behind a persistent worker
-        "repo": "Zyphra/Zonos-v0.1-transformer",
-        "repo_hybrid": "Zyphra/Zonos-v0.1-hybrid",
-        "source": "https://github.com/Zyphra/Zonos/archive/bc40d98e1e1ab54fc65c483be127a90e3c7c0645.tar.gz",
-        "python": "3.12",
-        "torch_min": "2.5.1",
-        "packages": ["setuptools", "packaging", "tqdm", "safetensors", "inflect>=7.5.0", "kanjize>=1.5.0", "numpy>=2.2.2", "phonemizer>=3.3.0", "sudachipy>=0.6.10", "sudachidict-full>=20241021", "transformers>=4.48.1,<5", "soundfile>=0.13.1", "huggingface-hub>=0.28.1"],
-        "packages_hybrid": ["mamba-ssm>=2.2.4", "causal-conv1d>=1.5.0.post8", "flash-attn>=2.7.3"],
-        # robust languages only (most of the 200k h are en, then zh, ja, fr, es, de); values are espeak codes
-        "languages": {"eng": "en-us", "deu": "de", "fra": "fr-fr", "jpn": "ja", "spa": "es", "zho": "cmn"},
-        "samplerate": 44100,
-        # Happiness, Sadness, Disgust, Fear, Surprise, Anger, Other, Neutral
-        "emotion": [0.3077, 0.0256, 0.0256, 0.0256, 0.0256, 0.0256, 0.2564, 0.3077],
-        "speaking_rate": 15.0,
-        "pitch_std": 20.0,
-        "fmax": 22050.0,
-        "cfg_scale": 2.0,
-        "min_p": 0.1,
-        "max_new_tokens": 86 * 30,
-        "files": [],
-        "voice": default_speaker,
-        "voices": {},
-        "rating": {"VRAM": 6, "CPU": 1, "RAM": 8, "Realism": 5}
     }
 }
