@@ -22,7 +22,7 @@ BASELINE = HERE / 'baseline_legends_eng.py'
 EMAIL = os.environ.get('MYMEMORY_EMAIL', '')
 MAX_CHUNK = 450
 THROTTLE = 0.4
-MT_CODES = {'zho': 'zh-CN'}
+MT_CODES = {'zho': 'zh-CN', 'jav': 'jv-ID'}
 NO_SPACE_JOIN = ('ja', 'zh-CN')
 PROTECT = re.compile(
     r'(\{\{[^\n]*?\}\}'
@@ -44,6 +44,9 @@ MARKER_MAX_FAILS = 2
 marker_fails:dict = {}
 
 class QuotaExceeded(Exception):
+    pass
+
+class LangRejected(Exception):
     pass
 
 def load_assign(path:Path, name:str)->dict:
@@ -111,10 +114,12 @@ def mymemory(text:str, code:str)->str:
             translated:str = (data.get('responseData') or {}).get('translatedText') or ''
             if data.get('quotaFinished') or str(data.get('responseStatus')) == '429' or translated.startswith('MYMEMORY WARNING'):
                 raise QuotaExceeded(data.get('responseDetails') or translated or 'MyMemory daily quota reached')
+            if str(data.get('responseStatus')) == '403':
+                raise LangRejected(data.get('responseDetails') or translated or 'invalid language pair')
             if str(data.get('responseStatus')) == '200' and translated:
                 return translated
             print(f'  status {data.get("responseStatus")} for {code}, retry {attempt+1}', file=sys.stderr)
-        except QuotaExceeded:
+        except (QuotaExceeded, LangRejected):
             raise
         except urllib.error.HTTPError as e:
             if e.code == 429:
@@ -259,6 +264,7 @@ def main()->int:
         code:str = targets[iso3]
         known:dict = {eng[k]: v for k, v in s['tr'].items() if k in eng}
         done:int = 0
+        rejected:Optional[str] = None
         for key in s['missing']:
             value:str = eng[key]
             translated:Optional[str] = known.get(value)
@@ -268,6 +274,9 @@ def main()->int:
                     translated, reason = translate_value(value, code)
                 except QuotaExceeded as e:
                     aborted = str(e)
+                    break
+                except LangRejected as e:
+                    rejected = str(e)
                     break
                 except RuntimeError as e:
                     translated, reason = None, str(e)
@@ -281,6 +290,9 @@ def main()->int:
             print(f'[{iso3}] + {key}'+(f' ({reason})' if reason else ''))
         write_legends(s['path'], {k: s['tr'][k] for k in eng if k in s['tr']})
         print(f'[{iso3}] {done} key(s) added')
+        if rejected:
+            failed[iso3] = [k for k in s['missing'] if k not in s['tr']]
+            print(f'[{iso3}] skipped, MyMemory rejected "{code}": {rejected} (map {iso3} to another code in MT_CODES)')
         if aborted:
             break
     if aborted:
