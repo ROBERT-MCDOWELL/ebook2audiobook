@@ -5,6 +5,7 @@ loaded_tts = {}
 xtts_builtin_speakers_list = {}
 
 TTS_ENGINES = {
+    "ZONOS": "zonos",
     "XTTS": "xtts",
     "BARK": "bark",
     "TORTOISE": "tortoise",
@@ -13,8 +14,7 @@ TTS_ENGINES = {
     "FAIRSEQ": "fairseq",
     "GLOWTTS": "glowtts",
     "TACOTRON": "tacotron",
-    "YOURTTS": "yourtts",
-    "ZONOS": "zonos"
+    "YOURTTS": "yourtts"
 }
 
 TTS_VOICE_CONVERSION = {
