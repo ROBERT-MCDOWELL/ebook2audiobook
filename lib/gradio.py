@@ -273,13 +273,6 @@ def build_interface(args:dict)->gr.Blocks:
                                 elem_id='gr_zonos_cfg_scale',
                                 info=legends['gr_zonos_cfg_scale_info']
                             )
-                        with gr.Group(elem_id='gr_group_zonos_emotion', elem_classes=['gr-group']):
-                            gr_zonos_emotion_enabled = gr.Checkbox(
-                                label=legends['gr_zonos_emotion_enabled'],
-                                value=bool(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled']),
-                                elem_id='gr_zonos_emotion_enabled',
-                                info=legends['gr_zonos_emotion_enabled_info']
-                            )
                         with gr.Group(elem_id='gr_group_zonos_advanced', elem_classes=['gr-group']):
                             gr_zonos_linear = gr.Slider(
                                 label=legends['gr_zonos_linear'],
@@ -289,6 +282,13 @@ def build_interface(args:dict)->gr.Blocks:
                                 value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['linear']),
                                 elem_id='gr_zonos_linear',
                                 info=legends['gr_zonos_linear_info']
+                            )
+                        with gr.Group(elem_id='gr_group_zonos_emotion', elem_classes=['gr-group']):
+                            gr_zonos_emotion_enabled = gr.Checkbox(
+                                label=legends['gr_zonos_emotion_enabled'],
+                                value=bool(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled']),
+                                elem_id='gr_zonos_emotion_enabled',
+                                info=legends['gr_zonos_emotion_enabled_info']
                             )
                         with gr.Group(elem_id='gr_group_zonos_emotion_sliders', elem_classes=['gr-group'], visible=bool(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled'])) as gr_group_zonos_emotion_sliders:
                                 gr_zonos_emotion_happiness = gr.Slider(
