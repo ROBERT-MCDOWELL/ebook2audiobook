@@ -90,6 +90,9 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             self.worker_env['VIRTUAL_ENV'] = self.venv_dir
             self.worker_env['PATH'] = os.pathsep.join([os.path.dirname(self.venv_python), self.worker_env.get('PATH', '')])
             self.worker_env['PYTHONUNBUFFERED'] = '1'
+            # a python uv has to download for the venv is kept with the venvs, so a docker volume
+            # on lib/classes/tts_engines/venvs (or deleting that folder) covers everything
+            self.worker_env['UV_PYTHON_INSTALL_DIR'] = os.path.join(engine_dir, 'venvs', '.python')
             if self.worker_device != devices['CUDA']['proc']:
                 # keep the worker off the GPU entirely (zonos probes cuda at import)
                 self.worker_env['CUDA_VISIBLE_DEVICES'] = '-1'
@@ -134,7 +137,8 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                     installed = {}
                     if not os.path.exists(self.venv_python):
                         msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
-                        steps.append((msg, [uv_bin, 'venv', '--python', settings['python'], self.venv_dir]))
+                        # --clear: the dir can exist with a dead interpreter link (docker image rebuilt)
+                        steps.append((msg, [uv_bin, 'venv', '--clear', '--python', settings['python'], self.venv_dir]))
                     msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch {torch.__version__}, torchaudio {torchaudio.__version__}')
                     steps.append((msg, uv_pip + [f'torch=={torch.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torch_tag}'] if torch_tag else [])))
                     steps.append((msg, uv_pip + ['--no-deps', f'torchaudio=={torchaudio.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torchaudio_tag}'] if torchaudio_tag else [])))
@@ -205,13 +209,19 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                 with open(marker_file, 'w', encoding='utf-8') as f:
                     json.dump(installed, f, indent=2)
             if hybrid_wanted and not installed.get('hybrid'):
-                # transformer weights under the same model_cache key, so cleanup_models_cache()
-                # keeps treating this worker as the session's active model
+                # the pre-flight in convert_ebook() already switches unsupported hardware to
+                # internal; this covers a first failed mamba-ssm/flash-attn install and the
+                # sentence editor: same alert, same switch, and the worker is cached under the
+                # internal key so cleanup_models_cache() keeps it as the session's model
                 self.model_repo = settings['repo']
+                self.session['fine_tuned'] = 'internal'
+                self.session['model_cache'] = self.tts_key = f'{tts_engine}-internal'
                 msg = legends['msg_venv_hybrid_fallback'].format(engine=tts_engine, reason=installed.get('hybrid_reason'))
-                print(msg)
-                if progress_bar is not None:
-                    progress_bar(0.0, desc=msg)
+                show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
+                if show_alert is not None:
+                    show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
+                else:
+                    print(msg)
             self.engine = self.load_engine()
         except Exception as e:
             error = f'__init__() error: {e}'
@@ -288,7 +298,9 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                             'language': self.language_espeak,
                             'voice': self.params['current_voice'],
                             'file': part_file,
-                            **self.fine_tuned_params
+                            **self.fine_tuned_params,
+                            # inside [emotion:...]...[/emotion] the tag wins over the panel
+                            **({'emotion_enabled': True, 'emotion': self.params['inline_emotion']} if self.params.get('inline_emotion') else {})
                         })
                         if not reply.get('ok'):
                             # no retry: core.py unloads the engine, which stops the worker

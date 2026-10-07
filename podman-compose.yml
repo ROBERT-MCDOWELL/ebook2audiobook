@@ -79,6 +79,7 @@ x-common: &common
     - ./models:/app/models:rw
     - ./voices:/app/voices:rw
     - ./tmp:/app/tmp:rw
+    - e2a_venvs:/app/lib/classes/tts_engines/venvs:rw
   restart: unless-stopped
 
 services:
@@ -133,3 +134,6 @@ services:
       - /dev/dri
     group_add:
       - "${RENDER_GID:-44}"
+
+volumes:
+  e2a_venvs:

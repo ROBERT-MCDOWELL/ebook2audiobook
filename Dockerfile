@@ -140,7 +140,7 @@ RUN set -eux; \
 		|| { echo 'no OpenCL ICD registered: the UR opencl adapter has zero devices and torch.stft fails CL_DEVICE_NOT_FOUND'; exit 1; }; \
 	ls -1 /etc/OpenCL/vendors/
 
-RUN python3 -m pip install --no-cache-dir --upgrade pip 'setuptools<82' wheel
+RUN python3 -m pip install --no-cache-dir --upgrade pip 'setuptools<82' wheel uv
 
 # Rust toolchain
 RUN set -eux; \

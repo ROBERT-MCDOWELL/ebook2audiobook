@@ -202,6 +202,7 @@ class SessionContext:
             "status": None,
             "ticker": 0,
             "cancellation_requested": False,
+            "tts_init_error": None,
             "ebook_mode": ebook_modes['SINGLE'],
             "blocks_preview": False,
             "interlude_enabled": False,
@@ -3141,7 +3142,15 @@ def convert_chapters2audio(session_id:str)->bool:
             msg = legends['msg_preparing_conversion']
             progress_bar(0.0, desc=msg)
         print(f'*********** Session: {session_id} **************\n{session_info}')
-        tts_manager = TTSManager(session)
+        try:
+            tts_manager = TTSManager(session)
+        except Exception as e:
+            # engine could not start (unsupported hardware, venv install, missing files...):
+            # traceback to the console only, the reason goes up to finalize_audiobook() and
+            # ends as one alert instead of an exception_alert() at every level
+            traceback.print_exc()
+            session['tts_init_error'] = re.sub(r'^(?:\w+\(\) error: )+', '', str(e))
+            return False
         blocks_current = session['blocks_current']
         blocks = blocks_current['blocks']
         block_resume = blocks_current['block_resume']
@@ -4539,6 +4548,32 @@ def convert_ebook(args:dict)->tuple:
                         torch_index_ok = torch_tag in ('', 'cpu', 'xpu') or bool(re.fullmatch(r'cu\d+', torch_tag)) or (bool(re.fullmatch(r'rocm[\d.]+', torch_tag)) and sys.platform == systems['LINUX'])
                         if torch_version < tuple(int(x) for x in torch_min.split('.')) or not torch_index_ok:
                             torch_error = legends['error_venv_torch_unsupported'].format(engine=session['tts_engine'], min=torch_min, version=torch.__version__)
+                    # hybrid backbones (zonos) need Linux + NVIDIA CUDA compute capability 8.0+ for
+                    # mamba-ssm / flash-attn, or a previous install of those failed here: warn and
+                    # switch to the internal (transformer) model instead of failing later
+                    if torch_error is None and session['fine_tuned'] == 'hybrid' and default_engine_settings[session['tts_engine']].get('repo_hybrid'):
+                        hybrid_reason = None
+                        if sys.platform != systems['LINUX']:
+                            hybrid_reason = sys.platform
+                        elif session['device'] != devices['CUDA']['proc']:
+                            hybrid_reason = session['device']
+                        else:
+                            import torch
+                            cc_major = torch.cuda.get_device_capability(0)[0] if torch.cuda.is_available() and torch.version.hip is None else 0
+                            if cc_major < 8:
+                                hybrid_reason = f'compute capability {cc_major}.x'
+                        if hybrid_reason is None:
+                            try:
+                                with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'classes', 'tts_engines', 'venvs', session['tts_engine'], '.e2a_installed.json'), 'r', encoding='utf-8') as f:
+                                    hybrid_installed = json.load(f)
+                                if hybrid_installed.get('hybrid') is False and hybrid_installed.get('hybrid_reason'):
+                                    hybrid_reason = hybrid_installed['hybrid_reason']
+                            except Exception:
+                                pass
+                        if hybrid_reason is not None:
+                            session['fine_tuned'] = default_fine_tuned
+                            session['model_cache'] = f"{session['tts_engine']}-{session['fine_tuned']}"
+                            msg += legends['msg_venv_hybrid_fallback'].format(engine=session['tts_engine'], reason=hybrid_reason) + '<br/>'
                     if torch_error is not None:
                         error = torch_error
                     elif float(total_vram_gb) >= float(device_vram_required):
@@ -4780,6 +4815,9 @@ def finalize_audiobook(session_id:str)->tuple:
             if session and session.get('id', False):
                 if session['cancellation_requested']:
                     error = legends['msg_conversion_cancelled']
+                elif session.get('tts_init_error'):
+                    error = session['tts_init_error']
+                    session['tts_init_error'] = None
             return _fail(error)
         generate_interludes(session_id)
         show_alert(session_id, {'type': 'info', 'msg': legends['msg_combining_all']})

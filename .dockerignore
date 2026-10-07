@@ -16,3 +16,4 @@ tools
 tmp/*
 run/*
 .installed
+lib/classes/tts_engines/venvs

@@ -914,9 +914,9 @@ if "%DOCKER_MODE%"=="podman" (
 	%wsl_cmd% docker image prune --force
 	echo Docker image ready. To run your docker:
 	echo GUI mode:
-	echo     %wsl_cmd% docker run -v ".\ebooks:/app/ebooks" -v ".\audiobooks:/app/audiobooks" -v ".\models:/app/models" -v ".\voices:/app/voices" -v ".\tmp:/app/tmp" !cmd_options! --rm -it -p 7860:7860 %DOCKER_IMG_NAME%
+	echo     %wsl_cmd% docker run -v ".\ebooks:/app/ebooks" -v ".\audiobooks:/app/audiobooks" -v ".\models:/app/models" -v ".\voices:/app/voices" -v ".\tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" !cmd_options! --rm -it -p 7860:7860 %DOCKER_IMG_NAME%
 	echo Headless mode:
-	echo     %wsl_cmd% docker run -v ".\ebooks:/app/ebooks" -v ".\audiobooks:/app/audiobooks" -v ".\models:/app/models" -v ".\voices:/app/voices" -v ".\tmp:/app/tmp" -v "D:\path\to\custom\voices:/app/custom_voice" !cmd_options! --rm -it -p 7860:7860 %DOCKER_IMG_NAME% --headless --ebook "/app/ebooks/myfile.pdf" [--voice "/app/custom_voice/voice.wav" etc..]
+	echo     %wsl_cmd% docker run -v ".\ebooks:/app/ebooks" -v ".\audiobooks:/app/audiobooks" -v ".\models:/app/models" -v ".\voices:/app/voices" -v ".\tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" -v "D:\path\to\custom\voices:/app/custom_voice" !cmd_options! --rm -it -p 7860:7860 %DOCKER_IMG_NAME% --headless --ebook "/app/ebooks/myfile.pdf" [--voice "/app/custom_voice/voice.wav" etc..]
 )
 if "%DOCKER_DESKTOP%"=="1" (
 	set "wsl_cmd=wsl --user root -d %DOCKER_WSL_CONTAINER% --"

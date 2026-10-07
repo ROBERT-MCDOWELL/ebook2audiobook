@@ -27,7 +27,14 @@ TTS_VOICE_CONVERSION = {
 TTS_SML = {
     "break": {"static": "[break]", "paired": False},
     "pause": {"static": "[pause]", "paired": False},
-    "voice": {"paired": True}
+    "voice": {"paired": True},
+    # zonos only (ignored by the other engines): [emotion:sadness]...[/emotion] or a mix
+    # [emotion:sadness=0.7,neutral=0.3]; values in zonos order, aliases for the obvious words
+    "emotion": {
+        "paired": True,
+        "values": ["happiness", "sadness", "disgust", "fear", "surprise", "anger", "other", "neutral"],
+        "aliases": {"happy": "happiness", "joy": "happiness", "sad": "sadness", "disgusted": "disgust", "afraid": "fear", "scared": "fear", "surprised": "surprise", "angry": "anger"}
+    }
 }
 
 sml_escape_tag = 0xE000

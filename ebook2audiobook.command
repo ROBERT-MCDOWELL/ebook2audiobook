@@ -640,8 +640,8 @@ build_docker_image() {
 		docker build --no-cache --progress plain --build-arg PYTHON_VERSION="$py_vers" --build-arg APP_VERSION="$APP_VERSION" --build-arg DEVICE_TAG="$DEVICE_TAG" --build-arg DOCKER_DEVICE_STR="$ARG" --build-arg DOCKER_PROGRAMS_STR="${DOCKER_PROGRAMS[*]}" --build-arg CALIBRE_INSTALLER_URL="$CALIBRE_INSTALLER_URL" --build-arg ISO3_LANG="$ISO3_LANG" -t "$DOCKER_IMG_NAME" . || return 1
 		docker image prune --force
 		echo "Docker image ready! to run your docker: "
-		echo "	GUI mode: docker run -v \"./ebooks:/app/ebooks\" -v \"./audiobooks:/app/audiobooks\" -v \"./models:/app/models\" -v \"./voices:/app/voices\" -v \"./tmp:/app/tmp\" ${cmd_options} --rm -it -p 7860:7860 $DOCKER_IMG_NAME"
-		echo "	Headless mode: docker run -v \"./ebooks:/app/ebooks\" -v \"./audiobooks:/app/audiobooks\" -v \"./models:/app/models\" -v \"./voices:/app/voices\" -v \"./tmp:/app/tmp\" -v \"/my/real/ebooks/folder/absolute/path:/app/custom_ebooks\" -v \"/my/real/output/folder/absolute/path:/app/audiobooks\" ${cmd_options} --rm -it -p 7860:7860 $DOCKER_IMG_NAME --headless --ebook /app/custom_ebooks/myfile.pdf [--voice /app/my/voicepath/voice.mp3 etc..]"
+		echo "	GUI mode: docker run -v \"./ebooks:/app/ebooks\" -v \"./audiobooks:/app/audiobooks\" -v \"./models:/app/models\" -v \"./voices:/app/voices\" -v \"./tmp:/app/tmp\" -v \"e2a_venvs:/app/lib/classes/tts_engines/venvs\" ${cmd_options} --rm -it -p 7860:7860 $DOCKER_IMG_NAME"
+		echo "	Headless mode: docker run -v \"./ebooks:/app/ebooks\" -v \"./audiobooks:/app/audiobooks\" -v \"./models:/app/models\" -v \"./voices:/app/voices\" -v \"./tmp:/app/tmp\" -v \"e2a_venvs:/app/lib/classes/tts_engines/venvs\" -v \"/my/real/ebooks/folder/absolute/path:/app/custom_ebooks\" -v \"/my/real/output/folder/absolute/path:/app/audiobooks\" ${cmd_options} --rm -it -p 7860:7860 $DOCKER_IMG_NAME --headless --ebook /app/custom_ebooks/myfile.pdf [--voice /app/my/voicepath/voice.mp3 etc..]"
 	fi
 }
 

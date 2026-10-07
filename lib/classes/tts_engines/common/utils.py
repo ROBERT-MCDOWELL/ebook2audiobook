@@ -924,6 +924,37 @@ class TTSUtils:
                 return False, error
             self.params['inline_voice'] = self.params['current_voice'] = inline_voice
             return True, None
+        elif tag == 'emotion':
+            if close:
+                self.params['inline_emotion'] = None
+                return True, None
+            names = TTS_SML['emotion']['values']
+            aliases = TTS_SML['emotion']['aliases']
+            raw = (value or '').strip().lower()
+            emotion = None
+            if '=' in raw:
+                # explicit mix, unlisted emotions at 0
+                emotion = [0.0] * len(names)
+                for item in raw.split(','):
+                    key, _, weight = item.partition('=')
+                    key = aliases.get(key.strip(), key.strip())
+                    try:
+                        emotion[names.index(key)] = min(max(float(weight), 0.0), 1.0)
+                    except ValueError:
+                        emotion = None
+                        break
+            elif aliases.get(raw, raw) in names:
+                # one named emotion, weighted like zonos' own UI default (main 1.0, rest low)
+                emotion = [0.05] * len(names)
+                emotion[names.index('other')] = 0.1
+                emotion[names.index('neutral')] = 0.2
+                emotion[names.index(aliases.get(raw, raw))] = 1.0
+            if emotion is None or not any(emotion):
+                # cosmetic tag: a typo must not abort a whole book, keep the current emotion
+                print(legends['msg_sml_emotion_ignored'].format(value=value, values=', '.join(names)))
+                return True, None
+            self.params['inline_emotion'] = emotion
+            return True, None
         elif tag == 'ipa':
             if close:
                 value = '' # TODO: get the value between tag [ipa] and close [/ipa]
