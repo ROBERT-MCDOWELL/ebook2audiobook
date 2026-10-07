@@ -280,6 +280,16 @@ def build_interface(args:dict)->gr.Blocks:
                                 elem_id='gr_zonos_emotion_enabled',
                                 info=legends['gr_zonos_emotion_enabled_info']
                             )
+                        with gr.Group(elem_id='gr_group_zonos_advanced', elem_classes=['gr-group']):
+                            gr_zonos_linear = gr.Slider(
+                                label=legends['gr_zonos_linear'],
+                                minimum=0.0,
+                                maximum=1.0,
+                                step=0.01,
+                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['linear']),
+                                elem_id='gr_zonos_linear',
+                                info=legends['gr_zonos_linear_info']
+                            )
                         with gr.Group(elem_id='gr_group_zonos_emotion_sliders', elem_classes=['gr-group'], visible=bool(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled'])) as gr_group_zonos_emotion_sliders:
                                 gr_zonos_emotion_happiness = gr.Slider(
                                     label=legends['gr_zonos_emotion_happiness'],
@@ -345,16 +355,6 @@ def build_interface(args:dict)->gr.Blocks:
                                     value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][7]),
                                     elem_id='gr_zonos_emotion_neutral'
                                 )
-                        with gr.Group(elem_id='gr_group_zonos_advanced', elem_classes=['gr-group']):
-                            gr_zonos_linear = gr.Slider(
-                                label=legends['gr_zonos_linear'],
-                                minimum=0.0,
-                                maximum=1.0,
-                                step=0.01,
-                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['linear']),
-                                elem_id='gr_zonos_linear',
-                                info=legends['gr_zonos_linear_info']
-                            )
                     with gr.Tab(legends['gr_tab_abs_params'], elem_id='gr_tab_abs_params', elem_classes='gr-tab', visible=visible_gr_tab_abs_params) as gr_tab_abs_params:
                         with gr.Row(elem_id='gr_row1_abs'):
                             gr_abs_url = gr.Textbox(label=legends['gr_abs_url'], elem_id='gr_abs_url', value=default_abs_url, placeholder='http://localhost:13378', lines=1, max_lines=1, interactive=True, scale=2)
