@@ -477,6 +477,8 @@ legends = {
     'msg_worker_starting': '正在启动{engine}个工人（{model}对{device} ） ……',
     'error_worker_failed': '{engine}个工作线程启动失败： {error}',
     'error_worker_exited': '工作进程已退出（代码{code} ）',
+    'msg_venv_creating': '创建名单 {engine} 虚拟环境 {dir}…',
+    'msg_venv_installing': '正在安装 {pkgs} 进入 {engine} 虚拟环境，需要一段时间，请耐心等待……',
     'msg_venv_hybrid_installing': '正在安装{engine}混合骨干网（{pkgs} ） ，它可能会从源代码编译，并且需要很长时间……',
     'msg_venv_hybrid_fallback': '{engine}混合在这里不可用（{reason} ） ，改用变压器模型。',
     'error_venv_torch_unsupported': '{engine}需要火炬> ={min}的标准PyTorch指数，找到火炬{version}。',

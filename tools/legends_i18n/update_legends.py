@@ -40,6 +40,8 @@ PROTECT = re.compile(
     r'|[\u2190-\u21ff\u2300-\u23ff\u25a0-\u27bf])'
 )
 MARKER = re.compile(r'[\u27e6\u301a\u3010\[]\s*(\d+)\s*[\u27e7\u301b\u3011\]]')
+MARKER_MAX_FAILS = 2
+marker_fails:dict = {}
 
 class QuotaExceeded(Exception):
     pass
@@ -157,33 +159,42 @@ def translate_segments(body:str, code:str)->str:
             pos = m.end()
     return ''.join(out)
 
-def translate_line(line:str, code:str)->Optional[str]:
+def translate_line(line:str, code:str)->tuple:
     m = re.match(r'^(\s*)(.*?)(\s*)$', line, re.S)
     lead, body, trail = m.group(1), m.group(2), m.group(3)
     if not body:
-        return line
+        return line, False
     protected, tokens = protect(body)
     if not re.search(r'[A-Za-z]', MARKER.sub('', protected)):
-        return line
-    translated:str = mt(protected, code)
-    restored:Optional[str] = restore(translated, tokens)
+        return line, False
+    if not tokens:
+        return lead+mt(protected, code).strip()+trail, False
+    restored:Optional[str] = None
+    if marker_fails.get(code, 0) < MARKER_MAX_FAILS:
+        translated:str = mt(protected, code)
+        restored = restore(translated, tokens)
+        if restored is None:
+            marker_fails[code] = marker_fails.get(code, 0)+1
+            print(f'  {code}: markers lost, MT returned: {translated[:120]}', file=sys.stderr)
+            if marker_fails[code] == MARKER_MAX_FAILS:
+                print(f'  {code}: {MARKER_MAX_FAILS} marker failures in a row, segment mode only for the rest of this run', file=sys.stderr)
+        else:
+            marker_fails[code] = 0
     if restored is None:
-        print(f'  {code}: markers lost, MT returned: {translated[:120]}', file=sys.stderr)
-        print(f'  {code}: retrying segment by segment around {len(tokens)} protected token(s)', file=sys.stderr)
-        restored = translate_segments(body, code)
-    return lead+restored.strip()+trail
+        return lead+translate_segments(body, code).strip()+trail, True
+    return lead+restored.strip()+trail, False
 
 def translate_value(text:str, code:str)->tuple:
     out:list = []
+    segmented:bool = False
     for line in text.split('\n'):
-        translated:Optional[str] = translate_line(line, code)
-        if translated is None:
-            return None, 'protected tokens lost in translation'
+        translated, seg = translate_line(line, code)
+        segmented = segmented or seg
         out.append(translated)
     result:str = '\n'.join(out)
     if format_fields(result) != format_fields(text):
         return None, 'format placeholders differ from English'
-    return result, ''
+    return result, 'segment mode, review wording' if segmented else ''
 
 def main()->int:
     parser = argparse.ArgumentParser(description='Add and translate keys of lib/lang/legends_eng.py missing from the other legends_<iso3>.py files')
@@ -267,7 +278,7 @@ def main()->int:
             s['tr'][key] = translated
             known[value] = translated
             done += 1
-            print(f'[{iso3}] + {key}')
+            print(f'[{iso3}] + {key}'+(f' ({reason})' if reason else ''))
         write_legends(s['path'], {k: s['tr'][k] for k in eng if k in s['tr']})
         print(f'[{iso3}] {done} key(s) added')
         if aborted:
