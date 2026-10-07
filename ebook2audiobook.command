@@ -351,8 +351,8 @@ check_required_programs() {
 				if command -v apt-get >/dev/null 2>&1 || command -v zypper >/dev/null 2>&1; then pkg="libxcb-cursor0"
 				elif command -v apk >/dev/null 2>&1; then pkg="xcb-util-cursor"
 				else pkg="$program"; fi
-				check_xcb=$(ldconfig -p 2>/dev/null | grep libxcb-cursor)
-				if [[ "$check_xcb" == "" ]]; then programs_missing+=("$pkg"); fi
+				check_xcb=$(PATH="$PATH:/sbin:/usr/sbin" ldconfig -p 2>/dev/null | grep libxcb-cursor)
+				if [[ "$check_xcb" == "" ]]; then echo -e "\e[33m$pkg is not installed.\e[0m"; programs_missing+=("$pkg"); fi
 			fi
 		fi
 		if [[ "$bin" != "" ]]; then
@@ -437,7 +437,7 @@ EOF
 			else echo -e "\e[31m=============== $program failed.\e[0m"; fi
 		elif [[ "$program" == "tesseract" || "$program" == "tesseract-ocr" ]]; then
 			eval "$SUDO $PACK_MGR $program $PACK_MGR_OPTIONS"
-			if command -v $program >/dev/null 2>&1; then
+			if command -v tesseract >/dev/null 2>&1; then
 				echo -e "\e[32m=============== $program OK! ===============\e[0m"
 				ISO3_LANG="$(get_iso3_lang "${OS_LANG:-en}")"
 				echo "Detected system language: $OS_LANG → installing Tesseract OCR language: $ISO3_LANG"
@@ -455,6 +455,11 @@ EOF
 					else echo "Tesseract OCR language '$ISO3_LANG' not installed properly."; fi
 				fi
 			else echo -e "\e[31m=============== $program failed.\e[0m"; fi
+		elif [[ "$program" == "libxcb-cursor0" || "$program" == "xcb-util-cursor" ]]; then
+			eval "$SUDO $PACK_MGR $program $PACK_MGR_OPTIONS"
+			check_xcb=$(PATH="$PATH:/sbin:/usr/sbin" ldconfig -p 2>/dev/null | grep libxcb-cursor)
+			if [[ "$check_xcb" != "" ]]; then echo -e "\e[32m=============== $program OK! ===============\e[0m"
+			else echo -e "\e[31m=============== $program failed.\e[0m"; fi
 		elif [[ "$program" == "nodejs" ]]; then
 			eval "$SUDO $PACK_MGR $program $PACK_MGR_OPTIONS"
 			if command -v node >/dev/null 2>&1; then echo -e "\e[32m=============== $program OK! ===============\e[0m"
@@ -466,7 +471,7 @@ EOF
 		fi
 	done
 	if check_required_programs "${HOST_PROGRAMS[@]}"; then return 0
-	else echo "Some programs didn't install successfuly, please report the log to the support"; fi
+	else echo "Some programs didn't install successfuly, please report the log to the support"; return 1; fi
 }
 
 check_uv() {
