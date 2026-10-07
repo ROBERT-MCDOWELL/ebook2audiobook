@@ -39,7 +39,8 @@ PROTECT = re.compile(
     r'|\b[A-Za-z0-9]+(?:_[A-Za-z0-9]+)+\b'
     r'|[\u2190-\u21ff\u2300-\u23ff\u25a0-\u27bf])'
 )
-MARKER = re.compile(r'[\u27e6\u301a\u3010\[]\s*(\d+)\s*[\u27e7\u301b\u3011\]]')
+MARKER = re.compile(r'\u27e6\s*(\d+)(?:\s*\u27e7|(?!\w))|[\u301a\u3010\[]\s*(\d+)\s*[\u27e7\u301b\u3011\]]')
+STRAY = re.compile(r'[\u27e6\u27e7\u301a\u301b\u3010\u3011]')
 MARKER_MAX_FAILS = 2
 marker_fails:dict = {}
 
@@ -94,13 +95,14 @@ def protect(text:str)->tuple:
 def restore(text:str, tokens:list)->Optional[str]:
     seen:list = []
     def repl(m)->str:
-        idx:int = int(m.group(1))
+        idx:int = int(m.group(1) or m.group(2))
         seen.append(idx)
-        return tokens[idx] if idx < len(tokens) else m.group(0)
+        return f'\x00{idx}\x00'
     out:str = MARKER.sub(repl, text)
     if sorted(seen) != list(range(len(tokens))):
         return None
-    return out
+    out = re.sub(r' {2,}', ' ', STRAY.sub('', out))
+    return re.sub(r'\x00(\d+)\x00', lambda m: tokens[int(m.group(1))], out)
 
 def mymemory(text:str, code:str)->str:
     params:dict = {'q': text, 'langpair': f'en|{code}'}
@@ -205,6 +207,7 @@ def main()->int:
     parser = argparse.ArgumentParser(description='Add and translate keys of lib/lang/legends_eng.py missing from the other legends_<iso3>.py files')
     parser.add_argument('--check', action='store_true', help='only report out-of-sync files, no network, no write, exit 1 if any')
     parser.add_argument('--langs', nargs='+', metavar='ISO3', help='translate only these languages (default: all)')
+    parser.add_argument('--redo', nargs='+', metavar='KEY', default=[], help='retranslate these keys in the selected languages')
     args = parser.parse_args()
     eng:dict = load_assign(ENG_FILE, 'legends')
     baseline:Optional[dict] = load_assign(BASELINE, 'legends') if BASELINE.exists() else None
@@ -222,6 +225,10 @@ def main()->int:
             print(f'unknown language(s): {", ".join(unknown)} (known: {", ".join(targets)})', file=sys.stderr)
             return 2
         selected = [l for l in targets if l in args.langs]
+    unknown_keys:list = [k for k in args.redo if k not in eng]
+    if unknown_keys:
+        print(f'unknown key(s): {", ".join(unknown_keys)}', file=sys.stderr)
+        return 2
     if baseline is None:
         print(f'{len(eng)} English key(s), no baseline yet: changed English values cannot be detected on this run')
     else:
@@ -232,7 +239,7 @@ def main()->int:
         path:Path = LANG_DIR / f'legends_{iso3}.py'
         tr:dict = load_assign(path, 'legends') if path.exists() else {}
         orphans:list = [k for k in tr if k not in eng]
-        stale:list = [k for k in eng if k in tr and (k in changed or format_fields(tr[k]) != format_fields(eng[k]))]
+        stale:list = [k for k in eng if k in tr and (k in changed or (k in args.redo and iso3 in selected) or format_fields(tr[k]) != format_fields(eng[k]))]
         missing:list = [k for k in eng if k not in tr]
         state[iso3] = dict(path=path, tr=tr, orphans=orphans, stale=stale, missing=missing, exists=path.exists())
         if (orphans or stale or missing or not path.exists()) and iso3 in selected:
