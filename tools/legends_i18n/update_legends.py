@@ -39,7 +39,7 @@ PROTECT = re.compile(
     r'|\b[A-Za-z0-9]+(?:_[A-Za-z0-9]+)+\b'
     r'|[\u2190-\u21ff\u2300-\u23ff\u25a0-\u27bf])'
 )
-MARKER = re.compile(r'\u27e6\s*(\d+)\s*\u27e7')
+MARKER = re.compile(r'[\u27e6\u301a\u3010\[]\s*(\d+)\s*[\u27e7\u301b\u3011\]]')
 
 class QuotaExceeded(Exception):
     pass
@@ -136,6 +136,27 @@ def chunk_text(text:str)->list:
         chunks.append(current)
     return chunks
 
+def mt(text:str, code:str)->str:
+    parts:list = []
+    for chunk in chunk_text(text):
+        parts.append(mymemory(chunk, code))
+        time.sleep(THROTTLE)
+    return html.unescape(('' if code in NO_SPACE_JOIN else ' ').join(parts)).replace('\n', ' ')
+
+def translate_segments(body:str, code:str)->str:
+    out:list = []
+    pos:int = 0
+    for m in [*PROTECT.finditer(body), None]:
+        segment:str = body[pos:m.start() if m else len(body)]
+        s = re.match(r'^(\s*)(.*?)(\s*)$', segment, re.S)
+        if re.search(r'[A-Za-z]', s.group(2)):
+            segment = s.group(1)+mt(s.group(2), code).strip()+s.group(3)
+        out.append(segment)
+        if m:
+            out.append(m.group(0))
+            pos = m.end()
+    return ''.join(out)
+
 def translate_line(line:str, code:str)->Optional[str]:
     m = re.match(r'^(\s*)(.*?)(\s*)$', line, re.S)
     lead, body, trail = m.group(1), m.group(2), m.group(3)
@@ -144,14 +165,12 @@ def translate_line(line:str, code:str)->Optional[str]:
     protected, tokens = protect(body)
     if not re.search(r'[A-Za-z]', MARKER.sub('', protected)):
         return line
-    parts:list = []
-    for chunk in chunk_text(protected):
-        parts.append(mymemory(chunk, code))
-        time.sleep(THROTTLE)
-    translated:str = html.unescape(('' if code in NO_SPACE_JOIN else ' ').join(parts)).replace('\n', ' ')
+    translated:str = mt(protected, code)
     restored:Optional[str] = restore(translated, tokens)
     if restored is None:
-        return None
+        print(f'  {code}: markers lost, MT returned: {translated[:120]}', file=sys.stderr)
+        print(f'  {code}: retrying segment by segment around {len(tokens)} protected token(s)', file=sys.stderr)
+        restored = translate_segments(body, code)
     return lead+restored.strip()+trail
 
 def translate_value(text:str, code:str)->tuple:
