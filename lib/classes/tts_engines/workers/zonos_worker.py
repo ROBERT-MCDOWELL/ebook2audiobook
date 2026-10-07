@@ -5,12 +5,11 @@
 #   stdout <- {"ready": true, "samplerate": 44100, "backbone": "...", "device": "..."} once loaded
 #             {"ready": false, "error": "..."} then exit 1 if loading failed
 #   stdin  -> {"op": "tts", "text", "language", "voice", "file", "emotion_enabled", "emotion",
-#              "speaking_rate", "pitch_std", "fmax", "cfg_scale", "linear", "confidence",
-#              "quadratic", "min_p", "max_new_tokens"}
+#              "speaking_rate", "pitch_std", "fmax", "cfg_scale", "linear", "max_new_tokens"}
 #   stdout <- {"ok": true, "file": "...", "samplerate": 44100, "samples": n}
 #             {"ok": false, "error": "...", "oom": bool}
 #   EOF on stdin -> exit 0 (that is how e2a unloads the model and frees its VRAM)
-import os, sys, json, argparse
+import os, sys, json, argparse, inspect
 
 def main()->int:
     # the protocol owns a private copy of fd 1; fd 1 itself is pointed at stderr so
@@ -44,6 +43,9 @@ def main()->int:
             and getattr(torch.version, 'hip', None) is None
             and torch.cuda.get_device_capability(0)[0] >= 8
         )
+        # zonos' own sampling default (generate()'s sampling_params, min_p 0.1 today): passing any
+        # dict replaces it, so requests only ever add to a copy of it
+        default_sampling = dict(inspect.signature(model.generate).parameters['sampling_params'].default)
         sampling_rate = int(model.autoencoder.sampling_rate)
         backbone = model.backbone.__class__.__name__
     except Exception as e:
@@ -92,12 +94,7 @@ def main()->int:
                 conditioning,
                 max_new_tokens=int(req['max_new_tokens']),
                 cfg_scale=float(req['cfg_scale']),
-                sampling_params=dict(
-                    min_p=float(req.get('min_p', 0.1)),
-                    linear=float(req.get('linear', 0.0)),
-                    conf=float(req.get('confidence', 0.0)),
-                    quad=float(req.get('quadratic', 0.0))
-                ),
+                sampling_params={**default_sampling, **({'linear': float(req['linear'])} if float(req.get('linear', 0.0)) > 0.0 else {})},
                 progress_bar=False,
                 disable_torch_compile=not use_compile
             )

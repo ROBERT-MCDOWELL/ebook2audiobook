@@ -102,11 +102,9 @@ default_engine_settings = {
         "pitch_std": 20.0,
         "fmax": 22050.0,
         "cfg_scale": 2.0,
-        # min_p sampling; the NovelAI unified sampler stays off while linear is 0
+        # sampling is zonos' own generate() default; linear > 0 adds the unified sampler's
+        # linear term on top (below 1 = more varied delivery), 0 leaves zonos untouched
         "linear": 0.0,
-        "confidence": 0.0,
-        "quadratic": 0.0,
-        "min_p": 0.1,
         "max_new_tokens": 86 * 30,
         "files": [],
         "voice": default_speaker,

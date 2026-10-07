@@ -62,9 +62,6 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                     'zonos_fmax': float,
                     'zonos_cfg_scale': float,
                     'zonos_linear': float,
-                    'zonos_confidence': float,
-                    'zonos_quadratic': float,
-                    'zonos_min_p': float,
                     'zonos_max_new_tokens': int
                 }.items()
             }
