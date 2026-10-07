@@ -481,7 +481,7 @@ legends = {
     'msg_venv_installing': 'Instalando {pkgs} al {engine} entorno virtual, lleva un tiempo, por favor, sea paciente...',
     'msg_venv_hybrid_installing': 'Montaje de la obra {engine} columna vertebral híbrida ({pkgs}), puede compilarse desde la fuente y llevar mucho tiempo...',
     'msg_venv_hybrid_fallback': '{engine} híbrido no está disponible aquí ({reason}), utilizando el modelo de transformador en su lugar.',
-    'error_venv_torch_unsupported': '{engine} necesita antorcha>={min} de un índice PyTorch estándar, antorcha encontrada {version}.',
+    'error_venv_torch_unsupported': '{engine} necesita antorcha>={min} de un índice PyTorch estándar, antorcha encontrada {version}. Por favor, seleccione otro motor TTS.',
     'error_venv_install_failed': '{engine} la instalación del entorno virtual ha fallado en: {step}',
     'gr_ui_language': 'Idioma de la interfaz',
     'gr_ui_language_auto': 'Auto (navegador)',

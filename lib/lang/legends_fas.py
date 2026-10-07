@@ -481,7 +481,7 @@ legends = {
     'msg_venv_installing': 'نصب {pkgs} در محیط مجازی {engine} کمی طول می‌کشد، لطفاً صبور باشید…',
     'msg_venv_hybrid_installing': 'نصب ستون فقرات ترکیبی {engine} ({pkgs})، ممکن است از منبع کامپایل شود و مدت زیادی طول بکشد…',
     'msg_venv_hybrid_fallback': 'هیبرید {engine} در اینجا ({reason}) در دسترس نیست و به جای آن از مدل ترانسفورماتور استفاده می‌شود.',
-    'error_venv_torch_unsupported': '{engine} به torch>={min} از یک اندیس استاندارد PyTorch نیاز دارد، torch {version} پیدا شد.',
+    'error_venv_torch_unsupported': '{engine} به torch>={min} از یک فهرست استاندارد PyTorch نیاز دارد، torch {version} پیدا شد. لطفاً یک موتور TTS دیگر انتخاب کنید.',
     'error_venv_install_failed': 'نصب محیط مجازی در {engine} با شکست مواجه شد: {step}',
     'gr_ui_language': 'زبان رابط کاربری',
     'gr_ui_language_auto': 'خودکار (مرورگر)',

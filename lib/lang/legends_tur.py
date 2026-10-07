@@ -481,7 +481,7 @@ legends = {
     'msg_venv_installing': 'Yükleniyor {pkgs} Dr. {engine} sanal ortam, biraz zaman alır, lütfen sabırlı olun…',
     'msg_venv_hybrid_installing': '{engine} hibrit omurgasının ({pkgs}) takılması, kaynaktan derlenebilir ve uzun zaman alabilir…',
     'msg_venv_hybrid_fallback': '{engine} hibrit burada mevcut değildir ({reason}), bunun yerine transformatör modeli kullanılır.',
-    'error_venv_torch_unsupported': '{engine} meşaleye ihtiyacı var >={min} standart bir PyTorch indeksinden, bulunan meşale {version}.',
+    'error_venv_torch_unsupported': '{engine}, standart bir PyTorch indeksinden torça>={min} ihtiyaç duyuyor, torç {version} bulundu. Lütfen başka bir TTS motoru seçin.',
     'error_venv_install_failed': '{engine} sanal ortam kurulumu başarısız oldu: {step}',
     'gr_ui_language': 'Arayüz dili',
     'gr_ui_language_auto': 'Otomatik (tarayıcı)',

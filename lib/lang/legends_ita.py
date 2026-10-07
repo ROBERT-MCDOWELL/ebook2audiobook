@@ -481,7 +481,7 @@ legends = {
     'msg_venv_installing': 'Installazione {pkgs} nelle {engine} ambiente virtuale, ci vuole un po\', per favore sii paziente...',
     'msg_venv_hybrid_installing': 'Installazione {engine} spina dorsale ibrida ({pkgs}), può essere compilato dalla fonte e richiedere molto tempo...',
     'msg_venv_hybrid_fallback': '{engine} ibrido non è disponibile qui ({reason}), utilizzando invece il modello di trasformatore.',
-    'error_venv_torch_unsupported': '{engine} ha bisogno di torcia>={min} da un indice PyTorch standard, trovato torcia {version}.',
+    'error_venv_torch_unsupported': '{engine} ha bisogno di torcia>={min} da un indice PyTorch standard, trovato torcia {version}. Selezionare un altro motore TTS.',
     'error_venv_install_failed': '{engine} installazione dell\'ambiente virtuale non riuscita in: {step}',
     'gr_ui_language': 'Lingua dell\'interfaccia',
     'gr_ui_language_auto': 'Auto (browser)',

@@ -481,7 +481,7 @@ legends = {
     'msg_venv_installing': 'Instalowanie {pkgs} do {engine} środowiska wirtualnego, zajmuje to trochę czasu, prosimy o cierpliwość...',
     'msg_venv_hybrid_installing': 'Instalowanie kanału {engine} szkielet hybrydowy (ang.{pkgs}), może zostać skompilowany ze źródła i może zająć dużo czasu…',
     'msg_venv_hybrid_fallback': '{engine} hybryda nie jest dostępna tutaj ({reason}), używając zamiast tego modelu transformatora.',
-    'error_venv_torch_unsupported': '{engine} wymaga palnika>={min} ze standardowego indeksu PyTorch, znaleziono palnik {version}.',
+    'error_venv_torch_unsupported': '{engine} wymaga palnika>={min} ze standardowego indeksu PyTorch, znaleziono palnik {version}. Wybierz inny silnik TTS.',
     'error_venv_install_failed': '{engine} instalacja środowiska wirtualnego nie powiodła się w: {step}',
     'gr_ui_language': 'Język interfejsu',
     'gr_ui_language_auto': 'Auto (przeglądarka)',

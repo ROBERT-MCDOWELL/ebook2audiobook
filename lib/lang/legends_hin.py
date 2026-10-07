@@ -481,7 +481,7 @@ legends = {
     'msg_venv_installing': 'संस्थापित किया जा रहा है {pkgs} में {engine} आभासी वातावरण, इसमें कुछ समय लगता है, कृपया धैर्य रखें...',
     'msg_venv_hybrid_installing': '{engine} हाइब्रिड रीढ़ ({pkgs}) स्थापित करना, यह स्रोत से संकलित हो सकता है और इसमें लंबा समय लग सकता है...',
     'msg_venv_hybrid_fallback': 'इसके बजाय ट्रांसफार्मर मॉडल का उपयोग करते हुए, {engine} हाइब्रिड यहाँ ({reason}) उपलब्ध नहीं है।',
-    'error_venv_torch_unsupported': '{engine} मशाल की जरूरत है >={min} एक मानक PyTorch इंडेक्स से, मशाल मिली {version}.',
+    'error_venv_torch_unsupported': '{engine} को एक मानक PyTorch सूचकांक से मशाल>={min} की आवश्यकता है, मशाल {version} मिली। कृपया कोई दूसरा TTS इंजन चुनें।',
     'error_venv_install_failed': '{engine} वर्चुअल एनवायरनमेंट इंस्टॉल यहाँ विफल रहा: {step}',
     'gr_ui_language': 'इंटरफ़ेस भाषा',
     'gr_ui_language_auto': 'स्वचालित (ब्राउज़र)',

@@ -481,7 +481,7 @@ legends = {
     'msg_venv_installing': 'インストール中 {pkgs} 全て学習コンテンツ {engine} 仮想環境、しばらく時間がかかります。しばらくお待ちください…',
     'msg_venv_hybrid_installing': '{engine}ハイブリッドバックボーン（{pkgs} ）をインストールすると、ソースからコンパイルされ、長い時間がかかる場合があります...',
     'msg_venv_hybrid_fallback': '{engine}ハイブリッドはここ（{reason} ）では利用できず、代わりにトランスフォーマーモデルを使用しています。',
-    'error_venv_torch_unsupported': '{engine} トーチが必要です>={min} 標準のPyTorchインデックスから、トーチを見つけました {version}.',
+    'error_venv_torch_unsupported': '{engine} トーチが必要です>={min} 標準のPyTorchインデックスから、トーチを見つけました {version}別のTTSエンジンを選択してください。',
     'error_venv_install_failed': '{engine}仮想環境のインストールに失敗しました： {step}',
     'gr_ui_language': '表示言語',
     'gr_ui_language_auto': '自動（ブラウザー）',

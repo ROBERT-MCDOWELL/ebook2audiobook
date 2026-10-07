@@ -481,7 +481,7 @@ legends = {
     'msg_venv_installing': '설치 {pkgs} 으로 {engine} 가상 환경, 시간이 좀 걸립니다. 잠시만 기다려주세요...',
     'msg_venv_hybrid_installing': '{engine} 하이브리드 백본 ({pkgs}) 을 설치하면 소스에서 컴파일되어 시간이 오래 걸릴 수 있습니다...',
     'msg_venv_hybrid_fallback': '대신 변압기 모델을 사용하여 {engine} 하이브리드를 사용할 수 없습니다 ({reason}).',
-    'error_venv_torch_unsupported': '{engine} needs torch > = 토치가 필요함{min} 표준 PyTorch 인덱스에서 발견된 토치 {version}.',
+    'error_venv_torch_unsupported': '{engine} needs torch > = 토치가 필요함{min} 표준 PyTorch 인덱스에서 발견된 토치 {version}. 다른 TTS 엔진을 선택하십시오.',
     'error_venv_install_failed': '{engine} 가상 환경 설치 실패 시간: {step}',
     'gr_ui_language': '인터페이스 언어',
     'gr_ui_language_auto': '자동(브라우저)',

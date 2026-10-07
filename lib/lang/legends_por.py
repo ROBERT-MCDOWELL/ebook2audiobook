@@ -481,7 +481,7 @@ legends = {
     'msg_venv_installing': 'Instalando {pkgs} Até a. {engine} ambiente virtual, demora um pouco, por favor, seja paciente...',
     'msg_venv_hybrid_installing': 'Instalação da base de carregamento {engine} espinha dorsal híbrida ({pkgs}), pode compilar a partir da fonte e levar muito tempo...',
     'msg_venv_hybrid_fallback': '{engine} híbrido não está disponível aqui ({reason}), usando o modelo do transformador.',
-    'error_venv_torch_unsupported': '{engine} precisa de tocha>={min} de um índice PyTorch padrão, encontrado tocha {version}.',
+    'error_venv_torch_unsupported': '{engine} precisa de tocha>={min} de um índice PyTorch padrão, encontrado tocha {version}. Seleccione outro motor TTS.',
     'error_venv_install_failed': '{engine} instalação do ambiente virtual falhou em: {step}',
     'gr_ui_language': 'Idioma da interface',
     'gr_ui_language_auto': 'Auto (navegador)',
