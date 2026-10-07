@@ -5,6 +5,7 @@ from pathlib import Path
 from lib.classes.vram_detector import VRAMDetector
 from lib.classes.bug_reporter import bug_reporter
 from lib.classes.tts_engines.common.audio import normalize_audio, get_audiolist_duration, is_audio_data_valid
+from lib.classes.subprocess_pipe import SubprocessPipe
 from lib import *
 from lib.lang import legends
 
@@ -670,7 +671,11 @@ class TTSUtils:
                         self.session['free_vram_gb'] = vram_dict.get('free_vram_gb', 0)
                         models_loaded_size_gb = self._loaded_tts_size_gb(loaded_tts)
                         if self.session['free_vram_gb'] <= models_loaded_size_gb:
-                            del loaded_tts[self.tts_key]
+                            cached = loaded_tts.pop(self.tts_key, None)
+                            if isinstance(cached, SubprocessPipe):
+                                # persistent worker: stop it, the reload below starts a new one
+                                cached.stop()
+                            cached = None
                         hf_repo = default_engine_settings[xtts]['repo']
                         hf_sub = ''
                         config_path = hf_hub_download(repo_id=hf_repo, filename=f"{hf_sub}{default_engine_settings[xtts]['files'][0]}", cache_dir=self.cache_dir)

@@ -251,6 +251,14 @@ class SessionContext:
             ####### Bark settings
             "bark_text_temp": default_engine_settings[TTS_ENGINES['BARK']]['text_temp'],
             "bark_waveform_temp": default_engine_settings[TTS_ENGINES['BARK']]['waveform_temp'],
+            ####### Zonos settings
+            "zonos_emotion": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'],
+            "zonos_speaking_rate": default_engine_settings[TTS_ENGINES['ZONOS']]['speaking_rate'],
+            "zonos_pitch_std": default_engine_settings[TTS_ENGINES['ZONOS']]['pitch_std'],
+            "zonos_fmax": default_engine_settings[TTS_ENGINES['ZONOS']]['fmax'],
+            "zonos_cfg_scale": default_engine_settings[TTS_ENGINES['ZONOS']]['cfg_scale'],
+            "zonos_min_p": default_engine_settings[TTS_ENGINES['ZONOS']]['min_p'],
+            "zonos_max_new_tokens": default_engine_settings[TTS_ENGINES['ZONOS']]['max_new_tokens'],
             ####### Audiobook editor
             "audiobook": None,
             "audiobooks_dir": None,
@@ -4905,11 +4913,20 @@ def unload_tts_manager(tts_manager:Any)->None:
                     engine_ref = weakref.ref(engine)
                 except Exception:
                     pass
+                # venv engines (zonos, ...): the model lives in a persistent worker
+                # process, so dropping the reference frees nothing — stop the worker.
+                worker = getattr(engine, 'engine', None)
+                if isinstance(worker, SubprocessPipe):
+                    worker.stop()
+                worker = None
             tts_manager.engine = None
             engine = None
             for key in keys:
                 if key:
-                    loaded_tts.pop(key, None)
+                    cached = loaded_tts.pop(key, None)
+                    if isinstance(cached, SubprocessPipe):
+                        cached.stop()
+                    cached = None
         gc.collect()
         try:
             import torch
@@ -4960,7 +4977,11 @@ def cleanup_models_cache()->None:
         }
         for key in list(loaded_tts.keys()):
             if key not in active_models:
-                del loaded_tts[key]
+                cached = loaded_tts.pop(key, None)
+                if isinstance(cached, SubprocessPipe):
+                    # persistent worker: its model and VRAM belong to the child process
+                    cached.stop()
+                cached = None
         gc.collect()
         if sys.platform == 'linux':
             # return freed pages to the OS: on jetson unified memory glibc's
