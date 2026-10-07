@@ -4511,7 +4511,21 @@ def convert_ebook(args:dict)->tuple:
                     if msg == '':
                         msg_extra = f"Using {session['device'].upper()}" + msg_extra
                     device_vram_required = default_engine_settings[session['tts_engine']]['rating']['RAM'] if session['device'] == devices['CPU']['proc'] else default_engine_settings[session['tts_engine']]['rating']['VRAM']
-                    if float(total_vram_gb) >= float(device_vram_required):
+                    # venv engines (zonos, ...) mirror python_env's torch into their own venv: stop
+                    # here with an alert when it is too old or comes from a custom wheel URL
+                    # (Intel macOS stops at 2.2.2, Jetson, Windows ROCm), not later in TTSManager()
+                    torch_error = None
+                    torch_min = default_engine_settings[session['tts_engine']].get('torch_min')
+                    if torch_min:
+                        import torch
+                        torch_base, _, torch_tag = torch.__version__.partition('+')
+                        torch_version = tuple(int(x) for x in re.findall(r'\d+', torch_base)[:3])
+                        torch_index_ok = torch_tag in ('', 'cpu', 'xpu') or bool(re.fullmatch(r'cu\d+', torch_tag)) or (bool(re.fullmatch(r'rocm[\d.]+', torch_tag)) and sys.platform == systems['LINUX'])
+                        if torch_version < tuple(int(x) for x in torch_min.split('.')) or not torch_index_ok:
+                            torch_error = legends['error_venv_torch_unsupported'].format(engine=session['tts_engine'], min=torch_min, version=torch.__version__)
+                    if torch_error is not None:
+                        error = torch_error
+                    elif float(total_vram_gb) >= float(device_vram_required):
                         if msg:
                             show_alert(session_id, {"type": "warning", "msg": msg + msg_extra})
                         else:
