@@ -284,8 +284,8 @@ Default {default_engine_settings[TTS_ENGINES['ZONOS']]['speaking_rate']}.""")
 Default {default_engine_settings[TTS_ENGINES['ZONOS']]['pitch_std']}.""")
     headless_optional_group.add_argument(cli_options[39], type=float, default=default_engine_settings[TTS_ENGINES['ZONOS']]['cfg_scale'], help=f"""(zonos only, optional) CFG scale, how strongly voice and settings are followed (1-5).
 Default {default_engine_settings[TTS_ENGINES['ZONOS']]['cfg_scale']}.""")
-    headless_optional_group.add_argument(cli_options[40], type=str, default=None, help=f"""(zonos only, optional) Enable emotion with 8 comma-separated values from 0.0 to 1.0:
-Happiness,Sadness,Disgust,Fear,Surprise,Anger,Other,Neutral. Off by default (the model picks the delivery).""")
+    headless_optional_group.add_argument(cli_options[40], type=str, default=None, help=f"""(zonos only, optional) Emotion mix, 8 comma-separated values from 0.0 to 1.0:
+Happiness,Sadness,Disgust,Fear,Surprise,Anger,Other,Neutral. On by default with zonos' own mix, "off" lets the model pick the delivery.""")
     headless_optional_group.add_argument(cli_options[28], type=str, help='Path to the output directory. Default is set in ./lib/conf.py')
     headless_optional_group.add_argument(cli_options[29], type=str, default='', help='Audiobookshelf server URL (e.g. http://localhost:13378).')
     headless_optional_group.add_argument(cli_options[30], type=str, default='', help='Audiobookshelf API token.')
@@ -399,8 +399,11 @@ Happiness,Sadness,Disgust,Fear,Surprise,Anger,Other,Neutral. Off by default (the
             args['zonos_speaking_rate'] = args['speaking_rate']
             args['zonos_pitch_std'] = args['pitch_std']
             args['zonos_cfg_scale'] = args['cfg_scale']
-            args['zonos_emotion_enabled'] = args['emotion'] is not None
-            if args['emotion'] is not None:
+            args['zonos_emotion_enabled'] = default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled']
+            if args['emotion'] is not None and str(args['emotion']).strip().lower() == 'off':
+                args['zonos_emotion_enabled'] = False
+            elif args['emotion'] is not None:
+                args['zonos_emotion_enabled'] = True
                 try:
                     args['zonos_emotion'] = [float(v) for v in str(args['emotion']).split(',')]
                 except ValueError:

@@ -61,8 +61,6 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                     'zonos_pitch_std': float,
                     'zonos_fmax': float,
                     'zonos_cfg_scale': float,
-                    'zonos_dnsmos': float,
-                    'zonos_vqscore': float,
                     'zonos_linear': float,
                     'zonos_confidence': float,
                     'zonos_quadratic': float,

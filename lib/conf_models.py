@@ -93,25 +93,20 @@ default_engine_settings = {
         # robust languages only (most of the 200k h are en, then zh, ja, fr, es, de); values are espeak codes
         "languages": {"eng": "en-us", "deu": "de", "fra": "fr-fr", "jpn": "ja", "spa": "es", "zho": "cmn"},
         "samplerate": 44100,
-        # conditioning and sampling defaults follow Zyphra's own gradio interface, except fmax:
-        # 22050 is upstream's value for voice cloning, which e2a always does.
-        # emotion is unconditional unless enabled (upstream UI default): the model picks the
-        # delivery from text and voice instead of one fixed mood for the whole book.
-        "emotion_enabled": False,
+        # conditioning and sampling defaults are zonos' own make_cond_dict() / generate() defaults
+        # (fmax 22050 is upstream's value for voice cloning, which e2a always does)
+        "emotion_enabled": True,
         # Happiness, Sadness, Disgust, Fear, Surprise, Anger, Other, Neutral
         "emotion": [0.3077, 0.0256, 0.0256, 0.0256, 0.0256, 0.0256, 0.2564, 0.3077],
         "speaking_rate": 15.0,
-        "pitch_std": 45.0,
+        "pitch_std": 20.0,
         "fmax": 22050.0,
         "cfg_scale": 2.0,
-        # audio quality targets, used by the hybrid model only
-        "dnsmos": 4.0,
-        "vqscore": 0.78,
-        # NovelAI unified sampler (linear 0 disables it), min_p 0 disables min_p
-        "linear": 0.5,
-        "confidence": 0.4,
+        # min_p sampling; the NovelAI unified sampler stays off while linear is 0
+        "linear": 0.0,
+        "confidence": 0.0,
         "quadratic": 0.0,
-        "min_p": 0.0,
+        "min_p": 0.1,
         "max_new_tokens": 86 * 30,
         "files": [],
         "voice": default_speaker,

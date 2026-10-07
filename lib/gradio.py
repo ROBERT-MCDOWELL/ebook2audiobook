@@ -381,24 +381,6 @@ def build_interface(args:dict)->gr.Blocks:
                                 elem_id='gr_zonos_min_p',
                                 info=legends['gr_zonos_min_p_info']
                             )
-                            gr_zonos_dnsmos = gr.Slider(
-                                label=legends['gr_zonos_dnsmos'],
-                                minimum=1.0,
-                                maximum=5.0,
-                                step=0.1,
-                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['dnsmos']),
-                                elem_id='gr_zonos_dnsmos',
-                                info=legends['gr_zonos_dnsmos_info']
-                            )
-                            gr_zonos_vqscore = gr.Slider(
-                                label=legends['gr_zonos_vqscore'],
-                                minimum=0.5,
-                                maximum=0.8,
-                                step=0.01,
-                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['vqscore']),
-                                elem_id='gr_zonos_vqscore',
-                                info=legends['gr_zonos_vqscore_info']
-                            )
                     with gr.Tab(legends['gr_tab_abs_params'], elem_id='gr_tab_abs_params', elem_classes='gr-tab', visible=visible_gr_tab_abs_params) as gr_tab_abs_params:
                         with gr.Row(elem_id='gr_row1_abs'):
                             gr_abs_url = gr.Textbox(label=legends['gr_abs_url'], elem_id='gr_abs_url', value=default_abs_url, placeholder='http://localhost:13378', lines=1, max_lines=1, interactive=True, scale=2)
@@ -869,7 +851,7 @@ def build_interface(args:dict)->gr.Blocks:
                             _search_abs_libraries(session_id, session.get('abs_url', ''), session.get('abs_api_token', '')),
                             gr.update(interactive=abs_upload_enabled),
                             gr.update(value=''),
-                            gr.update(value=bool(session.get('zonos_emotion_enabled', False))),
+                            gr.update(value=bool(session.get('zonos_emotion_enabled', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled']))),
                         )
                 except Exception as e:
                     error = f'_restore_interface(): {e}'
@@ -958,8 +940,6 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(label=legends['gr_zonos_confidence'], info=legends['gr_zonos_confidence_info']),
                             gr.update(label=legends['gr_zonos_quadratic'], info=legends['gr_zonos_quadratic_info']),
                             gr.update(label=legends['gr_zonos_min_p'], info=legends['gr_zonos_min_p_info']),
-                            gr.update(label=legends['gr_zonos_dnsmos'], info=legends['gr_zonos_dnsmos_info']),
-                            gr.update(label=legends['gr_zonos_vqscore'], info=legends['gr_zonos_vqscore_info']),
                             gr.update(label=legends['gr_abs_url']),
                             gr.update(label=legends['gr_abs_api_token']),
                             gr.update(label=legends['gr_abs_audiobook']),
@@ -2773,8 +2753,6 @@ def build_interface(args:dict)->gr.Blocks:
                                 "zonos_speaking_rate": float(session['zonos_speaking_rate']),
                                 "zonos_pitch_std": float(session['zonos_pitch_std']),
                                 "zonos_cfg_scale": float(session['zonos_cfg_scale']),
-                                "zonos_dnsmos": float(session['zonos_dnsmos']),
-                                "zonos_vqscore": float(session['zonos_vqscore']),
                                 "zonos_linear": float(session['zonos_linear']),
                                 "zonos_confidence": float(session['zonos_confidence']),
                                 "zonos_quadratic": float(session['zonos_quadratic']),
@@ -3460,7 +3438,7 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_xtts_top_p, gr_xtts_speed, gr_xtts_enable_text_splitting, gr_markdown_tab_bark_params, gr_bark_text_temp,
                 gr_bark_waveform_temp, gr_markdown_tab_zonos_params, gr_zonos_speaking_rate, gr_zonos_pitch_std, gr_zonos_cfg_scale, gr_zonos_emotion_enabled,
                 gr_zonos_emotion_happiness, gr_zonos_emotion_sadness, gr_zonos_emotion_disgust, gr_zonos_emotion_fear, gr_zonos_emotion_surprise, gr_zonos_emotion_anger, gr_zonos_emotion_other, gr_zonos_emotion_neutral,
-                gr_zonos_linear, gr_zonos_confidence, gr_zonos_quadratic, gr_zonos_min_p, gr_zonos_dnsmos, gr_zonos_vqscore,
+                gr_zonos_linear, gr_zonos_confidence, gr_zonos_quadratic, gr_zonos_min_p,
                 gr_abs_url, gr_abs_api_token, gr_abs_audiobook, gr_abs_status, gr_ui_language,
                 gr_tooltips, gr_tooltips_data
             ]
@@ -3560,7 +3538,7 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_bark_text_temp, gr_bark_waveform_temp,
                 gr_zonos_speaking_rate, gr_zonos_pitch_std, gr_zonos_cfg_scale, gr_zonos_emotion_enabled,
                 gr_zonos_emotion_happiness, gr_zonos_emotion_sadness, gr_zonos_emotion_disgust, gr_zonos_emotion_fear, gr_zonos_emotion_surprise, gr_zonos_emotion_anger, gr_zonos_emotion_other, gr_zonos_emotion_neutral,
-                gr_zonos_linear, gr_zonos_confidence, gr_zonos_quadratic, gr_zonos_min_p, gr_zonos_dnsmos, gr_zonos_vqscore
+                gr_zonos_linear, gr_zonos_confidence, gr_zonos_quadratic, gr_zonos_min_p
             ]
             outputs_on_voice_upload = [
                 gr_ebook_src, gr_ebook_textarea, gr_ebook_mode, gr_language, gr_tts_engine_list,
@@ -4141,16 +4119,6 @@ def build_interface(args:dict)->gr.Blocks:
             gr_zonos_min_p.change(
                 fn=lambda session_id, val: _change_param('zonos_min_p', session_id, float(val)),
                 inputs=[gr_session, gr_zonos_min_p],
-                outputs=None
-            )
-            gr_zonos_dnsmos.change(
-                fn=lambda session_id, val: _change_param('zonos_dnsmos', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_dnsmos],
-                outputs=None
-            )
-            gr_zonos_vqscore.change(
-                fn=lambda session_id, val: _change_param('zonos_vqscore', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_vqscore],
                 outputs=None
             )
             gr_zonos_emotion_enabled.change(
