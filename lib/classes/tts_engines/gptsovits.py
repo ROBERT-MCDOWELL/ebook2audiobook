@@ -140,7 +140,7 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 from lib.classes.device_installer import DeviceInstaller
                 uv_bin = DeviceInstaller().uv_bin
                 uv_pip = [uv_bin, 'pip', 'install', '--python', self.venv_python]
-                steps = []
+                steps = ['matplotlib']
                 if not os.path.exists(self.venv_python):
                     msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
                     # --clear: the dir can exist with a dead interpreter link (docker image rebuilt)
@@ -149,7 +149,7 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 steps.append((msg, uv_pip + torch_step))
                 if re.fullmatch(r'jetson\d+', torch_tag):
                     # the jetson wheels go in with --no-deps (as device_installer does): add torch's own deps
-                    steps.append((msg, uv_pip + ['filelock', 'typing-extensions', 'jinja2', 'fsspec', 'networkx', 'sympy', 'matplotlib']))
+                    steps.append((msg, uv_pip + ['filelock', 'typing-extensions', 'jinja2', 'fsspec', 'networkx', 'sympy']))
                 msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
                 steps.append((msg, uv_pip + ['--only-binary', ':all:'] + [arg for pkg in settings['packages_sdist'] for arg in ('--no-binary', pkg)] + torch_pins + settings['packages']))
                 # pinned source extracted to venvs/gptsovits/src/GPT-SoVITS (python_env's interpreter,
