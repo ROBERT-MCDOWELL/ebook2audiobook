@@ -1,3 +1,11 @@
+# Monkey-patch transformers CVE-2025-32434 check for macOS Intel (PyTorch 2.2.2)
+try:
+    from transformers.utils import import_utils
+    if hasattr(import_utils, 'check_torch_load_is_safe'):
+        import_utils.check_torch_load_is_safe = lambda: None
+except ImportError:
+    pass
+
 import json
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
