@@ -2683,6 +2683,17 @@ def build_interface(args:dict)->gr.Blocks:
                     error = f'_change_gr_zonos_emotion_enabled(): {e}'
                     exception_alert(session_id, error)
                 return tuple(gr.update() for _ in range(9))
+
+            def _select_gr_tab_zonos_params(session_id:str)->tuple:
+                try:
+                    session = context.get_session(session_id)
+                    if session and session.get('id', False):
+                        enabled = bool(session.get('zonos_emotion_enabled', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled']))
+                        return (gr.update(value=enabled), gr.update(visible=enabled), gr.update(value=float(session['zonos_emotion_happiness'])), gr.update(value=float(session['zonos_emotion_sadness'])), gr.update(value=float(session['zonos_emotion_disgust'])), gr.update(value=float(session['zonos_emotion_fear'])), gr.update(value=float(session['zonos_emotion_surprise'])), gr.update(value=float(session['zonos_emotion_anger'])), gr.update(value=float(session['zonos_emotion_other'])), gr.update(value=float(session['zonos_emotion_neutral'])))
+                except Exception as e:
+                    error = f'_select_gr_tab_zonos_params(): {e}'
+                    exception_alert(session_id, error)
+                return tuple(gr.update() for _ in range(10))
                 return
 
             def _start_conversion(
@@ -4088,10 +4099,19 @@ def build_interface(args:dict)->gr.Blocks:
                 inputs=[gr_session, gr_zonos_linear],
                 outputs=None
             )
-            gr_zonos_emotion_enabled.change(
+            # .input (user clicks only): a restore or the tab mounting must never write the session
+            gr_zonos_emotion_enabled.input(
                 fn=_change_gr_zonos_emotion_enabled,
                 inputs=[gr_session, gr_zonos_emotion_enabled],
                 outputs=[gr_group_zonos_emotion_sliders, gr_zonos_emotion_happiness, gr_zonos_emotion_sadness, gr_zonos_emotion_disgust, gr_zonos_emotion_fear, gr_zonos_emotion_surprise, gr_zonos_emotion_anger, gr_zonos_emotion_other, gr_zonos_emotion_neutral]
+            )
+            # tabs render their children only when first opened (gr.Tab render_children=False), so
+            # updates sent before that can be lost: re-apply checkbox, group and values from the
+            # session every time the tab opens
+            gr_tab_zonos_params.select(
+                fn=_select_gr_tab_zonos_params,
+                inputs=[gr_session],
+                outputs=[gr_zonos_emotion_enabled, gr_group_zonos_emotion_sliders, gr_zonos_emotion_happiness, gr_zonos_emotion_sadness, gr_zonos_emotion_disgust, gr_zonos_emotion_fear, gr_zonos_emotion_surprise, gr_zonos_emotion_anger, gr_zonos_emotion_other, gr_zonos_emotion_neutral]
             )
             gr_zonos_emotion_happiness.change(
                 fn=lambda session_id, val: _change_param('zonos_emotion_happiness', session_id, float(val)),
