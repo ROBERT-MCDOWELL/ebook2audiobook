@@ -156,23 +156,33 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 steps.append((msg, uv_pip + ['--only-binary', ':all:'] + [arg for pkg in settings['packages_sdist'] for arg in ('--no-binary', pkg)] + torch_pins + settings['packages']))
                 # --- GLOBAL MONKEY PATCH FOR CVE-2025-32434 ---
                 patch_script = '\n'.join([
-                    'import os, re, sys',
+                    'import os, sys, re',
                     'try:',
                     '    import transformers',
                     '    path = os.path.join(os.path.dirname(transformers.__file__), "utils", "import_utils.py")',
                     '    if os.path.exists(path):',
                     '        with open(path, "r", encoding="utf-8") as f:',
                     '            content = f.read()',
-                    '        pattern = r"def check_torch_load_is_safe\\(\\):.*?(?=\\n(?:def |class |@|\\Z))"',
-                    '        new_content = re.sub(pattern, "def check_torch_load_is_safe():\\n    pass", content, flags=re.DOTALL)',
-                    '        if new_content != content:',
-                    '            with open(path, "w", encoding="utf-8") as f:',
-                    '                f.write(new_content)',
-                    '            print("Patched transformers for CVE-2025-32434")',
+                    '        marker = "def check_torch_load_is_safe():"',
+                    '        idx = content.find(marker)',
+                    '        if idx != -1:',
+                    '            rest = content[idx + len(marker):]',
+                    '            match = re.search("\\r?\\n(?=[a-zA-Z@])", rest)',
+                    '            end_idx = idx + len(marker) + match.start() if match else len(content)',
+                    '            new_func = "def check_torch_load_is_safe():\\n    pass\\n"',
+                    '            new_content = content[:idx] + new_func + content[end_idx:]',
+                    '            if new_content != content:',
+                    '                with open(path, "w", encoding="utf-8") as f:',
+                    '                    f.write(new_content)',
+                    '                print("Successfully patched transformers for CVE-2025-32434")',
+                    '            else:',
+                    '                print("Content unchanged (already patched?)")',
                     '        else:',
-                    '            print("transformers already patched or function not found")',
+                    '            print("check_torch_load_is_safe not found in import_utils.py")',
                     'except Exception as e:',
-                    '    print(f"Patch skipped or failed: {e}")'
+                    '    import traceback',
+                    '    traceback.print_exc()',
+                    '    print(f"Patch failed: {e}")'
                 ])
                 msg = f'Patching {tts_engine} dependencies for CVE-2025-32434...'
                 steps.append((msg, [self.venv_python, '-c', patch_script]))
