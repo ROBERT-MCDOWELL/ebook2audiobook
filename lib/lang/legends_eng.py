@@ -79,7 +79,7 @@ legends = {
     'gr_zonos_linear': 'Linear',
     'gr_zonos_linear_info': '0 keeps the Zonos sampling. Values below 1 give a more varied, livelier delivery.',
     'msg_sml_emotion_ignored': 'Unknown [emotion:{value}] tag ignored. Use one of {values}, or a mix like sadness=0.7,neutral=0.3',
-    'error_zonos_emotion_format': '--emotion needs 8 comma-separated values between 0.0 and 1.0: Happiness,Sadness,Disgust,Fear,Surprise,Anger,Other,Neutral',
+    'error_zonos_emotion_format': '--enable_emotion values must be 8 comma-separated numbers between 0.0 and 1.0: Happiness,Sadness,Disgust,Fear,Surprise,Anger,Other,Neutral',
     'gr_abs_url': 'Server URL',
     'gr_abs_api_token': 'API Token',
     'gr_abs_audiobook': 'Audiobook',

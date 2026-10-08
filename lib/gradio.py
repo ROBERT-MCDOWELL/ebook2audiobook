@@ -826,6 +826,7 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(interactive=abs_upload_enabled),
                             gr.update(value=''),
                             gr.update(value=bool(session.get('zonos_emotion_enabled', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled']))),
+                            gr.update(visible=bool(session.get('zonos_emotion_enabled', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled']))),
                         )
                 except Exception as e:
                     error = f'_restore_interface(): {e}'
@@ -3407,7 +3408,7 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_output_split, gr_output_split_hours, gr_row_output_split_hours, gr_audiobook_list, gr_group_custom_model, gr_convert_btn,
                 gr_voice_player_hidden, gr_voice_play, gr_voice_del_btn, gr_row_voice_player, gr_custom_model_file, gr_custom_model_del_btn,
                 gr_abs_url, gr_abs_api_token, gr_abs_library, gr_abs_upload_btn, gr_abs_audiobook,
-                gr_zonos_emotion_enabled
+                gr_zonos_emotion_enabled, gr_group_zonos_emotion_sliders
             ]
             outputs_ui_language = [
                 gr_tab_main, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_abs_params, gr_import_markdown, gr_ebook_textarea,
