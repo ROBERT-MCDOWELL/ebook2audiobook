@@ -149,7 +149,7 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 steps.append((msg, uv_pip + torch_step))
                 if re.fullmatch(r'jetson\d+', torch_tag):
                     # the jetson wheels go in with --no-deps (as device_installer does): add torch's own deps
-                    steps.append((msg, uv_pip + ['filelock', 'typing-extensions', 'jinja2', 'fsspec', 'networkx', 'sympy']))
+                    steps.append((msg, uv_pip + ['filelock', 'typing-extensions', 'jinja2', 'fsspec', 'networkx', 'sympy', 'matplotlib']))
                 else:
                     steps.append((msg, uv_pip + ['matplotlib']))
                 msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
