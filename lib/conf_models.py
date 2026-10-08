@@ -6,6 +6,7 @@ xtts_builtin_speakers_list = {}
 
 TTS_ENGINES = {
     "ZONOS": "zonos",
+    "GPTSOVITS": "gptsovits",
     "XTTS": "xtts",
     "BARK": "bark",
     "TORTOISE": "tortoise",
@@ -110,6 +111,44 @@ default_engine_settings = {
         "voice": default_speaker,
         "voices": {},
         "rating": {"VRAM": 6, "CPU": 1, "RAM": 8, "Realism": 5}
+    },
+    TTS_ENGINES['GPTSOVITS']: {
+        # runs in its own uv venv (lib/classes/tts_engines/venvs/gptsovits) behind a persistent
+        # worker, from the pinned source tree: upstream is not a package, it runs from its repo root
+        "repo": "lj1995/GPT-SoVITS",
+        "source": "https://github.com/RVC-Boss/GPT-SoVITS/archive/e7cd61ec3dcc9a34089f50ed169e3103a16ad675.tar.gz",
+        "python": "3.12",
+        # pre-flight floor on python_env's torch (refuses platforms without recent builds: intel macOS,
+        # jetson); the venv itself does not mirror it, it installs upstream's own tested pair below
+        "torch_min": "2.5.1",
+        # upstream's tested torch for python 3.12 (README); torchaudio of the same release still loads
+        # wav through soundfile, so no torchcodec / ffmpeg shared libraries are needed in the venv
+        "torch": "2.7.1",
+        # torch 2.7.1 rocm index (upstream's install.sh rocm6.2 index stops at torch 2.5.1)
+        "torch_rocm": "rocm6.3",
+        # upstream requirements.txt without the webui / api / dataset tools (gradio, fastapi, funasr,
+        # modelscope, tensorboard). pyopenjtalk-plus is pyopenjtalk with prebuilt wheels and jieba
+        # stands in for jieba_fast (the worker aliases it): both would need a compiler otherwise.
+        # loguru / rich are hard imports upstream only gets through fastapi[standard].
+        # faster-whisper transcribes the reference for the versions that need its text (v5).
+        "packages": ["numpy<2.0", "scipy", "librosa==0.10.2", "numba", "pytorch-lightning>=2.4", "ffmpeg-python", "onnxruntime", "tqdm", "cn2an", "pypinyin", "pyopenjtalk-plus", "g2p_en", "sentencepiece", "transformers>=4.51,<5", "peft<0.18.0", "chardet", "PyYAML", "psutil", "jieba", "split-lang", "fast_langdetect>=0.3.1", "wordsegment", "rotary_embedding_torch", "ToJyutping", "g2pk2", "ko_pron", "opencc", "python_mecab_ko; sys_platform != 'win32'", "x_transformers", "torchmetrics<=1.5", "pydantic<=2.10.6", "av>=11", "einops", "huggingface_hub", "loguru", "rich", "resampy", "soundfile", "nltk", "faster-whisper", "ctranslate2>=4.0,<5"],
+        # weights every version loads; paths in the HF repo = paths under GPT_SoVITS/pretrained_models
+        "weights": ["chinese-roberta-wwm-ext-large/*", "chinese-hubert-base/*", "s1v3.ckpt", "sv/pretrained_eres2netv2w24s4ep4.ckpt"],
+        # upstream refuses references outside 3-10 s; the worker cuts a clip within this window
+        "ref_min": 3.2,
+        "ref_max": 9.5,
+        "asr_model": "large-v3-turbo",
+        "languages": {"eng": "en", "zho": "zh", "jpn": "ja", "kor": "ko"},
+        "samplerate": 32000,
+        "speed": 1.0,
+        "top_k": 15,
+        "top_p": 1.0,
+        "temperature": 1.0,
+        "repetition_penalty": 1.35,
+        "files": [],
+        "voice": default_speaker,
+        "voices": {},
+        "rating": {"VRAM": 4, "CPU": 2, "RAM": 8, "Realism": 4}
     },
     TTS_ENGINES['XTTS']: {
         "repo": "coqui/XTTS-v2",

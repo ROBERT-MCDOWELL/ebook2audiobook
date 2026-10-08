@@ -8,3 +8,4 @@ from .tacotron import Tacotron2
 from .piper import Piper
 from .yourtts import YourTTS
 from .zonos import Zonos
+from .gptsovits import GptSovits

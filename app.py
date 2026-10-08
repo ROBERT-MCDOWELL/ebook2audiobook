@@ -257,20 +257,20 @@ Default depends on the selected language. The tts engine should be compatible wi
     headless_optional_group.add_argument(cli_options[15], type=str, default=default_fine_tuned, help='Fine tuned model path. Default is builtin model.')
     headless_optional_group.add_argument(cli_options[16], type=str, default=default_output_format, help=f'Output audio format. Default is {default_output_format} set in ./lib/conf.py')
     headless_optional_group.add_argument(cli_options[17], type=str, default=default_output_channel, help=f'Output audio channel. Default is {default_output_channel} set in ./lib/conf.py')
-    headless_optional_group.add_argument(cli_options[18], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['temperature'], help=f"""(xtts only, optional) Temperature for the model.
+    headless_optional_group.add_argument(cli_options[18], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['temperature'], help=f"""(xtts and gptsovits, optional) Temperature for the model. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['temperature']}.
 Default to config.json model. Higher temperatures lead to more creative outputs.""")
     headless_optional_group.add_argument(cli_options[19], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['length_penalty'], help=f"""(xtts only, optional) A length penalty applied to the autoregressive decoder.
 Default to config.json model. Not applied to custom models.""")
     headless_optional_group.add_argument(cli_options[20], type=int, default=default_engine_settings[TTS_ENGINES['XTTS']]['num_beams'], help=f"""(xtts only, optional) Controls how many alternative sequences the model explores. Must be equal or greater than length penalty.
 Default to config.json model.""")
-    headless_optional_group.add_argument(cli_options[21], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['repetition_penalty'], help=f"""(xtts only, optional) A penalty that prevents the autoregressive decoder from repeating itself.
+    headless_optional_group.add_argument(cli_options[21], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['repetition_penalty'], help=f"""(xtts and gptsovits, optional) A penalty that prevents the autoregressive decoder from repeating itself. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['repetition_penalty']}.
 Default to config.json model.""")
-    headless_optional_group.add_argument(cli_options[22], type=int, default=default_engine_settings[TTS_ENGINES['XTTS']]['top_k'], help=f"""(xtts only, optional) Top-k sampling.
+    headless_optional_group.add_argument(cli_options[22], type=int, default=default_engine_settings[TTS_ENGINES['XTTS']]['top_k'], help=f"""(xtts and gptsovits, optional) Top-k sampling. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['top_k']}.
 Lower values mean more likely outputs and increased audio generation speed.
 Default to config.json model.""")
-    headless_optional_group.add_argument(cli_options[23], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['top_p'], help=f"""(xtts only, optional) Top-p sampling.
+    headless_optional_group.add_argument(cli_options[23], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['top_p'], help=f"""(xtts and gptsovits, optional) Top-p sampling. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['top_p']}.
 Lower values mean more likely outputs and increased audio generation speed. Default to config.json model.""")
-    headless_optional_group.add_argument(cli_options[24], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['speed'], help=f"""(xtts only, optional) Speed factor for the speech generation.
+    headless_optional_group.add_argument(cli_options[24], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['speed'], help=f"""(xtts and gptsovits, optional) Speed factor for the speech generation. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['speed']}.
 Default to config.json model.""")
     headless_optional_group.add_argument(cli_options[25], action='store_true', help=f"""(xtts only, optional) Enable TTS text splitting. This option is known to not be very efficient.
 Default to config.json model.""")
@@ -400,6 +400,10 @@ Without it the model picks the delivery from the text and the voice.""")
             args['zonos_speaking_rate'] = args['speaking_rate']
             args['zonos_pitch_std'] = args['pitch_std']
             args['zonos_cfg_scale'] = args['cfg_scale']
+            # shared with xtts: the argparse defaults above are xtts' values, so gptsovits takes an
+            # option only when it is on the command line, otherwise its own default
+            for option, key in ((cli_options[24], 'speed'), (cli_options[22], 'top_k'), (cli_options[23], 'top_p'), (cli_options[18], 'temperature'), (cli_options[21], 'repetition_penalty')):
+                args[f'gptsovits_{key}'] = args[key] if option in sys.argv else default_engine_settings[TTS_ENGINES['GPTSOVITS']][key]
             args['zonos_emotion_enabled'] = args.get('enable_emotion') is not None
             if args['zonos_emotion_enabled']:
                 if args['enable_emotion'] is True:

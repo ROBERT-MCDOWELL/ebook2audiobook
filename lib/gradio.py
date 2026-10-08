@@ -38,6 +38,7 @@ def build_interface(args:dict)->gr.Blocks:
         visible_gr_tab_xtts_params = interface_component_options['gr_tab_xtts_params']
         visible_gr_tab_bark_params = interface_component_options['gr_tab_bark_params']
         visible_gr_tab_zonos_params = interface_component_options['gr_tab_zonos_params']
+        visible_gr_tab_gptsovits_params = interface_component_options['gr_tab_gptsovits_params']
         visible_gr_group_voice_file = interface_component_options['gr_group_voice_file']
         visible_gr_group_custom_model = interface_component_options['gr_group_custom_model']
         visible_gr_tab_abs_params = interface_component_options['gr_tab_abs_params']
@@ -355,6 +356,57 @@ def build_interface(args:dict)->gr.Blocks:
                                     value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][7]),
                                     elem_id='gr_zonos_emotion_neutral'
                                 )
+                    with gr.Tab(legends['gr_tab_gptsovits_params'], elem_id='gr_tab_gptsovits_params', elem_classes='gr-tab', visible=False) as gr_tab_gptsovits_params:
+                        gr_markdown_tab_gptsovits_params = gr.Markdown(
+                            elem_id='gr_markdown_tab_gptsovits_params',
+                            value=f"### {legends['gr_markdown_tab_gptsovits_params_title']}\n{legends['gr_markdown_tab_gptsovits_params_desc']}"
+                        )
+                        with gr.Group(elem_id='gr_group_gptsovits_params', elem_classes=['gr-group']):
+                            gr_gptsovits_speed = gr.Slider(
+                                label=legends['gr_gptsovits_speed'],
+                                minimum=0.6,
+                                maximum=1.65,
+                                step=0.05,
+                                value=float(default_engine_settings[TTS_ENGINES['GPTSOVITS']]['speed']),
+                                elem_id='gr_gptsovits_speed',
+                                info=legends['gr_gptsovits_speed_info']
+                            )
+                            gr_gptsovits_top_k = gr.Slider(
+                                label=legends['gr_gptsovits_top_k'],
+                                minimum=1,
+                                maximum=100,
+                                step=1,
+                                value=int(default_engine_settings[TTS_ENGINES['GPTSOVITS']]['top_k']),
+                                elem_id='gr_gptsovits_top_k',
+                                info=legends['gr_gptsovits_top_k_info']
+                            )
+                            gr_gptsovits_top_p = gr.Slider(
+                                label=legends['gr_gptsovits_top_p'],
+                                minimum=0.0,
+                                maximum=1.0,
+                                step=0.05,
+                                value=float(default_engine_settings[TTS_ENGINES['GPTSOVITS']]['top_p']),
+                                elem_id='gr_gptsovits_top_p',
+                                info=legends['gr_gptsovits_top_p_info']
+                            )
+                            gr_gptsovits_temperature = gr.Slider(
+                                label=legends['gr_gptsovits_temperature'],
+                                minimum=0.0,
+                                maximum=1.0,
+                                step=0.05,
+                                value=float(default_engine_settings[TTS_ENGINES['GPTSOVITS']]['temperature']),
+                                elem_id='gr_gptsovits_temperature',
+                                info=legends['gr_gptsovits_temperature_info']
+                            )
+                            gr_gptsovits_repetition_penalty = gr.Slider(
+                                label=legends['gr_gptsovits_repetition_penalty'],
+                                minimum=0.0,
+                                maximum=2.0,
+                                step=0.05,
+                                value=float(default_engine_settings[TTS_ENGINES['GPTSOVITS']]['repetition_penalty']),
+                                elem_id='gr_gptsovits_repetition_penalty',
+                                info=legends['gr_gptsovits_repetition_penalty_info']
+                            )
                     with gr.Tab(legends['gr_tab_abs_params'], elem_id='gr_tab_abs_params', elem_classes='gr-tab', visible=visible_gr_tab_abs_params) as gr_tab_abs_params:
                         with gr.Row(elem_id='gr_row1_abs'):
                             gr_abs_url = gr.Textbox(label=legends['gr_abs_url'], elem_id='gr_abs_url', value=default_abs_url, placeholder='http://localhost:13378', lines=1, max_lines=1, interactive=True, scale=2)
@@ -764,12 +816,15 @@ def build_interface(args:dict)->gr.Blocks:
                         visible_xtts = False
                         visible_bark = False
                         visible_zonos = False
+                        visible_gptsovits = False
                         if session['tts_engine'] == TTS_ENGINES['XTTS']:
                             visible_xtts = visible_gr_tab_xtts_params
                         elif session['tts_engine'] == TTS_ENGINES['BARK']:
                             visible_bark = visible_gr_tab_bark_params
                         elif session['tts_engine'] == TTS_ENGINES['ZONOS']:
                             visible_zonos = visible_gr_tab_zonos_params
+                        elif session['tts_engine'] == TTS_ENGINES['GPTSOVITS']:
+                            visible_gptsovits = visible_gr_tab_gptsovits_params
                         visible_group_custom_model = visible_gr_group_custom_model if session['fine_tuned'] == 'internal' and session['tts_engine'] in tts_engines_with_custom_model else False
                         visible_voice_buttons = True if session.get('voice') is not None else False
                         visible_row_voice_player = _row_voice_player_visible(session.get('ebook_mode'), False)
@@ -792,6 +847,7 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(visible=visible_xtts),
                             gr.update(visible=visible_bark),
                             gr.update(visible=visible_zonos),
+                            gr.update(visible=visible_gptsovits),
                             gr.update(visible=visible_ebook_src, value=ebook_data, file_count=ebook_file_count),
                             gr.update(visible=visible_ebook_textarea, value=ebook_textarea),
                             gr.update(value=session['ebook_mode']),
@@ -863,6 +919,7 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(label=legends['gr_tab_xtts_params']),
                             gr.update(label=legends['gr_tab_bark_params']),
                             gr.update(label=legends['gr_tab_zonos_params']),
+                            gr.update(label=legends['gr_tab_gptsovits_params']),
                             gr.update(label=legends['gr_tab_abs_params']),
                             gr.update(value=legends['gr_import_markdown']),
                             gr.update(label=legends['gr_ebook_textarea']),
@@ -912,6 +969,12 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(label=legends['gr_zonos_emotion_other']),
                             gr.update(label=legends['gr_zonos_emotion_neutral']),
                             gr.update(label=legends['gr_zonos_linear'], info=legends['gr_zonos_linear_info']),
+                            gr.update(value=f"### {legends['gr_markdown_tab_gptsovits_params_title']}\n{legends['gr_markdown_tab_gptsovits_params_desc']}"),
+                            gr.update(label=legends['gr_gptsovits_speed'], info=legends['gr_gptsovits_speed_info']),
+                            gr.update(label=legends['gr_gptsovits_top_k'], info=legends['gr_gptsovits_top_k_info']),
+                            gr.update(label=legends['gr_gptsovits_top_p'], info=legends['gr_gptsovits_top_p_info']),
+                            gr.update(label=legends['gr_gptsovits_temperature'], info=legends['gr_gptsovits_temperature_info']),
+                            gr.update(label=legends['gr_gptsovits_repetition_penalty'], info=legends['gr_gptsovits_repetition_penalty_info']),
                             gr.update(label=legends['gr_abs_url']),
                             gr.update(label=legends['gr_abs_api_token']),
                             gr.update(label=legends['gr_abs_audiobook']),
@@ -1009,6 +1072,7 @@ def build_interface(args:dict)->gr.Blocks:
                             visible_xtts = False
                             visible_bark = False
                             visible_zonos = False
+                            visible_gptsovits = False
                             visible_abs = visible_gr_tab_abs_params
                             visible_ebook_src = False
                             visible_ebook_textarea = False
@@ -1021,6 +1085,8 @@ def build_interface(args:dict)->gr.Blocks:
                                 visible_bark = visible_gr_tab_bark_params
                             elif session['tts_engine'] == TTS_ENGINES['ZONOS']:
                                 visible_zonos = visible_gr_tab_zonos_params
+                            elif session['tts_engine'] == TTS_ENGINES['GPTSOVITS']:
+                                visible_gptsovits = visible_gr_tab_gptsovits_params
                             if session['ebook_mode'] == ebook_modes['DIRECTORY']:
                                 visible_ebook_src = True
                                 ebook_data = session['ebook_list']
@@ -1033,14 +1099,14 @@ def build_interface(args:dict)->gr.Blocks:
                             enabled_convert_btn = True if session['ebook_mode'] == ebook_modes['TEXT'] or ebook_data is not None else False
                             return (
                                 gr.update(value='', visible=False), gr.update(visible=visible_main),
-                                gr.update(visible=visible_xtts), gr.update(visible=visible_bark), gr.update(visible=visible_zonos), gr.update(visible=visible_abs),
+                                gr.update(visible=visible_xtts), gr.update(visible=visible_bark), gr.update(visible=visible_zonos), gr.update(visible=visible_gptsovits), gr.update(visible=visible_abs),
                                 gr.update(interactive=enabled_convert_btn), gr.update(visible=visible_ebook_src, value=ebook_data), gr.update(visible=visible_ebook_textarea, value=ebook_textarea),
                                 gr.update(value=session['device']), gr.update(value=session['audiobook']), _update_gr_audiobook_list(session_id),
                                 _update_gr_voice_list(session_id), gr.update(''), gr.update(value='')
                             )
                         elif session['status'] in [status_tags['CONVERTING']]:
                             return (
-                                gr.update(), gr.update(), gr.update(), gr.update(), gr.update(),
+                                gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(),
                                 gr.update(), gr.update(), gr.update(visible=True, value=session['ebook_list']), gr.update(),
                                 gr.update(), gr.update(), gr.update(),
                                 gr.update(), gr.update(), gr.update(value='')
@@ -1048,7 +1114,7 @@ def build_interface(args:dict)->gr.Blocks:
                 except Exception as e:
                     error = f'_refresh_interface(): {e}'
                     exception_alert(session_id, error)
-                outputs = tuple([gr.update() for _ in range(15)])
+                outputs = tuple([gr.update() for _ in range(16)])
                 return outputs
 
             def _change_gr_audiobook_list(session_id:str, selected:str|None)->tuple:
@@ -2515,6 +2581,7 @@ def build_interface(args:dict)->gr.Blocks:
                             visible_xtts = visible_gr_tab_xtts_params if session['tts_engine'] == TTS_ENGINES['XTTS'] else False
                             visible_bark = visible_gr_tab_bark_params if session['tts_engine'] == TTS_ENGINES['BARK'] else False
                             visible_zonos = visible_gr_tab_zonos_params if session['tts_engine'] == TTS_ENGINES['ZONOS'] else False
+                            visible_gptsovits = visible_gr_tab_gptsovits_params if session['tts_engine'] == TTS_ENGINES['GPTSOVITS'] else False
                             supports_custom = session['tts_engine'] in tts_engines_with_custom_model
                             visible_custom_model = supports_custom and session['fine_tuned'] == 'internal'
                             if supports_custom:
@@ -2528,6 +2595,7 @@ def build_interface(args:dict)->gr.Blocks:
                                 gr.update(visible=visible_xtts),
                                 gr.update(visible=visible_bark),
                                 gr.update(visible=visible_zonos),
+                                gr.update(visible=visible_gptsovits),
                                 gr.update(visible=visible_custom_model),
                                 _update_gr_fine_tuned_list(session_id),
                                 gr.update(label=file_label),
@@ -2536,7 +2604,7 @@ def build_interface(args:dict)->gr.Blocks:
                 except Exception as e:
                     error = f'_change_gr_tts_engine_list(): {e}'
                     exception_alert(session_id, error)
-                return tuple(gr.update() for _ in range(8))
+                return tuple(gr.update() for _ in range(9))
 
             def _change_gr_fine_tuned_list(session_id:str, selected:str)->dict:
                 try:
@@ -2750,6 +2818,11 @@ def build_interface(args:dict)->gr.Blocks:
                                 "zonos_pitch_std": float(session['zonos_pitch_std']),
                                 "zonos_cfg_scale": float(session['zonos_cfg_scale']),
                                 "zonos_linear": float(session['zonos_linear']),
+                                "gptsovits_speed": float(session['gptsovits_speed']),
+                                "gptsovits_top_k": int(session['gptsovits_top_k']),
+                                "gptsovits_top_p": float(session['gptsovits_top_p']),
+                                "gptsovits_temperature": float(session['gptsovits_temperature']),
+                                "gptsovits_repetition_penalty": float(session['gptsovits_repetition_penalty']),
                                 "output_split":bool(output_split),
                                 "output_split_hours": output_split_hours,
                                 "translate_enabled": bool(translate_enabled),
@@ -3413,7 +3486,7 @@ def build_interface(args:dict)->gr.Blocks:
                 *blocks_components_flat, gr_blocks_header, gr_blocks_expands
             ]
             outputs_restore_interface = [
-                gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_ebook_src, gr_ebook_textarea, gr_ebook_mode, gr_blocks_preview, gr_interlude_enabled, gr_device, gr_language,
+                gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_ebook_src, gr_ebook_textarea, gr_ebook_mode, gr_blocks_preview, gr_interlude_enabled, gr_device, gr_language,
                 gr_translate_enabled, gr_translate, gr_voice_list, gr_tts_engine_list, gr_tts_rating,
                 gr_custom_model_list, gr_fine_tuned_list, gr_output_format_list, gr_output_channel_list,
                 gr_output_split, gr_output_split_hours, gr_row_output_split_hours, gr_audiobook_list, gr_group_custom_model, gr_convert_btn,
@@ -3422,7 +3495,7 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_zonos_emotion_enabled, gr_group_zonos_emotion_sliders
             ]
             outputs_ui_language = [
-                gr_tab_main, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_abs_params, gr_import_markdown, gr_ebook_textarea,
+                gr_tab_main, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_abs_params, gr_import_markdown, gr_ebook_textarea,
                 gr_ebook_mode, gr_blocks_preview, gr_interlude_enabled, gr_language_markdown, gr_translate_enabled, gr_voice_markdown,
                 gr_voice_file, gr_voice_list, gr_device_markdown, gr_tts_rating, gr_models_markdown, gr_fine_tuned_list,
                 gr_custom_model_file, gr_output_markdown, gr_output_format_list, gr_output_channel_list, gr_output_split,
@@ -3431,7 +3504,7 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_xtts_top_p, gr_xtts_speed, gr_xtts_enable_text_splitting, gr_markdown_tab_bark_params, gr_bark_text_temp,
                 gr_bark_waveform_temp, gr_markdown_tab_zonos_params, gr_zonos_speaking_rate, gr_zonos_pitch_std, gr_zonos_cfg_scale, gr_zonos_emotion_enabled,
                 gr_zonos_emotion_happiness, gr_zonos_emotion_sadness, gr_zonos_emotion_disgust, gr_zonos_emotion_fear, gr_zonos_emotion_surprise, gr_zonos_emotion_anger, gr_zonos_emotion_other, gr_zonos_emotion_neutral,
-                gr_zonos_linear,
+                gr_zonos_linear, gr_markdown_tab_gptsovits_params, gr_gptsovits_speed, gr_gptsovits_top_k, gr_gptsovits_top_p, gr_gptsovits_temperature, gr_gptsovits_repetition_penalty,
                 gr_abs_url, gr_abs_api_token, gr_abs_audiobook, gr_abs_status, gr_ui_language,
                 gr_tooltips, gr_tooltips_data
             ]
@@ -3510,7 +3583,7 @@ def build_interface(args:dict)->gr.Blocks:
                 window.addEventListener('resize',hide);
             }'''
             outputs_refresh_interface = [
-                gr_modal, gr_group_main, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_abs_params, gr_convert_btn,
+                gr_modal, gr_group_main, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_abs_params, gr_convert_btn,
                 gr_ebook_src, gr_ebook_textarea, gr_device, gr_audiobook_player, gr_audiobook_list,
                 gr_voice_list, gr_voice_highlight_css, gr_progress
             ]
@@ -3531,7 +3604,8 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_bark_text_temp, gr_bark_waveform_temp,
                 gr_zonos_speaking_rate, gr_zonos_pitch_std, gr_zonos_cfg_scale, gr_zonos_emotion_enabled,
                 gr_zonos_emotion_happiness, gr_zonos_emotion_sadness, gr_zonos_emotion_disgust, gr_zonos_emotion_fear, gr_zonos_emotion_surprise, gr_zonos_emotion_anger, gr_zonos_emotion_other, gr_zonos_emotion_neutral,
-                gr_zonos_linear
+                gr_zonos_linear,
+                gr_gptsovits_speed, gr_gptsovits_top_k, gr_gptsovits_top_p, gr_gptsovits_temperature, gr_gptsovits_repetition_penalty
             ]
             outputs_on_voice_upload = [
                 gr_ebook_src, gr_ebook_textarea, gr_ebook_mode, gr_language, gr_tts_engine_list,
@@ -3656,7 +3730,7 @@ def build_interface(args:dict)->gr.Blocks:
             ).then(
                 fn=_change_gr_tts_engine_list,
                 inputs=[gr_session, gr_tts_engine_list],
-                outputs=[gr_tts_rating, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_group_custom_model, gr_fine_tuned_list, gr_custom_model_file, gr_custom_model_list],
+                outputs=[gr_tts_rating, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_group_custom_model, gr_fine_tuned_list, gr_custom_model_file, gr_custom_model_list],
                 show_progress_on=[gr_progress]
             ).then(
                 fn=_update_gr_voice_list,
@@ -3667,7 +3741,7 @@ def build_interface(args:dict)->gr.Blocks:
             gr_tts_engine_list.change(
                 fn=_change_gr_tts_engine_list,
                 inputs=[gr_session, gr_tts_engine_list],
-                outputs=[gr_tts_rating, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_group_custom_model, gr_fine_tuned_list, gr_custom_model_file, gr_custom_model_list],
+                outputs=[gr_tts_rating, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_group_custom_model, gr_fine_tuned_list, gr_custom_model_file, gr_custom_model_list],
                 show_progress_on=[gr_progress]
             ).then(
                 fn=_update_gr_voice_list,
@@ -4097,6 +4171,52 @@ def build_interface(args:dict)->gr.Blocks:
             gr_zonos_linear.change(
                 fn=lambda session_id, val: _change_param('zonos_linear', session_id, float(val)),
                 inputs=[gr_session, gr_zonos_linear],
+                outputs=None
+            )
+            ########### GPT-SoVITS Params
+
+            gr_tab_gptsovits_params.select(
+                fn=None,
+                inputs=None,
+                outputs=None,
+                js='''
+                    ()=>{
+                        if (!window._gptsovits_sliders_initialized) {
+                            const checkGptSovitsExist = setInterval(() => {
+                                const slider = document.querySelector("#gr_gptsovits_speed input[type=range]");
+                                if(slider){
+                                    clearInterval(checkGptSovitsExist);
+                                    window._gptsovits_sliders_initialized = true;
+                                    init_gptsovits_sliders();
+                                }
+                            }, 500);
+                        }
+                    }
+                '''
+            )
+            gr_gptsovits_speed.change(
+                fn=lambda session_id, val: _change_param('gptsovits_speed', session_id, float(val)),
+                inputs=[gr_session, gr_gptsovits_speed],
+                outputs=None
+            )
+            gr_gptsovits_top_k.change(
+                fn=lambda session_id, val: _change_param('gptsovits_top_k', session_id, int(val)),
+                inputs=[gr_session, gr_gptsovits_top_k],
+                outputs=None
+            )
+            gr_gptsovits_top_p.change(
+                fn=lambda session_id, val: _change_param('gptsovits_top_p', session_id, float(val)),
+                inputs=[gr_session, gr_gptsovits_top_p],
+                outputs=None
+            )
+            gr_gptsovits_temperature.change(
+                fn=lambda session_id, val: _change_param('gptsovits_temperature', session_id, float(val)),
+                inputs=[gr_session, gr_gptsovits_temperature],
+                outputs=None
+            )
+            gr_gptsovits_repetition_penalty.change(
+                fn=lambda session_id, val: _change_param('gptsovits_repetition_penalty', session_id, float(val)),
+                inputs=[gr_session, gr_gptsovits_repetition_penalty],
                 outputs=None
             )
             # .input (user clicks only): a restore or the tab mounting must never write the session
