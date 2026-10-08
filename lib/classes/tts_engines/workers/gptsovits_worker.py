@@ -9,6 +9,15 @@
 #   stdout <- {"ok": true, "file": "...", "samplerate": n, "samples": n}
 #             {"ok": false, "error": "...", "oom": bool}
 #   EOF on stdin -> exit 0 (that is how e2a unloads the model and frees its VRAM)
+
+# Monkey-patch transformers CVE-2025-32434 check for macOS Intel (PyTorch 2.2.2)
+try:
+    from transformers.utils import import_utils
+    if hasattr(import_utils, 'check_torch_load_is_safe'):
+        import_utils.check_torch_load_is_safe = lambda: None
+except ImportError:
+    pass
+
 import os, sys, json, argparse, hashlib
 
 def main()->int:
