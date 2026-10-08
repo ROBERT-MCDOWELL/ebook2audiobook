@@ -1,11 +1,3 @@
-# Monkey-patch transformers CVE-2025-32434 check for macOS Intel (PyTorch 2.2.2)
-try:
-    from transformers.utils import import_utils
-    if hasattr(import_utils, 'check_torch_load_is_safe'):
-        import_utils.check_torch_load_is_safe = lambda: None
-except ImportError:
-    pass
-
 import json
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
@@ -162,6 +154,30 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                     steps.append((msg, uv_pip + ['matplotlib']))
                 msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
                 steps.append((msg, uv_pip + ['--only-binary', ':all:'] + [arg for pkg in settings['packages_sdist'] for arg in ('--no-binary', pkg)] + torch_pins + settings['packages']))
+                # --- GLOBAL MONKEY PATCH FOR CVE-2025-32434 ---
+                patch_script = '\n'.join([
+                    'import os, re, sys',
+                    'try:',
+                    '    import transformers',
+                    '    path = os.path.join(os.path.dirname(transformers.__file__), "utils", "import_utils.py")',
+                    '    if os.path.exists(path):',
+                    '        with open(path, "r", encoding="utf-8") as f:',
+                    '            content = f.read()',
+                    '        pattern = r"def check_torch_load_is_safe\\(\\):.*?(?=\\n(?:def |class |@|\\Z))"',
+                    '        new_content = re.sub(pattern, "def check_torch_load_is_safe():\\n    pass", content, flags=re.DOTALL)',
+                    '        if new_content != content:',
+                    '            with open(path, "w", encoding="utf-8") as f:',
+                    '                f.write(new_content)',
+                    '            print("Patched transformers for CVE-2025-32434")',
+                    '        else:',
+                    '            print("transformers already patched or function not found")',
+                    'except Exception as e:',
+                    '    print(f"Patch skipped or failed: {e}")'
+                ])
+                msg = f'Patching {tts_engine} dependencies for CVE-2025-32434...'
+                steps.append((msg, [self.venv_python, '-c', patch_script]))
+                # -----------------------------------------------
+                # pinned source extracted to venvs/gptsovits/src/GPT-SoVITS (python_env's interpreter,
                 # pinned source extracted to venvs/gptsovits/src/GPT-SoVITS (python_env's interpreter,
                 # stdlib only). Upstream keeps its weights inside the tree, so pretrained_models and the
                 # chinese G2PWModel are set aside and put back: a new pin never re-downloads them.
