@@ -2,7 +2,7 @@ import json
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
-from lib.conf import systems, default_pytorch_url
+from lib.conf import systems, default_pytorch_url, default_jetson_url
 from lib.lang import legends
 
 class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
@@ -88,22 +88,39 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 self.worker_env['CUDA_VISIBLE_DEVICES'] = '-1'
                 self.worker_env['HIP_VISIBLE_DEVICES'] = '-1'
             import torch
-            # python_env's local tag gives the device family; the matching torch 2.7.1 index:
-            # cu126 keeps Pascal (sm_61) kernels, cu128 adds Blackwell, cu118 for older drivers.
-            # Jetson and Windows ROCm builds come from custom wheel URLs, intel macOS has no 2.7.1.
+            # upstream accepts torch >= 2.2.2 (its oldest tested release) and tested 2.7.1 with python
+            # 3.12, which the venv installs wherever PyTorch publishes it. python_env's local tag gives
+            # the device family: cu126 keeps Pascal (sm_61) kernels, cu128 adds Blackwell, cu118 for
+            # older drivers. Intel macOS stops at 2.2.2. Jetson takes e2a's own cp310 wheels, the
+            # same as python_env, so its venv is python 3.10. Windows ROCm wheels have no index.
             torch_tag = torch.__version__.partition('+')[2]
             cuda_tag = re.fullmatch(r'cu(\d+)', torch_tag)
-            venv_tag = None
+            venv_python = settings['python']
+            venv_torch = None
+            torch_step = None
             if cuda_tag:
-                venv_tag = 'cu118' if int(cuda_tag.group(1)) <= 118 else 'cu126' if int(cuda_tag.group(1)) <= 126 else 'cu128'
-            elif torch_tag in ('', 'cpu', 'xpu'):
-                venv_tag = torch_tag
+                index_tag = 'cu118' if int(cuda_tag.group(1)) <= 118 else 'cu126' if int(cuda_tag.group(1)) <= 126 else 'cu128'
+                venv_torch = f"{settings['torch']}+{index_tag}"
+                torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f'{default_pytorch_url}/{index_tag}']
+            elif torch_tag in ('cpu', 'xpu'):
+                venv_torch = f"{settings['torch']}+{torch_tag}"
+                torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f'{default_pytorch_url}/{torch_tag}']
+            elif torch_tag == '':
+                # PyPI builds (macOS)
+                venv_torch = settings['torch_min'] if sys.platform == systems['MACOS'] and os.uname().machine != 'arm64' else settings['torch']
+                torch_step = [f'torch=={venv_torch}', f'torchaudio=={venv_torch}']
             elif re.fullmatch(r'rocm[\d.]+', torch_tag) and sys.platform == systems['LINUX']:
-                venv_tag = settings['torch_rocm']
-            if venv_tag is None or (sys.platform == systems['MACOS'] and os.uname().machine != 'arm64'):
-                error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=settings['torch'], version=torch.__version__)
+                venv_torch = f"{settings['torch']}+{settings['torch_rocm']}"
+                torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f"{default_pytorch_url}/{settings['torch_rocm']}"]
+            elif re.fullmatch(r'jetson\d+', torch_tag):
+                import torchaudio
+                jetson_code = ''.join(c for c in torch_tag if c.isdigit())
+                venv_python = '3.10'
+                venv_torch = torch.__version__
+                torch_step = ['--no-deps', f"{default_jetson_url}/torch-v{jetson_code}/torch-{torch.__version__.partition('+')[0]}%2B{torch_tag}-cp310-cp310-linux_aarch64.whl", f"{default_jetson_url}/torchaudio-v{jetson_code}/torchaudio-{torchaudio.__version__.partition('+')[0]}%2B{torch_tag}-cp310-cp310-linux_aarch64.whl"]
+            if torch_step is None:
+                error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=settings['torch_min'], version=torch.__version__)
                 raise ValueError(error)
-            venv_torch = f"{settings['torch']}+{venv_tag}" if venv_tag else settings['torch']
             marker_file = os.path.join(self.venv_dir, '.e2a_installed.json')
             installed = {}
             if os.path.exists(marker_file):
@@ -121,9 +138,12 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 if not os.path.exists(self.venv_python):
                     msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
                     # --clear: the dir can exist with a dead interpreter link (docker image rebuilt)
-                    steps.append((msg, [uv_bin, 'venv', '--clear', '--python', settings['python'], self.venv_dir]))
+                    steps.append((msg, [uv_bin, 'venv', '--clear', '--python', venv_python, self.venv_dir]))
                 msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch / torchaudio {venv_torch}')
-                steps.append((msg, uv_pip + [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}"] + (['--index-url', f'{default_pytorch_url}/{venv_tag}'] if venv_tag else [])))
+                steps.append((msg, uv_pip + torch_step))
+                if re.fullmatch(r'jetson\d+', torch_tag):
+                    # the jetson wheels go in with --no-deps (as device_installer does): add torch's own deps
+                    steps.append((msg, uv_pip + ['filelock', 'typing-extensions', 'jinja2', 'fsspec', 'networkx', 'sympy']))
                 msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
                 steps.append((msg, uv_pip + settings['packages']))
                 # pinned source extracted to venvs/gptsovits/src/GPT-SoVITS (python_env's interpreter,

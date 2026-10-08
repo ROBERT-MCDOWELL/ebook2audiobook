@@ -118,9 +118,9 @@ default_engine_settings = {
         "repo": "lj1995/GPT-SoVITS",
         "source": "https://github.com/RVC-Boss/GPT-SoVITS/archive/e7cd61ec3dcc9a34089f50ed169e3103a16ad675.tar.gz",
         "python": "3.12",
-        # pre-flight floor on python_env's torch (refuses platforms without recent builds: intel macOS,
-        # jetson); the venv itself does not mirror it, it installs upstream's own tested pair below
-        "torch_min": "2.5.1",
+        # upstream's oldest tested torch (README, CPU): pre-flight floor on python_env's torch, and
+        # the venv's torch on intel macOS, where PyTorch stopped publishing at this release
+        "torch_min": "2.2.2",
         # upstream's tested torch for python 3.12 (README); torchaudio of the same release still loads
         # wav through soundfile, so no torchcodec / ffmpeg shared libraries are needed in the venv
         "torch": "2.7.1",
