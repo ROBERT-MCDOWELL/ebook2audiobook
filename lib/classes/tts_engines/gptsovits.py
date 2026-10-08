@@ -121,6 +121,12 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
             if torch_step is None:
                 error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=settings['torch_min'], version=torch.__version__)
                 raise ValueError(error)
+            # the dependency step must never swap this torch for another build: left free, a newer
+            # package (x-transformers -> torch-einops-utils) pulled PyPI's latest torch over jetson's
+            # and stranded its torchaudio. Pinned by public version, which PyPI resolves while the
+            # installed local build (+cuXXX, +jetsonNN) satisfies it, with its own dependencies.
+            venv_torchaudio = torchaudio.__version__.partition('+')[0] if re.fullmatch(r'jetson\d+', torch_tag) else venv_torch.partition('+')[0]
+            torch_pins = [f"torch=={venv_torch.partition('+')[0]}", f'torchaudio=={venv_torchaudio}']
             marker_file = os.path.join(self.venv_dir, '.e2a_installed.json')
             installed = {}
             if os.path.exists(marker_file):
@@ -145,7 +151,7 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                     # the jetson wheels go in with --no-deps (as device_installer does): add torch's own deps
                     steps.append((msg, uv_pip + ['filelock', 'typing-extensions', 'jinja2', 'fsspec', 'networkx', 'sympy']))
                 msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
-                steps.append((msg, uv_pip + settings['packages']))
+                steps.append((msg, uv_pip + ['--only-binary', ':all:'] + [arg for pkg in settings['packages_sdist'] for arg in ('--no-binary', pkg)] + torch_pins + settings['packages']))
                 # pinned source extracted to venvs/gptsovits/src/GPT-SoVITS (python_env's interpreter,
                 # stdlib only). Upstream keeps its weights inside the tree, so pretrained_models and the
                 # chinese G2PWModel are set aside and put back: a new pin never re-downloads them.

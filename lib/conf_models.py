@@ -132,6 +132,10 @@ default_engine_settings = {
         # loguru / rich are hard imports upstream only gets through fastapi[standard].
         # faster-whisper transcribes the reference for the versions that need its text (v5).
         "packages": ["numpy<2.0", "scipy", "librosa==0.10.2", "numba", "pytorch-lightning>=2.4", "ffmpeg-python", "onnxruntime", "tqdm", "cn2an", "pypinyin", "pyopenjtalk-plus", "g2p_en", "sentencepiece", "transformers>=4.51,<5", "peft<0.18.0", "chardet", "PyYAML", "psutil", "jieba", "split-lang", "fast_langdetect>=0.3.1", "wordsegment", "rotary_embedding_torch", "ToJyutping", "g2pk2", "ko_pron", "opencc", "python_mecab_ko; sys_platform != 'win32'", "x_transformers", "torchmetrics<=1.5", "pydantic<=2.10.6", "av>=11", "einops", "huggingface_hub", "loguru", "rich", "resampy", "soundfile", "nltk", "faster-whisper", "ctranslate2>=4.0,<5"],
+        # the packages above install as wheels only, so no platform ever needs a compiler: the resolver
+        # takes the newest release that has a wheel there (e.g. numba 0.68 / llvmlite 0.50 have no
+        # intel macOS wheels, 0.62 / 0.45 do). These three only exist as pure-python sources.
+        "packages_sdist": ["jieba", "g2p-en", "distance"],
         # weights every version loads; paths in the HF repo = paths under GPT_SoVITS/pretrained_models
         "weights": ["chinese-roberta-wwm-ext-large/*", "chinese-hubert-base/*", "s1v3.ckpt", "sv/pretrained_eres2netv2w24s4ep4.ckpt"],
         # upstream refuses references outside 3-10 s; the worker cuts a clip within this window
