@@ -98,10 +98,21 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             espeak_lib = None
             espeak_data = None
             if sys.platform == systems['MACOS']:
-                espeak_prefix = '/opt/homebrew' if os.uname().machine == archs['ARM64'] else '/usr/local'
+                espeak_prefix = '/opt/homebrew' if os.uname().machine == 'arm64' else '/usr/local'
                 espeak_exe = os.path.join(espeak_prefix, 'bin', 'espeak-ng')
                 espeak_lib = os.path.join(espeak_prefix, 'lib', 'libespeak-ng.dylib')
                 espeak_data = os.path.join(espeak_prefix, 'share', 'espeak-ng-data')
+                if os.path.exists(espeak_lib):
+                    self.worker_env['PHONEMIZER_ESPEAK_LIBRARY'] = espeak_lib
+                    # espeak-ng depends on libpcre2-8 and libucd in the same prefix
+                    self.worker_env['DYLD_LIBRARY_PATH'] = os.path.join(espeak_prefix, 'lib')
+                if os.path.isdir(espeak_data):
+                    self.worker_env['ESPEAK_DATA_PATH'] = espeak_data
+                # also ensure the espeak-ng binary is findable
+                self.worker_env['PATH'] = os.pathsep.join([
+                    os.path.join(espeak_prefix, 'bin'),
+                    self.worker_env.get('PATH', '')
+                ])
             elif sys.platform == systems['LINUX']:
                 espeak_exe = os.path.join(espeak_prefix, 'bin', 'espeak-ng')
                 if platform.machine().lower() == archs['AARCH64']:
