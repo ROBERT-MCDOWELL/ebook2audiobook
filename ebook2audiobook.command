@@ -50,6 +50,7 @@ if [[ "${OSTYPE-}" == darwin* ]]; then
         BREW_PREFIX="/usr/local"
     fi
     if [[ -f "$BREW_PREFIX/lib/libespeak-ng.dylib" ]]; then
+		export PHONEMIZER_ESPEAK_PATH="/usr/local/bin/espeak-ng"
         export PHONEMIZER_ESPEAK_LIBRARY="$BREW_PREFIX/lib/libespeak-ng.dylib"
         export ESPEAK_DATA_PATH="$BREW_PREFIX/share/espeak-ng-data"
     fi
@@ -62,6 +63,7 @@ elif [[ "${OSTYPE-}" == linux* ]]; then
         if [[ -f "$lib" ]]; then ESPEAK_LIB="$lib"; break; fi
     done
     if [[ -n "$ESPEAK_LIB" ]]; then
+		export PHONEMIZER_ESPEAK_PATH="/usr/bin/espeak-ng"
         export PHONEMIZER_ESPEAK_LIBRARY="$ESPEAK_LIB"
         export ESPEAK_DATA_PATH="/usr/share/espeak-ng-data"
     fi
