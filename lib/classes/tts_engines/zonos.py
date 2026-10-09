@@ -2,7 +2,7 @@ import json
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
-from lib.conf import systems, default_pytorch_url
+from lib.conf import systems, archs, default_pytorch_url
 from lib.lang import legends
 
 class Zonos(TTSUtils, TTSRegistry, name='zonos'):
