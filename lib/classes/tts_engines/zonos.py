@@ -137,6 +137,9 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                     msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch {torch.__version__}, torchaudio {torchaudio.__version__}')
                     steps.append((msg, uv_pip + [f'torch=={torch.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torch_tag}'] if torch_tag else [])))
                     steps.append((msg, uv_pip + ['--no-deps', f'torchaudio=={torchaudio.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torchaudio_tag}'] if torchaudio_tag else [])))
+                    # Pin numpy to match torch's compiled ABI (numpy 1.x for torch < 2.5, numpy 2.x for >= 2.5)
+                    numpy_pkg = 'numpy<2' if torch_version < (2, 5, 0) else 'numpy'
+                    steps.append((msg, uv_pip + [numpy_pkg]))
                     msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
                     steps.append((msg, uv_pip + settings['packages']))
                     # upstream pyproject has packages.find include = ["zonos"], which matches the

@@ -149,10 +149,13 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch / torchaudio {venv_torch}')
                 steps.append((msg, uv_pip + torch_step))
                 if re.fullmatch(r'jetson\d+', torch_tag):
-                    # the jetson wheels go in with --no-deps (as device_installer does): add torch's own deps
                     steps.append((msg, uv_pip + ['filelock', 'typing-extensions', 'jinja2', 'fsspec', 'networkx', 'sympy', 'matplotlib']))
                 else:
                     steps.append((msg, uv_pip + ['matplotlib']))
+                # Pin numpy to match torch's compiled ABI
+                venv_torch_tuple = tuple(int(x) for x in venv_torch.partition('+')[0].split('.')[:3])
+                numpy_pkg = 'numpy<2' if venv_torch_tuple < (2, 5, 0) else 'numpy'
+                steps.append((msg, uv_pip + [numpy_pkg]))
                 msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
                 steps.append((msg, uv_pip + ['--only-binary', ':all:'] + [arg for pkg in settings['packages_sdist'] for arg in ('--no-binary', pkg)] + torch_pins + settings['packages']))
                 # pinned source extracted to venvs/gptsovits/src/GPT-SoVITS (python_env's interpreter,

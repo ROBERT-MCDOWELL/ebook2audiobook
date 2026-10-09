@@ -89,7 +89,7 @@ default_engine_settings = {
         "source": "https://github.com/Zyphra/Zonos/archive/bc40d98e1e1ab54fc65c483be127a90e3c7c0645.tar.gz",
         "python": "3.12",
         "torch_min": "2.2.2",
-        "packages": ["setuptools", "packaging", "tqdm", "safetensors", "inflect>=7.5.0", "kanjize>=1.5.0", "numpy<2", "phonemizer>=3.3.0", "sudachipy>=0.6.10", "sudachidict-full>=20241021", "transformers>=4.48.1,<5", "soundfile>=0.13.1", "huggingface-hub>=0.28.1"],
+        "packages": ["setuptools", "packaging", "tqdm", "safetensors", "inflect>=7.5.0", "kanjize>=1.5.0", "phonemizer>=3.3.0", "sudachipy>=0.6.10", "sudachidict-full>=20241021", "transformers>=4.48.1,<5", "soundfile>=0.13.1", "huggingface-hub>=0.28.1"],
         "packages_hybrid": ["mamba-ssm>=2.2.4", "causal-conv1d>=1.5.0.post8", "flash-attn>=2.7.3"],
         # robust languages only (most of the 200k h are en, then zh, ja, fr, es, de); values are espeak codes
         "languages": {"eng": "en-us", "deu": "de", "fra": "fr-fr", "jpn": "ja", "spa": "es", "zho": "cmn"},
@@ -131,7 +131,7 @@ default_engine_settings = {
         # stands in for jieba_fast (the worker aliases it): both would need a compiler otherwise.
         # loguru / rich are hard imports upstream only gets through fastapi[standard].
         # faster-whisper transcribes the reference for the versions that need its text (v5).
-        "packages": ["numpy<2.0", "scipy", "librosa==0.10.2", "numba", "pytorch-lightning>=2.4", "ffmpeg-python", "onnxruntime", "tqdm", "cn2an", "pypinyin", "pyopenjtalk-plus", "g2p_en", "sentencepiece", "transformers>=4.51,<5", "peft<0.18.0", "chardet", "PyYAML", "psutil", "jieba", "split-lang", "fast_langdetect>=0.3.1", "wordsegment", "rotary_embedding_torch", "ToJyutping", "g2pk2", "ko_pron", "opencc", "python_mecab_ko; sys_platform != 'win32'", "x_transformers", "torchmetrics<=1.5", "pydantic<=2.10.6", "av>=11", "einops", "huggingface_hub", "loguru", "rich", "resampy", "soundfile", "nltk", "faster-whisper", "ctranslate2>=4.0,<5"],
+        "packages": ["scipy", "librosa==0.10.2", "numba", "pytorch-lightning>=2.4", "ffmpeg-python", "onnxruntime", "tqdm", "cn2an", "pypinyin", "pyopenjtalk-plus", "g2p_en", "sentencepiece", "transformers>=4.51,<5", "peft<0.18.0", "chardet", "PyYAML", "psutil", "jieba", "split-lang", "fast_langdetect>=0.3.1", "wordsegment", "rotary_embedding_torch", "ToJyutping", "g2pk2", "ko_pron", "opencc", "python_mecab_ko; sys_platform != 'win32'", "x_transformers", "torchmetrics<=1.5", "pydantic<=2.10.6", "av>=11", "einops", "huggingface_hub", "loguru", "rich", "resampy", "soundfile", "nltk", "faster-whisper", "ctranslate2>=4.0,<5"],
         # the packages above install as wheels only, so no platform ever needs a compiler: the resolver
         # takes the newest release that has a wheel there (e.g. numba 0.68 / llvmlite 0.50 have no
         # intel macOS wheels, 0.62 / 0.45 do). These three only exist as pure-python sources.
