@@ -2,7 +2,7 @@ import json
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
-from lib.conf import systems, archs, default_pytorch_url
+from lib.conf import systems, archs, default_pytorch_url, default_pytorch_nightly_url, default_jetson_url
 from lib.lang import legends
 
 class Zonos(TTSUtils, TTSRegistry, name='zonos'):
@@ -71,11 +71,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                float(self.session[key]) if self.session.get(key) is not None else float(settings['emotion'][i])
                for i, key in enumerate(['zonos_emotion_happiness', 'zonos_emotion_sadness', 'zonos_emotion_disgust', 'zonos_emotion_fear', 'zonos_emotion_surprise', 'zonos_emotion_anger', 'zonos_emotion_other', 'zonos_emotion_neutral'])
             ]
-            # --- own uv venv: lib/classes/tts_engines/venvs/zonos ---
-            # torch/torchaudio are mirrored from python_env (same version, same local
-            # tag, same index) so the worker gets the build device_installer already
-            # validated for this machine; everything else zonos needs is pinned in
-            # default_engine_settings. gradio is deliberately not installed.
+            # --- own uv venv: lib/classes/tts_engines/venvs ---
             progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
             engine_dir = os.path.dirname(os.path.abspath(__file__))
             self.venv_dir = os.path.join(engine_dir, 'venvs', tts_engine)
@@ -138,9 +134,6 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             torchaudio_tag = torchaudio.__version__.partition('+')[2]
             torch_version = tuple(int(x) for x in re.findall(r'\d+', torch_base)[:3])
             torch_min = tuple(int(x) for x in settings['torch_min'].split('.'))
-            # only builds reachable from a plain index can be mirrored: PyPI (no tag),
-            # download.pytorch.org cpu / cuXXX / xpu / linux rocmX.Y. Jetson and
-            # Windows ROCm come from custom wheel URLs and are below torch_min anyway.
             index_ok = (
                torch_tag in ('', 'cpu', 'xpu')
                or bool(re.fullmatch(r'cu\d+', torch_tag))

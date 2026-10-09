@@ -2,7 +2,7 @@ import json
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
-from lib.conf import systems, default_pytorch_url, default_jetson_url
+from lib.conf import systems, default_pytorch_url, default_pytorch_nightly_url, default_jetson_url
 from lib.lang import legends
 
 class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
@@ -64,7 +64,7 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                     'gptsovits_repetition_penalty': float
                 }.items()
             }
-            # --- own uv venv: lib/classes/tts_engines/venvs/gptsovits ---
+            # --- own uv venv in lib/classes/tts_engines/venvs ---
             # every package follows upstream's requirements, torch included (settings['torch']);
             # python_env only tells which device family the index must serve
             progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
@@ -111,11 +111,6 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
             if espeak_data and os.path.isdir(espeak_data):
                 self.worker_env['ESPEAK_DATA_PATH'] = espeak_data
             import torch
-            # upstream accepts torch >= 2.2.2 (its oldest tested release) and tested 2.7.1 with python
-            # 3.12, which the venv installs wherever PyTorch publishes it. python_env's local tag gives
-            # the device family: cu126 keeps Pascal (sm_61) kernels, cu128 adds Blackwell, cu118 for
-            # older drivers. Intel macOS stops at 2.2.2. Jetson takes e2a's own cp310 wheels, the
-            # same as python_env, so its venv is python 3.10. Windows ROCm wheels have no index.
             torch_tag = torch.__version__.partition('+')[2]
             cuda_tag = re.fullmatch(r'cu(\d+)', torch_tag)
             venv_python = settings['python']
@@ -129,7 +124,6 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 venv_torch = f"{settings['torch']}+{torch_tag}"
                 torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f'{default_pytorch_url}/{torch_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torch_tag}']
             elif torch_tag == '':
-                # PyPI builds (macOS)
                 venv_torch = settings['torch_min'] if sys.platform == systems['MACOS'] and os.uname().machine != 'arm64' else settings['torch']
                 torch_step = [f'torch=={venv_torch}', f'torchaudio=={venv_torch}']
             elif re.fullmatch(r'rocm[\d.]+', torch_tag) and sys.platform == systems['LINUX']:
@@ -144,10 +138,6 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
             if torch_step is None:
                 error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=settings['torch_min'], version=torch.__version__)
                 raise ValueError(error)
-            # the dependency step must never swap this torch for another build: left free, a newer
-            # package (x-transformers -> torch-einops-utils) pulled PyPI's latest torch over jetson's
-            # and stranded its torchaudio. Pinned by public version, which PyPI resolves while the
-            # installed local build (+cuXXX, +jetsonNN) satisfies it, with its own dependencies.
             venv_torchaudio = torchaudio.__version__.partition('+')[0] if re.fullmatch(r'jetson\d+', torch_tag) else venv_torch.partition('+')[0]
             torch_pins = [f"torch=={venv_torch.partition('+')[0]}", f'torchaudio=={venv_torchaudio}']
             marker_file = os.path.join(self.venv_dir, '.e2a_installed.json')
@@ -180,7 +170,6 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 steps.append((msg, uv_pip + [numpy_pkg]))
                 msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
                 steps.append((msg, uv_pip + ['--only-binary', ':all:'] + [arg for pkg in settings['packages_sdist'] for arg in ('--no-binary', pkg)] + torch_pins + settings['packages']))
-                # pinned source extracted to venvs/gptsovits/src/GPT-SoVITS (python_env's interpreter,
                 # pinned source extracted to venvs/gptsovits/src/GPT-SoVITS (python_env's interpreter,
                 # stdlib only). Upstream keeps its weights inside the tree, so pretrained_models and the
                 # chinese G2PWModel are set aside and put back: a new pin never re-downloads them.
