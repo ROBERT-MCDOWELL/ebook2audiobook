@@ -88,6 +88,28 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 # keep the worker off the GPU entirely
                 self.worker_env['CUDA_VISIBLE_DEVICES'] = '-1'
                 self.worker_env['HIP_VISIBLE_DEVICES'] = '-1'
+            # espeak-ng paths for phonemizer: worker_env replaces the subprocess
+            # environment, so resolve them here instead of relying on the launcher
+            espeak_lib = None
+            espeak_data = None
+            if sys.platform == systems['MACOS']:
+                espeak_prefix = '/opt/homebrew' if os.uname().machine == 'arm64' else '/usr/local'
+                espeak_lib = os.path.join(espeak_prefix, 'lib', 'libespeak-ng.dylib')
+                espeak_data = os.path.join(espeak_prefix, 'share', 'espeak-ng-data')
+            elif sys.platform == systems['LINUX']:
+                espeak_data = '/usr/share/espeak-ng-data'
+                for candidate in (
+                    '/usr/lib/x86_64-linux-gnu/libespeak-ng.so.1',
+                    '/usr/lib64/libespeak-ng.so.1',
+                    '/usr/lib/libespeak-ng.so.1',
+                ):
+                    if os.path.exists(candidate):
+                        espeak_lib = candidate
+                        break
+            if espeak_lib and os.path.exists(espeak_lib):
+                self.worker_env['PHONEMIZER_ESPEAK_LIBRARY'] = espeak_lib
+            if espeak_data and os.path.isdir(espeak_data):
+                self.worker_env['ESPEAK_DATA_PATH'] = espeak_data
             import torch
             # upstream accepts torch >= 2.2.2 (its oldest tested release) and tested 2.7.1 with python
             # 3.12, which the venv installs wherever PyTorch publishes it. python_env's local tag gives
