@@ -157,45 +157,45 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             # time and fail, so a failure is recorded instead of retried on every run.
             need_hybrid = hybrid_wanted and (need_base or 'hybrid' not in installed)
             if need_base or need_hybrid:
-               from lib.classes.device_installer import DeviceInstaller
-               uv_bin = DeviceInstaller().uv_bin
-               uv_pip = [uv_bin, 'pip', 'install', '--python', self.venv_python]
-               steps = []
-               if need_base:
-                   installed = {}
-                   if not os.path.exists(self.venv_python):
+                from lib.classes.device_installer import DeviceInstaller
+                uv_bin = DeviceInstaller().uv_bin
+                uv_pip = [uv_bin, 'pip', 'install', '--python', self.venv_python]
+                steps = []
+                if need_base:
+                    installed = {}
+                    if not os.path.exists(self.venv_python):
                     msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
                        # --clear: the dir can exist with a dead interpreter link (docker image rebuilt)
                        steps.append((msg, [uv_bin, 'venv', '--clear', '--python', settings['python'], self.venv_dir]))
-                   msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch {torch.__version__}, torchaudio {torchaudio.__version__}')
-                   steps.append((msg, uv_pip + [f'torch=={torch.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torch_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torch_tag}'] if torch_tag else [])))
-                   steps.append((msg, uv_pip + ['--no-deps', f'torchaudio=={torchaudio.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torchaudio_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torchaudio_tag}'] if torchaudio_tag else [])))
-                   # Pin numpy to match torch's compiled ABI (numpy 1.x for torch < 2.5, numpy 2.x for >= 2.5)
-                   numpy_pkg = 'numpy<2' if torch_version < (2, 5, 0) else 'numpy'
-                   steps.append((msg, uv_pip + [numpy_pkg]))
-                   msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
-                   steps.append((msg, uv_pip + settings['packages']))
-                   # upstream pyproject has packages.find include = ["zonos"], which matches the
-                   # top-level package only: a regular wheel build drops zonos/backbone. Upstream
-                   # installs editable (uv pip install -e .), so do the same from the pinned source
-                   # extracted to venvs/zonos/src/Zonos (python_env's interpreter, stdlib only).
-                   src_dir = os.path.join(self.venv_dir, 'src', 'Zonos')
-                   extract_script = '\n'.join([
-                       'import os, sys, shutil, tarfile, urllib.request',
-                       'url, dst = sys.argv[1], sys.argv[2]',
-                       'shutil.rmtree(dst, ignore_errors=True)',
-                       'os.makedirs(dst)',
-                       'archive = os.path.join(dst, "source.tar.gz")',
-                       'urllib.request.urlretrieve(url, archive)',
-                       'with tarfile.open(archive, "r:gz") as tar:',
-                       '    root = tar.getmembers()[0].name.split("/")[0]',
-                       '    tar.extractall(dst, **({"filter": "data"} if hasattr(tarfile, "data_filter") else {}))',
-                       'os.unlink(archive)',
-                       'os.rename(os.path.join(dst, root), os.path.join(dst, "Zonos"))'
-                   ])
-                   msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} source')
-                   steps.append((msg, [sys.executable, '-c', extract_script, settings['source'], os.path.dirname(src_dir)]))
-                   steps.append((msg, uv_pip + ['--no-deps', '-e', src_dir]))
+                    msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch {torch.__version__}, torchaudio {torchaudio.__version__}')
+                    steps.append((msg, uv_pip + [f'torch=={torch.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torch_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torch_tag}'] if torch_tag else [])))
+                    steps.append((msg, uv_pip + ['--no-deps', f'torchaudio=={torchaudio.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torchaudio_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torchaudio_tag}'] if torchaudio_tag else [])))
+                    # Pin numpy to match torch's compiled ABI (numpy 1.x for torch < 2.5, numpy 2.x for >= 2.5)
+                    numpy_pkg = 'numpy<2' if torch_version < (2, 5, 0) else 'numpy'
+                    steps.append((msg, uv_pip + [numpy_pkg]))
+                    msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
+                    steps.append((msg, uv_pip + settings['packages']))
+                    # upstream pyproject has packages.find include = ["zonos"], which matches the
+                    # top-level package only: a regular wheel build drops zonos/backbone. Upstream
+                    # installs editable (uv pip install -e .), so do the same from the pinned source
+                    # extracted to venvs/zonos/src/Zonos (python_env's interpreter, stdlib only).
+                    src_dir = os.path.join(self.venv_dir, 'src', 'Zonos')
+                    extract_script = '\n'.join([
+                        'import os, sys, shutil, tarfile, urllib.request',
+                        'url, dst = sys.argv[1], sys.argv[2]',
+                        'shutil.rmtree(dst, ignore_errors=True)',
+                        'os.makedirs(dst)',
+                        'archive = os.path.join(dst, "source.tar.gz")',
+                        'urllib.request.urlretrieve(url, archive)',
+                        'with tarfile.open(archive, "r:gz") as tar:',
+                        '    root = tar.getmembers()[0].name.split("/")[0]',
+                        '    tar.extractall(dst, **({"filter": "data"} if hasattr(tarfile, "data_filter") else {}))',
+                        'os.unlink(archive)',
+                        'os.rename(os.path.join(dst, root), os.path.join(dst, "Zonos"))'
+                    ])
+                    msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} source')
+                    steps.append((msg, [sys.executable, '-c', extract_script, settings['source'], os.path.dirname(src_dir)]))
+                    steps.append((msg, uv_pip + ['--no-deps', '-e', src_dir]))
                for msg, cmd in steps:
                   print(msg)
                   if progress_bar is not None:
