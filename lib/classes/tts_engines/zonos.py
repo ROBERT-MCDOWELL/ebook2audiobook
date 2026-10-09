@@ -1,8 +1,4 @@
 import json
-import re
-import sys
-import os
-import subprocess
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
@@ -135,6 +131,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             import torch
             import torchaudio
             torch_base, _, torch_tag = torch.__version__.partition('+')
+            torchaudio_tag = torchaudio.__version__.partition('+')[2]
             torch_version = tuple(int(x) for x in re.findall(r'\d+', torch_base)[:3])
             torch_min = tuple(int(x) for x in settings['torch_min'].split('.'))
             index_ok = (
@@ -145,7 +142,6 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             if torch_version < torch_min or not index_ok:
                error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=settings['torch_min'], version=torch.__version__)
                raise ValueError(error)
-
             marker_file = os.path.join(self.venv_dir, '.e2a_installed.json')
             installed = {}
             if os.path.exists(marker_file):
@@ -157,60 +153,66 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             expected = {'source': settings['source'], 'torch': torch.__version__, 'torchaudio': torchaudio.__version__}
             need_base = not os.path.exists(self.venv_python) or any(installed.get(k) != v for k, v in expected.items())
             hybrid_wanted = self.model_repo == settings['repo_hybrid']
+            # one attempt per base install: mamba-ssm/flash-attn may compile for a long
+            # time and fail, so a failure is recorded instead of retried on every run.
             need_hybrid = hybrid_wanted and (need_base or 'hybrid' not in installed)
-
-            src_dir = os.path.join(self.venv_dir, 'src', 'Zonos')
-            pyproject_file = os.path.join(src_dir, 'pyproject.toml')
-
-            if need_base or need_hybrid or not os.path.exists(pyproject_file):
+            if need_base or need_hybrid:
                from lib.classes.device_installer import DeviceInstaller
                uv_bin = DeviceInstaller().uv_bin
-               
-               sync_env = dict(self.worker_env)
-               sync_env['UV_PROJECT_ENVIRONMENT'] = self.venv_dir
-
+               uv_pip = [uv_bin, 'pip', 'install', '--python', self.venv_python]
                steps = []
-
-               if need_base or not os.path.exists(pyproject_file):
-                  installed = {}
-                  # Download and extract pinned Zonos repo source tree
-                  extract_script = '\n'.join([
-                      'import os, sys, shutil, tarfile, urllib.request',
-                      'url, dst = sys.argv[1], sys.argv[2]',
-                      'shutil.rmtree(dst, ignore_errors=True)',
-                      'os.makedirs(dst)',
-                      'archive = os.path.join(dst, "source.tar.gz")',
-                      'urllib.request.urlretrieve(url, archive)',
-                      'with tarfile.open(archive, "r:gz") as tar:',
-                      '    root = tar.getmembers()[0].name.split("/")[0]',
-                      '    tar.extractall(dst, **({"filter": "data"} if hasattr(tarfile, "data_filter") else {}))',
-                      'os.unlink(archive)',
-                      'os.rename(os.path.join(dst, root), os.path.join(dst, "Zonos"))'
-                  ])
-                  msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs='Zonos source')
-                  steps.append((msg, [sys.executable, '-c', extract_script, settings['source'], os.path.dirname(src_dir)]))
-
-                  # Run uv sync directly on Zonos project root
-                  msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies (uv sync)')
-                  sync_cmd = [uv_bin, 'sync', '--project', src_dir, '--python', settings.get('python', '3.12')]
-                  steps.append((msg, sync_cmd))
-
+                if need_base:
+                   installed = {}
+                   if not os.path.exists(self.venv_python):
+                       msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
+                       # --clear: the dir can exist with a dead interpreter link (docker image rebuilt)
+                       steps.append((msg, [uv_bin, 'venv', '--clear', '--python', settings['python'], self.venv_dir]))
+                   msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch {torch.__version__}, torchaudio {torchaudio.__version__}')
+                   steps.append((msg, uv_pip + [f'torch=={torch.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torch_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torch_tag}'] if torch_tag else [])))
+                   steps.append((msg, uv_pip + ['--no-deps', f'torchaudio=={torchaudio.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torchaudio_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torchaudio_tag}'] if torchaudio_tag else [])))
+                   # Pin numpy to match torch's compiled ABI (numpy 1.x for torch < 2.5, numpy 2.x for >= 2.5)
+                   numpy_pkg = 'numpy<2' if torch_version < (2, 5, 0) else 'numpy'
+                   steps.append((msg, uv_pip + [numpy_pkg]))
+                   msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
+                   steps.append((msg, uv_pip + settings['packages']))
+                   # upstream pyproject has packages.find include = ["zonos"], which matches the
+                   # top-level package only: a regular wheel build drops zonos/backbone. Upstream
+                   # installs editable (uv pip install -e .), so do the same from the pinned source
+                   # extracted to venvs/zonos/src/Zonos (python_env's interpreter, stdlib only).
+                   src_dir = os.path.join(self.venv_dir, 'src', 'Zonos')
+                   extract_script = '\n'.join([
+                       'import os, sys, shutil, tarfile, urllib.request',
+                       'url, dst = sys.argv[1], sys.argv[2]',
+                       'shutil.rmtree(dst, ignore_errors=True)',
+                       'os.makedirs(dst)',
+                       'archive = os.path.join(dst, "source.tar.gz")',
+                       'urllib.request.urlretrieve(url, archive)',
+                       'with tarfile.open(archive, "r:gz") as tar:',
+                       '    root = tar.getmembers()[0].name.split("/")[0]',
+                       '    tar.extractall(dst, **({"filter": "data"} if hasattr(tarfile, "data_filter") else {}))',
+                       'os.unlink(archive)',
+                       'os.rename(os.path.join(dst, root), os.path.join(dst, "Zonos"))'
+                   ])
+                   msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} source')
+                   steps.append((msg, [sys.executable, '-c', extract_script, settings['source'], os.path.dirname(src_dir)]))
+                   steps.append((msg, uv_pip + ['--no-deps', '-e', src_dir]))
                for msg, cmd in steps:
                   print(msg)
                   if progress_bar is not None:
                       progress_bar(0.0, desc=msg)
-                  proc_pipe = SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=sync_env)
+                  proc_pipe = SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env)
                   if not proc_pipe.result:
                       error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
                       raise RuntimeError(error)
-
                try:
                   import shutil
+                  # Ask the venv's python where its site-packages directory is
                   site_packages = subprocess.check_output(
                       [self.venv_python, '-c', 'import sysconfig; print(sysconfig.get_paths()["purelib"])'],
                       text=True
                   ).strip()
                   
+                  # Locate the source sitecustomize.py (3 levels up from lib/classes/tts_engines)
                   sitecustomize_src = os.path.abspath(os.path.join(engine_dir, '..', '..', '..', 'components', 'sitecustomize.py'))
                   sitecustomize_dst = os.path.join(site_packages, 'sitecustomize.py')
                   
@@ -221,14 +223,12 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                       print(f"Warning: sitecustomize.py not found at {sitecustomize_src}")
                except Exception as e:
                   print(f"Warning: Failed to copy sitecustomize.py: {e}")
-
                if need_base:
                   probe = subprocess.run([self.venv_python, '-c', 'import zonos.model'], env=self.worker_env, capture_output=True, text=True, timeout=600)
                   if probe.returncode != 0:
                       error = legends['error_venv_install_failed'].format(engine=tts_engine, step=f'import zonos.model: {probe.stderr.strip()[-500:]}')
                       raise RuntimeError(error)
                   installed.update(expected)
-
                if need_hybrid:
                   reason = None
                   if sys.platform != systems['LINUX']:
@@ -242,13 +242,13 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                          reason = f'compute capability {cc_major}.x'
                   installed['hybrid'] = False
                   if reason is None:
-                      msg = legends['msg_venv_hybrid_installing'].format(engine=tts_engine, pkgs='mamba-ssm, causal-conv1d, flash-attn')
+                      msg = legends['msg_venv_hybrid_installing'].format(engine=tts_engine, pkgs=', '.join(settings['packages_hybrid']))
                       print(msg)
                       if progress_bar is not None:
                          progress_bar(0.0, desc=msg)
-                      
-                      hybrid_sync_cmd = [uv_bin, 'sync', '--project', src_dir, '--python', settings.get('python', '3.12'), '--extra', 'compile']
-                      hybrid_ok = SubprocessPipe(hybrid_sync_cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=sync_env).result
+                      hybrid_ok = SubprocessPipe(uv_pip + ['wheel', 'ninja'], is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env).result
+                      if hybrid_ok:
+                         hybrid_ok = SubprocessPipe(uv_pip + ['--no-build-isolation'] + settings['packages_hybrid'], is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env).result
                       if hybrid_ok:
                          probe = subprocess.run([self.venv_python, '-c', 'import mamba_ssm, causal_conv1d, flash_attn'], env=self.worker_env, capture_output=True, text=True, timeout=600)
                          hybrid_ok = probe.returncode == 0
@@ -256,11 +256,13 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                       installed['hybrid_reason'] = None if hybrid_ok else 'mamba-ssm / causal-conv1d / flash-attn install failed'
                   else:
                       installed['hybrid_reason'] = reason
-
                with open(marker_file, 'w', encoding='utf-8') as f:
                   json.dump(installed, f, indent=2)
-
             if hybrid_wanted and not installed.get('hybrid'):
+               # the pre-flight in convert_ebook() already switches unsupported hardware to
+               # internal; this covers a first failed mamba-ssm/flash-attn install and the
+               # sentence editor: same alert, same switch, and the worker is cached under the
+               # internal key so cleanup_models_cache() keeps it as the session's model
                self.model_repo = settings['repo']
                self.session['fine_tuned'] = 'internal'
                self.session['model_cache'] = self.tts_key = f'{tts_engine}-internal'
@@ -283,6 +285,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             cmd = [self.venv_python, '-u', self.worker_script, '--repo', self.model_repo, '--device', self.worker_device, '--compile']
             engine = loaded_tts.get(self.tts_key)
             if isinstance(engine, SubprocessPipe) and (engine.cmd != cmd or engine.process is None or engine.process.poll() is not None):
+               # dead worker, or one serving another model/device under this key
                loaded_tts.pop(self.tts_key, None)
                engine.stop()
                engine = None
@@ -296,6 +299,8 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                if not engine.result:
                   error = legends['error_worker_failed'].format(engine=self.session['tts_engine'], error=engine.ready_info.get('error'))
                   raise RuntimeError(error)
+               # always cached, whatever the free VRAM: the worker must stay reachable
+               # by unload_tts_manager() / cleanup_models_cache(), which stop it.
                loaded_tts[self.tts_key] = engine
             self.params['samplerate'] = int(engine.ready_info.get('samplerate', self.params['samplerate']))
             msg = legends['msg_tts_loaded'].format(model=self.tts_key)
@@ -335,6 +340,8 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                       continue
                   else:
                       trim_audio_buffer = 0.006
+                      # only the voice path crosses the pipe: the worker computes the
+                      # speaker embedding once per voice file and keeps it.
                       reply = self.engine.send({
                          'op': 'tts',
                          'text': part,
@@ -342,9 +349,11 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                          'voice': self.params['current_voice'],
                          'file': part_file,
                          **self.fine_tuned_params,
+                         # inside [emotion:...]...[/emotion] the tag wins over the panel
                          **({'emotion_enabled': True, 'emotion': self.params['inline_emotion']} if self.params.get('inline_emotion') else {})
                       })
                       if not reply.get('ok'):
+                         # no retry: core.py unloads the engine, which stops the worker
                          error = f"convert() error: {reply.get('error')} segment: {part}"
                          print(error)
                          return False, error
