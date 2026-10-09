@@ -94,13 +94,16 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                self.worker_env['HIP_VISIBLE_DEVICES'] = '-1'
             # espeak-ng paths for phonemizer: worker_env replaces the subprocess
             # environment, so resolve them here instead of relying on the launcher
+            espeak_exe = None
             espeak_lib = None
             espeak_data = None
             if sys.platform == systems['MACOS']:
                 espeak_prefix = '/opt/homebrew' if os.uname().machine == archs['ARM64'] else '/usr/local'
+                espeak_exe = os.path.join(espeak_prefix, 'bin', 'espeak-ng')
                 espeak_lib = os.path.join(espeak_prefix, 'lib', 'libespeak-ng.dylib')
                 espeak_data = os.path.join(espeak_prefix, 'share', 'espeak-ng-data')
             elif sys.platform == systems['LINUX']:
+                espeak_exe = os.path.join(espeak_prefix, 'bin', 'espeak-ng')
                 if platform.machine().lower() == archs['AARCH64']:
                     espeak_data = '/usr/lib/aarch64-linux-gnu/espeak-ng-data'
                 else:
@@ -114,6 +117,8 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                     if os.path.exists(candidate):
                         espeak_lib = candidate
                         break
+            if espeak_exe and os.path.exists(espeak_exe):
+                self.worker_env['PHONEMIZER_ESPEAK_PATH'] = espeak_exe
             if espeak_lib and os.path.exists(espeak_lib):
                 self.worker_env['PHONEMIZER_ESPEAK_LIBRARY'] = espeak_lib
             if espeak_data and os.path.isdir(espeak_data):
