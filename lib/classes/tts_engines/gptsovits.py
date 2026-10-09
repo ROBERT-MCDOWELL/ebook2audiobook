@@ -2,7 +2,7 @@ import json
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
-from lib.conf import systems, archs, torch_matrix
+from lib.conf import systems, archs, torch_matrix, default_pytorch_url, default_pytorch_nightly_url
 from lib.lang import legends
 
 class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
@@ -213,18 +213,21 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 # wheels only, so no platform ever needs a compiler: the resolver takes the newest release
                 # that has a wheel there; the few pure-python sdist-only packages are let through
                 wheels_only = ['--only-binary', ':all:'] + [arg for pkg in settings['packages_sdist'] for arg in ('--no-binary', pkg)]
-                msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} requirements ({torch_line}, {torch_backend})')
-                print(msg)
-                if progress_bar is not None:
-                    progress_bar(0.0, desc=msg)
-                # 1. upstream's requirements and torch from the device's PyTorch index, in one resolution
-                proc_pipe = SubprocessPipe(uv_pip + ['--torch-backend', torch_backend] + wheels_only + ['-r', requirements_file, torch_line], is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env)
-                if not proc_pipe.result:
+                # 1. upstream's requirements and torch from the device's PyTorch index, in one resolution.
+                # Only for tags uv has a backend for: jetson / windows rocm go straight to the fallback.
+                backend_ok = False
+                if re.fullmatch(r'auto|cpu|xpu|cu\d+|rocm[\d.]+', torch_backend):
+                    msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} requirements ({torch_line}, {torch_backend})')
+                    print(msg)
+                    if progress_bar is not None:
+                        progress_bar(0.0, desc=msg)
+                    backend_ok = SubprocessPipe(uv_pip + ['--torch-backend', torch_backend] + wheels_only + ['-r', requirements_file, torch_line], is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env).result
+                if not backend_ok:
                     # 2. no uv backend for this tag (jetson, windows rocm, a newer cuda) or no build there:
                     # e2a's DeviceInstaller installs its device-proven torch into the venv. It runs on the
                     # venv's interpreter, so python_exec and its installed-version checks are the venv's
                     # (PY_CMD forced: e2a's own environment may point it at python_env), then the
-                    # requirements resolve around that torch (no torch line here, so it is kept).
+                    # requirements resolve around that torch.
                     device_script = '\n'.join([
                         'import sys, json',
                         'from lib.conf import NATIVE',
@@ -234,17 +237,48 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                         'sys.exit(installer.install_device_packages(json.dumps(info) if info else installer.check_device_info(NATIVE)))'
                     ])
                     fallback_env = dict(self.worker_env, PY_CMD=self.venv_python)
-                    for msg, cmd in (
-                        (legends['msg_venv_installing'].format(engine=tts_engine, pkgs='torch (DeviceInstaller)'), [self.venv_python, '-c', device_script]),
-                        (legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} requirements'), uv_pip + wheels_only + ['-r', requirements_file])
-                    ):
-                        print(msg)
-                        if progress_bar is not None:
-                            progress_bar(0.0, desc=msg)
-                        proc_pipe = SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=fallback_env)
-                        if not proc_pipe.result:
-                            error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
-                            raise RuntimeError(error)
+                    msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs='torch (DeviceInstaller)')
+                    print(msg)
+                    if progress_bar is not None:
+                        progress_bar(0.0, desc=msg)
+                    cmd = [self.venv_python, '-c', device_script]
+                    if not SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=fallback_env).result:
+                        error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
+                        raise RuntimeError(error)
+                    # hold torch / torchaudio to exactly what DeviceInstaller installed, or the resolver
+                    # swaps them for the newest PyPI torch as soon as a package wants a newer one (jetson:
+                    # torch 2.14.1 + CUDA 13 wheels over 2.4.1+jetson51, and a torchaudio that no longer
+                    # loads). URL wheels (jetson, windows rocm) are held by their direct_url.json URL, index
+                    # wheels by version, with their PyTorch index when the version carries a local tag.
+                    pins_script = '\n'.join([
+                        'import json, importlib.metadata as metadata',
+                        'pins = []',
+                        'for name in ("torch", "torchaudio"):',
+                        '    try:',
+                        '        dist = metadata.distribution(name)',
+                        '    except metadata.PackageNotFoundError:',
+                        '        continue',
+                        '    direct = json.loads(dist.read_text("direct_url.json") or "null")',
+                        '    pins.append(name + " @ " + direct["url"] if direct and direct.get("url") else name + "==" + dist.version)',
+                        'print(json.dumps(pins))'
+                    ])
+                    probe = subprocess.run([self.venv_python, '-c', pins_script], env=fallback_env, capture_output=True, text=True, timeout=120)
+                    torch_pins = json.loads(probe.stdout.strip() or '[]') if probe.returncode == 0 else []
+                    index_args = []
+                    for pin in torch_pins:
+                        if '==' in pin and '+' in pin:
+                            local_tag = pin.split('+', 1)[1]
+                            index_args += ['--extra-index-url', f"{default_pytorch_nightly_url if '.dev' in pin else default_pytorch_url}/{local_tag}"]
+                    if index_args:
+                        index_args += ['--index-strategy', 'unsafe-best-match']
+                    msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} requirements')
+                    print(msg)
+                    if progress_bar is not None:
+                        progress_bar(0.0, desc=msg)
+                    cmd = uv_pip + wheels_only + index_args + ['-r', requirements_file] + torch_pins
+                    if not SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=fallback_env).result:
+                        error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
+                        raise RuntimeError(error)
                 # --- DIRECT PYTHON COPY OF sitecustomize.py ---
                 try:
                     import shutil
