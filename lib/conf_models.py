@@ -89,7 +89,7 @@ default_engine_settings = {
         "source": "https://github.com/Zyphra/Zonos/archive/bc40d98e1e1ab54fc65c483be127a90e3c7c0645.tar.gz",
         "python": "3.12",
         "torch_min": "2.2.2",
-        "packages": ["setuptools", "packaging", "tqdm", "safetensors", "inflect>=7.5.0", "kanjize>=1.5.0", "numpy>=2.2.2", "phonemizer>=3.3.0", "sudachipy>=0.6.10", "sudachidict-full>=20241021", "transformers>=4.48.1,<5", "soundfile>=0.13.1", "huggingface-hub>=0.28.1"],
+        "packages": ["setuptools", "packaging", "tqdm", "safetensors", "inflect>=7.5.0", "kanjize>=1.5.0", "numpy<2", "phonemizer>=3.3.0", "sudachipy>=0.6.10", "sudachidict-full>=20241021", "transformers>=4.48.1,<5", "soundfile>=0.13.1", "huggingface-hub>=0.28.1"],
         "packages_hybrid": ["mamba-ssm>=2.2.4", "causal-conv1d>=1.5.0.post8", "flash-attn>=2.7.3"],
         # robust languages only (most of the 200k h are en, then zh, ja, fr, es, de); values are espeak codes
         "languages": {"eng": "en-us", "deu": "de", "fra": "fr-fr", "jpn": "ja", "spa": "es", "zho": "cmn"},
