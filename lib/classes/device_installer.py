@@ -1862,7 +1862,7 @@ class DeviceInstaller():
                                 url = default_pytorch_url
                                 url_nightly = default_pytorch_nightly_url
                                 torch_url_tag = tag_dir
-                                torchaudio_url_tag = 'cu130' if tag_dir.startswith('cu') and tag_dir[2:].isdigit() and int(tag_dir[2:]) > 130 else tag_dir
+                                torchaudio_url_tag = tag_dir
                                 if self.system == systems['WINDOWS'] and tag.startswith('win-cu'):
                                     torch_url_tag = tag.replace('win-', '')
                                 subprocess.check_call(self._uv_pip('install', '--reinstall-package', 'torch', '--no-cache', f'torch=={torch_version_matrix}', '--index-url', f'{url}/{torch_url_tag}', '--extra-index-url', f'{url_nightly}/{torch_url_tag}'))
