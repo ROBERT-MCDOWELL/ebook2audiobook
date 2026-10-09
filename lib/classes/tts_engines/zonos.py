@@ -164,9 +164,9 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                 if need_base:
                     installed = {}
                     if not os.path.exists(self.venv_python):
-                    msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
-                       # --clear: the dir can exist with a dead interpreter link (docker image rebuilt)
-                       steps.append((msg, [uv_bin, 'venv', '--clear', '--python', settings['python'], self.venv_dir]))
+                        msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
+                        # --clear: the dir can exist with a dead interpreter link (docker image rebuilt)
+                        steps.append((msg, [uv_bin, 'venv', '--clear', '--python', settings['python'], self.venv_dir]))
                     msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch {torch.__version__}, torchaudio {torchaudio.__version__}')
                     steps.append((msg, uv_pip + [f'torch=={torch.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torch_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torch_tag}'] if torch_tag else [])))
                     steps.append((msg, uv_pip + ['--no-deps', f'torchaudio=={torchaudio.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torchaudio_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torchaudio_tag}'] if torchaudio_tag else [])))
