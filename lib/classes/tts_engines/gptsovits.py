@@ -124,17 +124,17 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
             if cuda_tag:
                 index_tag = 'cu118' if int(cuda_tag.group(1)) <= 118 else 'cu126' if int(cuda_tag.group(1)) <= 126 else 'cu128'
                 venv_torch = f"{settings['torch']}+{index_tag}"
-                torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f'{default_pytorch_url}/{index_tag}']
+                torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f'{default_pytorch_url}/{index_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{index_tag}']
             elif torch_tag in ('cpu', 'xpu'):
                 venv_torch = f"{settings['torch']}+{torch_tag}"
-                torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f'{default_pytorch_url}/{torch_tag}']
+                torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f'{default_pytorch_url}/{torch_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torch_tag}']
             elif torch_tag == '':
                 # PyPI builds (macOS)
                 venv_torch = settings['torch_min'] if sys.platform == systems['MACOS'] and os.uname().machine != 'arm64' else settings['torch']
                 torch_step = [f'torch=={venv_torch}', f'torchaudio=={venv_torch}']
             elif re.fullmatch(r'rocm[\d.]+', torch_tag) and sys.platform == systems['LINUX']:
                 venv_torch = f"{settings['torch']}+{settings['torch_rocm']}"
-                torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f"{default_pytorch_url}/{settings['torch_rocm']}"]
+                torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f"{default_pytorch_url}/{settings['torch_rocm']}", '--extra-index-url', f"{default_pytorch_nightly_url}/{settings['torch_rocm']}"]
             elif re.fullmatch(r'jetson\d+', torch_tag):
                 import torchaudio
                 jetson_code = ''.join(c for c in torch_tag if c.isdigit())
