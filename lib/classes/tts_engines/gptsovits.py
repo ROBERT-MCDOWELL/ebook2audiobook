@@ -164,7 +164,6 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                     steps.append((msg, uv_pip + ['filelock', 'typing-extensions', 'jinja2', 'fsspec', 'networkx', 'sympy', 'matplotlib']))
                 else:
                     steps.append((msg, uv_pip + ['matplotlib']))
-                # Pin numpy to match torch's compiled ABI
                 venv_torch_tuple = tuple(int(x) for x in venv_torch.partition('+')[0].split('.')[:3])
                 numpy_pkg = 'numpy<2' if venv_torch_tuple < (2, 5, 0) else 'numpy'
                 steps.append((msg, uv_pip + [numpy_pkg]))
