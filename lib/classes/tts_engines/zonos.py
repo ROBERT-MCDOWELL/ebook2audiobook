@@ -97,20 +97,23 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             espeak_lib = None
             espeak_data = None
             if sys.platform == systems['MACOS']:
-                espeak_prefix = '/opt/homebrew' if os.uname().machine == 'arm64' else '/usr/local'
+                espeak_prefix = '/opt/homebrew' if platform.machine().lower() == archs['ARM64'] else '/usr/local'
                 espeak_lib = os.path.join(espeak_prefix, 'lib', 'libespeak-ng.dylib')
                 espeak_data = os.path.join(espeak_prefix, 'share', 'espeak-ng-data')
             elif sys.platform == systems['LINUX']:
-                espeak_data = '/usr/share/espeak-ng-data'
+                if platform.machine().lower() == archs['AARCH64']:
+                    espeak_data = '/usr/lib/aarch64-linux-gnu/espeak-ng-data'
+                else:
+                    espeak_data = '/usr/share/espeak-ng-data'
                 for candidate in (
                     '/usr/lib/x86_64-linux-gnu/libespeak-ng.so.1',
+                    '/usr/lib/aarch64-linux-gnu/libespeak-ng.so.1',
                     '/usr/lib64/libespeak-ng.so.1',
                     '/usr/lib/libespeak-ng.so.1',
                 ):
                     if os.path.exists(candidate):
                         espeak_lib = candidate
                         break
-            print(espeak_data, espeak_lib)
             if espeak_lib and os.path.exists(espeak_lib):
                 self.worker_env['PHONEMIZER_ESPEAK_LIBRARY'] = espeak_lib
             if espeak_data and os.path.isdir(espeak_data):
