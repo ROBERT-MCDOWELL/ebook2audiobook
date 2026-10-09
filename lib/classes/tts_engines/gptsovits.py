@@ -2,7 +2,7 @@ import json
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
-from lib.conf import systems, default_pytorch_url, default_pytorch_nightly_url, default_jetson_url
+from lib.conf import systems, archs, default_pytorch_url, default_pytorch_nightly_url, default_jetson_url
 from lib.lang import legends
 
 class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
