@@ -168,6 +168,25 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                     if not proc_pipe.result:
                         error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
                         raise RuntimeError(error)
+                try:
+                    import shutil
+                    # Ask the venv's python where its site-packages directory is
+                    site_packages = subprocess.check_output(
+                        [self.venv_python, '-c', 'import sysconfig; print(sysconfig.get_paths()["purelib"])'],
+                        text=True
+                    ).strip()
+                    
+                    # Locate the source sitecustomize.py (3 levels up from lib/classes/tts_engines)
+                    sitecustomize_src = os.path.abspath(os.path.join(engine_dir, '..', '..', '..', 'components', 'sitecustomize.py'))
+                    sitecustomize_dst = os.path.join(site_packages, 'sitecustomize.py')
+                    
+                    if os.path.exists(sitecustomize_src):
+                        shutil.copy2(sitecustomize_src, sitecustomize_dst)
+                        print(f"Copied sitecustomize.py to {sitecustomize_dst}")
+                    else:
+                        print(f"Warning: sitecustomize.py not found at {sitecustomize_src}")
+                except Exception as e:
+                    print(f"Warning: Failed to copy sitecustomize.py: {e}")
                 if need_base:
                     probe = subprocess.run([self.venv_python, '-c', 'import zonos.model'], env=self.worker_env, capture_output=True, text=True, timeout=600)
                     if probe.returncode != 0:
