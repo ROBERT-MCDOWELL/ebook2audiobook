@@ -25,28 +25,28 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             self.language = self.session.get('language')
             self.language_iso1 = self.session.get('language_iso1')
             if self.session.get('translate_enabled'):
-                if self.session.get('translate'):
-                    self.language = self.session['translate']
-                if self.session.get('translate_iso1'):
-                    self.language_iso1 = self.session['translate_iso1']
+               if self.session.get('translate'):
+                  self.language = self.session['translate']
+               if self.session.get('translate_iso1'):
+                  self.language_iso1 = self.session['translate_iso1']
             if tts_engine not in default_engine_settings:
-                error = legends['error_invalid_tts_engine'].format(engine=tts_engine)
-                raise ValueError(error)
+               error = legends['error_invalid_tts_engine'].format(engine=tts_engine)
+               raise ValueError(error)
             settings = default_engine_settings[tts_engine]
             engine_langs = settings.get('languages', {})
             if self.language not in engine_langs:
-                error = legends['error_language_not_supported_engine'].format(lang=self.language, engine=tts_engine)
-                raise ValueError(error)
+               error = legends['error_language_not_supported_engine'].format(lang=self.language, engine=tts_engine)
+               raise ValueError(error)
             self.language_espeak = engine_langs[self.language]
             fine_tuned = self.session.get('fine_tuned')
             if fine_tuned not in self.models:
-                error = legends['error_invalid_fine_tuned'].format(model=fine_tuned, models=list(self.models.keys()))
-                raise ValueError(error)
+               error = legends['error_invalid_fine_tuned'].format(model=fine_tuned, models=list(self.models.keys()))
+               raise ValueError(error)
             model_cfg = self.models[fine_tuned]
             for required_key in ('repo', 'samplerate', 'voice'):
-                if required_key not in model_cfg:
-                    error = legends['error_fine_tuned_missing_key'].format(model=fine_tuned, key=required_key)
-                    raise ValueError(error)
+               if required_key not in model_cfg:
+                  error = legends['error_fine_tuned_missing_key'].format(model=fine_tuned, key=required_key)
+                  raise ValueError(error)
             self.params['samplerate'] = model_cfg['samplerate']
             self.model_repo = model_cfg['repo']
             self.xtts_speakers = self._load_xtts_builtin_list()
@@ -54,22 +54,22 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             # upstream zonos disables MPS ("MPS breaks"), so macOS runs the worker on cpu
             self.worker_device = devices['CPU']['proc'] if self.device == devices['MPS']['proc'] else self.device
             self.fine_tuned_params = {
-                key.removeprefix('zonos_'): cast_type(self.session[key]) if self.session.get(key) is not None else cast_type(settings[key.removeprefix('zonos_')])
-                for key, cast_type in {
-                    'zonos_emotion_enabled': bool,
-                    'zonos_speaking_rate': float,
-                    'zonos_pitch_std': float,
-                    'zonos_fmax': float,
-                    'zonos_cfg_scale': float,
-                    'zonos_linear': float,
-                    'zonos_max_new_tokens': int
-                }.items()
+               key.removeprefix('zonos_'): cast_type(self.session[key]) if self.session.get(key) is not None else cast_type(settings[key.removeprefix('zonos_')])
+               for key, cast_type in {
+                  'zonos_emotion_enabled': bool,
+                  'zonos_speaking_rate': float,
+                  'zonos_pitch_std': float,
+                  'zonos_fmax': float,
+                  'zonos_cfg_scale': float,
+                  'zonos_linear': float,
+                  'zonos_max_new_tokens': int
+               }.items()
             }
             # Happiness, Sadness, Disgust, Fear, Surprise, Anger, Other, Neutral: one session key
             # per slider (as xtts / bark), the list order zonos expects
             self.fine_tuned_params['emotion'] = [
-                float(self.session[key]) if self.session.get(key) is not None else float(settings['emotion'][i])
-                for i, key in enumerate(['zonos_emotion_happiness', 'zonos_emotion_sadness', 'zonos_emotion_disgust', 'zonos_emotion_fear', 'zonos_emotion_surprise', 'zonos_emotion_anger', 'zonos_emotion_other', 'zonos_emotion_neutral'])
+               float(self.session[key]) if self.session.get(key) is not None else float(settings['emotion'][i])
+               for i, key in enumerate(['zonos_emotion_happiness', 'zonos_emotion_sadness', 'zonos_emotion_disgust', 'zonos_emotion_fear', 'zonos_emotion_surprise', 'zonos_emotion_anger', 'zonos_emotion_other', 'zonos_emotion_neutral'])
             ]
             # --- own uv venv: lib/classes/tts_engines/venvs/zonos ---
             # torch/torchaudio are mirrored from python_env (same version, same local
@@ -89,9 +89,32 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             # on lib/classes/tts_engines/venvs (or deleting that folder) covers everything
             self.worker_env['UV_PYTHON_INSTALL_DIR'] = os.path.join(engine_dir, 'venvs', '.python')
             if self.worker_device != devices['CUDA']['proc']:
-                # keep the worker off the GPU entirely (zonos probes cuda at import)
-                self.worker_env['CUDA_VISIBLE_DEVICES'] = '-1'
-                self.worker_env['HIP_VISIBLE_DEVICES'] = '-1'
+               # keep the worker off the GPU entirely (zonos probes cuda at import)
+               self.worker_env['CUDA_VISIBLE_DEVICES'] = '-1'
+               self.worker_env['HIP_VISIBLE_DEVICES'] = '-1'
+
+            # espeak-ng paths for phonemizer: worker_env replaces the subprocess
+            # environment, so resolve them here instead of relying on the launcher
+            espeak_lib = None
+            espeak_data = None
+            if sys.platform == systems['MACOS']:
+               espeak_prefix = '/opt/homebrew' if os.uname().machine == 'arm64' else '/usr/local'
+               espeak_lib = os.path.join(espeak_prefix, 'lib', 'libespeak-ng.dylib')
+               espeak_data = os.path.join(espeak_prefix, 'share', 'espeak-ng-data')
+            elif sys.platform == systems['LINUX']:
+               espeak_data = '/usr/share/espeak-ng-data'
+               for candidate in (
+                   '/usr/lib/x86_64-linux-gnu/libespeak-ng.so.1',
+                   '/usr/lib64/libespeak-ng.so.1',
+                   '/usr/lib/libespeak-ng.so.1',
+               ):
+                   if os.path.exists(candidate):
+                       espeak_lib = candidate
+                       break
+            if espeak_lib and os.path.exists(espeak_lib):
+               self.worker_env['PHONEMIZER_ESPEAK_LIBRARY'] = espeak_lib
+            if espeak_data and os.path.isdir(espeak_data):
+               self.worker_env['ESPEAK_DATA_PATH'] = espeak_data
             import torch
             import torchaudio
             torch_base, _, torch_tag = torch.__version__.partition('+')
@@ -102,21 +125,21 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             # download.pytorch.org cpu / cuXXX / xpu / linux rocmX.Y. Jetson and
             # Windows ROCm come from custom wheel URLs and are below torch_min anyway.
             index_ok = (
-                torch_tag in ('', 'cpu', 'xpu')
-                or bool(re.fullmatch(r'cu\d+', torch_tag))
-                or (bool(re.fullmatch(r'rocm[\d.]+', torch_tag)) and sys.platform == systems['LINUX'])
+               torch_tag in ('', 'cpu', 'xpu')
+               or bool(re.fullmatch(r'cu\d+', torch_tag))
+               or (bool(re.fullmatch(r'rocm[\d.]+', torch_tag)) and sys.platform == systems['LINUX'])
             )
             if torch_version < torch_min or not index_ok:
-                error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=settings['torch_min'], version=torch.__version__)
-                raise ValueError(error)
+               error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=settings['torch_min'], version=torch.__version__)
+               raise ValueError(error)
             marker_file = os.path.join(self.venv_dir, '.e2a_installed.json')
             installed = {}
             if os.path.exists(marker_file):
-                try:
-                    with open(marker_file, 'r', encoding='utf-8') as f:
-                        installed = json.load(f)
-                except Exception:
-                    installed = {}
+               try:
+                  with open(marker_file, 'r', encoding='utf-8') as f:
+                      installed = json.load(f)
+               except Exception:
+                  installed = {}
             expected = {'source': settings['source'], 'torch': torch.__version__, 'torchaudio': torchaudio.__version__}
             need_base = not os.path.exists(self.venv_python) or any(installed.get(k) != v for k, v in expected.items())
             hybrid_wanted = self.model_repo == settings['repo_hybrid']
@@ -124,121 +147,121 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             # time and fail, so a failure is recorded instead of retried on every run.
             need_hybrid = hybrid_wanted and (need_base or 'hybrid' not in installed)
             if need_base or need_hybrid:
-                from lib.classes.device_installer import DeviceInstaller
-                uv_bin = DeviceInstaller().uv_bin
-                uv_pip = [uv_bin, 'pip', 'install', '--python', self.venv_python]
-                steps = []
-                if need_base:
-                    installed = {}
-                    if not os.path.exists(self.venv_python):
-                        msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
-                        # --clear: the dir can exist with a dead interpreter link (docker image rebuilt)
-                        steps.append((msg, [uv_bin, 'venv', '--clear', '--python', settings['python'], self.venv_dir]))
-                    msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch {torch.__version__}, torchaudio {torchaudio.__version__}')
-                    steps.append((msg, uv_pip + [f'torch=={torch.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torch_tag}'] if torch_tag else [])))
-                    steps.append((msg, uv_pip + ['--no-deps', f'torchaudio=={torchaudio.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torchaudio_tag}'] if torchaudio_tag else [])))
-                    # Pin numpy to match torch's compiled ABI (numpy 1.x for torch < 2.5, numpy 2.x for >= 2.5)
-                    numpy_pkg = 'numpy<2' if torch_version < (2, 5, 0) else 'numpy'
-                    steps.append((msg, uv_pip + [numpy_pkg]))
-                    msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
-                    steps.append((msg, uv_pip + settings['packages']))
-                    # upstream pyproject has packages.find include = ["zonos"], which matches the
-                    # top-level package only: a regular wheel build drops zonos/backbone. Upstream
-                    # installs editable (uv pip install -e .), so do the same from the pinned source
-                    # extracted to venvs/zonos/src/Zonos (python_env's interpreter, stdlib only).
-                    src_dir = os.path.join(self.venv_dir, 'src', 'Zonos')
-                    extract_script = '\n'.join([
-                        'import os, sys, shutil, tarfile, urllib.request',
-                        'url, dst = sys.argv[1], sys.argv[2]',
-                        'shutil.rmtree(dst, ignore_errors=True)',
-                        'os.makedirs(dst)',
-                        'archive = os.path.join(dst, "source.tar.gz")',
-                        'urllib.request.urlretrieve(url, archive)',
-                        'with tarfile.open(archive, "r:gz") as tar:',
-                        '    root = tar.getmembers()[0].name.split("/")[0]',
-                        '    tar.extractall(dst, **({"filter": "data"} if hasattr(tarfile, "data_filter") else {}))',
-                        'os.unlink(archive)',
-                        'os.rename(os.path.join(dst, root), os.path.join(dst, "Zonos"))'
-                    ])
-                    msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=tts_engine)
-                    steps.append((msg, [sys.executable, '-c', extract_script, settings['source'], os.path.dirname(src_dir)]))
-                    steps.append((msg, uv_pip + ['--no-deps', '-e', src_dir]))
-                for msg, cmd in steps:
-                    print(msg)
-                    if progress_bar is not None:
-                        progress_bar(0.0, desc=msg)
-                    proc_pipe = SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env)
-                    if not proc_pipe.result:
-                        error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
-                        raise RuntimeError(error)
-                try:
-                    import shutil
-                    # Ask the venv's python where its site-packages directory is
-                    site_packages = subprocess.check_output(
-                        [self.venv_python, '-c', 'import sysconfig; print(sysconfig.get_paths()["purelib"])'],
-                        text=True
-                    ).strip()
-                    
-                    # Locate the source sitecustomize.py (3 levels up from lib/classes/tts_engines)
-                    sitecustomize_src = os.path.abspath(os.path.join(engine_dir, '..', '..', '..', 'components', 'sitecustomize.py'))
-                    sitecustomize_dst = os.path.join(site_packages, 'sitecustomize.py')
-                    
-                    if os.path.exists(sitecustomize_src):
-                        shutil.copy2(sitecustomize_src, sitecustomize_dst)
-                        print(f"Copied sitecustomize.py to {sitecustomize_dst}")
-                    else:
-                        print(f"Warning: sitecustomize.py not found at {sitecustomize_src}")
-                except Exception as e:
-                    print(f"Warning: Failed to copy sitecustomize.py: {e}")
-                if need_base:
-                    probe = subprocess.run([self.venv_python, '-c', 'import zonos.model'], env=self.worker_env, capture_output=True, text=True, timeout=600)
-                    if probe.returncode != 0:
-                        error = legends['error_venv_install_failed'].format(engine=tts_engine, step=f'import zonos.model: {probe.stderr.strip()[-500:]}')
-                        raise RuntimeError(error)
-                    installed.update(expected)
-                if need_hybrid:
-                    reason = None
-                    if sys.platform != systems['LINUX']:
-                        reason = sys.platform
-                    elif self.session['device'] != devices['CUDA']['proc']:
-                        reason = self.session['device']
-                    else:
-                        probe = subprocess.run([self.venv_python, '-c', 'import torch;print(torch.cuda.get_device_capability(0)[0] if torch.cuda.is_available() and torch.version.hip is None else 0)'], env=self.worker_env, capture_output=True, text=True, timeout=300)
-                        cc_major = int(probe.stdout.strip() or 0) if probe.returncode == 0 else 0
-                        if cc_major < 8:
-                            reason = f'compute capability {cc_major}.x'
-                    installed['hybrid'] = False
-                    if reason is None:
-                        msg = legends['msg_venv_hybrid_installing'].format(engine=tts_engine, pkgs=', '.join(settings['packages_hybrid']))
-                        print(msg)
-                        if progress_bar is not None:
-                            progress_bar(0.0, desc=msg)
-                        hybrid_ok = SubprocessPipe(uv_pip + ['wheel', 'ninja'], is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env).result
-                        if hybrid_ok:
-                            hybrid_ok = SubprocessPipe(uv_pip + ['--no-build-isolation'] + settings['packages_hybrid'], is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env).result
-                        if hybrid_ok:
-                            probe = subprocess.run([self.venv_python, '-c', 'import mamba_ssm, causal_conv1d, flash_attn'], env=self.worker_env, capture_output=True, text=True, timeout=600)
-                            hybrid_ok = probe.returncode == 0
-                        installed['hybrid'] = bool(hybrid_ok)
-                        installed['hybrid_reason'] = None if hybrid_ok else 'mamba-ssm / causal-conv1d / flash-attn install failed'
-                    else:
-                        installed['hybrid_reason'] = reason
-                with open(marker_file, 'w', encoding='utf-8') as f:
-                    json.dump(installed, f, indent=2)
+               from lib.classes.device_installer import DeviceInstaller
+               uv_bin = DeviceInstaller().uv_bin
+               uv_pip = [uv_bin, 'pip', 'install', '--python', self.venv_python]
+               steps = []
+               if need_base:
+                  installed = {}
+                  if not os.path.exists(self.venv_python):
+                      msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
+                      # --clear: the dir can exist with a dead interpreter link (docker image rebuilt)
+                      steps.append((msg, [uv_bin, 'venv', '--clear', '--python', settings['python'], self.venv_dir]))
+                  msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch {torch.__version__}, torchaudio {torchaudio.__version__}')
+                  steps.append((msg, uv_pip + [f'torch=={torch.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torch_tag}'] if torch_tag else [])))
+                  steps.append((msg, uv_pip + ['--no-deps', f'torchaudio=={torchaudio.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torchaudio_tag}'] if torchaudio_tag else [])))
+                  # Pin numpy to match torch's compiled ABI (numpy 1.x for torch < 2.5, numpy 2.x for >= 2.5)
+                  numpy_pkg = 'numpy<2' if torch_version < (2, 5, 0) else 'numpy'
+                  steps.append((msg, uv_pip + [numpy_pkg]))
+                  msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
+                  steps.append((msg, uv_pip + settings['packages']))
+                  # upstream pyproject has packages.find include = ["zonos"], which matches the
+                  # top-level package only: a regular wheel build drops zonos/backbone. Upstream
+                  # installs editable (uv pip install -e .), so do the same from the pinned source
+                  # extracted to venvs/zonos/src/Zonos (python_env's interpreter, stdlib only).
+                  src_dir = os.path.join(self.venv_dir, 'src', 'Zonos')
+                  extract_script = '\n'.join([
+                      'import os, sys, shutil, tarfile, urllib.request',
+                      'url, dst = sys.argv[1], sys.argv[2]',
+                      'shutil.rmtree(dst, ignore_errors=True)',
+                      'os.makedirs(dst)',
+                      'archive = os.path.join(dst, "source.tar.gz")',
+                      'urllib.request.urlretrieve(url, archive)',
+                      'with tarfile.open(archive, "r:gz") as tar:',
+                      '    root = tar.getmembers()[0].name.split("/")[0]',
+                      '    tar.extractall(dst, **({"filter": "data"} if hasattr(tarfile, "data_filter") else {}))',
+                      'os.unlink(archive)',
+                      'os.rename(os.path.join(dst, root), os.path.join(dst, "Zonos"))'
+                  ])
+                  msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=tts_engine)
+                  steps.append((msg, [sys.executable, '-c', extract_script, settings['source'], os.path.dirname(src_dir)]))
+                  steps.append((msg, uv_pip + ['--no-deps', '-e', src_dir]))
+               for msg, cmd in steps:
+                  print(msg)
+                  if progress_bar is not None:
+                      progress_bar(0.0, desc=msg)
+                  proc_pipe = SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env)
+                  if not proc_pipe.result:
+                      error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
+                      raise RuntimeError(error)
+               try:
+                  import shutil
+                  # Ask the venv's python where its site-packages directory is
+                  site_packages = subprocess.check_output(
+                      [self.venv_python, '-c', 'import sysconfig; print(sysconfig.get_paths()["purelib"])'],
+                      text=True
+                  ).strip()
+                  
+                  # Locate the source sitecustomize.py (3 levels up from lib/classes/tts_engines)
+                  sitecustomize_src = os.path.abspath(os.path.join(engine_dir, '..', '..', '..', 'components', 'sitecustomize.py'))
+                  sitecustomize_dst = os.path.join(site_packages, 'sitecustomize.py')
+                  
+                  if os.path.exists(sitecustomize_src):
+                      shutil.copy2(sitecustomize_src, sitecustomize_dst)
+                      print(f"Copied sitecustomize.py to {sitecustomize_dst}")
+                  else:
+                      print(f"Warning: sitecustomize.py not found at {sitecustomize_src}")
+               except Exception as e:
+                  print(f"Warning: Failed to copy sitecustomize.py: {e}")
+               if need_base:
+                  probe = subprocess.run([self.venv_python, '-c', 'import zonos.model'], env=self.worker_env, capture_output=True, text=True, timeout=600)
+                  if probe.returncode != 0:
+                      error = legends['error_venv_install_failed'].format(engine=tts_engine, step=f'import zonos.model: {probe.stderr.strip()[-500:]}')
+                      raise RuntimeError(error)
+                  installed.update(expected)
+               if need_hybrid:
+                  reason = None
+                  if sys.platform != systems['LINUX']:
+                      reason = sys.platform
+                  elif self.session['device'] != devices['CUDA']['proc']:
+                      reason = self.session['device']
+                  else:
+                      probe = subprocess.run([self.venv_python, '-c', 'import torch;print(torch.cuda.get_device_capability(0)[0] if torch.cuda.is_available() and torch.version.hip is None else 0)'], env=self.worker_env, capture_output=True, text=True, timeout=300)
+                      cc_major = int(probe.stdout.strip() or 0) if probe.returncode == 0 else 0
+                      if cc_major < 8:
+                         reason = f'compute capability {cc_major}.x'
+                  installed['hybrid'] = False
+                  if reason is None:
+                      msg = legends['msg_venv_hybrid_installing'].format(engine=tts_engine, pkgs=', '.join(settings['packages_hybrid']))
+                      print(msg)
+                      if progress_bar is not None:
+                         progress_bar(0.0, desc=msg)
+                      hybrid_ok = SubprocessPipe(uv_pip + ['wheel', 'ninja'], is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env).result
+                      if hybrid_ok:
+                         hybrid_ok = SubprocessPipe(uv_pip + ['--no-build-isolation'] + settings['packages_hybrid'], is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env).result
+                      if hybrid_ok:
+                         probe = subprocess.run([self.venv_python, '-c', 'import mamba_ssm, causal_conv1d, flash_attn'], env=self.worker_env, capture_output=True, text=True, timeout=600)
+                         hybrid_ok = probe.returncode == 0
+                      installed['hybrid'] = bool(hybrid_ok)
+                      installed['hybrid_reason'] = None if hybrid_ok else 'mamba-ssm / causal-conv1d / flash-attn install failed'
+                  else:
+                      installed['hybrid_reason'] = reason
+               with open(marker_file, 'w', encoding='utf-8') as f:
+                  json.dump(installed, f, indent=2)
             if hybrid_wanted and not installed.get('hybrid'):
-                # the pre-flight in convert_ebook() already switches unsupported hardware to
-                # internal; this covers a first failed mamba-ssm/flash-attn install and the
-                # sentence editor: same alert, same switch, and the worker is cached under the
-                # internal key so cleanup_models_cache() keeps it as the session's model
-                self.model_repo = settings['repo']
-                self.session['fine_tuned'] = 'internal'
-                self.session['model_cache'] = self.tts_key = f'{tts_engine}-internal'
-                msg = legends['msg_venv_hybrid_fallback'].format(engine=tts_engine, reason=installed.get('hybrid_reason'))
-                show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
-                if show_alert is not None:
-                    show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
-                else:
-                    print(msg)
+               # the pre-flight in convert_ebook() already switches unsupported hardware to
+               # internal; this covers a first failed mamba-ssm/flash-attn install and the
+               # sentence editor: same alert, same switch, and the worker is cached under the
+               # internal key so cleanup_models_cache() keeps it as the session's model
+               self.model_repo = settings['repo']
+               self.session['fine_tuned'] = 'internal'
+               self.session['model_cache'] = self.tts_key = f'{tts_engine}-internal'
+               msg = legends['msg_venv_hybrid_fallback'].format(engine=tts_engine, reason=installed.get('hybrid_reason'))
+               show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
+               if show_alert is not None:
+                  show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
+               else:
+                  print(msg)
             self.engine = self.load_engine()
         except Exception as e:
             error = f'__init__() error: {e}'
@@ -252,23 +275,23 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             cmd = [self.venv_python, '-u', self.worker_script, '--repo', self.model_repo, '--device', self.worker_device, '--compile']
             engine = loaded_tts.get(self.tts_key)
             if isinstance(engine, SubprocessPipe) and (engine.cmd != cmd or engine.process is None or engine.process.poll() is not None):
-                # dead worker, or one serving another model/device under this key
-                loaded_tts.pop(self.tts_key, None)
-                engine.stop()
-                engine = None
+               # dead worker, or one serving another model/device under this key
+               loaded_tts.pop(self.tts_key, None)
+               engine.stop()
+               engine = None
             if not engine:
-                msg = legends['msg_worker_starting'].format(engine=self.session['tts_engine'], model=self.model_repo, device=self.worker_device)
-                print(msg)
-                progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
-                if progress_bar is not None:
-                    progress_bar(0.0, desc=msg)
-                engine = SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, keep_alive=True, env=self.worker_env)
-                if not engine.result:
-                    error = legends['error_worker_failed'].format(engine=self.session['tts_engine'], error=engine.ready_info.get('error'))
-                    raise RuntimeError(error)
-                # always cached, whatever the free VRAM: the worker must stay reachable
-                # by unload_tts_manager() / cleanup_models_cache(), which stop it.
-                loaded_tts[self.tts_key] = engine
+               msg = legends['msg_worker_starting'].format(engine=self.session['tts_engine'], model=self.model_repo, device=self.worker_device)
+               print(msg)
+               progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
+               if progress_bar is not None:
+                  progress_bar(0.0, desc=msg)
+               engine = SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, keep_alive=True, env=self.worker_env)
+               if not engine.result:
+                  error = legends['error_worker_failed'].format(engine=self.session['tts_engine'], error=engine.ready_info.get('error'))
+                  raise RuntimeError(error)
+               # always cached, whatever the free VRAM: the worker must stay reachable
+               # by unload_tts_manager() / cleanup_models_cache(), which stop it.
+               loaded_tts[self.tts_key] = engine
             self.params['samplerate'] = int(engine.ready_info.get('samplerate', self.params['samplerate']))
             msg = legends['msg_tts_loaded'].format(model=self.tts_key)
             print(msg)
@@ -285,83 +308,83 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             import soundfile as sf
             from lib.classes.tts_engines.common.audio import trim_audio, is_audio_data_valid
             if self.engine:
-                sentence_parts = self._split_sentence_on_sml(sentence)
-                self.params['block_voice'] = kwargs.get('block_voice', self.session['voice'])
-                if self.params.get('inline_voice'):
-                    self.params['current_voice'] = self.params['inline_voice']
-                else:
-                    self.params['current_voice'], error = self._set_voice(self.params['block_voice'])
-                    if self.params['current_voice'] is None and error is not None:
-                        return False, error
-                self.audio_segments = []
-                for part in sentence_parts:
-                    part = part.strip()
-                    if not part:
-                        continue
-                    if SML_TAG_PATTERN.fullmatch(part):
-                        success, error = self._convert_sml(part)
-                        if not success:
-                            return False, error
-                        continue
-                    if not any(c.isalnum() for c in part):
-                        continue
-                    else:
-                        trim_audio_buffer = 0.006
-                        # only the voice path crosses the pipe: the worker computes the
-                        # speaker embedding once per voice file and keeps it.
-                        reply = self.engine.send({
-                            'op': 'tts',
-                            'text': part,
-                            'language': self.language_espeak,
-                            'voice': self.params['current_voice'],
-                            'file': part_file,
-                            **self.fine_tuned_params,
-                            # inside [emotion:...]...[/emotion] the tag wins over the panel
-                            **({'emotion_enabled': True, 'emotion': self.params['inline_emotion']} if self.params.get('inline_emotion') else {})
-                        })
-                        if not reply.get('ok'):
-                            # no retry: core.py unloads the engine, which stops the worker
-                            error = f"convert() error: {reply.get('error')} segment: {part}"
-                            print(error)
-                            return False, error
-                        audio_part, samplerate = sf.read(part_file, dtype='float32')
-                        os.unlink(part_file)
-                        if not is_audio_data_valid(audio_part):
-                            error = 'audio_part not valid'
-                            return False, error
-                        self.params['samplerate'] = int(samplerate)
-                        part_tensor = self._tensor_type(audio_part).reshape(1, -1)
-                        if part_tensor.numel() == 0:
-                            error = 'part_tensor not valid'
-                            return False, error
-                        if part[-1].isalnum() or part[-1] == '—':
-                            part_tensor = trim_audio(part_tensor.squeeze(), self.params['samplerate'], 0.001, trim_audio_buffer).unsqueeze(0)
-                        self.audio_segments.append(part_tensor)
-                        if not re.search(r'\w$', part, flags=re.UNICODE) and part[-1] != '—':
-                            silence_time = int(np.random.uniform(0.3, 0.6) * 100) / 100
-                            self.audio_segments.append(torch.zeros(1, int(self.params['samplerate'] * silence_time)))
-                if self.audio_segments:
-                    segment_tensor = torch.cat(self.audio_segments, dim=-1)
-                    if not self.audio_save(sentence_file, segment_tensor, self.params['samplerate']):
-                        error = f'audio_save() error: cannot save {sentence_file}'
-                        return False, error
-                    self.audio_segments = []
-                    if not os.path.exists(sentence_file):
-                        error = legends['error_cannot_create'].format(file=sentence_file)
-                        return False, error
-                return True, None
+               sentence_parts = self._split_sentence_on_sml(sentence)
+               self.params['block_voice'] = kwargs.get('block_voice', self.session['voice'])
+               if self.params.get('inline_voice'):
+                  self.params['current_voice'] = self.params['inline_voice']
+               else:
+                  self.params['current_voice'], error = self._set_voice(self.params['block_voice'])
+                  if self.params['current_voice'] is None and error is not None:
+                      return False, error
+               self.audio_segments = []
+               for part in sentence_parts:
+                  part = part.strip()
+                  if not part:
+                      continue
+                  if SML_TAG_PATTERN.fullmatch(part):
+                      success, error = self._convert_sml(part)
+                      if not success:
+                         return False, error
+                      continue
+                  if not any(c.isalnum() for c in part):
+                      continue
+                  else:
+                      trim_audio_buffer = 0.006
+                      # only the voice path crosses the pipe: the worker computes the
+                      # speaker embedding once per voice file and keeps it.
+                      reply = self.engine.send({
+                         'op': 'tts',
+                         'text': part,
+                         'language': self.language_espeak,
+                         'voice': self.params['current_voice'],
+                         'file': part_file,
+                         **self.fine_tuned_params,
+                         # inside [emotion:...]...[/emotion] the tag wins over the panel
+                         **({'emotion_enabled': True, 'emotion': self.params['inline_emotion']} if self.params.get('inline_emotion') else {})
+                      })
+                      if not reply.get('ok'):
+                         # no retry: core.py unloads the engine, which stops the worker
+                         error = f"convert() error: {reply.get('error')} segment: {part}"
+                         print(error)
+                         return False, error
+                      audio_part, samplerate = sf.read(part_file, dtype='float32')
+                      os.unlink(part_file)
+                      if not is_audio_data_valid(audio_part):
+                         error = 'audio_part not valid'
+                         return False, error
+                      self.params['samplerate'] = int(samplerate)
+                      part_tensor = self._tensor_type(audio_part).reshape(1, -1)
+                      if part_tensor.numel() == 0:
+                         error = 'part_tensor not valid'
+                         return False, error
+                      if part[-1].isalnum() or part[-1] == '—':
+                         part_tensor = trim_audio(part_tensor.squeeze(), self.params['samplerate'], 0.001, trim_audio_buffer).unsqueeze(0)
+                      self.audio_segments.append(part_tensor)
+                      if not re.search(r'\w$', part, flags=re.UNICODE) and part[-1] != '—':
+                         silence_time = int(np.random.uniform(0.3, 0.6) * 100) / 100
+                         self.audio_segments.append(torch.zeros(1, int(self.params['samplerate'] * silence_time)))
+               if self.audio_segments:
+                  segment_tensor = torch.cat(self.audio_segments, dim=-1)
+                  if not self.audio_save(sentence_file, segment_tensor, self.params['samplerate']):
+                      error = f'audio_save() error: cannot save {sentence_file}'
+                      return False, error
+                  self.audio_segments = []
+                  if not os.path.exists(sentence_file):
+                      error = legends['error_cannot_create'].format(file=sentence_file)
+                      return False, error
+               return True, None
             else:
-                error = legends['error_tts_engine_load_failed'].format(engine=self.session['tts_engine'])
-                return False, error
+               error = legends['error_tts_engine_load_failed'].format(engine=self.session['tts_engine'])
+               return False, error
         except Exception as e:
             self.audio_segments = []
             return False, self.log_exception(f'{self.__class__.__name__}.convert()', e)
         finally:
             if os.path.exists(part_file):
-                try:
-                    os.unlink(part_file)
-                except OSError:
-                    pass
+               try:
+                  os.unlink(part_file)
+               except OSError:
+                  pass
 
     def create_vtt(self, all_sentences:list)->bool:
         if self._build_vtt_file(all_sentences):
