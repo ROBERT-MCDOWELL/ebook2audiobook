@@ -40,6 +40,25 @@ export SUDO="sudo"
 export SETVARS_CALL=""
 export ETVARS_ARGS=""
 export SETVARS_COMPLETED=""
+# espeak-ng paths for phonemizer (zonos, gptsovits, core.py)
+if [[ "${OSTYPE-}" == darwin* ]]; then
+    BREW_PREFIX="/opt/homebrew"
+    [[ "$ARCH" == "amd64" ]] && BREW_PREFIX="/usr/local"
+    export PHONEMIZER_ESPEAK_LIBRARY="${BREW_PREFIX}/lib/libespeak-ng.dylib"
+    export ESPEAK_DATA_PATH="${BREW_PREFIX}/share/espeak-ng-data"
+elif [[ "${OSTYPE-}" == linux* ]]; then
+    ESPEAK_LIB=""
+    for lib in /usr/lib/x86_64-linux-gnu/libespeak-ng.so.1 \
+               /usr/lib64/libespeak-ng.so.1 \
+               /usr/lib/libespeak-ng.so.1 \
+               /usr/lib/libespeak-ng.so; do
+        if [[ -f "$lib" ]]; then ESPEAK_LIB="$lib"; break; fi
+    done
+    if [[ -n "$ESPEAK_LIB" ]]; then
+        export PHONEMIZER_ESPEAK_LIBRARY="$ESPEAK_LIB"
+        export ESPEAK_DATA_PATH="/usr/share/espeak-ng-data"
+    fi
+fi
 NATIVE="native"
 BUILD_DOCKER="build_docker"
 FULL_DOCKER="full_docker"
