@@ -83,6 +83,7 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
             self.worker_env['UV_PYTHON_INSTALL_DIR'] = os.path.join(engine_dir, 'venvs', '.python')
             # nltk data for the english frontend lives in the venv too
             self.worker_env['NLTK_DATA'] = os.path.join(self.venv_dir, 'nltk_data')
+            self.worker_env['NLTK_ALLOW_PROXIED_URLOPEN'] = '1'
             if self.worker_device != devices['CUDA']['proc']:
                 # keep the worker off the GPU entirely
                 self.worker_env['CUDA_VISIBLE_DEVICES'] = '-1'
@@ -154,29 +155,6 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                     steps.append((msg, uv_pip + ['matplotlib']))
                 msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
                 steps.append((msg, uv_pip + ['--only-binary', ':all:'] + [arg for pkg in settings['packages_sdist'] for arg in ('--no-binary', pkg)] + torch_pins + settings['packages']))
-                # --- GLOBAL MONKEY PATCH FOR CVE-2025-32434 ---
-                patch_script = '\n'.join([
-                    'import os, sys',
-                    'try:',
-                    '    import transformers',
-                    '    path = os.path.join(os.path.dirname(transformers.__file__), "utils", "import_utils.py")',
-                    '    if os.path.exists(path):',
-                    '        with open(path, "r", encoding="utf-8") as f:',
-                    '            content = f.read()',
-                    '        if "check_torch_load_is_safe" in content and "E2A_PATCH" not in content:',
-                    '            with open(path, "a", encoding="utf-8") as f:',
-                    '                f.write("\\n\\ndef check_torch_load_is_safe(*args, **kwargs):\\n    pass # E2A_PATCH\\n")',
-                    '            print("Successfully patched transformers for CVE-2025-32434")',
-                    '        else:',
-                    '            print("Already patched or function not found")',
-                    'except Exception as e:',
-                    '    import traceback',
-                    '    traceback.print_exc()',
-                    '    print(f"Patch failed: {e}")'
-                ])
-                msg = f'Patching {tts_engine} dependencies for CVE-2025-32434...'
-                steps.append((msg, [self.venv_python, '-c', patch_script]))
-                # -----------------------------------------------
                 # pinned source extracted to venvs/gptsovits/src/GPT-SoVITS (python_env's interpreter,
                 # pinned source extracted to venvs/gptsovits/src/GPT-SoVITS (python_env's interpreter,
                 # stdlib only). Upstream keeps its weights inside the tree, so pretrained_models and the
@@ -217,6 +195,25 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                     if not proc_pipe.result:
                         error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
                         raise RuntimeError(error)
+                # --- DIRECT PYTHON COPY OF sitecustomize.py ---
+                try:
+                    import shutil
+                    # Ask the venv's python where its site-packages directory is
+                    site_packages = subprocess.check_output(
+                        [self.venv_python, '-c', 'import sysconfig; print(sysconfig.get_paths()["purelib"])'],
+                        text=True
+                    ).strip()
+                    # Locate the source sitecustomize.py (3 levels up from lib/classes/tts_engines)
+                    sitecustomize_src = os.path.abspath(os.path.join(engine_dir, '..', '..', '..', 'components', 'sitecustomize.py'))
+                    sitecustomize_dst = os.path.join(site_packages, 'sitecustomize.py')
+                    if os.path.exists(sitecustomize_src):
+                        shutil.copy2(sitecustomize_src, sitecustomize_dst)
+                        print(f"Copied sitecustomize.py to {sitecustomize_dst}")
+                    else:
+                        print(f"Warning: sitecustomize.py not found at {sitecustomize_src}")
+                except Exception as e:
+                    print(f"Warning: Failed to copy sitecustomize.py: {e}")
+                # ----------------------------------------------
                 # same import path as the worker: from the tree root, jieba standing in for jieba_fast
                 probe_script = '\n'.join([
                     'import sys',
