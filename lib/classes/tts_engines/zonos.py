@@ -114,7 +114,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                     self.worker_env.get('PATH', '')
                 ])
             elif sys.platform == systems['LINUX']:
-                espeak_exe = os.path.join(espeak_prefix, 'bin', 'espeak-ng')
+                espeak_exe = 'usr/bin/espeak-ng'
                 if platform.machine().lower() == archs['AARCH64']:
                     espeak_data = '/usr/lib/aarch64-linux-gnu/espeak-ng-data'
                 else:
