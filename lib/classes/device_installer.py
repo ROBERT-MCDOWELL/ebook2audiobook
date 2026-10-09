@@ -1866,7 +1866,7 @@ class DeviceInstaller():
                                 if self.system == systems['WINDOWS'] and tag.startswith('win-cu'):
                                     torch_url_tag = tag.replace('win-', '')
                                 subprocess.check_call(self._uv_pip('install', '--reinstall-package', 'torch', '--no-cache', f'torch=={torch_version_matrix}', '--index-url', f'{url}/{torch_url_tag}', '--extra-index-url', f'{url_nightly}/{torch_url_tag}'))
-                                subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', f'torchaudio=={torchaudio_version_matrix}', '--index-url', f'{url}/{torchaudio_url_tag}'), '--extra-index-url', f'{url_nightly}/{torchaudio_url_tag}'))
+                                subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', f'torchaudio=={torchaudio_version_matrix}', '--index-url', f'{url}/{torchaudio_url_tag}', '--extra-index-url', f'{url_nightly}/{torchaudio_url_tag}'))
                             if not self.check_numpy():
                                 return 1
                             #### torchcodec installation
