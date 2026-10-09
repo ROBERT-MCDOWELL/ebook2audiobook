@@ -110,6 +110,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                     if os.path.exists(candidate):
                         espeak_lib = candidate
                         break
+            print(espeak_data, espeak_lib)
             if espeak_lib and os.path.exists(espeak_lib):
                 self.worker_env['PHONEMIZER_ESPEAK_LIBRARY'] = espeak_lib
             if espeak_data and os.path.isdir(espeak_data):
