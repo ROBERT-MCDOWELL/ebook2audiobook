@@ -161,10 +161,10 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                uv_bin = DeviceInstaller().uv_bin
                uv_pip = [uv_bin, 'pip', 'install', '--python', self.venv_python]
                steps = []
-                if need_base:
+               if need_base:
                    installed = {}
                    if not os.path.exists(self.venv_python):
-                       msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
+                    msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
                        # --clear: the dir can exist with a dead interpreter link (docker image rebuilt)
                        steps.append((msg, [uv_bin, 'venv', '--clear', '--python', settings['python'], self.venv_dir]))
                    msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch {torch.__version__}, torchaudio {torchaudio.__version__}')
