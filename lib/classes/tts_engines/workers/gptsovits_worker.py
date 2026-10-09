@@ -54,6 +54,15 @@ def main()->int:
         import re
         import numpy as np
         import torch
+        import torch.distributed
+        if not torch.distributed.is_available():
+            # torch built without distributed support (USE_DISTRIBUTED=0, e.g. the jetson wheels):
+            # upstream's module/distrib.py reads torch.distributed.ReduceOp at import and calls
+            # is_initialized() at run time; single-process inference only needs them to exist
+            import types
+            for attr, value in (('ReduceOp', types.SimpleNamespace(SUM='sum', AVG='avg', PRODUCT='product', MIN='min', MAX='max')), ('is_initialized', lambda: False), ('get_rank', lambda: 0), ('get_world_size', lambda: 1)):
+                if not hasattr(torch.distributed, attr):
+                    setattr(torch.distributed, attr, value)
         import soundfile as sf
         from TTS_infer_pack.TTS import TTS, TTS_Config
         device = args.device

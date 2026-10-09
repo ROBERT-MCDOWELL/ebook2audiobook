@@ -308,6 +308,12 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                     '    import jieba, jieba.posseg',
                     '    sys.modules["jieba_fast"] = jieba',
                     '    sys.modules["jieba_fast.posseg"] = jieba.posseg',
+                    # same torch.distributed stubs as the worker, for torch built without distributed (jetson)
+                    'import types, torch, torch.distributed',
+                    'if not torch.distributed.is_available():',
+                    '    for attr, value in (("ReduceOp", types.SimpleNamespace(SUM="sum", AVG="avg", PRODUCT="product", MIN="min", MAX="max")), ("is_initialized", lambda: False), ("get_rank", lambda: 0), ("get_world_size", lambda: 1)):',
+                    '        if not hasattr(torch.distributed, attr):',
+                    '            setattr(torch.distributed, attr, value)',
                     'import TTS_infer_pack.TTS'
                 ])
                 probe = subprocess.run([self.venv_python, '-c', probe_script], cwd=self.src_dir, env=self.worker_env, capture_output=True, text=True, timeout=600)
