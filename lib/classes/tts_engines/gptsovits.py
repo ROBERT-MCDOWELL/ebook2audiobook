@@ -2,7 +2,7 @@ import json
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
-from lib.conf import systems, archs, default_pytorch_url, default_pytorch_nightly_url, default_jetson_url
+from lib.conf import systems, archs, torch_matrix
 from lib.lang import legends
 
 class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
@@ -65,8 +65,8 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 }.items()
             }
             # --- own uv venv in lib/classes/tts_engines/venvs ---
-            # every package follows upstream's requirements, torch included (settings['torch']);
-            # python_env only tells which device family the index must serve
+            # every package follows upstream's requirements.txt, torch included: e2a's device
+            # detection only tells which PyTorch index (or fallback) serves this machine
             progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
             engine_dir = os.path.dirname(os.path.abspath(__file__))
             self.venv_dir = os.path.join(engine_dir, 'venvs', tts_engine)
@@ -110,36 +110,20 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 self.worker_env['PHONEMIZER_ESPEAK_LIBRARY'] = espeak_lib
             if espeak_data and os.path.isdir(espeak_data):
                 self.worker_env['ESPEAK_DATA_PATH'] = espeak_data
-            import torch
-            torch_tag = torch.__version__.partition('+')[2]
-            cuda_tag = re.fullmatch(r'cu(\d+)', torch_tag)
+            # device family and python come from e2a's own detection (.device_info.json, written by
+            # DeviceInstaller): torch is never imported here
+            from lib.classes.device_installer import DeviceInstaller
+            device_installer = DeviceInstaller()
+            device_info = device_installer.load_device_info() or {}
+            # GPT-SoVITS' own python (settings), unless python_env's is older: then python_env's, as the
+            # fallback's wheels are built for it (jetson: cp310 only)
             venv_python = settings['python']
-            venv_torch = None
-            torch_step = None
-            if cuda_tag:
-                index_tag = 'cu118' if int(cuda_tag.group(1)) <= 118 else 'cu126' if int(cuda_tag.group(1)) <= 126 else 'cu128'
-                venv_torch = f"{settings['torch']}+{index_tag}"
-                torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f'{default_pytorch_url}/{index_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{index_tag}']
-            elif torch_tag in ('cpu', 'xpu'):
-                venv_torch = f"{settings['torch']}+{torch_tag}"
-                torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f'{default_pytorch_url}/{torch_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torch_tag}']
-            elif torch_tag == '':
-                venv_torch = settings['torch_min'] if sys.platform == systems['MACOS'] and os.uname().machine != 'arm64' else settings['torch']
-                torch_step = [f'torch=={venv_torch}', f'torchaudio=={venv_torch}']
-            elif re.fullmatch(r'rocm[\d.]+', torch_tag) and sys.platform == systems['LINUX']:
-                venv_torch = f"{settings['torch']}+{settings['torch_rocm']}"
-                torch_step = [f"torch=={settings['torch']}", f"torchaudio=={settings['torch']}", '--index-url', f"{default_pytorch_url}/{settings['torch_rocm']}", '--extra-index-url', f"{default_pytorch_nightly_url}/{settings['torch_rocm']}"]
-            elif re.fullmatch(r'jetson\d+', torch_tag):
-                import torchaudio
-                jetson_code = ''.join(c for c in torch_tag if c.isdigit())
-                venv_python = '3.10'
-                venv_torch = torch.__version__
-                torch_step = ['--no-deps', f"{default_jetson_url}/torch-v{jetson_code}/torch-{torch.__version__.partition('+')[0]}%2B{torch_tag}-cp310-cp310-linux_aarch64.whl", f"{default_jetson_url}/torchaudio-v{jetson_code}/torchaudio-{torchaudio.__version__.partition('+')[0]}%2B{torch_tag}-cp310-cp310-linux_aarch64.whl"]
-            if torch_step is None:
-                error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=settings['torch_min'], version=torch.__version__)
-                raise ValueError(error)
-            venv_torchaudio = torchaudio.__version__.partition('+')[0] if re.fullmatch(r'jetson\d+', torch_tag) else venv_torch.partition('+')[0]
-            torch_pins = [f"torch=={venv_torch.partition('+')[0]}", f'torchaudio=={venv_torchaudio}']
+            if device_info.get('pyvenv') and tuple(device_info['pyvenv'][:2]) < tuple(int(x) for x in settings['python'].split('.')[:2]):
+                venv_python = '.'.join(str(v) for v in device_info['pyvenv'][:2])
+            # --torch-backend gets the tag e2a picked for this machine (cu126 keeps Pascal kernels,
+            # mps uses the PyPI build). 'auto' only reads the driver version: a Pascal card on a
+            # recent driver would get cu128+/cu130 wheels without sm_61 kernels.
+            torch_backend = {devices['MPS']['proc']: devices['CPU']['proc']}.get(device_info.get('tag'), device_info.get('tag')) or 'auto'
             marker_file = os.path.join(self.venv_dir, '.e2a_installed.json')
             installed = {}
             if os.path.exists(marker_file):
@@ -148,27 +132,17 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                         installed = json.load(f)
                 except Exception:
                     installed = {}
-            expected = {'source': settings['source'], 'torch': venv_torch}
+            # newest torch e2a ships for this device tag (torch_matrix 'last'); a matrix bump reinstalls
+            matrix_entry = torch_matrix.get(device_info.get('tag')) or {}
+            expected = {'source': settings['source'], 'device': torch_backend, 'torch': matrix_entry.get('last')}
             if not os.path.exists(self.venv_python) or not os.path.isdir(self.src_dir) or any(installed.get(k) != v for k, v in expected.items()):
-                from lib.classes.device_installer import DeviceInstaller
-                uv_bin = DeviceInstaller().uv_bin
+                uv_bin = device_installer.uv_bin
                 uv_pip = [uv_bin, 'pip', 'install', '--python', self.venv_python]
                 steps = []
                 if not os.path.exists(self.venv_python):
                     msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
                     # --clear: the dir can exist with a dead interpreter link (docker image rebuilt)
                     steps.append((msg, [uv_bin, 'venv', '--clear', '--python', venv_python, self.venv_dir]))
-                msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch / torchaudio {venv_torch}')
-                steps.append((msg, uv_pip + torch_step))
-                if re.fullmatch(r'jetson\d+', torch_tag):
-                    steps.append((msg, uv_pip + ['filelock', 'typing-extensions', 'jinja2', 'fsspec', 'networkx', 'sympy', 'matplotlib']))
-                else:
-                    steps.append((msg, uv_pip + ['matplotlib']))
-                venv_torch_tuple = tuple(int(x) for x in venv_torch.partition('+')[0].split('.')[:3])
-                numpy_pkg = 'numpy<2' if venv_torch_tuple < (2, 5, 0) else 'numpy'
-                steps.append((msg, uv_pip + [numpy_pkg]))
-                msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
-                steps.append((msg, uv_pip + ['--only-binary', ':all:'] + [arg for pkg in settings['packages_sdist'] for arg in ('--no-binary', pkg)] + torch_pins + settings['packages']))
                 # pinned source extracted to venvs/gptsovits/src/GPT-SoVITS (python_env's interpreter,
                 # stdlib only). Upstream keeps its weights inside the tree, so pretrained_models and the
                 # chinese G2PWModel are set aside and put back: a new pin never re-downloads them.
@@ -208,6 +182,69 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                     if not proc_pipe.result:
                         error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
                         raise RuntimeError(error)
+                # the package list is upstream's own requirements.txt from the extracted tree, minus what
+                # inference never imports (webui, api, dataset/ASR tools, training) and the two C builds
+                # that have wheel twins; e2a's additions are in settings['requirements_extra']
+                requirements = []
+                with open(os.path.join(self.src_dir, 'requirements.txt'), 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        name = re.match(r'[A-Za-z0-9][A-Za-z0-9._-]*', line)
+                        # option lines (--no-binary=opencc) never match a name: dropped too
+                        if name and re.sub(r'[-_.]+', '-', name.group(0)).lower() not in settings['requirements_exclude']:
+                            requirements.append(line)
+                requirements_file = os.path.join(self.venv_dir, 'requirements.e2a.txt')
+                with open(requirements_file, 'w', encoding='utf-8') as f:
+                    f.write('\n'.join(requirements + settings['requirements_extra']) + '\n')
+                # torch: torch_matrix 'last' for this device tag, unless upstream's requirements lock torch
+                # or cap it below that version: then upstream's own spec
+                from packaging.requirements import Requirement
+                from packaging.version import Version
+                torch_line = f"torch=={matrix_entry['last']}" if matrix_entry.get('last') else 'torch'
+                for line in requirements:
+                    try:
+                        requirement = Requirement(line)
+                    except Exception:
+                        continue
+                    if re.sub(r'[-_.]+', '-', requirement.name).lower() == 'torch' and requirement.specifier:
+                        locked = any(spec.operator in ('==', '===') for spec in requirement.specifier)
+                        if locked or not matrix_entry.get('last') or Version(matrix_entry['last']) not in requirement.specifier:
+                            torch_line = line
+                # wheels only, so no platform ever needs a compiler: the resolver takes the newest release
+                # that has a wheel there; the few pure-python sdist-only packages are let through
+                wheels_only = ['--only-binary', ':all:'] + [arg for pkg in settings['packages_sdist'] for arg in ('--no-binary', pkg)]
+                msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} requirements ({torch_line}, {torch_backend})')
+                print(msg)
+                if progress_bar is not None:
+                    progress_bar(0.0, desc=msg)
+                # 1. upstream's requirements and torch from the device's PyTorch index, in one resolution
+                proc_pipe = SubprocessPipe(uv_pip + ['--torch-backend', torch_backend] + wheels_only + ['-r', requirements_file, torch_line], is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env)
+                if not proc_pipe.result:
+                    # 2. no uv backend for this tag (jetson, windows rocm, a newer cuda) or no build there:
+                    # e2a's DeviceInstaller installs its device-proven torch into the venv. It runs on the
+                    # venv's interpreter, so python_exec and its installed-version checks are the venv's
+                    # (PY_CMD forced: e2a's own environment may point it at python_env), then the
+                    # requirements resolve around that torch (no torch line here, so it is kept).
+                    device_script = '\n'.join([
+                        'import sys, json',
+                        'from lib.conf import NATIVE',
+                        'from lib.classes.device_installer import DeviceInstaller',
+                        'installer = DeviceInstaller()',
+                        'info = installer.load_device_info()',
+                        'sys.exit(installer.install_device_packages(json.dumps(info) if info else installer.check_device_info(NATIVE)))'
+                    ])
+                    fallback_env = dict(self.worker_env, PY_CMD=self.venv_python)
+                    for msg, cmd in (
+                        (legends['msg_venv_installing'].format(engine=tts_engine, pkgs='torch (DeviceInstaller)'), [self.venv_python, '-c', device_script]),
+                        (legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} requirements'), uv_pip + wheels_only + ['-r', requirements_file])
+                    ):
+                        print(msg)
+                        if progress_bar is not None:
+                            progress_bar(0.0, desc=msg)
+                        proc_pipe = SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=fallback_env)
+                        if not proc_pipe.result:
+                            error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
+                            raise RuntimeError(error)
                 # --- DIRECT PYTHON COPY OF sitecustomize.py ---
                 try:
                     import shutil

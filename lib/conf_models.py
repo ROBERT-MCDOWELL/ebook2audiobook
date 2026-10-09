@@ -118,23 +118,21 @@ default_engine_settings = {
         "repo": "lj1995/GPT-SoVITS",
         "source": "https://github.com/RVC-Boss/GPT-SoVITS/archive/e7cd61ec3dcc9a34089f50ed169e3103a16ad675.tar.gz",
         "python": "3.12",
-        # upstream's oldest tested torch (README, CPU): pre-flight floor on python_env's torch, and
-        # the venv's torch on intel macOS, where PyTorch stopped publishing at this release
-        "torch_min": "2.2.2",
-        # upstream's tested torch for python 3.12 (README); torchaudio of the same release still loads
-        # wav through soundfile, so no torchcodec / ffmpeg shared libraries are needed in the venv
-        "torch": "2.7.1",
-        # torch 2.7.1 rocm index (upstream's install.sh rocm6.2 index stops at torch 2.5.1)
-        "torch_rocm": "rocm6.3",
-        # upstream requirements.txt without the webui / api / dataset tools (gradio, fastapi, funasr,
-        # modelscope, tensorboard). pyopenjtalk-plus is pyopenjtalk with prebuilt wheels and jieba
-        # stands in for jieba_fast (the worker aliases it): both would need a compiler otherwise.
-        # loguru / rich are hard imports upstream only gets through fastapi[standard].
-        # faster-whisper transcribes the reference for the versions that need its text (v5).
-        "packages": ["scipy", "librosa==0.10.2", "numba", "pytorch-lightning>=2.4", "ffmpeg-python", "onnxruntime", "tqdm", "cn2an", "pypinyin", "pyopenjtalk-plus", "g2p_en", "sentencepiece", "transformers>=4.51,<5", "peft<0.18.0", "chardet", "PyYAML", "psutil", "jieba", "split-lang", "fast_langdetect>=0.3.1", "wordsegment", "rotary_embedding_torch", "ToJyutping", "g2pk2", "ko_pron", "opencc", "python_mecab_ko; sys_platform != 'win32'", "x_transformers", "torchmetrics<=1.5", "pydantic<=2.10.6", "av>=11", "einops", "huggingface_hub", "loguru", "rich", "resampy", "soundfile", "nltk", "faster-whisper", "ctranslate2>=4.0,<5"],
-        # the packages above install as wheels only, so no platform ever needs a compiler: the resolver
-        # takes the newest release that has a wheel there (e.g. numba 0.68 / llvmlite 0.50 have no
-        # intel macOS wheels, 0.62 / 0.45 do). These three only exist as pure-python sources.
+        # package list = upstream's own requirements.txt (in the extracted tree), torch from the device's
+        # PyTorch index (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller as fallback.
+        # Left out: what inference never imports (webui, api, dataset / ASR tools, training) and the two
+        # C builds: pyopenjtalk (pyopenjtalk-plus = same module, prebuilt wheels) and jieba_fast (the
+        # worker aliases jieba). Names normalized as pip does (lowercase, - for _ and .).
+        "requirements_exclude": ["gradio", "fastapi", "funasr", "modelscope", "tensorboard", "onnxruntime-gpu", "pyopenjtalk", "jieba-fast"],
+        # torch is added by the install itself (torch_matrix 'last' for the device tag, or upstream's own
+        # spec when it locks torch or caps it below that); onnxruntime replaces
+        # the dropped onnxruntime-gpu; loguru / rich are hard imports upstream only gets through
+        # fastapi[standard]; soundfile backs e2a's sitecustomize torchaudio.load shim (so no torchcodec);
+        # nltk / matplotlib for the english frontend and utils; faster-whisper transcribes v5 references
+        "requirements_extra": ["onnxruntime", "pyopenjtalk-plus", "loguru", "rich", "resampy", "soundfile", "nltk", "matplotlib", "faster-whisper"],
+        # every package installs as a wheel, so no platform ever needs a compiler: the resolver takes the
+        # newest release that has a wheel there (e.g. numba 0.68 / llvmlite 0.50 have no intel macOS
+        # wheels, 0.62 / 0.45 do). These three only exist as pure-python sources.
         "packages_sdist": ["jieba", "g2p-en", "distance"],
         # weights every version loads; paths in the HF repo = paths under GPT_SoVITS/pretrained_models
         "weights": ["chinese-roberta-wwm-ext-large/*", "chinese-hubert-base/*", "s1v3.ckpt", "sv/pretrained_eres2netv2w24s4ep4.ckpt"],
