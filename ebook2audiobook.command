@@ -40,12 +40,19 @@ export SUDO="sudo"
 export SETVARS_CALL=""
 export ETVARS_ARGS=""
 export SETVARS_COMPLETED=""
-# espeak-ng paths for phonemizer (zonos, gptsovits, core.py)
+export TTS_CACHE="$SCRIPT_DIR/models"
+export TESSDATA_PREFIX="$SCRIPT_DIR/models/tessdata"
+export TMPDIR="$SCRIPT_DIR/run"
 if [[ "${OSTYPE-}" == darwin* ]]; then
-    BREW_PREFIX="/opt/homebrew"
-    [[ "$ARCH" == "amd64" ]] && BREW_PREFIX="/usr/local"
-    export PHONEMIZER_ESPEAK_LIBRARY="${BREW_PREFIX}/lib/libespeak-ng.dylib"
-    export ESPEAK_DATA_PATH="${BREW_PREFIX}/share/espeak-ng-data"
+    if [[ "$ARCH" == "arm64" ]]; then
+        BREW_PREFIX="/opt/homebrew"
+    else
+        BREW_PREFIX="/usr/local"
+    fi
+    if [[ -f "$BREW_PREFIX/lib/libespeak-ng.dylib" ]]; then
+        export PHONEMIZER_ESPEAK_LIBRARY="$BREW_PREFIX/lib/libespeak-ng.dylib"
+        export ESPEAK_DATA_PATH="$BREW_PREFIX/share/espeak-ng-data"
+    fi
 elif [[ "${OSTYPE-}" == linux* ]]; then
     ESPEAK_LIB=""
     for lib in /usr/lib/x86_64-linux-gnu/libespeak-ng.so.1 \
