@@ -97,7 +97,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             espeak_lib = None
             espeak_data = None
             if sys.platform == systems['MACOS']:
-                espeak_prefix = '/opt/homebrew' if platform.machine().lower() == archs['ARM64'] else '/usr/local'
+                espeak_prefix = '/opt/homebrew' if os.uname().machine == archs['ARM64'] else '/usr/local'
                 espeak_lib = os.path.join(espeak_prefix, 'lib', 'libespeak-ng.dylib')
                 espeak_data = os.path.join(espeak_prefix, 'share', 'espeak-ng-data')
             elif sys.platform == systems['LINUX']:
