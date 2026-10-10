@@ -132,25 +132,33 @@ def main()->int:
                         # The clip is decoded here (soundfile) and handed over as 16 kHz mono float32: given an
                         # array, faster-whisper skips its own PyAV decoder, whose av.open(metadata_errors=...)
                         # breaks on PyAV >= 19 (faster-whisper 1.2.1 only requires av>=11).
+                        # The model is fetched as plain files into its own folder (huggingface local_dir): the
+                        # HF cache layout symlinks, and huggingface_hub 0.36's symlink probe races under
+                        # faster-whisper's threaded download (WinError 1314 on Windows without symlink rights).
+                        # Once model.bin is there, no download step runs at all.
                         asr_out = clip[:-4] + '.asr.json'
+                        asr_dir = os.path.join(os.environ.get('HF_HOME') or args.cache_dir, f'faster-whisper-{args.asr_model}')
                         asr_script = '\n'.join([
-                            'import sys, json, math',
+                            'import os, sys, json, math',
                             'import numpy as np, soundfile as sf',
                             'from scipy.signal import resample_poly',
                             'from faster_whisper import WhisperModel',
-                            'clip, model_name, out = sys.argv[1], sys.argv[2], sys.argv[3]',
+                            'from faster_whisper.utils import download_model',
+                            'clip, model_name, out, model_dir = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]',
+                            'if not os.path.exists(os.path.join(model_dir, "model.bin")):',
+                            '    model_dir = download_model(model_name, output_dir=model_dir)',
                             'data, sr = sf.read(clip, dtype="float32", always_2d=True)',
                             'audio = data.mean(axis=1)',
                             'if sr != 16000:',
                             '    g = math.gcd(16000, sr)',
                             '    audio = resample_poly(audio, 16000 // g, sr // g)',
                             'audio = np.ascontiguousarray(audio, dtype=np.float32)',
-                            'segments, info = WhisperModel(model_name, device="cpu", compute_type="int8").transcribe(audio, beam_size=5)',
+                            'segments, info = WhisperModel(model_dir, device="cpu", compute_type="int8").transcribe(audio, beam_size=5)',
                             'text = "".join(segment.text for segment in segments).strip()',
                             'with open(out, "w", encoding="utf-8") as f:',
                             '    json.dump({"text": text, "language": info.language}, f, ensure_ascii=False)'
                         ])
-                        asr_run = subprocess.run([sys.executable, '-c', asr_script, clip, args.asr_model, asr_out], stdout=subprocess.DEVNULL)
+                        asr_run = subprocess.run([sys.executable, '-c', asr_script, clip, args.asr_model, asr_out, asr_dir], stdout=subprocess.DEVNULL)
                         if asr_run.returncode != 0 or not os.path.exists(asr_out):
                             raise RuntimeError(f'reference transcription failed (exit code {asr_run.returncode})')
                         with open(asr_out, 'r', encoding='utf-8') as f:
