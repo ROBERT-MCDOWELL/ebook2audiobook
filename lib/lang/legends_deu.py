@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': 'Die Installation von {pkgs} in der {engine} virtuellen Umgebung dauert eine Weile, bitte haben Sie etwas Geduld...',
     'msg_venv_hybrid_installing': 'Installation der {engine} hybrid-Backbone ({pkgs}), kann es aus der Quelle kompilieren und lange dauern...',
     'msg_venv_hybrid_fallback': '{engine} Hybrid kann hier nicht laufen ({reason}): auf das interne Trafomodell umgeschaltet.',
-    'error_venv_torch_unsupported': '{engine} benötigt Taschenlampe>={min} aus einem Standard-PyTorch-Index, gefundene Taschenlampe {version}. Bitte wählen Sie eine andere TTS-Engine.',
+    'error_venv_torch_unsupported': '{engine} benötigt Taschenlampe>={min}, aber die neueste Taschenlampe für dieses Gerät ist {version}. Bitte wählen Sie eine andere TTS-Engine.',
     'error_venv_install_failed': '{engine} installation der virtuellen Umgebung fehlgeschlagen bei: {step}',
     'gr_ui_language': 'Sprache der Oberfläche',
     'gr_ui_language_auto': 'Auto (Browser)',

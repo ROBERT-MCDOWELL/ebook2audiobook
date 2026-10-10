@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': 'ING BANK {pkgs} ээээээээээээээээээээээээээээээээээээээээээээЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭ {engine} lingkungan virtual, iku njupuk wektu, please sabar...',
     'msg_venv_hybrid_installing': 'Nginstal {engine} balung punggung hibrida ({pkgs}), bisa nyusun saka sumber lan njupuk wektu sing suwe...',
     'msg_venv_hybrid_fallback': '{engine} hibrida ora bisa mbukak ing kene ({reason}): ngalih menyang model transformator internal.',
-    'error_venv_torch_unsupported': '{engine} butuh obor>={min} saka indeks PyTorch standar, ditemokake obor {version}. Mangga pilih mesin TTS liyane.',
+    'error_venv_torch_unsupported': '{engine} butuh obor>={min}, nanging obor paling anyar kanggo piranti iki yaiku {version}. Mangga pilih mesin TTS liyane.',
     'error_venv_install_failed': '{engine} instalasi lingkungan virtual gagal ing: {step}',
     'gr_ui_language': 'Basa antarmuka',
     'gr_ui_language_auto': 'Otomatis (peramban)',

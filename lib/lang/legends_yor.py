@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': 'Ń fi sí orí ẹ̀rọ... {pkgs} wọle si awọn {engine} àyíká gidi, ó gba ìgbà díẹ̀, jọ̀wọ́ ní sùúrù...',
     'msg_venv_hybrid_installing': 'Fifi sori ẹrọ {engine} àpá ẹ̀yìn aládàákẹ́gbẹ́ ({pkgs}), ó lè kó jọ láti orísun ó sì gba àkókò gígùn...',
     'msg_venv_hybrid_fallback': '{engine} arabara kò lè sáré níbí ({reason}): yí padà sí àwòṣe àyípadà inú.',
-    'error_venv_torch_unsupported': '{engine} nílò iná>={min} láti atọ́ka PyTorch tí ó ṣe déédéé, rí iná {version}. Jọ̀wọ́ yan ẹ̀rọ TTS mìíràn.',
+    'error_venv_torch_unsupported': '{engine} nílò iná>={min}, ṣùgbọ́n iná tuntun fún ẹ̀rọ yìí ni {version}. Jọ̀wọ́ yan ẹ̀rọ TTS mìíràn.',
     'error_venv_install_failed': '{engine} fi sori ẹrọ ayika foju kuna ni: {step}',
     'gr_ui_language': 'Èdè ojú-iṣẹ́',
     'gr_ui_language_auto': 'Aládàáṣe (aṣàwákiri)',

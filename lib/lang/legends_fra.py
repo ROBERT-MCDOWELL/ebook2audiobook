@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': 'Installation {pkgs} dans le {engine} environnement virtuel, cela prend un certain temps, s\'il vous plaît soyez patient…',
     'msg_venv_hybrid_installing': 'Installez le {engine} épine dorsale hybride ({pkgs}), il peut compiler à partir de la source et prendre beaucoup de temps...',
     'msg_venv_hybrid_fallback': '{engine} hybride ne peut pas fonctionner ici ({reason}) : est passé au modèle de transformateur interne.',
-    'error_venv_torch_unsupported': '{engine} nécessite une torche>={min} à partir d\'un indice PyTorch standard, torche trouvée {version}. Veuillez sélectionner un autre moteur TTS.',
+    'error_venv_torch_unsupported': '{engine} nécessite une torche>={min}, mais la torche la plus récente pour cet appareil est {version}. Veuillez sélectionner un autre moteur TTS.',
     'error_venv_install_failed': '{engine} l\'installation de l\'environnement virtuel a échoué à : {step}',
     'gr_ui_language': 'Langue de l\'interface',
     'gr_ui_language_auto': 'Auto (navigateur)',

@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': '正在安装 {pkgs} 进入 {engine} 虚拟环境，需要一段时间，请耐心等待……',
     'msg_venv_hybrid_installing': '正在安装{engine}混合骨干网（{pkgs} ） ，它可能会从源代码编译，并且需要很长时间……',
     'msg_venv_hybrid_fallback': '{engine}混合电源无法在此处运行（{reason} ） ：切换到内部变压器型号。',
-    'error_venv_torch_unsupported': '{engine}需要火炬> ={min}的标准PyTorch指数，找到火炬{version}。请选择其他TTS引擎。',
+    'error_venv_torch_unsupported': '{engine}需要割炬> ={min} ，但此设备的最新割炬为{version}。请选择其他TTS引擎。',
     'error_venv_install_failed': '{engine}虚拟环境安装失败： {step}',
     'gr_ui_language': '界面语言',
     'gr_ui_language_auto': '自动（浏览器）',

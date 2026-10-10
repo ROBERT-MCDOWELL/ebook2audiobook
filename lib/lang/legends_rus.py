@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': 'Установка {pkgs} в {engine} виртуальная среда, это занимает некоторое время, пожалуйста, будьте терпеливы...',
     'msg_venv_hybrid_installing': 'Установка {engine} гибридный каркас ({pkgs}), он может компилироваться из источника и занимать много времени...',
     'msg_venv_hybrid_fallback': '{engine} Hybrid не может работать здесь ({reason}): переключился на модель внутреннего трансформатора.',
-    'error_venv_torch_unsupported': '{engine} требуется горелка>={min} из стандартного индекса PyTorch, найдена горелка {version}. Выберите другой двигатель TTS.',
+    'error_venv_torch_unsupported': '{engine} требуется факел>={min}, но новейший факел для этого устройства - {version}. Выберите другой двигатель TTS.',
     'error_venv_install_failed': '{engine} установка виртуальной среды не удалась в: {step}',
     'gr_ui_language': 'Язык интерфейса',
     'gr_ui_language_auto': 'Авто (браузер)',
