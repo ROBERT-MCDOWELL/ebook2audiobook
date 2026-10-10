@@ -9,12 +9,14 @@
 #   stdout <- {"ok": true, "file": "...", "samplerate": n, "samples": n}
 #             {"ok": false, "error": "...", "oom": bool}
 #   EOF on stdin -> exit 0 (that is how e2a unloads the model and frees its VRAM)
-import os, sys, json, argparse, hashlib
+import os, sys, json, argparse, hashlib, subprocess, faulthandler
 
 def main()->int:
     # the protocol owns a private copy of fd 1; fd 1 itself is pointed at stderr so
     # upstream's prints, tqdm and C extensions can never write into the reply stream.
     proto = os.fdopen(os.dup(1), 'w', encoding='utf-8', buffering=1)
+    # a native crash (SIGSEGV...) prints the python stack to stderr, which e2a shows in its log
+    faulthandler.enable()
     os.dup2(2, 1)
     sys.stdout = sys.stderr
     parser = argparse.ArgumentParser()
@@ -80,7 +82,6 @@ def main()->int:
         proto.write(json.dumps({'ready': False, 'error': f'{type(e).__name__}: {e}'}) + '\n')
         return 1
     proto.write(json.dumps({'ready': True, 'samplerate': sampling_rate, 'version': args.version, 'needs_prompt': needs_prompt, 'device': str(tts.configs.device), 'half': is_half}) + '\n')
-    asr = None
     refs = {}
     while True:
         raw = sys.stdin.buffer.readline()
@@ -125,15 +126,29 @@ def main()->int:
                             cached = json.load(f)
                         prompt_text, prompt_lang = cached['text'], cached['language']
                     else:
-                        if asr is None:
-                            # cpu int8: one short clip per voice, no CUDA/cuDNN runtime needed
-                            from faster_whisper import WhisperModel
-                            asr = WhisperModel(args.asr_model, device='cpu', compute_type='int8')
-                        segments, info = asr.transcribe(clip, beam_size=5)
-                        prompt_text = ''.join(segment.text for segment in segments).strip()
-                        prompt_lang = {'en': 'en', 'zh': 'zh', 'ja': 'ja', 'ko': 'ko', 'yue': 'yue'}.get(info.language)
+                        # faster-whisper runs in its own short-lived process, as upstream's webui does:
+                        # ctranslate2 bundles intel's openmp (libiomp5) and torch its own (libomp), and
+                        # both in one process crash on macOS. cpu int8, once per voice (cached on disk).
+                        asr_out = clip[:-4] + '.asr.json'
+                        asr_script = '\n'.join([
+                            'import sys, json',
+                            'from faster_whisper import WhisperModel',
+                            'clip, model_name, out = sys.argv[1], sys.argv[2], sys.argv[3]',
+                            'segments, info = WhisperModel(model_name, device="cpu", compute_type="int8").transcribe(clip, beam_size=5)',
+                            'text = "".join(segment.text for segment in segments).strip()',
+                            'with open(out, "w", encoding="utf-8") as f:',
+                            '    json.dump({"text": text, "language": info.language}, f, ensure_ascii=False)'
+                        ])
+                        asr_run = subprocess.run([sys.executable, '-c', asr_script, clip, args.asr_model, asr_out], stdout=subprocess.DEVNULL)
+                        if asr_run.returncode != 0 or not os.path.exists(asr_out):
+                            raise RuntimeError(f'reference transcription failed (exit code {asr_run.returncode})')
+                        with open(asr_out, 'r', encoding='utf-8') as f:
+                            asr_result = json.load(f)
+                        os.unlink(asr_out)
+                        prompt_text = asr_result['text']
+                        prompt_lang = {'en': 'en', 'zh': 'zh', 'ja': 'ja', 'ko': 'ko', 'yue': 'yue'}.get(asr_result['language'])
                         if prompt_lang is None or not prompt_text:
-                            raise ValueError(f'reference voice language {info.language!r} cannot be transcribed for {args.version} (supported: en, zh, ja, ko, yue)')
+                            raise ValueError(f"reference voice language {asr_result['language']!r} cannot be transcribed for {args.version} (supported: en, zh, ja, ko, yue)")
                         with open(transcript, 'w', encoding='utf-8') as f:
                             json.dump({'text': prompt_text, 'language': prompt_lang}, f, ensure_ascii=False)
                 refs[voice_key] = (clip, prompt_text, prompt_lang)
