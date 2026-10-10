@@ -3706,7 +3706,8 @@ def combine_audio_chapters(session_id:str)->list[str]|None:
             merged_audio = Path(session['process_dir']) / f"{get_sanitized(session['metadata']['title'])}{part_suffix}.{default_audio_proc_format}"
             # two tracks mixed into one file in the output's channel layout: voice = chapters + silent gaps, music = faded interludes at their offsets.
             # each interlude fades in 5-10 s before the chapter's last sentence ends and fades out 4-6 s into the next chapter;
-            # the part's last chapter gets the same fade in, then the interlude plays out and fades out at the very end
+            # the part's last chapter gets the same fade in, then the interlude plays out and fades out at the very end.
+            # the voice ducks the music through a sidechain compressor in the final merge
             mix_dir = os.path.join(concat_dir, f'interludes_mix{part_suffix}')
             shutil.rmtree(mix_dir, ignore_errors=True)
             os.makedirs(mix_dir, exist_ok=True)
@@ -3929,10 +3930,15 @@ def combine_audio_chapters(session_id:str)->list[str]|None:
                 music_chain += f',apad=whole_len={target_samples}'
             cmd = [ffmpeg, '-hide_banner', '-nostats', '-safe', '0', '-f', 'concat', '-i', voice_list]
             if music_pos > 0:
+                # voice ducking: a sidechain compressor driven by the voice lowers the music while the voice is heard and lets it fade
+                # back in fast once the voice stops. mix caps the ducking at interlude_duck_db: out = music * (gain * mix + 1 - mix)
+                duck_mix = 1 - 10 ** (interlude_duck_db / 20)
                 cmd += [
                     '-safe', '0', '-f', 'concat', '-i', music_list,
                     '-filter_complex',
-                    f'{voice_chain}[v];{music_chain}[m];[v][m]amix=inputs=2:duration=longest:normalize=0[out]'
+                    f'{voice_chain},asplit=2[v][sc];{music_chain}[m];'
+                    f'[m][sc]sidechaincompress=threshold={interlude_duck_threshold}:ratio={interlude_duck_ratio}:attack={interlude_duck_attack}:release={interlude_duck_release}:mix={duck_mix:.4f}[md];'
+                    f'[v][md]amix=inputs=2:duration=longest:normalize=0[out]'
                 ]
             else:
                 cmd += [
