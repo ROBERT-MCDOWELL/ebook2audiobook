@@ -134,7 +134,8 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                     installed = {}
             # newest torch e2a ships for this device tag (torch_matrix 'last'); a matrix bump reinstalls
             matrix_entry = torch_matrix.get(device_info.get('tag')) or {}
-            expected = {'source': settings['source'], 'device': torch_backend, 'torch': matrix_entry.get('last')}
+            # e2a's own package lists are part of the marker: changing them gives existing venvs one install pass
+            expected = {'source': settings['source'], 'device': torch_backend, 'torch': matrix_entry.get('last'), 'requirements': settings['requirements_exclude'] + settings['requirements_extra']}
             if not os.path.exists(self.venv_python) or not os.path.isdir(self.src_dir) or any(installed.get(k) != v for k, v in expected.items()):
                 uv_bin = device_installer.uv_bin
                 uv_pip = [uv_bin, 'pip', 'install', '--python', self.venv_python]

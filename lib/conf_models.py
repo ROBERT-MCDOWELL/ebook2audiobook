@@ -129,7 +129,9 @@ default_engine_settings = {
         # the dropped onnxruntime-gpu; loguru / rich are hard imports upstream only gets through
         # fastapi[standard]; soundfile backs e2a's sitecustomize torchaudio.load shim (so no torchcodec);
         # nltk / matplotlib for the english frontend and utils; faster-whisper transcribes v5 references
-        "requirements_extra": ["onnxruntime", "pyopenjtalk-plus", "loguru", "rich", "resampy", "soundfile", "nltk", "matplotlib", "faster-whisper"],
+        # hf_xet: huggingface_hub 0.36 only requires it when platform_machine is exactly x86_64 / amd64 /
+        # arm64 / aarch64, and windows reports AMD64, so windows misses the fast Xet downloads; same range
+        "requirements_extra": ["onnxruntime", "pyopenjtalk-plus", "loguru", "rich", "resampy", "soundfile", "nltk", "matplotlib", "faster-whisper", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
         # every package installs as a wheel, so no platform ever needs a compiler: the resolver takes the
         # newest release that has a wheel there (e.g. numba 0.68 / llvmlite 0.50 have no intel macOS
         # wheels, 0.62 / 0.45 do). These three only exist as pure-python sources.
