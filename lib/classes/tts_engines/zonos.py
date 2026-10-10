@@ -2,7 +2,7 @@ import json
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
-from lib.conf import systems, archs, default_pytorch_url, default_pytorch_nightly_url, default_jetson_url
+from lib.conf import systems, archs, torch_matrix, default_pytorch_url, default_pytorch_nightly_url
 from lib.lang import legends
 
 class Zonos(TTSUtils, TTSRegistry, name='zonos'):
@@ -108,7 +108,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                     self.worker_env.get('PATH', '')
                 ])
             elif sys.platform == systems['LINUX']:
-                espeak_exe = 'usr/bin/espeak-ng'
+                espeak_exe = '/usr/bin/espeak-ng'
                 if os.uname().machine == archs['AARCH64']:
                     espeak_data = '/usr/lib/aarch64-linux-gnu/espeak-ng-data'
                 else:
@@ -128,20 +128,23 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                 self.worker_env['PHONEMIZER_ESPEAK_LIBRARY'] = espeak_lib
             if espeak_data and os.path.isdir(espeak_data):
                 self.worker_env['ESPEAK_DATA_PATH'] = espeak_data
-            import torch
-            import torchaudio
-            torch_base, _, torch_tag = torch.__version__.partition('+')
-            torchaudio_tag = torchaudio.__version__.partition('+')[2]
-            torch_version = tuple(int(x) for x in re.findall(r'\d+', torch_base)[:3])
-            torch_min = tuple(int(x) for x in settings['torch_min'].split('.'))
-            index_ok = (
-               torch_tag in ('', 'cpu', 'xpu')
-               or bool(re.fullmatch(r'cu\d+', torch_tag))
-               or (bool(re.fullmatch(r'rocm[\d.]+', torch_tag)) and sys.platform == systems['LINUX'])
-            )
-            if torch_version < torch_min or not index_ok:
-               error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=settings['torch_min'], version=torch.__version__)
-               raise ValueError(error)
+            # device family and python come from e2a's own detection (.device_info.json, written by
+            # DeviceInstaller): torch is never imported here
+            from lib.classes.device_installer import DeviceInstaller
+            device_installer = DeviceInstaller()
+            device_info = device_installer.load_device_info() or {}
+            # Zonos' own python (settings), unless python_env's is older: then python_env's, as the
+            # fallback's wheels are built for it
+            venv_python = settings['python']
+            if device_info.get('pyvenv') and tuple(device_info['pyvenv'][:2]) < tuple(int(x) for x in settings['python'].split('.')[:2]):
+               venv_python = '.'.join(str(v) for v in device_info['pyvenv'][:2])
+            # --torch-backend gets the tag e2a picked for this machine (cu126 keeps Pascal kernels,
+            # mps uses the PyPI build). 'auto' only reads the driver version: a Pascal card on a
+            # recent driver would get cu128+/cu130 wheels without sm_61 kernels.
+            torch_backend = {devices['MPS']['proc']: devices['CPU']['proc']}.get(device_info.get('tag'), device_info.get('tag')) or 'auto'
+            # newest torch e2a ships for this device tag (torch_matrix 'last'); a matrix bump reinstalls
+            matrix_entry = torch_matrix.get(device_info.get('tag')) or {}
+            src_dir = os.path.join(self.venv_dir, 'src', 'Zonos')
             marker_file = os.path.join(self.venv_dir, '.e2a_installed.json')
             installed = {}
             if os.path.exists(marker_file):
@@ -150,36 +153,27 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                       installed = json.load(f)
                except Exception:
                   installed = {}
-            expected = {'source': settings['source'], 'torch': torch.__version__, 'torchaudio': torchaudio.__version__}
-            need_base = not os.path.exists(self.venv_python) or any(installed.get(k) != v for k, v in expected.items())
+            # e2a's own package lists are part of the marker: changing them gives existing venvs one install pass
+            expected = {'source': settings['source'], 'device': torch_backend, 'torch': matrix_entry.get('last'), 'requirements': settings['requirements_exclude'] + settings['requirements_extra']}
+            need_base = not os.path.exists(self.venv_python) or not os.path.isdir(src_dir) or any(installed.get(k) != v for k, v in expected.items())
             hybrid_wanted = self.model_repo == settings['repo_hybrid']
             # one attempt per base install: mamba-ssm/flash-attn may compile for a long
             # time and fail, so a failure is recorded instead of retried on every run.
             need_hybrid = hybrid_wanted and (need_base or 'hybrid' not in installed)
             if need_base or need_hybrid:
-               from lib.classes.device_installer import DeviceInstaller
-               uv_bin = DeviceInstaller().uv_bin
+               uv_bin = device_installer.uv_bin
                uv_pip = [uv_bin, 'pip', 'install', '--python', self.venv_python]
-               steps = []
                if need_base:
                   installed = {}
+                  steps = []
                   if not os.path.exists(self.venv_python):
                       msg = legends['msg_venv_creating'].format(engine=tts_engine, dir=self.venv_dir)
                       # --clear: the dir can exist with a dead interpreter link (docker image rebuilt)
-                      steps.append((msg, [uv_bin, 'venv', '--clear', '--python', settings['python'], self.venv_dir]))
-                  msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'torch {torch.__version__}, torchaudio {torchaudio.__version__}')
-                  steps.append((msg, uv_pip + [f'torch=={torch.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torch_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torch_tag}'] if torch_tag else [])))
-                  steps.append((msg, uv_pip + ['--no-deps', f'torchaudio=={torchaudio.__version__}'] + (['--index-url', f'{default_pytorch_url}/{torchaudio_tag}', '--extra-index-url', f'{default_pytorch_nightly_url}/{torchaudio_tag}'] if torchaudio_tag else [])))
-                  # Pin numpy to match torch's compiled ABI (numpy 1.x for torch < 2.5, numpy 2.x for >= 2.5)
-                  numpy_pkg = 'numpy<2' if torch_version < (2, 5, 0) else 'numpy'
-                  steps.append((msg, uv_pip + [numpy_pkg]))
-                  msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} dependencies')
-                  steps.append((msg, uv_pip + settings['packages']))
+                      steps.append((msg, [uv_bin, 'venv', '--clear', '--python', venv_python, self.venv_dir]))
                   # upstream pyproject has packages.find include = ["zonos"], which matches the
                   # top-level package only: a regular wheel build drops zonos/backbone. Upstream
                   # installs editable (uv pip install -e .), so do the same from the pinned source
                   # extracted to venvs/zonos/src/Zonos (python_env's interpreter, stdlib only).
-                  src_dir = os.path.join(self.venv_dir, 'src', 'Zonos')
                   extract_script = '\n'.join([
                       'import os, sys, shutil, tarfile, urllib.request',
                       'url, dst = sys.argv[1], sys.argv[2]',
@@ -195,35 +189,150 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                   ])
                   msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=tts_engine)
                   steps.append((msg, [sys.executable, '-c', extract_script, settings['source'], os.path.dirname(src_dir)]))
-                  steps.append((msg, uv_pip + ['--no-deps', '-e', src_dir]))
-               for msg, cmd in steps:
-                  print(msg)
-                  if progress_bar is not None:
-                      progress_bar(0.0, desc=msg)
-                  proc_pipe = SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env)
-                  if not proc_pipe.result:
+                  for msg, cmd in steps:
+                      print(msg)
+                      if progress_bar is not None:
+                         progress_bar(0.0, desc=msg)
+                      proc_pipe = SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env)
+                      if not proc_pipe.result:
+                         error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
+                         raise RuntimeError(error)
+                  # the package list is upstream's own pyproject.toml dependencies, minus
+                  # settings['requirements_exclude'], plus settings['requirements_extra']. Read with a
+                  # regex: tomllib only exists from python 3.11 and upstream's arrays are plain strings.
+                  with open(os.path.join(src_dir, 'pyproject.toml'), 'r', encoding='utf-8') as f:
+                      pyproject = f.read()
+                  requirements = []
+                  for line in re.findall(r'"([^"]+)"', re.search(r'^dependencies\s*=\s*\[(.*?)\]', pyproject, re.S | re.M).group(1)):
+                      name = re.match(r'[A-Za-z0-9][A-Za-z0-9._-]*', line)
+                      if name and re.sub(r'[-_.]+', '-', name.group(0)).lower() not in settings['requirements_exclude']:
+                         requirements.append(line)
+                  requirements_file = os.path.join(self.venv_dir, 'requirements.e2a.txt')
+                  with open(requirements_file, 'w', encoding='utf-8') as f:
+                      f.write('\n'.join(requirements + settings['requirements_extra']) + '\n')
+                  # torch: torch_matrix 'last' for this device tag, unless upstream locks torch or caps it
+                  # below that version: then upstream's own spec. Upstream's floor replaces torch_min.
+                  from packaging.requirements import Requirement
+                  from packaging.specifiers import SpecifierSet
+                  from packaging.version import Version
+                  torch_line = f"torch=={matrix_entry['last']}" if matrix_entry.get('last') else 'torch'
+                  torch_spec = SpecifierSet()
+                  for line in requirements:
+                      try:
+                         requirement = Requirement(line)
+                      except Exception:
+                         continue
+                      if re.sub(r'[-_.]+', '-', requirement.name).lower() == 'torch' and requirement.specifier:
+                         torch_spec &= requirement.specifier
+                         locked = any(spec.operator in ('==', '===') for spec in requirement.specifier)
+                         if locked or not matrix_entry.get('last') or not requirement.specifier.contains(Version(matrix_entry['last']), prereleases=True):
+                            torch_line = line
+                  torch_floor = next((spec.version for spec in torch_spec if spec.operator in ('>=', '>', '~=')), str(torch_spec))
+                  # e2a's newest torch for this device is below upstream's floor (e.g. jetson): stop here
+                  # with a clear alert, before downloading anything
+                  if matrix_entry.get('last') and any(spec.operator in ('>=', '>', '~=') and not SpecifierSet(str(spec)).contains(Version(matrix_entry['last']), prereleases=True) for spec in torch_spec):
+                      error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=torch_floor, version=matrix_entry['last'])
+                      raise ValueError(error)
+                  # wheels only, so no platform ever needs a compiler: the resolver takes the newest release
+                  # that has a wheel there; the few pure-python sdist-only packages are let through
+                  wheels_only = ['--only-binary', ':all:'] + [arg for pkg in settings['packages_sdist'] for arg in ('--no-binary', pkg)]
+                  # 1. upstream's requirements and torch from the device's PyTorch index, in one resolution.
+                  # Only for tags uv has a backend for: jetson / windows rocm go straight to the fallback.
+                  backend_ok = False
+                  if re.fullmatch(r'auto|cpu|xpu|cu\d+|rocm[\d.]+', torch_backend):
+                      msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} requirements ({torch_line}, {torch_backend})')
+                      print(msg)
+                      if progress_bar is not None:
+                         progress_bar(0.0, desc=msg)
+                      backend_ok = SubprocessPipe(uv_pip + ['--torch-backend', torch_backend] + wheels_only + ['-r', requirements_file, torch_line], is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env).result
+                  if not backend_ok:
+                      # 2. no uv backend for this tag, or no build there: e2a's DeviceInstaller installs its
+                      # device-proven torch into the venv. It runs on the venv's interpreter, so python_exec
+                      # and its installed-version checks are the venv's (PY_CMD forced: e2a's own environment
+                      # may point it at python_env), then the requirements resolve around that torch.
+                      device_script = '\n'.join([
+                         'import sys, json',
+                         'from lib.conf import NATIVE',
+                         'from lib.classes.device_installer import DeviceInstaller',
+                         'installer = DeviceInstaller()',
+                         'info = installer.load_device_info()',
+                         'sys.exit(installer.install_device_packages(json.dumps(info) if info else installer.check_device_info(NATIVE)))'
+                      ])
+                      fallback_env = dict(self.worker_env, PY_CMD=self.venv_python)
+                      msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs='torch (DeviceInstaller)')
+                      print(msg)
+                      if progress_bar is not None:
+                         progress_bar(0.0, desc=msg)
+                      cmd = [self.venv_python, '-c', device_script]
+                      if not SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=fallback_env).result:
+                         error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
+                         raise RuntimeError(error)
+                      # hold torch / torchaudio to exactly what DeviceInstaller installed, or the resolver
+                      # swaps them for the newest PyPI torch as soon as a package wants a newer one. URL
+                      # wheels (jetson, windows rocm) are held by their direct_url.json URL, index wheels by
+                      # version, with their PyTorch index when the version carries a local tag.
+                      pins_script = '\n'.join([
+                         'import json, importlib.metadata as metadata',
+                         'pins = []',
+                         'versions = {}',
+                         'for name in ("torch", "torchaudio"):',
+                         '    try:',
+                         '        dist = metadata.distribution(name)',
+                         '    except metadata.PackageNotFoundError:',
+                         '        continue',
+                         '    versions[name] = dist.version',
+                         '    direct = json.loads(dist.read_text("direct_url.json") or "null")',
+                         '    pins.append(name + " @ " + direct["url"] if direct and direct.get("url") else name + "==" + dist.version)',
+                         'print(json.dumps({"pins": pins, "versions": versions}))'
+                      ])
+                      probe = subprocess.run([self.venv_python, '-c', pins_script], env=fallback_env, capture_output=True, text=True, timeout=120)
+                      pins_info = json.loads(probe.stdout.strip() or '{}') if probe.returncode == 0 else {}
+                      torch_pins = pins_info.get('pins', [])
+                      # the torch this device can have is below upstream's floor (e.g. intel macOS 2.2.2)
+                      fallback_torch = pins_info.get('versions', {}).get('torch')
+                      if fallback_torch and torch_spec and not torch_spec.contains(Version(fallback_torch), prereleases=True):
+                         error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=torch_floor, version=fallback_torch)
+                         raise ValueError(error)
+                      index_args = []
+                      for pin in torch_pins:
+                         if '==' in pin and '+' in pin:
+                            local_tag = pin.split('+', 1)[1]
+                            index_args += ['--extra-index-url', f"{default_pytorch_nightly_url if '.dev' in pin else default_pytorch_url}/{local_tag}"]
+                      if index_args:
+                         index_args += ['--index-strategy', 'unsafe-best-match']
+                      msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=f'{tts_engine} requirements')
+                      print(msg)
+                      if progress_bar is not None:
+                         progress_bar(0.0, desc=msg)
+                      cmd = uv_pip + wheels_only + index_args + ['-r', requirements_file] + torch_pins
+                      if not SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=fallback_env).result:
+                         error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
+                         raise RuntimeError(error)
+                  # zonos itself, editable and without dependencies (they are all in place now)
+                  msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs=tts_engine)
+                  cmd = uv_pip + ['--no-deps', '-e', src_dir]
+                  if not SubprocessPipe(cmd, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env).result:
                       error = legends['error_venv_install_failed'].format(engine=tts_engine, step=' '.join(cmd))
                       raise RuntimeError(error)
-               try:
-                  import shutil
-                  # Ask the venv's python where its site-packages directory is
-                  site_packages = subprocess.check_output(
-                      [self.venv_python, '-c', 'import sysconfig; print(sysconfig.get_paths()["purelib"])'],
-                      text=True
-                  ).strip()
+                  try:
+                     import shutil
+                     # Ask the venv's python where its site-packages directory is
+                     site_packages = subprocess.check_output(
+                         [self.venv_python, '-c', 'import sysconfig; print(sysconfig.get_paths()["purelib"])'],
+                         text=True
+                     ).strip()
                   
-                  # Locate the source sitecustomize.py (3 levels up from lib/classes/tts_engines)
-                  sitecustomize_src = os.path.abspath(os.path.join(engine_dir, '..', '..', '..', 'components', 'sitecustomize.py'))
-                  sitecustomize_dst = os.path.join(site_packages, 'sitecustomize.py')
+                     # Locate the source sitecustomize.py (3 levels up from lib/classes/tts_engines)
+                     sitecustomize_src = os.path.abspath(os.path.join(engine_dir, '..', '..', '..', 'components', 'sitecustomize.py'))
+                     sitecustomize_dst = os.path.join(site_packages, 'sitecustomize.py')
                   
-                  if os.path.exists(sitecustomize_src):
-                      shutil.copy2(sitecustomize_src, sitecustomize_dst)
-                      print(f"Copied sitecustomize.py to {sitecustomize_dst}")
-                  else:
-                      print(f"Warning: sitecustomize.py not found at {sitecustomize_src}")
-               except Exception as e:
-                  print(f"Warning: Failed to copy sitecustomize.py: {e}")
-               if need_base:
+                     if os.path.exists(sitecustomize_src):
+                         shutil.copy2(sitecustomize_src, sitecustomize_dst)
+                         print(f"Copied sitecustomize.py to {sitecustomize_dst}")
+                     else:
+                         print(f"Warning: sitecustomize.py not found at {sitecustomize_src}")
+                  except Exception as e:
+                     print(f"Warning: Failed to copy sitecustomize.py: {e}")
                   probe = subprocess.run([self.venv_python, '-c', 'import zonos.model'], env=self.worker_env, capture_output=True, text=True, timeout=600)
                   if probe.returncode != 0:
                       error = legends['error_venv_install_failed'].format(engine=tts_engine, step=f'import zonos.model: {probe.stderr.strip()[-500:]}')
@@ -242,13 +351,17 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                          reason = f'compute capability {cc_major}.x'
                   installed['hybrid'] = False
                   if reason is None:
-                      msg = legends['msg_venv_hybrid_installing'].format(engine=tts_engine, pkgs=', '.join(settings['packages_hybrid']))
+                      # upstream's own [compile] extra (pyproject.toml optional-dependencies), built from source
+                      with open(os.path.join(src_dir, 'pyproject.toml'), 'r', encoding='utf-8') as f:
+                         compile_block = re.search(r'^compile\s*=\s*\[(.*?)\]', f.read(), re.S | re.M)
+                      packages_hybrid = re.findall(r'"([^"]+)"', compile_block.group(1)) if compile_block else []
+                      msg = legends['msg_venv_hybrid_installing'].format(engine=tts_engine, pkgs=', '.join(packages_hybrid))
                       print(msg)
                       if progress_bar is not None:
                          progress_bar(0.0, desc=msg)
                       hybrid_ok = SubprocessPipe(uv_pip + ['wheel', 'ninja'], is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env).result
                       if hybrid_ok:
-                         hybrid_ok = SubprocessPipe(uv_pip + ['--no-build-isolation'] + settings['packages_hybrid'], is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env).result
+                         hybrid_ok = SubprocessPipe(uv_pip + ['--no-build-isolation'] + packages_hybrid, is_gui_process=self.session['is_gui_process'], total_duration=0, msg=msg, env=self.worker_env).result
                       if hybrid_ok:
                          probe = subprocess.run([self.venv_python, '-c', 'import mamba_ssm, causal_conv1d, flash_attn'], env=self.worker_env, capture_output=True, text=True, timeout=600)
                          hybrid_ok = probe.returncode == 0

@@ -88,9 +88,19 @@ default_engine_settings = {
         "repo_hybrid": "Zyphra/Zonos-v0.1-hybrid",
         "source": "https://github.com/Zyphra/Zonos/archive/bc40d98e1e1ab54fc65c483be127a90e3c7c0645.tar.gz",
         "python": "3.12",
-        "torch_min": "2.2.2",
-        "packages": ["setuptools", "packaging", "tqdm", "safetensors", "inflect>=7.5.0", "kanjize>=1.5.0", "phonemizer>=3.3.0", "sudachipy>=0.6.10", "sudachidict-full>=20241021", "transformers>=4.48.1,<5", "soundfile>=0.13.1", "huggingface-hub>=0.28.1"],
-        "packages_hybrid": ["mamba-ssm>=2.2.4", "causal-conv1d>=1.5.0.post8", "flash-attn>=2.7.3"],
+        # package list = upstream's own pyproject.toml dependencies (in the extracted tree), torch from the
+        # device's PyTorch index (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller as fallback;
+        # upstream's torch floor (torch>=2.5.1) stops devices that cannot reach it with a clear alert.
+        # The hybrid's mamba-ssm / causal-conv1d / flash-attn come from upstream's [compile] extra.
+        # Left out: gradio, only used by upstream's demo UI. Names normalized as pip does.
+        "requirements_exclude": ["gradio"],
+        # transformers<5: upstream sets no upper bound, the venv was validated on 4.x (DacModel).
+        # hf_xet: huggingface_hub 0.36 only requires it when platform_machine is exactly x86_64 / amd64 /
+        # arm64 / aarch64, and windows reports AMD64, so windows misses the fast Xet downloads; same range
+        "requirements_extra": ["transformers<5", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
+        # every package installs as a wheel, so no platform ever needs a compiler; sudachidict-full only
+        # exists as a source package (pure data: its build downloads the Sudachi dictionary)
+        "packages_sdist": ["sudachidict-full"],
         # robust languages only (most of the 200k h are en, then zh, ja, fr, es, de); values are espeak codes
         "languages": {"eng": "en-us", "deu": "de", "fra": "fr-fr", "jpn": "ja", "spa": "es", "zho": "cmn"},
         "samplerate": 44100,

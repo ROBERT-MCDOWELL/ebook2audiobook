@@ -9,12 +9,14 @@
 #   stdout <- {"ok": true, "file": "...", "samplerate": 44100, "samples": n}
 #             {"ok": false, "error": "...", "oom": bool}
 #   EOF on stdin -> exit 0 (that is how e2a unloads the model and frees its VRAM)
-import os, sys, json, argparse, inspect
+import os, sys, json, argparse, faulthandler, inspect
 
 def main()->int:
     # the protocol owns a private copy of fd 1; fd 1 itself is pointed at stderr so
     # zonos, phonemizer, tqdm and C extensions can never write into the reply stream.
     proto = os.fdopen(os.dup(1), 'w', encoding='utf-8', buffering=1)
+    # a native crash (SIGSEGV...) prints the python stack to stderr, which e2a shows in its log
+    faulthandler.enable()
     os.dup2(2, 1)
     sys.stdout = sys.stderr
     parser = argparse.ArgumentParser()
