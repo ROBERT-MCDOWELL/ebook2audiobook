@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': 'Telepítés {pkgs} a következőbe: {engine} virtuális környezet, eltart egy ideig, kérjük, legyen türelemmel…',
     'msg_venv_hybrid_installing': 'A {engine} hibrid gerinc ({pkgs}) telepítése forrásból fordítható le, és sokáig tarthat…',
     'msg_venv_hybrid_fallback': '{engine} hibrid nem futhat itt ({reason}): átkapcsolva a belső transzformátor modellre.',
-    'error_venv_torch_unsupported': '{engine} elemlámpára van szükség >={min}, de a készülék legújabb elemlámpája {version}. Válasszon másik TTS-motort.',
+    'error_venv_torch_unsupported': '{engine} nem futtatható ezen az eszközön, mert a pisztoly maximális verziója < {min}. Válasszon másik TTS-motort.',
     'error_venv_install_failed': '{engine} virtuális környezet telepítése nem sikerült itt: {step}',
     'gr_ui_language': 'Felület nyelve',
     'gr_ui_language_auto': 'Automatikus (böngésző)',

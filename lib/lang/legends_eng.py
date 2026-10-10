@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': 'Installing {pkgs} into the {engine} virtual environment, it takes a while, please be patient…',
     'msg_venv_hybrid_installing': 'Installing the {engine} hybrid backbone ({pkgs}), it may compile from source and take a long time…',
     'msg_venv_hybrid_fallback': '{engine} hybrid cannot run here ({reason}): switched to the internal transformer model.',
-    'error_venv_torch_unsupported': '{engine} needs torch>={min}, but the newest torch for this device is {version}. Please select another TTS engine.',
+    'error_venv_torch_unsupported': '{engine} cannot run on this device because torch max version is < {min}. Please select another TTS engine.',
     'error_venv_install_failed': '{engine} virtual environment install failed at: {step}',
     'gr_ui_language': 'Interface language',
     'gr_ui_language_auto': 'Auto (browser)',

@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': 'Instalando {pkgs} al {engine} entorno virtual, lleva un tiempo, por favor, sea paciente...',
     'msg_venv_hybrid_installing': 'Montaje de la obra {engine} columna vertebral híbrida ({pkgs}), puede compilarse desde la fuente y llevar mucho tiempo...',
     'msg_venv_hybrid_fallback': '{engine} híbrido no se puede ejecutar aquí ({reason}): se ha cambiado al modelo de transformador interno.',
-    'error_venv_torch_unsupported': '{engine} necesita antorcha>={min}, pero la antorcha más nueva para este dispositivo es {version}. Por favor, seleccione otro motor TTS.',
+    'error_venv_torch_unsupported': '{engine} no se puede ejecutar en este dispositivo porque la versión máxima de Torch es < {min}. Por favor, seleccione otro motor TTS.',
     'error_venv_install_failed': '{engine} la instalación del entorno virtual ha fallado en: {step}',
     'gr_ui_language': 'Idioma de la interfaz',
     'gr_ui_language_auto': 'Auto (navegador)',

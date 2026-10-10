@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': '[ترجمة المصطلح: Installing] {pkgs} داخل ال {engine} بيئة افتراضية، يستغرق الأمر بعض الوقت، يرجى التحلي بالصبر...',
     'msg_venv_hybrid_installing': 'تركيب ذراع التطويل {engine} العمود الفقري الهجين ({pkgs})، قد يتم تجميعها من المصدر وتستغرق وقتًا طويلاً...',
     'msg_venv_hybrid_fallback': '{engine} لا يمكن تشغيل المحول الهجين هنا ({reason}): تم التبديل إلى نموذج المحول الداخلي.',
-    'error_venv_torch_unsupported': '{engine} يحتاج إلى شعلة>={min}، ولكن أحدث شعلة لهذا الجهاز هي {version}. يرجى تحديد محرك TTS آخر.',
+    'error_venv_torch_unsupported': '{engine} لا يمكن تشغيله على هذا الجهاز لأن إصدار TORCH MAX هو < {min}. يرجى تحديد محرك TTS آخر.',
     'error_venv_install_failed': '{engine} فشل تثبيت البيئة الافتراضية في: {step}',
     'gr_ui_language': 'لغة الواجهة',
     'gr_ui_language_auto': 'تلقائي (المتصفح)',

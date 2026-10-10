@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': 'Pasangkan {pkgs} ke dalam {engine} lingkungan virtual, butuh beberapa saat, harap bersabar...',
     'msg_venv_hybrid_installing': 'Memasang {engine} tulang punggung hibrida ({pkgs}), dapat dikompilasi dari sumber dan memakan waktu lama...',
     'msg_venv_hybrid_fallback': '{engine} hibrida tidak dapat berjalan di sini ({reason}): beralih ke model transformator internal.',
-    'error_venv_torch_unsupported': '{engine} membutuhkan obor>={min}, tetapi obor terbaru untuk perangkat ini adalah {version}. Silakan pilih mesin tts lain.',
+    'error_venv_torch_unsupported': '{engine} tidak dapat berjalan pada perangkat ini karena versi obor maks < {min}. Silakan pilih mesin tts lain.',
     'error_venv_install_failed': '{engine} instalasi lingkungan virtual gagal pada: {step}',
     'gr_ui_language': 'Bahasa antarmuka',
     'gr_ui_language_auto': 'Otomatis (peramban)',

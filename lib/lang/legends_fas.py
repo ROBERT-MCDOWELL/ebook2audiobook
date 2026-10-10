@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': 'نصب {pkgs} در محیط مجازی {engine} کمی طول می‌کشد، لطفاً صبور باشید…',
     'msg_venv_hybrid_installing': 'نصب ستون فقرات ترکیبی {engine} ({pkgs})، ممکن است از منبع کامپایل شود و مدت زیادی طول بکشد…',
     'msg_venv_hybrid_fallback': 'هیبرید {engine} اینجا ({reason}) نمی‌تواند کار کند: به مدل ترانسفورماتور داخلی تغییر داده شد.',
-    'error_venv_torch_unsupported': '{engine} به مشعل نیاز دارد>={min}، اما جدیدترین مشعل برای این دستگاه {version} است. لطفاً موتور TTS دیگری انتخاب کنید.',
+    'error_venv_torch_unsupported': '{engine} روی این دستگاه اجرا نمی‌شود زیرا نسخه مشعل حداکثر < {min} است. لطفاً موتور TTS دیگری را انتخاب کنید.',
     'error_venv_install_failed': 'نصب محیط مجازی در {engine} با شکست مواجه شد: {step}',
     'gr_ui_language': 'زبان رابط کاربری',
     'gr_ui_language_auto': 'خودکار (مرورگر)',

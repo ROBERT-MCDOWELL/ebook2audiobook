@@ -517,7 +517,7 @@ legends = {
     'msg_venv_installing': 'Yükleniyor {pkgs} Dr. {engine} sanal ortam, biraz zaman alır, lütfen sabırlı olun…',
     'msg_venv_hybrid_installing': '{engine} hibrit omurgasının ({pkgs}) takılması, kaynaktan derlenebilir ve uzun zaman alabilir…',
     'msg_venv_hybrid_fallback': '{engine} hibrit burada çalışamaz ({reason}): dahili transformatör modeline geçilir.',
-    'error_venv_torch_unsupported': '{engine} \'ın meşaleye ihtiyacı var >={min}, ancak bu cihaz için en yeni meşale {version}\' dir. Lütfen başka bir TTS motoru seçin.',
+    'error_venv_torch_unsupported': 'Torch max sürümü < {min} olduğundan{engine} bu cihazda çalışamaz. Lütfen başka bir TTS motoru seçin.',
     'error_venv_install_failed': '{engine} sanal ortam kurulumu başarısız oldu: {step}',
     'gr_ui_language': 'Arayüz dili',
     'gr_ui_language_auto': 'Otomatik (tarayıcı)',
