@@ -134,6 +134,9 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                     installed = {}
             # newest torch e2a ships for this device tag (torch_matrix 'last'); a matrix bump reinstalls
             matrix_entry = torch_matrix.get(device_info.get('tag')) or {}
+            # intel macOS: PyTorch stopped at 2.2.2 there, the same rule DeviceInstaller applies
+            if device_info.get('os') == 'macosx_11_0' and device_info.get('arch') == archs['X86_64']:
+                matrix_entry = dict(matrix_entry, last='2.2.2')
             # e2a's own package lists are part of the marker: changing them gives existing venvs one install pass
             expected = {'source': settings['source'], 'device': torch_backend, 'torch': matrix_entry.get('last'), 'requirements': settings['requirements_exclude'] + settings['requirements_extra']}
             if not os.path.exists(self.venv_python) or not os.path.isdir(self.src_dir) or any(installed.get(k) != v for k, v in expected.items()):

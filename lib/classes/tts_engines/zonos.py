@@ -144,6 +144,9 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             torch_backend = {devices['MPS']['proc']: devices['CPU']['proc']}.get(device_info.get('tag'), device_info.get('tag')) or 'auto'
             # newest torch e2a ships for this device tag (torch_matrix 'last'); a matrix bump reinstalls
             matrix_entry = torch_matrix.get(device_info.get('tag')) or {}
+            # intel macOS: PyTorch stopped at 2.2.2 there, the same rule DeviceInstaller applies
+            if device_info.get('os') == 'macosx_11_0' and device_info.get('arch') == archs['X86_64']:
+               matrix_entry = dict(matrix_entry, last='2.2.2')
             src_dir = os.path.join(self.venv_dir, 'src', 'Zonos')
             marker_file = os.path.join(self.venv_dir, '.e2a_installed.json')
             installed = {}
@@ -232,6 +235,9 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                   # with a clear alert, before downloading anything
                   if matrix_entry.get('last') and any(spec.operator in ('>=', '>', '~=') and not SpecifierSet(str(spec)).contains(Version(matrix_entry['last']), prereleases=True) for spec in torch_spec):
                       error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=torch_floor, version=matrix_entry['last'])
+                      # this device cannot run zonos: leave no unusable venv behind
+                      import shutil
+                      shutil.rmtree(self.venv_dir, ignore_errors=True)
                       raise ValueError(error)
                   # wheels only, so no platform ever needs a compiler: the resolver takes the newest release
                   # that has a wheel there; the few pure-python sdist-only packages are let through
@@ -269,6 +275,9 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                          env_torch = None
                       if env_torch and torch_spec and not torch_spec.contains(Version(env_torch), prereleases=True):
                          error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=torch_floor, version=env_torch)
+                         # this device cannot run zonos: leave no unusable venv behind
+                         import shutil
+                         shutil.rmtree(self.venv_dir, ignore_errors=True)
                          raise ValueError(error)
                       msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs='torch (DeviceInstaller)')
                       print(msg)
@@ -303,6 +312,9 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                       fallback_torch = pins_info.get('versions', {}).get('torch')
                       if fallback_torch and torch_spec and not torch_spec.contains(Version(fallback_torch), prereleases=True):
                          error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=torch_floor, version=fallback_torch)
+                         # this device cannot run zonos: leave no unusable venv behind
+                         import shutil
+                         shutil.rmtree(self.venv_dir, ignore_errors=True)
                          raise ValueError(error)
                       index_args = []
                       for pin in torch_pins:
