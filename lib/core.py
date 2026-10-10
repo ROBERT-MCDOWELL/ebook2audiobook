@@ -2056,11 +2056,12 @@ def get_sentences(session_id:str, text:str)->list|None:
                     if cut[i] in soft_set:
                         best_idx = i + 1
                         break
-            # 3) no punctuation at all -> fall back to last space
+            # 3) no punctuation at all -> fall back to last whitespace (space, NBSP, NNBSP, tab, newline...)
             if best_idx == -1:
-                idx = cut.rfind(' ')
-                if idx > 0:
-                    best_idx = idx
+                for i in range(len(cut) - 1, 0, -1):
+                    if cut[i].isspace():
+                        best_idx = i
+                        break
             # 4) last resort -> hard cut at max_chars
             if best_idx <= 0:
                 best_idx = max_chars
