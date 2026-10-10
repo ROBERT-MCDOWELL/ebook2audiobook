@@ -129,12 +129,23 @@ def main()->int:
                         # faster-whisper runs in its own short-lived process, as upstream's webui does:
                         # ctranslate2 bundles intel's openmp (libiomp5) and torch its own (libomp), and
                         # both in one process crash on macOS. cpu int8, once per voice (cached on disk).
+                        # The clip is decoded here (soundfile) and handed over as 16 kHz mono float32: given an
+                        # array, faster-whisper skips its own PyAV decoder, whose av.open(metadata_errors=...)
+                        # breaks on PyAV >= 19 (faster-whisper 1.2.1 only requires av>=11).
                         asr_out = clip[:-4] + '.asr.json'
                         asr_script = '\n'.join([
-                            'import sys, json',
+                            'import sys, json, math',
+                            'import numpy as np, soundfile as sf',
+                            'from scipy.signal import resample_poly',
                             'from faster_whisper import WhisperModel',
                             'clip, model_name, out = sys.argv[1], sys.argv[2], sys.argv[3]',
-                            'segments, info = WhisperModel(model_name, device="cpu", compute_type="int8").transcribe(clip, beam_size=5)',
+                            'data, sr = sf.read(clip, dtype="float32", always_2d=True)',
+                            'audio = data.mean(axis=1)',
+                            'if sr != 16000:',
+                            '    g = math.gcd(16000, sr)',
+                            '    audio = resample_poly(audio, 16000 // g, sr // g)',
+                            'audio = np.ascontiguousarray(audio, dtype=np.float32)',
+                            'segments, info = WhisperModel(model_name, device="cpu", compute_type="int8").transcribe(audio, beam_size=5)',
                             'text = "".join(segment.text for segment in segments).strip()',
                             'with open(out, "w", encoding="utf-8") as f:',
                             '    json.dump({"text": text, "language": info.language}, f, ensure_ascii=False)'
