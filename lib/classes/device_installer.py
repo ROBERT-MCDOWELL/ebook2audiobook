@@ -1861,12 +1861,15 @@ class DeviceInstaller():
                             else:
                                 url = default_pytorch_url
                                 url_nightly = default_pytorch_nightly_url
+                                # uv gives --extra-index-url priority over --index-url and by default stops at the
+                                # first index that has the package: without unsafe-best-match a stable pin that the
+                                # nightly index lacks (e.g. torch==2.2.2 on intel macOS) finds no version at all
                                 torch_url_tag = tag_dir
                                 torchaudio_url_tag = tag_dir
                                 if self.system == systems['WINDOWS'] and tag.startswith('win-cu'):
                                     torch_url_tag = tag.replace('win-', '')
-                                subprocess.check_call(self._uv_pip('install', '--reinstall-package', 'torch', '--no-cache', f'torch=={torch_version_matrix}', '--index-url', f'{url}/{torch_url_tag}', '--extra-index-url', f'{url_nightly}/{torch_url_tag}'))
-                                subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', f'torchaudio=={torchaudio_version_matrix}', '--index-url', f'{url}/{torchaudio_url_tag}', '--extra-index-url', f'{url_nightly}/{torchaudio_url_tag}'))
+                                subprocess.check_call(self._uv_pip('install', '--reinstall-package', 'torch', '--no-cache', f'torch=={torch_version_matrix}', '--index-url', f'{url}/{torch_url_tag}', '--extra-index-url', f'{url_nightly}/{torch_url_tag}', '--index-strategy', 'unsafe-best-match'))
+                                subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', f'torchaudio=={torchaudio_version_matrix}', '--index-url', f'{url}/{torchaudio_url_tag}', '--extra-index-url', f'{url_nightly}/{torchaudio_url_tag}', '--index-strategy', 'unsafe-best-match'))
                             if not self.check_numpy():
                                 return 1
                             #### torchcodec installation

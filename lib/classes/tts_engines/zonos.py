@@ -259,6 +259,17 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                          'sys.exit(installer.install_device_packages(json.dumps(info) if info else installer.check_device_info(NATIVE)))'
                       ])
                       fallback_env = dict(self.worker_env, PY_CMD=self.venv_python)
+                      # the fallback installs e2a's device-proven torch, the one python_env runs here (read
+                      # from its metadata, torch is not imported): below upstream's floor (intel macOS 2.2.2)
+                      # stop now with the clear alert instead of installing it first
+                      from importlib.metadata import version as package_version, PackageNotFoundError
+                      try:
+                         env_torch = package_version('torch')
+                      except PackageNotFoundError:
+                         env_torch = None
+                      if env_torch and torch_spec and not torch_spec.contains(Version(env_torch), prereleases=True):
+                         error = legends['error_venv_torch_unsupported'].format(engine=tts_engine, min=torch_floor, version=env_torch)
+                         raise ValueError(error)
                       msg = legends['msg_venv_installing'].format(engine=tts_engine, pkgs='torch (DeviceInstaller)')
                       print(msg)
                       if progress_bar is not None:
