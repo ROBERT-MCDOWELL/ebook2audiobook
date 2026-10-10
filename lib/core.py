@@ -4580,7 +4580,7 @@ def convert_ebook(args:dict)->tuple:
                             msg += legends['msg_venv_hybrid_fallback'].format(engine=session['tts_engine'], reason=hybrid_reason) + '<br/>'
                     if torch_error is not None:
                         error = torch_error
-                    elif float(total_vram_gb) <= float(device_vram_required):
+                    elif float(total_vram_gb) >= float(device_vram_required):
                         if msg:
                             show_alert(session_id, {"type": "warning", "msg": msg + msg_extra})
                         else:
