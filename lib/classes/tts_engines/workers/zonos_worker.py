@@ -104,9 +104,12 @@ def main()->int:
                 conditioning_emotion = model.prepare_conditioning(make_cond_dict(**cond_kwargs, unconditional_keys=['vqscore_8', 'dnsmos_ovrl']))
                 conditioning = torch.lerp(conditioning, conditioning_emotion, emotion_strength)
                 del conditioning_emotion
+            # zonos missing its end token babbles up to the cap (30 s by default): bound it by the text,
+            # 0.25 s per character is far above normal speech (~0.07-0.12), 86 frames per second
+            max_new_tokens = min(int(req['max_new_tokens']), int(86 * max(2.0, len(req['text']) * 0.25)))
             codes = model.generate(
                 conditioning,
-                max_new_tokens=int(req['max_new_tokens']),
+                max_new_tokens=max_new_tokens,
                 cfg_scale=float(req['cfg_scale']),
                 sampling_params={**default_sampling, **({'linear': float(req['linear'])} if float(req.get('linear', 0.0)) > 0.0 else {})},
                 progress_bar=False,
