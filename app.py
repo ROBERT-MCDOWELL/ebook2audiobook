@@ -407,7 +407,7 @@ Without it the model picks the delivery from the text and the voice.""")
             args['zonos_emotion_enabled'] = args.get('enable_emotion') is not None
             if args['zonos_emotion_enabled']:
                 if args['enable_emotion'] is True:
-                    # --enable_emotion alone: zonos' own default mix
+                    # --enable_emotion alone: the default mix (Neutral only, sounds like emotion off)
                     args['zonos_emotion'] = [float(v) for v in default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']]
                 else:
                     try:

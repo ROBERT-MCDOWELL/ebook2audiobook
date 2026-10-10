@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'Iwọn CFG',
     'gr_zonos_cfg_scale_info': 'Báwo ni wọ́n ṣe ń tẹ̀lé ohùn àti ètò náà dáadáa tó. Ní òkè 3 ó lè ṣe àfikún àwọn ohun-èlò.',
     'gr_zonos_emotion_enabled': 'Lo Ìrònú',
-    'gr_zonos_emotion_enabled_info': 'Lo ìdàpọ̀ ìmọ̀lára tó wà nísàlẹ̀ sí gbogbo ìwé náà. Pa jẹ́ kí àwòṣe náà yan ìfipamọ́.',
+    'gr_zonos_emotion_enabled_info': 'Lo ìdàpọ̀ ìmọ̀lára tó wà nísàlẹ̀ sí gbogbo ìwé náà. Dídákẹ́gbẹ́ nìkan dàbí ìmí ẹ̀dùn; gbé àwọn elérékérekè yòókù sókè díẹ̀díẹ̀. Pa jẹ́ kí àwòṣe náà yan ìfipamọ́.',
     'gr_zonos_emotion_happiness': 'Ayọ̀',
     'gr_zonos_emotion_sadness': 'Ibanujẹ',
     'gr_zonos_emotion_disgust': 'Ìkórìíra',

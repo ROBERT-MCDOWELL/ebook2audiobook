@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'Skala cfg',
     'gr_zonos_cfg_scale_info': 'Seberapa kuat suara dan pengaturan diikuti. Di atas 3 dapat menambahkan artefak.',
     'gr_zonos_emotion_enabled': 'Gunakan Emosi',
-    'gr_zonos_emotion_enabled_info': 'Terapkan campuran emosi di bawah ini ke seluruh buku. Mati memungkinkan model memilih pengantaran.',
+    'gr_zonos_emotion_enabled_info': 'Terapkan campuran emosi di bawah ini ke seluruh buku. Netral saja terdengar seperti emosi; angkat slider lainnya secara bertahap. Mati memungkinkan model memilih pengantaran.',
     'gr_zonos_emotion_happiness': 'Kebahagiaan',
     'gr_zonos_emotion_sadness': 'Kesedihan',
     'gr_zonos_emotion_disgust': 'Jijik',

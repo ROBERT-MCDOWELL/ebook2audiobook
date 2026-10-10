@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'CFG-skála',
     'gr_zonos_cfg_scale_info': 'Milyen erősen követik a hangot és a beállításokat. 3 felett műtermékek adhatók hozzá.',
     'gr_zonos_emotion_enabled': 'Érzelem használata',
-    'gr_zonos_emotion_enabled_info': 'Alkalmazza az alábbi érzelmi keveréket az egész könyvre. Az OFF lehetővé teszi a modell számára, hogy kiválassza a kiszállítást.',
+    'gr_zonos_emotion_enabled_info': 'Alkalmazza az alábbi érzelmi keveréket az egész könyvre. A semleges önmagában úgy hangzik, mint az érzelmek kikapcsolása; fokozatosan emelje fel a többi csúszkát. Az OFF lehetővé teszi a modell számára, hogy kiválassza a kiszállítást.',
     'gr_zonos_emotion_happiness': 'Boldogság',
     'gr_zonos_emotion_sadness': 'Bánat',
     'gr_zonos_emotion_disgust': 'undor',

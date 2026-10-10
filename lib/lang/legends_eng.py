@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'CFG Scale',
     'gr_zonos_cfg_scale_info': 'How strongly the voice and settings are followed. Above 3 can add artifacts.',
     'gr_zonos_emotion_enabled': 'Use Emotion',
-    'gr_zonos_emotion_enabled_info': 'Apply the emotion mix below to the whole book. Off lets the model choose the delivery.',
+    'gr_zonos_emotion_enabled_info': 'Apply the emotion mix below to the whole book. Neutral alone sounds like emotion off; raise the other sliders gradually. Off lets the model choose the delivery.',
     'gr_zonos_emotion_happiness': 'Happiness',
     'gr_zonos_emotion_sadness': 'Sadness',
     'gr_zonos_emotion_disgust': 'Disgust',

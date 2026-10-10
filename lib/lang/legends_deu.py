@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'CFG-Skala',
     'gr_zonos_cfg_scale_info': 'Wie stark die Stimme und die Einstellungen befolgt werden. Über 3 können Artefakte hinzugefügt werden.',
     'gr_zonos_emotion_enabled': 'Emotion verwenden',
-    'gr_zonos_emotion_enabled_info': 'Wenden Sie die unten stehende Emotionsmischung auf das gesamte Buch an. Aus lässt das Modell die Lieferung auswählen.',
+    'gr_zonos_emotion_enabled_info': 'Wenden Sie die unten stehende Emotionsmischung auf das gesamte Buch an. Neutral allein klingt wie Emotion aus; heben Sie die anderen Schieberegler nach und nach an. Aus lässt das Modell die Lieferung auswählen.',
     'gr_zonos_emotion_happiness': 'Glück',
     'gr_zonos_emotion_sadness': 'Trauer',
     'gr_zonos_emotion_disgust': 'Ekel',

@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'CFG স্কেল',
     'gr_zonos_cfg_scale_info': 'ভয়েস এবং সেটিংস কতটা দৃঢ়ভাবে অনুসরণ করা হয় । উপরে 3 আর্টিফ্যাক্ট যোগ করতে পারে ।',
     'gr_zonos_emotion_enabled': 'আবেগ ব্যবহার করুন',
-    'gr_zonos_emotion_enabled_info': 'পুরো বইয়ের নীচে আবেগের মিশ্রণটি প্রয়োগ করুন । মডেলটিকে ডেলিভারি বেছে নিতে দিন ।',
+    'gr_zonos_emotion_enabled_info': 'পুরো বইয়ের নীচে আবেগের মিশ্রণটি প্রয়োগ করুন । নিরপেক্ষ একা আবেগের মতো শোনাচ্ছে; অন্যান্য স্লাইডারগুলিকে ধীরে ধীরে উত্থাপন করুন । মডেলটিকে ডেলিভারি বেছে নিতে দিন ।',
     'gr_zonos_emotion_happiness': 'সুখ',
     'gr_zonos_emotion_sadness': 'দুঃখ',
     'gr_zonos_emotion_disgust': 'অস্বস্তি',

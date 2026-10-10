@@ -79,19 +79,31 @@ def main()->int:
                     wav = torch.from_numpy(data.T.copy())
                     speaker = model.make_speaker_embedding(wav, sr).to(device, dtype=torch.bfloat16)
                     speakers[voice_key] = speaker
-            cond_dict = make_cond_dict(
+            # Happiness, Sadness, Disgust, Fear, Surprise, Anger, Other, Neutral. Neutral is the anchor:
+            # its share of the mix keeps the emotion-off delivery, the other seven pull toward the
+            # conditional mix, so the default (Neutral only) sounds like emotion off
+            emotion = [max(float(v), 0.0) for v in req['emotion']]
+            emotion_total = sum(emotion)
+            emotion_strength = (emotion_total - emotion[7]) / emotion_total if req.get('emotion_enabled', True) and emotion_total > 0.0 else 0.0
+            cond_kwargs = dict(
                 text=req['text'],
                 language=req['language'],
                 speaker=speaker,
-                emotion=[float(v) for v in req['emotion']],
+                emotion=emotion if emotion_total > 0.0 else [0.0] * 7 + [1.0],
                 fmax=float(req['fmax']),
                 pitch_std=float(req['pitch_std']),
                 speaking_rate=float(req['speaking_rate']),
-                # zonos' default unconditional keys, plus emotion when it is switched off
-                unconditional_keys=['vqscore_8', 'dnsmos_ovrl'] + ([] if req.get('emotion_enabled', True) else ['emotion']),
                 device=device
             )
-            conditioning = model.prepare_conditioning(cond_dict)
+            # reference = zonos' default unconditional keys plus emotion, i.e. emotion off
+            conditioning = model.prepare_conditioning(make_cond_dict(**cond_kwargs, unconditional_keys=['vqscore_8', 'dnsmos_ovrl', 'emotion']))
+            if emotion_strength > 0.0:
+                # the prefix is one token per conditioner (project + LayerNorm are per token), so the
+                # two prefixes differ only on the emotion token and the CFG half is identical:
+                # lerp moves the delivery continuously from emotion off (0) to the full mix (1)
+                conditioning_emotion = model.prepare_conditioning(make_cond_dict(**cond_kwargs, unconditional_keys=['vqscore_8', 'dnsmos_ovrl']))
+                conditioning = torch.lerp(conditioning, conditioning_emotion, emotion_strength)
+                del conditioning_emotion
             codes = model.generate(
                 conditioning,
                 max_new_tokens=int(req['max_new_tokens']),

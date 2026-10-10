@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'CFG Ölçeği',
     'gr_zonos_cfg_scale_info': 'Ses ve ayarların ne kadar güçlü takip edildiği. 3 \'ün üzerine eserler eklenebilir.',
     'gr_zonos_emotion_enabled': 'Duyguları Kullan',
-    'gr_zonos_emotion_enabled_info': 'Aşağıdaki duygu karışımını tüm kitaba uygulayın. Kapalı, modelin teslimatı seçmesini sağlar.',
+    'gr_zonos_emotion_enabled_info': 'Aşağıdaki duygu karışımını tüm kitaba uygulayın. Tarafsız tek başına kulağa duygu kaybı gibi geliyor; diğer kaydırıcıları kademeli olarak kaldırın. Kapalı, modelin teslimatı seçmesini sağlar.',
     'gr_zonos_emotion_happiness': 'Mutluluk',
     'gr_zonos_emotion_sadness': 'Üzüntü',
     'gr_zonos_emotion_disgust': 'İğrenme',

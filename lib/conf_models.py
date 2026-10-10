@@ -107,8 +107,10 @@ default_engine_settings = {
         # conditioning and sampling defaults are zonos' own make_cond_dict() / generate() defaults
         # (fmax 22050 is upstream's value for voice cloning, which e2a always does)
         "emotion_enabled": True,
-        # Happiness, Sadness, Disgust, Fear, Surprise, Anger, Other, Neutral
-        "emotion": [0.3077, 0.0256, 0.0256, 0.0256, 0.0256, 0.0256, 0.2564, 0.3077],
+        # Happiness, Sadness, Disgust, Fear, Surprise, Anger, Other, Neutral. Not zonos' own mix:
+        # Neutral is the worker's anchor (= emotion off), so the default starts from the
+        # emotion-off voice and each other slider moves away from it gradually
+        "emotion": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
         "speaking_rate": 15.0,
         "pitch_std": 20.0,
         "fmax": 22050.0,

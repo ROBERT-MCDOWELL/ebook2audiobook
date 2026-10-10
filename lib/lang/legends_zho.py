@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'CFG比例',
     'gr_zonos_cfg_scale_info': '在多大程度上遵循了语音和设置。3以上可以添加工件。',
     'gr_zonos_emotion_enabled': '使用情感',
-    'gr_zonos_emotion_enabled_info': '将下面的情绪组合应用到整本书中。Off可让模特选择派送方式。',
+    'gr_zonos_emotion_enabled_info': '将下面的情绪组合应用到整本书中。中立独自听起来像情绪关闭;逐渐提高其他滑块。Off可让模特选择派送方式。',
     'gr_zonos_emotion_happiness': '美满度',
     'gr_zonos_emotion_sadness': '悲伤',
     'gr_zonos_emotion_disgust': '厭惡',

@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'CFG 척도',
     'gr_zonos_cfg_scale_info': '음성 및 설정이 얼마나 강력하게 준수되는지. 3개 이상은 아티팩트를 추가할 수 있습니다.',
     'gr_zonos_emotion_enabled': '감정 사용',
-    'gr_zonos_emotion_enabled_info': '아래의 감정 믹스를 책 전체에 적용하십시오. OFF를 사용하면 모델이 배달을 선택할 수 있습니다.',
+    'gr_zonos_emotion_enabled_info': '아래의 감정 믹스를 책 전체에 적용하십시오. 중립적인 것만으로는 감정이 사라지는 것처럼 들립니다. 다른 슬라이더를 점진적으로 올리세요. OFF를 사용하면 모델이 배달을 선택할 수 있습니다.',
     'gr_zonos_emotion_happiness': '행복',
     'gr_zonos_emotion_sadness': '슬픔',
     'gr_zonos_emotion_disgust': '혐오',

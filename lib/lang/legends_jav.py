@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'Skala CFG',
     'gr_zonos_cfg_scale_info': 'Sepira kuaté swara lan setelan sing dituruti. Ing ndhuwur 3 bisa nambah artefak.',
     'gr_zonos_emotion_enabled': 'Gunakake Emosi',
-    'gr_zonos_emotion_enabled_info': 'Gunakake campuran emosi ing ngisor iki kanggo kabeh buku. Ninggalake supaya model milih pangiriman.',
+    'gr_zonos_emotion_enabled_info': 'Gunakake campuran emosi ing ngisor iki kanggo kabeh buku. Neutral piyambak muni kaya emosi mati; mundhakaken slider liyane mboko sithik. Ninggalake supaya model milih pangiriman.',
     'gr_zonos_emotion_happiness': 'Kabagjaan',
     'gr_zonos_emotion_sadness': 'Sadhèrèk',
     'gr_zonos_emotion_disgust': 'KANGERTECH',

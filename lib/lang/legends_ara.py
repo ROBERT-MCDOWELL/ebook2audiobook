@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'مقياس CFG',
     'gr_zonos_cfg_scale_info': 'مدى قوة متابعة الصوت والإعدادات. فوق 3 يمكن أن تضيف القطع الأثرية.',
     'gr_zonos_emotion_enabled': 'استخدم العاطفة',
-    'gr_zonos_emotion_enabled_info': 'ضع مزيج العاطفة أدناه على الكتاب بأكمله. إيقاف يسمح للطراز باختيار خدمة التوصيل.',
+    'gr_zonos_emotion_enabled_info': 'ضع مزيج العاطفة أدناه على الكتاب بأكمله. المحايد وحده يبدو وكأنه عاطفة ؛ ارفع أشرطة التمرير الأخرى تدريجيًا. إيقاف يسمح للطراز باختيار خدمة التوصيل.',
     'gr_zonos_emotion_happiness': 'السعادة',
     'gr_zonos_emotion_sadness': 'الحزن',
     'gr_zonos_emotion_disgust': 'الإشمئزاز',

@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'Escala CFG',
     'gr_zonos_cfg_scale_info': 'Com que intensidade a voz e as configurações são seguidas. Acima de 3 pode adicionar artefatos.',
     'gr_zonos_emotion_enabled': 'Usar Emoção',
-    'gr_zonos_emotion_enabled_info': 'Aplique a mistura de emoções abaixo a todo o livro. Desligado permite que o modelo escolha a entrega.',
+    'gr_zonos_emotion_enabled_info': 'Aplique a mistura de emoções abaixo a todo o livro. Sozinho, neutro soa como emoção desligada; levante os outros controles deslizantes gradualmente. Desligado permite que o modelo escolha a entrega.',
     'gr_zonos_emotion_happiness': 'Felicidade',
     'gr_zonos_emotion_sadness': 'Tristeza',
     'gr_zonos_emotion_disgust': 'Nojo',

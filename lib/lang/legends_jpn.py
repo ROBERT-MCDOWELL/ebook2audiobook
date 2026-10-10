@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'CFGスケール',
     'gr_zonos_cfg_scale_info': '音声と設定にどの程度従っているか。3を超えるとアーティファクトを追加できます。',
     'gr_zonos_emotion_enabled': '感情を使う',
-    'gr_zonos_emotion_enabled_info': '以下のエモーションミックスを本全体に適用してください。オフにすると、モデルが配達を選択できます。',
+    'gr_zonos_emotion_enabled_info': '以下のエモーションミックスを本全体に適用してください。ニュートラル単独では感情がオフのように聞こえます。他のスライダーを徐々に上げてください。オフにすると、モデルが配達を選択できます。',
     'gr_zonos_emotion_happiness': '幸福感',
     'gr_zonos_emotion_sadness': '悲しみ',
     'gr_zonos_emotion_disgust': '嫌悪',

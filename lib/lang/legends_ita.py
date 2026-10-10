@@ -68,7 +68,7 @@ legends = {
     'gr_zonos_cfg_scale': 'Scala CFG',
     'gr_zonos_cfg_scale_info': 'Quanto sono seguite la voce e le impostazioni. Sopra 3 può aggiungere artefatti.',
     'gr_zonos_emotion_enabled': 'Usa l\'Emozione',
-    'gr_zonos_emotion_enabled_info': 'Applica il mix di emozioni riportato di seguito all\'intero libro. OFF consente al modello di scegliere la consegna.',
+    'gr_zonos_emotion_enabled_info': 'Applica il mix di emozioni riportato di seguito all\'intero libro. Neutro da solo suona come un\'emozione spenta; solleva gradualmente gli altri cursori. OFF consente al modello di scegliere la consegna.',
     'gr_zonos_emotion_happiness': 'Felicità',
     'gr_zonos_emotion_sadness': 'Tristezza',
     'gr_zonos_emotion_disgust': 'Disgusto',
