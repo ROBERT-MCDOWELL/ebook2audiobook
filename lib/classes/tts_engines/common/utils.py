@@ -928,32 +928,34 @@ class TTSUtils:
             if close:
                 self.params['inline_emotion'] = None
                 return True, None
+            # ZONOS2 sliders: [emotion:sad] (full) or a mix [emotion:sad=0.7,angry=0.2], scaled by
+            # 1/max(1, sum of |weights|) so a mix never adds up above full; Zonos v0.1 names work through
+            # aliases / map (fear, disgust on the valence/arousal axes, neutral/other = plain voice)
             names = TTS_SML['emotion']['values']
             aliases = TTS_SML['emotion']['aliases']
-            raw = (value or '').strip().lower()
-            emotion = None
-            if '=' in raw:
-                # explicit mix, unlisted emotions at 0
-                emotion = [0.0] * len(names)
-                for item in raw.split(','):
-                    key, _, weight = item.partition('=')
-                    key = aliases.get(key.strip(), key.strip())
-                    try:
-                        emotion[names.index(key)] = min(max(float(weight), 0.0), 1.0)
-                    except ValueError:
-                        emotion = None
-                        break
-            elif aliases.get(raw, raw) in names:
-                # one named emotion, weighted like zonos' own UI default (main 1.0, rest low)
-                emotion = [0.05] * len(names)
-                emotion[names.index('other')] = 0.1
-                emotion[names.index('neutral')] = 0.2
-                emotion[names.index(aliases.get(raw, raw))] = 1.0
-            if emotion is None or not any(emotion):
+            mapping = TTS_SML['emotion'].get('map', {})
+            weights = {}
+            for item in [p for p in re.split(r'[,\s]+', (value or '').strip().lower()) if p]:
+                key, _, weight = item.partition('=')
+                key = aliases.get(key.strip(), key.strip())
+                try:
+                    if key not in names and key not in mapping:
+                        raise ValueError(key)
+                    weights[key] = float(weight) if weight else 1.0
+                except ValueError:
+                    weights = None
+                    break
+            if not weights:
                 # cosmetic tag: a typo must not abort a whole book, keep the current emotion
-                print(legends['msg_sml_emotion_ignored'].format(value=value, values=', '.join(names)))
+                print(legends['msg_sml_emotion_ignored'].format(value=value, values=', '.join(names + list(aliases) + list(mapping))))
                 return True, None
-            self.params['inline_emotion'] = emotion
+            scale = 1.0 / max(1.0, sum(abs(w) for w in weights.values()))
+            emotion = {}
+            for key, w in weights.items():
+                for name, v in (mapping[key] if key in mapping else {key: 1.0}).items():
+                    emotion[name] = emotion.get(name, 0.0) + v * w * scale
+            # an empty dict ([emotion:neutral]) is the plain voice for the passage, not "no tag"
+            self.params['inline_emotion'] = {k: round(max(-1.0, min(1.0, v)), 4) for k, v in emotion.items() if abs(v) > 1e-4}
             return True, None
         elif tag == 'ipa':
             if close:

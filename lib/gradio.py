@@ -249,40 +249,12 @@ def build_interface(args:dict)->gr.Blocks:
                         with gr.Group(elem_id='gr_group_zonos_params', elem_classes=['gr-group']):
                             gr_zonos_speaking_rate = gr.Slider(
                                 label=legends['gr_zonos_speaking_rate'],
-                                minimum=5.0,
-                                maximum=30.0,
+                                minimum=0.0,
+                                maximum=40.0,
                                 step=0.5,
                                 value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['speaking_rate']),
                                 elem_id='gr_zonos_speaking_rate',
                                 info=legends['gr_zonos_speaking_rate_info']
-                            )
-                            gr_zonos_pitch_std = gr.Slider(
-                                label=legends['gr_zonos_pitch_std'],
-                                minimum=0.0,
-                                maximum=300.0,
-                                step=1.0,
-                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['pitch_std']),
-                                elem_id='gr_zonos_pitch_std',
-                                info=legends['gr_zonos_pitch_std_info']
-                            )
-                            gr_zonos_cfg_scale = gr.Slider(
-                                label=legends['gr_zonos_cfg_scale'],
-                                minimum=1.0,
-                                maximum=5.0,
-                                step=0.1,
-                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['cfg_scale']),
-                                elem_id='gr_zonos_cfg_scale',
-                                info=legends['gr_zonos_cfg_scale_info']
-                            )
-                        with gr.Group(elem_id='gr_group_zonos_advanced', elem_classes=['gr-group']):
-                            gr_zonos_linear = gr.Slider(
-                                label=legends['gr_zonos_linear'],
-                                minimum=0.0,
-                                maximum=1.0,
-                                step=0.01,
-                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['linear']),
-                                elem_id='gr_zonos_linear',
-                                info=legends['gr_zonos_linear_info']
                             )
                         with gr.Group(elem_id='gr_group_zonos_emotion', elem_classes=['gr-group']):
                             gr_zonos_emotion_enabled = gr.Checkbox(
@@ -291,71 +263,76 @@ def build_interface(args:dict)->gr.Blocks:
                                 elem_id='gr_zonos_emotion_enabled',
                                 info=legends['gr_zonos_emotion_enabled_info']
                             )
+                        # ZONOS2: every slider at 0 is the plain cloned voice, each one moves away from it
                         with gr.Group(elem_id='gr_group_zonos_emotion_sliders', elem_classes=['gr-group'], visible=bool(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled'])) as gr_group_zonos_emotion_sliders:
-                                gr_zonos_emotion_happiness = gr.Slider(
-                                    label=legends['gr_zonos_emotion_happiness'],
-                                    minimum=0.0,
-                                    maximum=1.0,
-                                    step=0.01,
-                                    value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][0]),
-                                    elem_id='gr_zonos_emotion_happiness'
-                                )
-                                gr_zonos_emotion_sadness = gr.Slider(
-                                    label=legends['gr_zonos_emotion_sadness'],
-                                    minimum=0.0,
-                                    maximum=1.0,
-                                    step=0.01,
-                                    value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][1]),
-                                    elem_id='gr_zonos_emotion_sadness'
-                                )
-                                gr_zonos_emotion_disgust = gr.Slider(
-                                    label=legends['gr_zonos_emotion_disgust'],
-                                    minimum=0.0,
-                                    maximum=1.0,
-                                    step=0.01,
-                                    value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][2]),
-                                    elem_id='gr_zonos_emotion_disgust'
-                                )
-                                gr_zonos_emotion_fear = gr.Slider(
-                                    label=legends['gr_zonos_emotion_fear'],
-                                    minimum=0.0,
-                                    maximum=1.0,
-                                    step=0.01,
-                                    value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][3]),
-                                    elem_id='gr_zonos_emotion_fear'
-                                )
-                                gr_zonos_emotion_surprise = gr.Slider(
-                                    label=legends['gr_zonos_emotion_surprise'],
-                                    minimum=0.0,
-                                    maximum=1.0,
-                                    step=0.01,
-                                    value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][4]),
-                                    elem_id='gr_zonos_emotion_surprise'
-                                )
-                                gr_zonos_emotion_anger = gr.Slider(
-                                    label=legends['gr_zonos_emotion_anger'],
-                                    minimum=0.0,
-                                    maximum=1.0,
-                                    step=0.01,
-                                    value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][5]),
-                                    elem_id='gr_zonos_emotion_anger'
-                                )
-                                gr_zonos_emotion_other = gr.Slider(
-                                    label=legends['gr_zonos_emotion_other'],
-                                    minimum=0.0,
-                                    maximum=1.0,
-                                    step=0.01,
-                                    value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][6]),
-                                    elem_id='gr_zonos_emotion_other'
-                                )
-                                gr_zonos_emotion_neutral = gr.Slider(
-                                    label=legends['gr_zonos_emotion_neutral'],
-                                    minimum=0.0,
-                                    maximum=1.0,
-                                    step=0.01,
-                                    value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][7]),
-                                    elem_id='gr_zonos_emotion_neutral'
-                                )
+                                    gr_zonos_emotion_happy = gr.Slider(
+                                        label=legends['gr_zonos_emotion_happy'],
+                                        minimum=0.0,
+                                        maximum=1.0,
+                                        step=0.01,
+                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['happy']),
+                                        elem_id='gr_zonos_emotion_happy'
+                                    )
+                                    gr_zonos_emotion_sad = gr.Slider(
+                                        label=legends['gr_zonos_emotion_sad'],
+                                        minimum=0.0,
+                                        maximum=1.0,
+                                        step=0.01,
+                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['sad']),
+                                        elem_id='gr_zonos_emotion_sad'
+                                    )
+                                    gr_zonos_emotion_angry = gr.Slider(
+                                        label=legends['gr_zonos_emotion_angry'],
+                                        minimum=0.0,
+                                        maximum=1.0,
+                                        step=0.01,
+                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['angry']),
+                                        elem_id='gr_zonos_emotion_angry'
+                                    )
+                                    gr_zonos_emotion_surprised = gr.Slider(
+                                        label=legends['gr_zonos_emotion_surprised'],
+                                        minimum=0.0,
+                                        maximum=1.0,
+                                        step=0.01,
+                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['surprised']),
+                                        elem_id='gr_zonos_emotion_surprised'
+                                    )
+                                    gr_zonos_emotion_valence = gr.Slider(
+                                        label=legends['gr_zonos_emotion_valence'],
+                                        minimum=-1.0,
+                                        maximum=1.0,
+                                        step=0.01,
+                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['valence']),
+                                        elem_id='gr_zonos_emotion_valence',
+                                        info=legends['gr_zonos_emotion_valence_info']
+                                    )
+                                    gr_zonos_emotion_arousal = gr.Slider(
+                                        label=legends['gr_zonos_emotion_arousal'],
+                                        minimum=-1.0,
+                                        maximum=1.0,
+                                        step=0.01,
+                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['arousal']),
+                                        elem_id='gr_zonos_emotion_arousal',
+                                        info=legends['gr_zonos_emotion_arousal_info']
+                                    )
+                                    gr_zonos_emotion_strength = gr.Slider(
+                                        label=legends['gr_zonos_emotion_strength'],
+                                        minimum=0.0,
+                                        maximum=2.0,
+                                        step=0.05,
+                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_strength']),
+                                        elem_id='gr_zonos_emotion_strength',
+                                        info=legends['gr_zonos_emotion_strength_info']
+                                    )
+                                    gr_zonos_emotion_cfg_scale = gr.Slider(
+                                        label=legends['gr_zonos_emotion_cfg_scale'],
+                                        minimum=1.0,
+                                        maximum=3.0,
+                                        step=0.05,
+                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_cfg_scale']),
+                                        elem_id='gr_zonos_emotion_cfg_scale',
+                                        info=legends['gr_zonos_emotion_cfg_scale_info']
+                                    )
                     with gr.Tab(legends['gr_tab_gptsovits_params'], elem_id='gr_tab_gptsovits_params', elem_classes='gr-tab', visible=False) as gr_tab_gptsovits_params:
                         gr_markdown_tab_gptsovits_params = gr.Markdown(
                             elem_id='gr_markdown_tab_gptsovits_params',
@@ -957,18 +934,15 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(label=legends['gr_bark_waveform_temp'], info=legends['gr_bark_waveform_temp_info']),
                             gr.update(value=f"### {legends['gr_markdown_tab_zonos_params_title']}\n{legends['gr_markdown_tab_zonos_params_desc']}"),
                             gr.update(label=legends['gr_zonos_speaking_rate'], info=legends['gr_zonos_speaking_rate_info']),
-                            gr.update(label=legends['gr_zonos_pitch_std'], info=legends['gr_zonos_pitch_std_info']),
-                            gr.update(label=legends['gr_zonos_cfg_scale'], info=legends['gr_zonos_cfg_scale_info']),
                             gr.update(label=legends['gr_zonos_emotion_enabled'], info=legends['gr_zonos_emotion_enabled_info']),
-                            gr.update(label=legends['gr_zonos_emotion_happiness']),
-                            gr.update(label=legends['gr_zonos_emotion_sadness']),
-                            gr.update(label=legends['gr_zonos_emotion_disgust']),
-                            gr.update(label=legends['gr_zonos_emotion_fear']),
-                            gr.update(label=legends['gr_zonos_emotion_surprise']),
-                            gr.update(label=legends['gr_zonos_emotion_anger']),
-                            gr.update(label=legends['gr_zonos_emotion_other']),
-                            gr.update(label=legends['gr_zonos_emotion_neutral']),
-                            gr.update(label=legends['gr_zonos_linear'], info=legends['gr_zonos_linear_info']),
+                            gr.update(label=legends['gr_zonos_emotion_happy']),
+                            gr.update(label=legends['gr_zonos_emotion_sad']),
+                            gr.update(label=legends['gr_zonos_emotion_angry']),
+                            gr.update(label=legends['gr_zonos_emotion_surprised']),
+                            gr.update(label=legends['gr_zonos_emotion_valence'], info=legends['gr_zonos_emotion_valence_info']),
+                            gr.update(label=legends['gr_zonos_emotion_arousal'], info=legends['gr_zonos_emotion_arousal_info']),
+                            gr.update(label=legends['gr_zonos_emotion_strength'], info=legends['gr_zonos_emotion_strength_info']),
+                            gr.update(label=legends['gr_zonos_emotion_cfg_scale'], info=legends['gr_zonos_emotion_cfg_scale_info']),
                             gr.update(value=f"### {legends['gr_markdown_tab_gptsovits_params_title']}\n{legends['gr_markdown_tab_gptsovits_params_desc']}"),
                             gr.update(label=legends['gr_gptsovits_speed'], info=legends['gr_gptsovits_speed_info']),
                             gr.update(label=legends['gr_gptsovits_top_k'], info=legends['gr_gptsovits_top_k_info']),
@@ -2746,7 +2720,7 @@ def build_interface(args:dict)->gr.Blocks:
                     _change_param('zonos_emotion_enabled', session_id, bool(val))
                     session = context.get_session(session_id)
                     if session and session.get('id', False):
-                        return (gr.update(visible=bool(val)), gr.update(value=float(session['zonos_emotion_happiness'])), gr.update(value=float(session['zonos_emotion_sadness'])), gr.update(value=float(session['zonos_emotion_disgust'])), gr.update(value=float(session['zonos_emotion_fear'])), gr.update(value=float(session['zonos_emotion_surprise'])), gr.update(value=float(session['zonos_emotion_anger'])), gr.update(value=float(session['zonos_emotion_other'])), gr.update(value=float(session['zonos_emotion_neutral'])))
+                        return (gr.update(visible=bool(val)), gr.update(value=float(session.get('zonos_emotion_happy', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['happy']))), gr.update(value=float(session.get('zonos_emotion_sad', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['sad']))), gr.update(value=float(session.get('zonos_emotion_angry', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['angry']))), gr.update(value=float(session.get('zonos_emotion_surprised', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['surprised']))), gr.update(value=float(session.get('zonos_emotion_valence', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['valence']))), gr.update(value=float(session.get('zonos_emotion_arousal', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['arousal']))), gr.update(value=float(session.get('zonos_emotion_strength', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_strength']))), gr.update(value=float(session.get('zonos_emotion_cfg_scale', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_cfg_scale']))))
                 except Exception as e:
                     error = f'_change_gr_zonos_emotion_enabled(): {e}'
                     exception_alert(session_id, error)
@@ -2757,7 +2731,7 @@ def build_interface(args:dict)->gr.Blocks:
                     session = context.get_session(session_id)
                     if session and session.get('id', False):
                         enabled = bool(session.get('zonos_emotion_enabled', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled']))
-                        return (gr.update(value=enabled), gr.update(visible=enabled), gr.update(value=float(session['zonos_emotion_happiness'])), gr.update(value=float(session['zonos_emotion_sadness'])), gr.update(value=float(session['zonos_emotion_disgust'])), gr.update(value=float(session['zonos_emotion_fear'])), gr.update(value=float(session['zonos_emotion_surprise'])), gr.update(value=float(session['zonos_emotion_anger'])), gr.update(value=float(session['zonos_emotion_other'])), gr.update(value=float(session['zonos_emotion_neutral'])))
+                        return (gr.update(value=enabled), gr.update(visible=enabled), gr.update(value=float(session.get('zonos_emotion_happy', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['happy']))), gr.update(value=float(session.get('zonos_emotion_sad', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['sad']))), gr.update(value=float(session.get('zonos_emotion_angry', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['angry']))), gr.update(value=float(session.get('zonos_emotion_surprised', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['surprised']))), gr.update(value=float(session.get('zonos_emotion_valence', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['valence']))), gr.update(value=float(session.get('zonos_emotion_arousal', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['arousal']))), gr.update(value=float(session.get('zonos_emotion_strength', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_strength']))), gr.update(value=float(session.get('zonos_emotion_cfg_scale', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_cfg_scale']))))
                 except Exception as e:
                     error = f'_select_gr_tab_zonos_params(): {e}'
                     exception_alert(session_id, error)
@@ -2805,19 +2779,16 @@ def build_interface(args:dict)->gr.Blocks:
                                 "xtts_enable_text_splitting":bool(xtts_enable_text_splitting),
                                 "bark_text_temp": float(bark_text_temp),
                                 "bark_waveform_temp": float(bark_waveform_temp),
-                                "zonos_emotion_enabled": bool(session['zonos_emotion_enabled']),
-                                "zonos_emotion_happiness": float(session['zonos_emotion_happiness']),
-                                "zonos_emotion_sadness": float(session['zonos_emotion_sadness']),
-                                "zonos_emotion_disgust": float(session['zonos_emotion_disgust']),
-                                "zonos_emotion_fear": float(session['zonos_emotion_fear']),
-                                "zonos_emotion_surprise": float(session['zonos_emotion_surprise']),
-                                "zonos_emotion_anger": float(session['zonos_emotion_anger']),
-                                "zonos_emotion_other": float(session['zonos_emotion_other']),
-                                "zonos_emotion_neutral": float(session['zonos_emotion_neutral']),
-                                "zonos_speaking_rate": float(session['zonos_speaking_rate']),
-                                "zonos_pitch_std": float(session['zonos_pitch_std']),
-                                "zonos_cfg_scale": float(session['zonos_cfg_scale']),
-                                "zonos_linear": float(session['zonos_linear']),
+                                "zonos_emotion_enabled": bool(session.get('zonos_emotion_enabled', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled'])),
+                                "zonos_emotion_happy": float(session.get('zonos_emotion_happy', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['happy'])),
+                                "zonos_emotion_sad": float(session.get('zonos_emotion_sad', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['sad'])),
+                                "zonos_emotion_angry": float(session.get('zonos_emotion_angry', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['angry'])),
+                                "zonos_emotion_surprised": float(session.get('zonos_emotion_surprised', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['surprised'])),
+                                "zonos_emotion_valence": float(session.get('zonos_emotion_valence', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['valence'])),
+                                "zonos_emotion_arousal": float(session.get('zonos_emotion_arousal', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['arousal'])),
+                                "zonos_emotion_strength": float(session.get('zonos_emotion_strength', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_strength'])),
+                                "zonos_emotion_cfg_scale": float(session.get('zonos_emotion_cfg_scale', default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_cfg_scale'])),
+                                "zonos_speaking_rate": float(session.get('zonos_speaking_rate', default_engine_settings[TTS_ENGINES['ZONOS']]['speaking_rate'])),
                                 "gptsovits_speed": float(session['gptsovits_speed']),
                                 "gptsovits_top_k": int(session['gptsovits_top_k']),
                                 "gptsovits_top_p": float(session['gptsovits_top_p']),
@@ -3502,9 +3473,9 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_output_split_hours_markdown, gr_session_markdown, gr_progress_markdown, gr_audiobook_markdown,
                 gr_xtts_temperature, gr_xtts_length_penalty, gr_xtts_num_beams, gr_xtts_repetition_penalty, gr_xtts_top_k,
                 gr_xtts_top_p, gr_xtts_speed, gr_xtts_enable_text_splitting, gr_markdown_tab_bark_params, gr_bark_text_temp,
-                gr_bark_waveform_temp, gr_markdown_tab_zonos_params, gr_zonos_speaking_rate, gr_zonos_pitch_std, gr_zonos_cfg_scale, gr_zonos_emotion_enabled,
-                gr_zonos_emotion_happiness, gr_zonos_emotion_sadness, gr_zonos_emotion_disgust, gr_zonos_emotion_fear, gr_zonos_emotion_surprise, gr_zonos_emotion_anger, gr_zonos_emotion_other, gr_zonos_emotion_neutral,
-                gr_zonos_linear, gr_markdown_tab_gptsovits_params, gr_gptsovits_speed, gr_gptsovits_top_k, gr_gptsovits_top_p, gr_gptsovits_temperature, gr_gptsovits_repetition_penalty,
+                gr_bark_waveform_temp, gr_markdown_tab_zonos_params, gr_zonos_speaking_rate, gr_zonos_emotion_enabled,
+                gr_zonos_emotion_happy, gr_zonos_emotion_sad, gr_zonos_emotion_angry, gr_zonos_emotion_surprised, gr_zonos_emotion_valence, gr_zonos_emotion_arousal, gr_zonos_emotion_strength, gr_zonos_emotion_cfg_scale,
+                gr_markdown_tab_gptsovits_params, gr_gptsovits_speed, gr_gptsovits_top_k, gr_gptsovits_top_p, gr_gptsovits_temperature, gr_gptsovits_repetition_penalty,
                 gr_abs_url, gr_abs_api_token, gr_abs_audiobook, gr_abs_status, gr_ui_language,
                 gr_tooltips, gr_tooltips_data
             ]
@@ -3602,9 +3573,8 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_abs_url, gr_abs_api_token, gr_abs_library, gr_abs_search_btn, gr_abs_upload_btn,
                 gr_xtts_temperature, gr_xtts_length_penalty, gr_xtts_num_beams, gr_xtts_repetition_penalty, gr_xtts_top_k, gr_xtts_top_p, gr_xtts_speed, gr_xtts_enable_text_splitting,
                 gr_bark_text_temp, gr_bark_waveform_temp,
-                gr_zonos_speaking_rate, gr_zonos_pitch_std, gr_zonos_cfg_scale, gr_zonos_emotion_enabled,
-                gr_zonos_emotion_happiness, gr_zonos_emotion_sadness, gr_zonos_emotion_disgust, gr_zonos_emotion_fear, gr_zonos_emotion_surprise, gr_zonos_emotion_anger, gr_zonos_emotion_other, gr_zonos_emotion_neutral,
-                gr_zonos_linear,
+                gr_zonos_speaking_rate, gr_zonos_emotion_enabled,
+                gr_zonos_emotion_happy, gr_zonos_emotion_sad, gr_zonos_emotion_angry, gr_zonos_emotion_surprised, gr_zonos_emotion_valence, gr_zonos_emotion_arousal, gr_zonos_emotion_strength, gr_zonos_emotion_cfg_scale,
                 gr_gptsovits_speed, gr_gptsovits_top_k, gr_gptsovits_top_p, gr_gptsovits_temperature, gr_gptsovits_repetition_penalty
             ]
             outputs_on_voice_upload = [
@@ -4158,21 +4128,6 @@ def build_interface(args:dict)->gr.Blocks:
                 inputs=[gr_session, gr_zonos_speaking_rate],
                 outputs=None
             )
-            gr_zonos_pitch_std.change(
-                fn=lambda session_id, val: _change_param('zonos_pitch_std', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_pitch_std],
-                outputs=None
-            )
-            gr_zonos_cfg_scale.change(
-                fn=lambda session_id, val: _change_param('zonos_cfg_scale', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_cfg_scale],
-                outputs=None
-            )
-            gr_zonos_linear.change(
-                fn=lambda session_id, val: _change_param('zonos_linear', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_linear],
-                outputs=None
-            )
             ########### GPT-SoVITS Params
 
             gr_tab_gptsovits_params.select(
@@ -4223,7 +4178,7 @@ def build_interface(args:dict)->gr.Blocks:
             gr_zonos_emotion_enabled.input(
                 fn=_change_gr_zonos_emotion_enabled,
                 inputs=[gr_session, gr_zonos_emotion_enabled],
-                outputs=[gr_group_zonos_emotion_sliders, gr_zonos_emotion_happiness, gr_zonos_emotion_sadness, gr_zonos_emotion_disgust, gr_zonos_emotion_fear, gr_zonos_emotion_surprise, gr_zonos_emotion_anger, gr_zonos_emotion_other, gr_zonos_emotion_neutral]
+                outputs=[gr_group_zonos_emotion_sliders, gr_zonos_emotion_happy, gr_zonos_emotion_sad, gr_zonos_emotion_angry, gr_zonos_emotion_surprised, gr_zonos_emotion_valence, gr_zonos_emotion_arousal, gr_zonos_emotion_strength, gr_zonos_emotion_cfg_scale]
             )
             # tabs render their children only when first opened (gr.Tab render_children=False), so
             # updates sent before that can be lost: re-apply checkbox, group and values from the
@@ -4231,46 +4186,46 @@ def build_interface(args:dict)->gr.Blocks:
             gr_tab_zonos_params.select(
                 fn=_select_gr_tab_zonos_params,
                 inputs=[gr_session],
-                outputs=[gr_zonos_emotion_enabled, gr_group_zonos_emotion_sliders, gr_zonos_emotion_happiness, gr_zonos_emotion_sadness, gr_zonos_emotion_disgust, gr_zonos_emotion_fear, gr_zonos_emotion_surprise, gr_zonos_emotion_anger, gr_zonos_emotion_other, gr_zonos_emotion_neutral]
+                outputs=[gr_zonos_emotion_enabled, gr_group_zonos_emotion_sliders, gr_zonos_emotion_happy, gr_zonos_emotion_sad, gr_zonos_emotion_angry, gr_zonos_emotion_surprised, gr_zonos_emotion_valence, gr_zonos_emotion_arousal, gr_zonos_emotion_strength, gr_zonos_emotion_cfg_scale]
             )
-            gr_zonos_emotion_happiness.change(
-                fn=lambda session_id, val: _change_param('zonos_emotion_happiness', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_emotion_happiness],
+            gr_zonos_emotion_happy.change(
+                fn=lambda session_id, val: _change_param('zonos_emotion_happy', session_id, float(val)),
+                inputs=[gr_session, gr_zonos_emotion_happy],
                 outputs=None
             )
-            gr_zonos_emotion_sadness.change(
-                fn=lambda session_id, val: _change_param('zonos_emotion_sadness', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_emotion_sadness],
+            gr_zonos_emotion_sad.change(
+                fn=lambda session_id, val: _change_param('zonos_emotion_sad', session_id, float(val)),
+                inputs=[gr_session, gr_zonos_emotion_sad],
                 outputs=None
             )
-            gr_zonos_emotion_disgust.change(
-                fn=lambda session_id, val: _change_param('zonos_emotion_disgust', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_emotion_disgust],
+            gr_zonos_emotion_angry.change(
+                fn=lambda session_id, val: _change_param('zonos_emotion_angry', session_id, float(val)),
+                inputs=[gr_session, gr_zonos_emotion_angry],
                 outputs=None
             )
-            gr_zonos_emotion_fear.change(
-                fn=lambda session_id, val: _change_param('zonos_emotion_fear', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_emotion_fear],
+            gr_zonos_emotion_surprised.change(
+                fn=lambda session_id, val: _change_param('zonos_emotion_surprised', session_id, float(val)),
+                inputs=[gr_session, gr_zonos_emotion_surprised],
                 outputs=None
             )
-            gr_zonos_emotion_surprise.change(
-                fn=lambda session_id, val: _change_param('zonos_emotion_surprise', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_emotion_surprise],
+            gr_zonos_emotion_valence.change(
+                fn=lambda session_id, val: _change_param('zonos_emotion_valence', session_id, float(val)),
+                inputs=[gr_session, gr_zonos_emotion_valence],
                 outputs=None
             )
-            gr_zonos_emotion_anger.change(
-                fn=lambda session_id, val: _change_param('zonos_emotion_anger', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_emotion_anger],
+            gr_zonos_emotion_arousal.change(
+                fn=lambda session_id, val: _change_param('zonos_emotion_arousal', session_id, float(val)),
+                inputs=[gr_session, gr_zonos_emotion_arousal],
                 outputs=None
             )
-            gr_zonos_emotion_other.change(
-                fn=lambda session_id, val: _change_param('zonos_emotion_other', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_emotion_other],
+            gr_zonos_emotion_strength.change(
+                fn=lambda session_id, val: _change_param('zonos_emotion_strength', session_id, float(val)),
+                inputs=[gr_session, gr_zonos_emotion_strength],
                 outputs=None
             )
-            gr_zonos_emotion_neutral.change(
-                fn=lambda session_id, val: _change_param('zonos_emotion_neutral', session_id, float(val)),
-                inputs=[gr_session, gr_zonos_emotion_neutral],
+            gr_zonos_emotion_cfg_scale.change(
+                fn=lambda session_id, val: _change_param('zonos_emotion_cfg_scale', session_id, float(val)),
+                inputs=[gr_session, gr_zonos_emotion_cfg_scale],
                 outputs=None
             )
 

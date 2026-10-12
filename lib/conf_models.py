@@ -29,12 +29,15 @@ TTS_SML = {
     "break": {"static": "[break]", "paired": False},
     "pause": {"static": "[pause]", "paired": False},
     "voice": {"paired": True},
-    # zonos only (ignored by the other engines): [emotion:sadness]...[/emotion] or a mix
-    # [emotion:sadness=0.7,neutral=0.3]; values in zonos order, aliases for the obvious words
+    # zonos only (ignored by the other engines): [emotion:sad]...[/emotion] or a mix [emotion:sad=0.7,angry=0.2].
+    # ZONOS2 directions happy/sad/angry/surprised (0..1) and axes valence/arousal (-1..1); all at 0 is the plain
+    # cloned voice. Zonos v0.1 names still work through aliases, fear/disgust through "map" (no direction of their own,
+    # approximated on the two axes), neutral/other add nothing. A mix is scaled by 1/max(1, sum of |weights|).
     "emotion": {
         "paired": True,
-        "values": ["happiness", "sadness", "disgust", "fear", "surprise", "anger", "other", "neutral"],
-        "aliases": {"happy": "happiness", "joy": "happiness", "sad": "sadness", "disgusted": "disgust", "afraid": "fear", "scared": "fear", "surprised": "surprise", "angry": "anger"}
+        "values": ["happy", "sad", "angry", "surprised", "valence", "arousal"],
+        "aliases": {"happiness": "happy", "joy": "happy", "sadness": "sad", "anger": "angry", "surprise": "surprised"},
+        "map": {"fear": {"valence": -0.6, "arousal": 0.6}, "afraid": {"valence": -0.6, "arousal": 0.6}, "scared": {"valence": -0.6, "arousal": 0.6}, "disgust": {"valence": -0.6, "arousal": 0.2}, "disgusted": {"valence": -0.6, "arousal": 0.2}, "neutral": {}, "other": {}}
     }
 }
 
@@ -83,48 +86,65 @@ max_custom_voices = 1000
 
 default_engine_settings = {
     TTS_ENGINES['ZONOS']: {
-        # runs in its own uv venv (lib/classes/tts_engines/venvs/zonos) behind a persistent worker
-        "repo": "Zyphra/Zonos-v0.1-transformer",
-        "repo_hybrid": "Zyphra/Zonos-v0.1-hybrid",
-        "source": "https://github.com/Zyphra/Zonos/archive/bc40d98e1e1ab54fc65c483be127a90e3c7c0645.tar.gz",
-        "python": "3.12",
-        # package list = upstream's own pyproject.toml dependencies (in the extracted tree), torch from the
-        # device's PyTorch index (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller as fallback;
-        # upstream's torch floor (torch>=2.5.1) stops devices that cannot reach it with a clear alert.
-        # The hybrid's mamba-ssm / causal-conv1d / flash-attn come from upstream's [compile] extra.
-        # Left out: gradio, only used by upstream's demo UI. Names normalized as pip does.
-        "requirements_exclude": ["gradio"],
-        # transformers<5: upstream sets no upper bound, the venv was validated on 4.x (DacModel).
-        # hf_xet: huggingface_hub 0.36 only requires it when platform_machine is exactly x86_64 / amd64 /
-        # arm64 / aarch64, and windows reports AMD64, so windows misses the fast Xet downloads; same range
-        "requirements_extra": ["transformers<5", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
-        # every package installs as a wheel, so no platform ever needs a compiler; sudachidict-full only
-        # exists as a source package (pure data: its build downloads the Sudachi dictionary)
-        "packages_sdist": ["sudachidict-full"],
-        # robust languages only (most of the 200k h are en, then zh, ja, fr, es, de); values are espeak codes
-        "languages": {"eng": "en-us", "deu": "de", "fra": "fr-fr", "jpn": "ja", "spa": "es", "zho": "cmn"},
+        # ZONOS2 (Zyphra zonos2.cpp): a native zonos2-server per machine behind a persistent stdlib-only worker,
+        # no torch and no venv. Packages are Zyphra's release builds, plus e2a's own builds (ROBERT-MCDOWELL/py-pkg,
+        # redistributed with Zyphra's authorization) where Zyphra ships none. Unpacked into
+        # lib/classes/tts_engines/venvs/zonos/<package>. A package whose sha256 is empty is not published yet:
+        # it is skipped, a GPU package then falls back to the CPU one of the same platform.
+        #   gpu: the build runs with --gpu (CUDA / Vulkan / Metal), else --cpu
+        #   jetpack + sm: Jetson only, JetPack major and the GPU architectures inside (Xavier 72, Orin 87, Thor 110)
+        #   macos_min: lowest macOS major the binary starts on
+        #   cpu_flags: CPU features the binary needs, /proc/cpuinfo names (Windows: from IsProcessorFeaturePresent).
+        #     e2a's own x64 builds (build-zonos2-x64.sh, zig, glibc >= 2.27, no libstdc++/libgomp) come as AVX2 and
+        #     SSE4.2 variants for old CPUs; Zyphra's Linux CPU build needs AVX-512 VNNI, its Vulkan builds AVX2
+        #   glibc_min: Zyphra's Linux builds need glibc 2.34 (and GCC 12's libstdc++)
+        # A GPU package that fails to start (no Vulkan loader, old driver) falls back to the CPU package.
+        "version": "0.5.2",
+        "packages": {
+            "linux-x64-cuda": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-x64-cuda12.tar.gz", "sha256": "", "gpu": True},
+            "linux-x64-vulkan": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-x64-vulkan.tar.gz", "sha256": "", "gpu": True, "cpu_flags": ["avx2", "fma", "f16c"]},
+            "linux-x64-vulkan-zyphra": {"url": "https://github.com/Zyphra/zonos2.cpp/releases/download/v0.5.2/zonos2-linux-x64-vulkan.tar.gz", "sha256": "1a64eb1a2b91d563bdd5f5bc0a9952d52607b6344e45110a111a1cc5e415fc02", "gpu": True, "cpu_flags": ["avx2", "fma", "f16c"], "glibc_min": "2.34"},
+            "linux-x64-cpu-avx2": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-x64-cpu-avx2.tar.gz", "sha256": "", "gpu": False, "cpu_flags": ["avx2", "fma", "f16c", "bmi2"]},
+            "linux-x64-cpu-sse42": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-x64-cpu-sse42.tar.gz", "sha256": "", "gpu": False, "cpu_flags": ["sse4_2"]},
+            "linux-x64-cpu-zyphra": {"url": "https://github.com/Zyphra/zonos2.cpp/releases/download/v0.5.2/zonos2-linux-x64-cpu.tar.gz", "sha256": "3ff57ddf04947afac9f3262375372dc385d5f247d2250a5b5cc741351e235dea", "gpu": False, "cpu_flags": ["avx512f", "avx512bw", "avx512vl", "avx512_vnni"], "glibc_min": "2.34"},
+            "windows-x64-cuda": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-windows-x64-cuda12.zip", "sha256": "", "gpu": True},
+            "windows-x64-vulkan": {"url": "https://github.com/Zyphra/zonos2.cpp/releases/download/v0.5.2/zonos2-windows-x64-vulkan.zip", "sha256": "e89fb7396e3960ae0961f5a737ed0f988e16d3dece79618d35920cc916cc943c", "gpu": True, "cpu_flags": ["avx2", "fma", "f16c"]},
+            "windows-x64-cpu-avx2": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-windows-x64-cpu-avx2.zip", "sha256": "", "gpu": False, "cpu_flags": ["avx2", "fma", "f16c", "bmi2"]},
+            "windows-x64-cpu-sse42": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-windows-x64-cpu-sse42.zip", "sha256": "", "gpu": False, "cpu_flags": ["sse4_2"]},
+            "macos-arm64-metal": {"url": "https://github.com/Zyphra/zonos2.cpp/releases/download/v0.5.2/zonos2-macos-arm64-metal.tar.gz", "sha256": "fcce06009eec409831bc888de824147f3f30b9b5948987e71778664dc1b78b6f", "gpu": True},
+            "macos-x86_64": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-macos-x86_64.tar.gz", "sha256": "7c90426fb9c74e33d1954fafb4548ed73e307f05f247ed8195abc4d8cd25c8b5", "gpu": False, "macos_min": 15},
+            "jetson5-sm72": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-jetson51-sm72.tar.gz", "sha256": "afda09edfef68c5481d2af22ae2bcaab877d413d8c4beeeb9e8bedd6e981a29d", "gpu": True, "jetpack": 5, "sm": [72]},
+            "jetson5-sm72-sm87": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-jetson5-sm72-sm87.tar.gz", "sha256": "", "gpu": True, "jetpack": 5, "sm": [72, 87]},
+            "jetson6-sm87": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-jetson6-sm87.tar.gz", "sha256": "", "gpu": True, "jetpack": 6, "sm": [87]},
+            "jetson7-sm87-sm110": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-jetson7-sm87-sm110.tar.gz", "sha256": "", "gpu": True, "jetpack": 7, "sm": [87, 110]},
+            "linux-aarch64-cuda13": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-aarch64-cuda13.tar.gz", "sha256": "", "gpu": True},
+            "linux-aarch64-cuda12": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-aarch64-cuda12.tar.gz", "sha256": "", "gpu": True},
+            "linux-aarch64-v82": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-aarch64-v82.tar.gz", "sha256": "", "gpu": False, "cpu_flags": ["asimddp", "asimdhp"]},
+            "linux-aarch64": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-aarch64.tar.gz", "sha256": "68dd689a886482b584b34eb57c1b12a479e721ce654df4e07dcd97b6d8967558", "gpu": False}
+        },
+        # GGUF weights (Hugging Face, e2a's tts_dir cache): the backbone file comes from the fine_tuned preset
+        # (zonos_presets.py: Q4_K / Q6_K / Q8_0), the DAC decoder and the speaker encoder are shared
+        "repo": "Zyphra/ZONOS2-GGUF",
+        "dac": "dac.gguf",
+        "spk": "spk-encoder.gguf",
+        # official Tier 1 (en, Mandarin, ja) and Tier 2 languages. The model reads raw text, so the values are only
+        # zonos2-server's own language codes (used by its optional text normalizer)
+        "languages": {"eng": "en_us", "zho": "cmn", "jpn": "ja", "kor": "ko", "rus": "ru", "ita": "it", "por": "pt_br", "fra": "fr_fr", "spa": "es", "vie": "vi", "deu": "de", "heb": "he", "nld": "nl"},
         "samplerate": 44100,
-        # conditioning and sampling defaults are zonos' own make_cond_dict() / generate() defaults
-        # (fmax 22050 is upstream's value for voice cloning, which e2a always does)
-        # off like upstream's own UI (emotion unconditional): conditional emotion is unstable,
-        # above all with a cloned speaker, which e2a always uses
+        # emotion off by default; on, every slider at 0 is exactly the plain cloned voice (ZONOS2 adds the
+        # sliders' directions to the speaker embedding), so users move away from it gradually
         "emotion_enabled": False,
-        # Happiness, Sadness, Disgust, Fear, Surprise, Anger, Other, Neutral. Not zonos' own mix:
-        # Neutral is the worker's anchor (= emotion off), so the default starts from the
-        # emotion-off voice and each other slider moves away from it gradually
-        "emotion": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
-        "speaking_rate": 15.0,
-        "pitch_std": 20.0,
-        "fmax": 22050.0,
-        "cfg_scale": 2.0,
-        # sampling is zonos' own generate() default; linear > 0 adds the unified sampler's
-        # linear term on top (below 1 = more varied delivery), 0 leaves zonos untouched
-        "linear": 0.0,
-        "max_new_tokens": 86 * 30,
+        "emotion": {"happy": 0.0, "sad": 0.0, "angry": 0.0, "surprised": 0.0, "valence": 0.0, "arousal": 0.0},
+        # multiplier on the server's per-speaker calibration of the emotion directions
+        "emotion_strength": 1.0,
+        # emotion guidance, 1.0 = off (the server runs with --batch 2 so any value is accepted)
+        "emotion_cfg_scale": 1.0,
+        # 0 = the model's own pace, else speaking-rate conditioning (about 10 slow, 15 natural, 30 fast)
+        "speaking_rate": 0.0,
         "files": [],
         "voice": default_speaker,
         "voices": {},
-        "rating": {"VRAM": 6, "CPU": 1, "RAM": 8, "Realism": 5}
+        "rating": {"VRAM": 6, "CPU": 3, "RAM": 8, "Realism": 5}
     },
     TTS_ENGINES['GPTSOVITS']: {
         # runs in its own uv venv (lib/classes/tts_engines/venvs/gptsovits) behind a persistent

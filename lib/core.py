@@ -252,28 +252,23 @@ class SessionContext:
             ####### Bark settings
             "bark_text_temp": default_engine_settings[TTS_ENGINES['BARK']]['text_temp'],
             "bark_waveform_temp": default_engine_settings[TTS_ENGINES['BARK']]['waveform_temp'],
-            ####### Zonos settings
+            ####### Zonos settings (ZONOS2)
             "zonos_emotion_enabled": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled'],
-            "zonos_emotion_happiness": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][0],
-            "zonos_emotion_sadness": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][1],
-            "zonos_emotion_disgust": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][2],
-            "zonos_emotion_fear": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][3],
-            "zonos_emotion_surprise": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][4],
-            "zonos_emotion_anger": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][5],
-            "zonos_emotion_other": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][6],
-            "zonos_emotion_neutral": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion'][7],
+            "zonos_emotion_happy": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['happy'],
+            "zonos_emotion_sad": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['sad'],
+            "zonos_emotion_angry": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['angry'],
+            "zonos_emotion_surprised": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['surprised'],
+            "zonos_emotion_valence": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['valence'],
+            "zonos_emotion_arousal": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['arousal'],
+            "zonos_emotion_strength": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_strength'],
+            "zonos_emotion_cfg_scale": default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_cfg_scale'],
             "zonos_speaking_rate": default_engine_settings[TTS_ENGINES['ZONOS']]['speaking_rate'],
-            "zonos_pitch_std": default_engine_settings[TTS_ENGINES['ZONOS']]['pitch_std'],
-            "zonos_fmax": default_engine_settings[TTS_ENGINES['ZONOS']]['fmax'],
-            "zonos_cfg_scale": default_engine_settings[TTS_ENGINES['ZONOS']]['cfg_scale'],
-            "zonos_linear": default_engine_settings[TTS_ENGINES['ZONOS']]['linear'],
             ####### GPT-SoVITS settings
             "gptsovits_speed": default_engine_settings[TTS_ENGINES['GPTSOVITS']]['speed'],
             "gptsovits_top_k": default_engine_settings[TTS_ENGINES['GPTSOVITS']]['top_k'],
             "gptsovits_top_p": default_engine_settings[TTS_ENGINES['GPTSOVITS']]['top_p'],
             "gptsovits_temperature": default_engine_settings[TTS_ENGINES['GPTSOVITS']]['temperature'],
             "gptsovits_repetition_penalty": default_engine_settings[TTS_ENGINES['GPTSOVITS']]['repetition_penalty'],
-            "zonos_max_new_tokens": default_engine_settings[TTS_ENGINES['ZONOS']]['max_new_tokens'],
             ####### Audiobook editor
             "audiobook": None,
             "audiobooks_dir": None,
@@ -4391,7 +4386,7 @@ def convert_ebook(args:dict)->tuple:
             session['xtts_enable_text_splitting'] = bool(args['xtts_enable_text_splitting'])
             session['bark_text_temp'] =  float(args['bark_text_temp'])
             session['bark_waveform_temp'] =  float(args['bark_waveform_temp'])
-            for zonos_key, zonos_cast in (('zonos_emotion_enabled', bool), ('zonos_emotion_happiness', float), ('zonos_emotion_sadness', float), ('zonos_emotion_disgust', float), ('zonos_emotion_fear', float), ('zonos_emotion_surprise', float), ('zonos_emotion_anger', float), ('zonos_emotion_other', float), ('zonos_emotion_neutral', float), ('zonos_speaking_rate', float), ('zonos_pitch_std', float), ('zonos_cfg_scale', float), ('zonos_linear', float)):
+            for zonos_key, zonos_cast in (('zonos_emotion_enabled', bool), ('zonos_emotion_happy', float), ('zonos_emotion_sad', float), ('zonos_emotion_angry', float), ('zonos_emotion_surprised', float), ('zonos_emotion_valence', float), ('zonos_emotion_arousal', float), ('zonos_emotion_strength', float), ('zonos_emotion_cfg_scale', float), ('zonos_speaking_rate', float)):
                 if args.get(zonos_key) is not None:
                     session[zonos_key] = zonos_cast(args[zonos_key])
             for gptsovits_key, gptsovits_cast in (('gptsovits_speed', float), ('gptsovits_top_k', int), ('gptsovits_top_p', float), ('gptsovits_temperature', float), ('gptsovits_repetition_penalty', float)):
@@ -4547,7 +4542,7 @@ def convert_ebook(args:dict)->tuple:
                     if msg == '':
                         msg_extra = f"Using {session['device'].upper()}" + msg_extra
                     device_vram_required = default_engine_settings[session['tts_engine']]['rating']['RAM'] if session['device'] == devices['CPU']['proc'] else default_engine_settings[session['tts_engine']]['rating']['VRAM']
-                    # venv engines (zonos, ...) mirror python_env's torch into their own venv: stop
+                    # venv engines (gptsovits, ...) mirror python_env's torch into their own venv: stop
                     # here with an alert when it is too old or comes from a custom wheel URL
                     # (e.g. Windows ROCm, or a torch below the engine's torch_min), not later in TTSManager()
                     torch_error = None
@@ -4559,32 +4554,6 @@ def convert_ebook(args:dict)->tuple:
                         torch_index_ok = torch_tag in ('', 'cpu', 'xpu') or bool(re.fullmatch(r'cu\d+', torch_tag)) or (bool(re.fullmatch(r'rocm[\d.]+', torch_tag)) and sys.platform == systems['LINUX']) or bool(re.fullmatch(r'jetson\d+', torch_tag))
                         if torch_version < tuple(int(x) for x in torch_min.split('.')) or not torch_index_ok:
                             torch_error = legends['error_venv_torch_unsupported'].format(engine=session['tts_engine'], min=torch_min, version=torch.__version__)
-                    # hybrid backbones (zonos) need Linux + NVIDIA CUDA compute capability 8.0+ for
-                    # mamba-ssm / flash-attn, or a previous install of those failed here: warn and
-                    # switch to the internal (transformer) model instead of failing later
-                    if torch_error is None and session['fine_tuned'] == 'hybrid' and default_engine_settings[session['tts_engine']].get('repo_hybrid'):
-                        hybrid_reason = None
-                        if sys.platform != systems['LINUX']:
-                            hybrid_reason = sys.platform
-                        elif session['device'] != devices['CUDA']['proc']:
-                            hybrid_reason = session['device']
-                        else:
-                            import torch
-                            cc_major = torch.cuda.get_device_capability(0)[0] if torch.cuda.is_available() and torch.version.hip is None else 0
-                            if cc_major < 8:
-                                hybrid_reason = f'compute capability {cc_major}.x'
-                        if hybrid_reason is None:
-                            try:
-                                with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'classes', 'tts_engines', 'venvs', session['tts_engine'], '.e2a_installed.json'), 'r', encoding='utf-8') as f:
-                                    hybrid_installed = json.load(f)
-                                if hybrid_installed.get('hybrid') is False and hybrid_installed.get('hybrid_reason'):
-                                    hybrid_reason = hybrid_installed['hybrid_reason']
-                            except Exception:
-                                pass
-                        if hybrid_reason is not None:
-                            session['fine_tuned'] = default_fine_tuned
-                            session['model_cache'] = f"{session['tts_engine']}-{session['fine_tuned']}"
-                            msg += legends['msg_venv_hybrid_fallback'].format(engine=session['tts_engine'], reason=hybrid_reason) + '<br/>'
                     if torch_error is not None:
                         error = torch_error
                     elif float(total_vram_gb) >= float(device_vram_required):
@@ -4992,7 +4961,7 @@ def unload_tts_manager(tts_manager:Any)->None:
                     engine_ref = weakref.ref(engine)
                 except Exception:
                     pass
-                # venv engines (zonos, ...): the model lives in a persistent worker
+                # worker engines (zonos, gptsovits, ...): the model lives in a persistent worker
                 # process, so dropping the reference frees nothing — stop the worker.
                 worker = getattr(engine, 'engine', None)
                 if isinstance(worker, SubprocessPipe):

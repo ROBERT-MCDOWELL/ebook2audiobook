@@ -217,7 +217,7 @@ SML tags available:
 [pause] — silence (random range 1.0–1.6 sec.)
 [pause:N] — fixed pause (N sec.)
 [voice:/path/to/voice/file]...[/voice] — switch voice from default or selected voice from GUI/CLI
-[emotion:sadness]...[/emotion] — Zonos only: emotion for a passage (happiness, sadness, disgust, fear, surprise, anger, other, neutral) or a mix like [emotion:sadness=0.7,neutral=0.3]; other engines ignore it
+[emotion:sad]...[/emotion] — Zonos only: emotion for a passage (happy, sad, angry, surprised, valence, arousal; also fear, disgust, neutral) or a mix like [emotion:sad=0.7,angry=0.2]; other engines ignore it
 ''',
         formatter_class=argparse.RawTextHelpFormatter
     )
@@ -278,15 +278,15 @@ Default to config.json model.""")
 Default to config.json model.""")
     headless_optional_group.add_argument(cli_options[27], type=float, default=default_engine_settings[TTS_ENGINES['BARK']]['waveform_temp'], help=f"""(bark only, optional) Waveform Temperature for the model.
 Default to config.json model.""")
-    headless_optional_group.add_argument(cli_options[37], type=float, default=default_engine_settings[TTS_ENGINES['ZONOS']]['speaking_rate'], help=f"""(zonos only, optional) Speaking rate: 10 is slow, 15 is natural narration, 30 is very fast.
-Default {default_engine_settings[TTS_ENGINES['ZONOS']]['speaking_rate']}.""")
-    headless_optional_group.add_argument(cli_options[38], type=float, default=default_engine_settings[TTS_ENGINES['ZONOS']]['pitch_std'], help=f"""(zonos only, optional) Pitch variation: 20-45 is normal speech, 60-150 is expressive.
-Default {default_engine_settings[TTS_ENGINES['ZONOS']]['pitch_std']}.""")
-    headless_optional_group.add_argument(cli_options[39], type=float, default=default_engine_settings[TTS_ENGINES['ZONOS']]['cfg_scale'], help=f"""(zonos only, optional) CFG scale, how strongly voice and settings are followed (1-5).
-Default {default_engine_settings[TTS_ENGINES['ZONOS']]['cfg_scale']}.""")
-    headless_optional_group.add_argument(cli_options[40], type=str, nargs='?', const=True, default=None, help=f"""(zonos only, optional) Enable emotion conditioning. Alone it uses zonos' own mix; followed by
-8 comma-separated values from 0.0 to 1.0 (Happiness,Sadness,Disgust,Fear,Surprise,Anger,Other,Neutral) it uses that mix.
-Without it the model picks the delivery from the text and the voice.""")
+    headless_optional_group.add_argument(cli_options[37], type=float, default=default_engine_settings[TTS_ENGINES['ZONOS']]['speaking_rate'], help=f"""(zonos only, optional) Speaking rate: 0 lets the model pick its own pace,
+otherwise about 10 is slow, 15 is natural narration, 30 is very fast. Default {default_engine_settings[TTS_ENGINES['ZONOS']]['speaking_rate']}.""")
+    headless_optional_group.add_argument(cli_options[38], type=float, default=default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_strength'], help=f"""(zonos only, optional) Emotion strength, multiplier on the emotion mix (0-2).
+Default {default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_strength']}.""")
+    headless_optional_group.add_argument(cli_options[39], type=float, default=default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_cfg_scale'], help=f"""(zonos only, optional) Emotion guidance, 1.0 is off, about 1.5 makes the emotion clearer (1-3).
+Default {default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_cfg_scale']}.""")
+    headless_optional_group.add_argument(cli_options[40], type=str, nargs='?', const=True, default=None, help=f"""(zonos only, optional) Enable emotion. Alone, every emotion is at 0 (the plain cloned voice);
+followed by a mix like happy=0.5,sad=0.2 it uses that mix. Names: happy, sad, angry, surprised (0 to 1),
+valence, arousal (-1 to 1).""")
     headless_optional_group.add_argument(cli_options[28], type=str, help='Path to the output directory. Default is set in ./lib/conf.py')
     headless_optional_group.add_argument(cli_options[29], type=str, default='', help='Audiobookshelf server URL (e.g. http://localhost:13378).')
     headless_optional_group.add_argument(cli_options[30], type=str, default='', help='Audiobookshelf API token.')
@@ -398,27 +398,30 @@ Without it the model picks the delivery from the text and the voice.""")
             args['bark_text_temp'] = args['text_temp']
             args['bark_waveform_temp'] = args['waveform_temp']
             args['zonos_speaking_rate'] = args['speaking_rate']
-            args['zonos_pitch_std'] = args['pitch_std']
-            args['zonos_cfg_scale'] = args['cfg_scale']
+            args['zonos_emotion_strength'] = args['emotion_strength']
+            args['zonos_emotion_cfg_scale'] = args['emotion_cfg_scale']
             # shared with xtts: the argparse defaults above are xtts' values, so gptsovits takes an
             # option only when it is on the command line, otherwise its own default
             for option, key in ((cli_options[24], 'speed'), (cli_options[22], 'top_k'), (cli_options[23], 'top_p'), (cli_options[18], 'temperature'), (cli_options[21], 'repetition_penalty')):
                 args[f'gptsovits_{key}'] = args[key] if option in sys.argv else default_engine_settings[TTS_ENGINES['GPTSOVITS']][key]
             args['zonos_emotion_enabled'] = args.get('enable_emotion') is not None
             if args['zonos_emotion_enabled']:
-                if args['enable_emotion'] is True:
-                    # --enable_emotion alone: the default mix (Neutral only, sounds like emotion off)
-                    args['zonos_emotion'] = [float(v) for v in default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']]
-                else:
+                emotion = {name: 0.0 for name in default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']}
+                if args['enable_emotion'] is not True:
+                    # --enable_emotion happy=0.5,sad=0.2: named sliders, the others stay at 0
                     try:
-                        args['zonos_emotion'] = [float(v) for v in str(args['enable_emotion']).split(',')]
+                        for item in str(args['enable_emotion']).split(','):
+                            name, _, value = item.partition('=')
+                            name = name.strip().lower()
+                            low = -1.0 if name in ('valence', 'arousal') else 0.0
+                            if name not in emotion or not low <= float(value) <= 1.0:
+                                raise ValueError(name)
+                            emotion[name] = float(value)
                     except ValueError:
-                        args['zonos_emotion'] = []
-                    if len(args['zonos_emotion']) != 8 or any(v < 0.0 or v > 1.0 for v in args['zonos_emotion']):
                         error = legends['error_zonos_emotion_format']
                         print(error)
                         sys.exit(1)
-                for name, value in zip(['happiness', 'sadness', 'disgust', 'fear', 'surprise', 'anger', 'other', 'neutral'], args['zonos_emotion']):
+                for name, value in emotion.items():
                     args[f'zonos_emotion_{name}'] = value
             args['translate_enabled'] = False
             _user_translate_raw = args.get('translate')
