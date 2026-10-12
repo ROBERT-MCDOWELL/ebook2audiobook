@@ -119,7 +119,7 @@ default_engine_settings = {
             "jetson7-sm87-sm110": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-jetson7-sm87-sm110.tar.gz", "sha256": "19eced9b58c3cfe66c4176a5ccb1d8e33aa2ef52fe24fa35234d21953e698521", "gpu": True, "jetpack": 7, "sm": [87, 110]},
             "linux-aarch64-cuda13": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-aarch64-cuda13.tar.gz", "sha256": "", "gpu": True},
             "linux-aarch64-cuda12": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-aarch64-cuda12.tar.gz", "sha256": "", "gpu": True},
-            "linux-aarch64-v82": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-aarch64-v82.tar.gz", "sha256": "", "gpu": False, "cpu_flags": ["asimddp", "asimdhp"]},
+            "linux-aarch64-v82": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-aarch64-v82.tar.gz", "sha256": "425ab66d08fe93b8cc80b10b81ea2ffcbb83d348b7cdb4caed7deb7c5eb7bed2", "gpu": False, "cpu_flags": ["asimddp", "asimdhp"]},
             "linux-aarch64": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2-v0.5.2/zonos2-server-0.5.2-linux-aarch64.tar.gz", "sha256": "392c5540e3700c5d5a1d78ca6f949d702e196cd492534fc6da5f2cab2a9f295d", "gpu": False}
         },
         # GGUF weights (Hugging Face, e2a's tts_dir cache): the backbone file comes from the fine_tuned preset
