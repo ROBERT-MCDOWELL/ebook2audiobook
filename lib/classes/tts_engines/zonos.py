@@ -135,9 +135,11 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                raise ValueError(error)
             # first choice, plus the CPU package to fall back on if a GPU package cannot start
             # (no Vulkan loader, an old driver, a too old system library)
+            # a GPU first choice is followed by the other GPU packages (CUDA 13 -> CUDA 12, own Vulkan -> Zyphra's),
+            # then by one CPU package
             attempts = [usable[0]]
             if packages[usable[0]]['gpu']:
-               attempts += [k for k in usable if not packages[k]['gpu']][:1]
+               attempts = [k for k in usable if packages[k]['gpu']] + [k for k in usable if not packages[k]['gpu']][:1]
             if gpu_wanted and not packages[usable[0]]['gpu']:
                msg = legends['msg_zonos2_cpu_fallback'].format(engine=tts_engine, machine=machine_desc)
                if show_alert is not None:
@@ -156,6 +158,21 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             self.worker_script = os.path.join(engine_dir, 'workers', f'{tts_engine}_worker.py')
             self.worker_env = {k: v for k, v in os.environ.items() if k not in ('PYTHONHOME', 'PYTHONPATH', 'PYTHONSTARTUP', '__PYVENV_LAUNCHER__')}
             self.worker_env['PYTHONUNBUFFERED'] = '1'
+            # CUDA packages that do not bundle cuBLAS / cudart find them in the NVIDIA pip packages e2a's own CUDA
+            # PyTorch installed into python_env (site-packages/nvidia/<x>/lib, CUDA 13: nvidia/cu13/lib; Windows
+            # also torch/lib), so a driver-only machine still runs on GPU. Sonames are per CUDA major (.so.12 / .so.13):
+            # a package of another major skips these and uses a system CUDA, a bundled lib/ or falls back
+            import importlib.util
+            cuda_dirs = []
+            for module, leaves in (('nvidia', ('lib', 'bin')), ('torch', ('',))):
+               spec = importlib.util.find_spec(module)
+               for root in (spec.submodule_search_locations or []) if spec else []:
+                  for path in ([os.path.join(root, 'lib')] if module == 'torch' else [os.path.join(root, sub, leaf) for sub in sorted(os.listdir(root)) for leaf in leaves]):
+                     if os.path.isdir(path) and any(n.lower().startswith(('libcudart', 'libcublas', 'cudart64', 'cublas64', 'cublaslt64')) for n in os.listdir(path)):
+                        cuda_dirs.append(path)
+            if cuda_dirs:
+               var = 'PATH' if sys.platform == systems['WINDOWS'] else 'LD_LIBRARY_PATH'
+               self.worker_env[var] = os.pathsep.join([p for p in self.worker_env.get(var, '').split(os.pathsep) if p] + cuda_dirs)
             for attempt, self.package_name in enumerate(attempts):
                package = packages[self.package_name]
                if package.get('macos_min'):
