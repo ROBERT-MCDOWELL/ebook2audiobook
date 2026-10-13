@@ -326,9 +326,13 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                       trim_audio_buffer = 0.03
                       # only the voice path crosses the pipe: the worker registers each voice file
                       # once with zonos2-server and keeps its embedding id.
+                      # a part ending on a word (cut at max_chars or before an SML tag) is sent closed with a comma:
+                      # without punctuation zonos2 stops right on the word, with no trailing silence, and its last
+                      # syllable can be lost. Only the text sent to the model changes; the comma's pause is trimmed
+                      # back below (trim_audio) since part itself still ends on a word
                       reply = self.engine.send({
                          'op': 'tts',
-                         'text': part,
+                         'text': f'{part},' if part[-1].isalnum() else part,
                          'language': self.language_code,
                          'voice': self.params['current_voice'],
                          'file': part_file,

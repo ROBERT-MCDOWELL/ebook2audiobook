@@ -10,7 +10,7 @@
 #   stdout <- {"ok": true, "file": "...", "samplerate": 44100, "samples": n}
 #             {"ok": false, "error": "...", "oom": bool}
 #   EOF on stdin -> the server is stopped, exit 0
-import os, sys, re, json, uuid, wave, base64, signal, argparse, threading, subprocess, unicodedata
+import os, sys, re, json, uuid, wave, math, array, base64, signal, argparse, threading, subprocess, unicodedata
 import urllib.request, urllib.error
 
 def main()->int:
@@ -183,21 +183,68 @@ def main()->int:
                 emotion = {k: float(v) for k, v in (req.get('emotion') or {}).items() if abs(float(v)) > 1e-4}
                 if req.get('emotion_enabled') and emotion and voice:
                     body.update(emotion_enabled=True, emotion_sliders=emotion, emotion_strength=float(req.get('emotion_strength', 1.0)), emotion_cfg_scale=float(req.get('emotion_cfg_scale', 1.0)))
-                for attempt in range(2):
+                # best take: (tail ms, wav bytes, pcm, samplerate, channels). A take ending with its last 20 ms still
+                # voiced stopped on the word with no trailing silence: the end of the word is lost. Up to 2 new draws
+                # (fresh seed), then the take with the longest tail is kept, faded out over 20 ms if still cut (no click)
+                best = None
+                cut_draws = 0
+                while True:
                     audio = post('/tts/generate', body, 1800)
                     if not audio.startswith(b'RIFF'):
                         raise RuntimeError(f'not a WAV reply: {audio[:200]!r}')
                     with open(req['file'], 'wb') as f:
                         f.write(audio)
                     with wave.open(req['file'], 'rb') as w:
-                        reply = {'ok': True, 'file': req['file'], 'samplerate': w.getframerate(), 'samples': w.getnframes()}
+                        sr, width, channels, frames = w.getframerate(), w.getsampwidth(), w.getnchannels(), w.getnframes()
+                        pcm = array.array('h', w.readframes(frames)) if width == 2 else None
                     # with an end token the server decodes up to it, >= 10 frames (9 codebooks + 1) before the last
                     # generated one; without it every frame is decoded (max_tokens * 512 samples) and the tail is
                     # cut mid-word. One new draw (fresh seed) at the ceiling: a long sentence fits, a runaway ends
-                    if reply['samples'] < (body['max_tokens'] - 9) * 512 or body['max_tokens'] >= max_frames:
+                    eos = frames < (body['max_tokens'] - 9) * 512
+                    if not eos and body['max_tokens'] < max_frames:
+                        sys.stderr.write(f"zonos worker: no end token within {body['max_tokens']} frames, regenerating with {max_frames}\n")
+                        body['max_tokens'] = max_frames
+                        continue
+                    # trailing silence: 10 ms windows read back from the end (up to 500 ms) while below the voiced
+                    # threshold (peak - 45 dB, floor -50 dBFS). A take stopped by the ceiling is kept as it is
+                    tail_ms = 1000
+                    win = sr // 100 * channels
+                    if pcm is not None and eos and win > 0 and len(pcm) >= win:
+                        if sys.byteorder == 'big':
+                            pcm.byteswap()
+                        thr = max(-50.0, 20 * math.log10(max(max(pcm), -min(pcm), 1) / 32768.0) - 45.0)
+                        tail_ms = 0
+                        end = len(pcm)
+                        while tail_ms < 500 and end >= win:
+                            acc = sum(s * s for s in pcm[end - win:end]) / win
+                            if acc > 0 and 10 * math.log10(acc / 1073741824.0) >= thr:
+                                break
+                            tail_ms += 10
+                            end -= win
+                    if best is None or tail_ms > best[0]:
+                        best = (tail_ms, audio, pcm, sr, channels)
+                    if tail_ms >= 20 or cut_draws >= 2:
                         break
-                    sys.stderr.write(f"zonos worker: no end token within {body['max_tokens']} frames, regenerating with {max_frames}\n")
-                    body['max_tokens'] = max_frames
+                    cut_draws += 1
+                    sys.stderr.write(f'zonos worker: last word cut (tail {tail_ms} ms), new draw {cut_draws}/2\n')
+                tail_ms, audio, pcm, sr, channels = best
+                if tail_ms < 20 and pcm is not None:
+                    fade = min(len(pcm), sr // 50 * channels)
+                    for i in range(fade):
+                        pcm[len(pcm) - fade + i] = int(pcm[len(pcm) - fade + i] * (fade - 1 - i) / fade)
+                    if sys.byteorder == 'big':
+                        pcm.byteswap()
+                    with wave.open(req['file'], 'wb') as w:
+                        w.setnchannels(channels)
+                        w.setsampwidth(2)
+                        w.setframerate(sr)
+                        w.writeframes(pcm.tobytes())
+                    sys.stderr.write(f'zonos worker: still cut after {cut_draws} new draws, kept the longest take, faded out\n')
+                else:
+                    with open(req['file'], 'wb') as f:
+                        f.write(audio)
+                with wave.open(req['file'], 'rb') as w:
+                    reply = {'ok': True, 'file': req['file'], 'samplerate': w.getframerate(), 'samples': w.getnframes()}
             except Exception as e:
                 # no retry here: e2a's convert() returns False and core.py unloads the engine, which closes
                 # stdin and ends this process (and the server with it)
