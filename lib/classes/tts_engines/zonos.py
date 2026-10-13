@@ -11,7 +11,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
         # ZONOS2 (Zyphra zonos2.cpp): a native zonos2-server package per platform (default_engine_settings
         # ['packages']) plus the GGUF weights, driven by workers/zonos_worker.py. No torch and no venv.
         try:
-            import platform, hashlib, tarfile, zipfile, urllib.request
+            import platform, tarfile, zipfile, urllib.request
             self.session = session
             self.cache_dir = tts_dir
             self.speakers_path = None
@@ -127,7 +127,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             machine_desc = f'{sys.platform} {machine}' + (f' JetPack {jetpack}' if jetpack else '') + (f' sm_{board_sm}' if board_sm else '')
             usable = [
                k for k in dict.fromkeys(candidates)
-               if k in packages and packages[k].get('sha256') and set(packages[k].get('cpu_flags', [])) <= cpu_flags
+               if k in packages and packages[k].get('enabled', True) and set(packages[k].get('cpu_flags', [])) <= cpu_flags
                and glibc_version >= tuple(int(x) for x in packages[k].get('glibc_min', '0.0').split('.'))
             ]
             if not usable:
@@ -182,71 +182,62 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                     raise ValueError(error)
                # Metal / Vulkan / CUDA builds run --gpu only when e2a's device is a GPU (cpu keeps --cpu)
                self.backend = 'gpu' if package['gpu'] and gpu_wanted else 'cpu'
-               engine_dir = os.path.dirname(os.path.abspath(__file__))
-               packages_dir = os.path.join(engine_dir, 'venvs', tts_engine)
-               if os.path.exists(os.path.join(packages_dir, 'pyvenv.cfg')):
-                  # the Zonos v0.1 venv (torch, several GB) has no use with ZONOS2: replaced by its packages
-                  msg = legends['msg_zonos2_old_venv'].format(dir=packages_dir)
-                  print(msg)
-                  shutil.rmtree(packages_dir, ignore_errors=True)
-               package_dir = os.path.join(packages_dir, self.package_name)
-               marker_file = os.path.join(package_dir, '.e2a_installed.json')
-               installed = {}
-               if os.path.exists(marker_file):
-                  try:
-                     with open(marker_file, 'r', encoding='utf-8') as f:
-                        installed = json.load(f)
-                  except Exception:
-                     installed = {}
-               if installed.get('url') != package['url'] or installed.get('sha256') != package['sha256']:
-                  msg = legends['msg_zonos2_downloading'].format(engine=tts_engine, package=self.package_name)
-                  print(msg)
-                  if progress_bar is not None:
-                     progress_bar(0.0, desc=msg)
-                  shutil.rmtree(package_dir, ignore_errors=True)
-                  os.makedirs(package_dir, exist_ok=True)
-                  archive = os.path.join(package_dir, os.path.basename(package['url']))
-                  try:
-                     # urllib: no quarantine flag on macOS, so the unsigned binaries start without a Gatekeeper prompt
-                     digest = hashlib.sha256()
-                     with urllib.request.urlopen(package['url'], timeout=60) as r, open(archive, 'wb') as f:
-                        total = int(r.headers.get('Content-Length') or 0)
-                        done = 0
-                        while True:
-                           chunk = r.read(1 << 20)
-                           if not chunk:
-                              break
-                           f.write(chunk)
-                           digest.update(chunk)
-                           done += len(chunk)
-                           if progress_bar is not None and total:
-                              progress_bar(done / total, desc=msg)
-                     if digest.hexdigest() != package['sha256']:
-                        raise ValueError(f'sha256 mismatch: {digest.hexdigest()}')
-                     if archive.endswith('.zip'):
-                        with zipfile.ZipFile(archive) as z:
-                           z.extractall(package_dir)
-                     else:
-                        with tarfile.open(archive, 'r:gz') as t:
-                           t.extractall(package_dir, **({'filter': 'data'} if hasattr(tarfile, 'data_filter') else {}))
-                     os.unlink(archive)
-                  except Exception as e:
-                     shutil.rmtree(package_dir, ignore_errors=True)
-                     error = legends['error_zonos2_download'].format(engine=tts_engine, package=self.package_name, error=e)
-                     raise RuntimeError(error)
-                  with open(marker_file, 'w', encoding='utf-8') as f:
-                     json.dump({'url': package['url'], 'sha256': package['sha256']}, f, indent=2)
-               # Zyphra's archives are flat, e2a's have a top folder: take the server wherever it is
-               server_name = 'zonos2-server.exe' if sys.platform == systems['WINDOWS'] else 'zonos2-server'
-               self.server_bin = next((os.path.join(root, server_name) for root, _, files in os.walk(package_dir) if server_name in files), None)
-               if self.server_bin is None:
-                  shutil.rmtree(package_dir, ignore_errors=True)
-                  error = legends['error_zonos2_download'].format(engine=tts_engine, package=self.package_name, error=f'{server_name} not found in the package')
-                  raise RuntimeError(error)
-               if sys.platform != systems['WINDOWS']:
-                  os.chmod(self.server_bin, os.stat(self.server_bin).st_mode | 0o755)
-               self.emotion_dir = os.path.join(os.path.dirname(self.server_bin), 'emotion_directions')
                try:
+                  engine_dir = os.path.dirname(os.path.abspath(__file__))
+                  packages_dir = os.path.join(engine_dir, 'venvs', tts_engine)
+                  if os.path.exists(os.path.join(packages_dir, 'pyvenv.cfg')):
+                     # the Zonos v0.1 venv (torch, several GB) has no use with ZONOS2: replaced by its packages
+                     msg = legends['msg_zonos2_old_venv'].format(dir=packages_dir)
+                     print(msg)
+                     shutil.rmtree(packages_dir, ignore_errors=True)
+                  package_dir = os.path.join(packages_dir, self.package_name)
+                  marker_file = os.path.join(package_dir, '.e2a_installed.json')
+                  # downloaded once: a package folder with its install record is used as it is from then on
+                  # (the record is written only after a complete download and unpacking)
+                  if not os.path.exists(marker_file):
+                     msg = legends['msg_zonos2_downloading'].format(engine=tts_engine, package=self.package_name)
+                     print(msg)
+                     if progress_bar is not None:
+                        progress_bar(0.0, desc=msg)
+                     shutil.rmtree(package_dir, ignore_errors=True)
+                     os.makedirs(package_dir, exist_ok=True)
+                     archive = os.path.join(package_dir, os.path.basename(package['url']))
+                     try:
+                        # urllib: no quarantine flag on macOS, so the unsigned binaries start without a Gatekeeper prompt
+                        with urllib.request.urlopen(package['url'], timeout=60) as r, open(archive, 'wb') as f:
+                           total = int(r.headers.get('Content-Length') or 0)
+                           done = 0
+                           while True:
+                              chunk = r.read(1 << 20)
+                              if not chunk:
+                                 break
+                              f.write(chunk)
+                              done += len(chunk)
+                              if progress_bar is not None and total:
+                                 progress_bar(done / total, desc=msg)
+                        if archive.endswith('.zip'):
+                           with zipfile.ZipFile(archive) as z:
+                              z.extractall(package_dir)
+                        else:
+                           with tarfile.open(archive, 'r:gz') as t:
+                              t.extractall(package_dir, **({'filter': 'data'} if hasattr(tarfile, 'data_filter') else {}))
+                        os.unlink(archive)
+                     except Exception as e:
+                        shutil.rmtree(package_dir, ignore_errors=True)
+                        error = legends['error_zonos2_download'].format(engine=tts_engine, package=self.package_name, error=e)
+                        raise RuntimeError(error)
+                     with open(marker_file, 'w', encoding='utf-8') as f:
+                        json.dump({'url': package['url']}, f, indent=2)
+                  # Zyphra's archives are flat, e2a's have a top folder: take the server wherever it is
+                  server_name = 'zonos2-server.exe' if sys.platform == systems['WINDOWS'] else 'zonos2-server'
+                  self.server_bin = next((os.path.join(root, server_name) for root, _, files in os.walk(package_dir) if server_name in files), None)
+                  if self.server_bin is None:
+                     shutil.rmtree(package_dir, ignore_errors=True)
+                     error = legends['error_zonos2_download'].format(engine=tts_engine, package=self.package_name, error=f'{server_name} not found in the package')
+                     raise RuntimeError(error)
+                  if sys.platform != systems['WINDOWS']:
+                     os.chmod(self.server_bin, os.stat(self.server_bin).st_mode | 0o755)
+                  self.emotion_dir = os.path.join(os.path.dirname(self.server_bin), 'emotion_directions')
                   self.engine = self.load_engine()
                   break
                except Exception as e:
