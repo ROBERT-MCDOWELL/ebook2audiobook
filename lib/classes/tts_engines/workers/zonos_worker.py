@@ -10,7 +10,7 @@
 #   stdout <- {"ok": true, "file": "...", "samplerate": 44100, "samples": n}
 #             {"ok": false, "error": "...", "oom": bool}
 #   EOF on stdin -> the server is stopped, exit 0
-import os, sys, re, json, uuid, wave, base64, signal, argparse, threading, subprocess
+import os, sys, re, json, uuid, wave, base64, signal, argparse, threading, subprocess, unicodedata
 import urllib.request, urllib.error
 
 def main()->int:
@@ -31,7 +31,11 @@ def main()->int:
     # --port 0: the OS picks a free port at bind time (no race, no clash between e2a instances), the server
     # reports it in its ready line, printed only once the backbone, emotion directions and DAC are loaded.
     # --batch 2: emotion_cfg_scale != 1 needs a second slot. Empty default-voices dir: e2a always clones.
-    cmd = [args.server, args.model, '--dac', args.dac, '--spk', args.spk, '--host', '127.0.0.1', '--port', '0', '--batch', '2', '--tts-default-voices-dir', '', '--tts-emotion-directions-dir', args.emotion_dir, f'--{args.backend}']
+    # --max: frame ceiling (DAC 44.1 kHz = 512 samples per frame, ~86 frames/s). The server default 2000 (~23 s)
+    # is below a max_chars sentence read at natural pace plus its trailing silence, and a generation stopped by
+    # the ceiling is decoded without its end token: the last word is cut. 3440 = 40 s, ~+0.09 GB KV per slot
+    max_frames = 3440
+    cmd = [args.server, args.model, '--dac', args.dac, '--spk', args.spk, '--host', '127.0.0.1', '--port', '0', '--batch', '2', '--max', str(max_frames), '--tts-default-voices-dir', '', '--tts-emotion-directions-dir', args.emotion_dir, f'--{args.backend}']
     server_dir = os.path.dirname(os.path.abspath(args.server))
     pid_file = os.path.join(server_dir, '.e2a_server.pid')
     popen_kw = {}
@@ -155,9 +159,14 @@ def main()->int:
                 if server.poll() is not None:
                     raise RuntimeError(f'zonos2-server exited ({server.poll()}): ' + ' | '.join(state['tail'][-5:]))
                 text = req['text']
-                # runaway guard: a generation that misses its end token babbles up to the server cap (~23 s);
-                # bound it by the text, 0.25 s per character is far above normal speech (~0.07-0.12), 86 frames/s
-                body = {'text': text, 'language': req.get('language') or 'en_us', 'stream': False, 'format': 'wav', 'max_tokens': int(86 * max(2.0, len(text) * 0.25))}
+                # runaway guard: a generation that misses its end token babbles up to max_frames; bound it by the text.
+                # The budget must hold the speech, the model's own trailing silence (0.25-0.5 s, its default
+                # conditioning) and the 8 delayed-codebook frames, or the end token never comes and the last word is cut:
+                # CJK / fullwidth ~0.5 s per char (0.25 cut zho/jpn/kor), digits ~0.4 s (read as words), others 0.25 s,
+                # stretched for a slow speaking_rate (15 = natural), + 1.5 s fixed headroom
+                rate = float(req.get('speaking_rate') or 0.0)
+                seconds = sum(0.5 if unicodedata.east_asian_width(c) in ('W', 'F') else 0.4 if c.isdigit() else 0.25 for c in text) * (max(1.0, 15.0 / rate) if rate > 0.0 else 1.0) + 1.5
+                body = {'text': text, 'language': req.get('language') or 'en_us', 'stream': False, 'format': 'wav', 'max_tokens': min(max_frames, int(args.samplerate / 512 * max(3.0, seconds)))}
                 voice = req.get('voice')
                 if voice:
                     # registered once per voice file, keyed by path + mtime so a rebuilt voice gets a new embedding.
@@ -174,13 +183,21 @@ def main()->int:
                 emotion = {k: float(v) for k, v in (req.get('emotion') or {}).items() if abs(float(v)) > 1e-4}
                 if req.get('emotion_enabled') and emotion and voice:
                     body.update(emotion_enabled=True, emotion_sliders=emotion, emotion_strength=float(req.get('emotion_strength', 1.0)), emotion_cfg_scale=float(req.get('emotion_cfg_scale', 1.0)))
-                audio = post('/tts/generate', body, 1800)
-                if not audio.startswith(b'RIFF'):
-                    raise RuntimeError(f'not a WAV reply: {audio[:200]!r}')
-                with open(req['file'], 'wb') as f:
-                    f.write(audio)
-                with wave.open(req['file'], 'rb') as w:
-                    reply = {'ok': True, 'file': req['file'], 'samplerate': w.getframerate(), 'samples': w.getnframes()}
+                for attempt in range(2):
+                    audio = post('/tts/generate', body, 1800)
+                    if not audio.startswith(b'RIFF'):
+                        raise RuntimeError(f'not a WAV reply: {audio[:200]!r}')
+                    with open(req['file'], 'wb') as f:
+                        f.write(audio)
+                    with wave.open(req['file'], 'rb') as w:
+                        reply = {'ok': True, 'file': req['file'], 'samplerate': w.getframerate(), 'samples': w.getnframes()}
+                    # with an end token the server decodes up to it, >= 10 frames (9 codebooks + 1) before the last
+                    # generated one; without it every frame is decoded (max_tokens * 512 samples) and the tail is
+                    # cut mid-word. One new draw (fresh seed) at the ceiling: a long sentence fits, a runaway ends
+                    if reply['samples'] < (body['max_tokens'] - 9) * 512 or body['max_tokens'] >= max_frames:
+                        break
+                    sys.stderr.write(f"zonos worker: no end token within {body['max_tokens']} frames, regenerating with {max_frames}\n")
+                    body['max_tokens'] = max_frames
             except Exception as e:
                 # no retry here: e2a's convert() returns False and core.py unloads the engine, which closes
                 # stdin and ends this process (and the server with it)
