@@ -314,7 +314,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                   if not any(c.isalnum() for c in part):
                       continue
                   else:
-                      trim_audio_buffer = 0.03
+                      trim_audio_buffer = 0.06
                       # only the voice path crosses the pipe: the worker registers each voice file
                       # once with zonos2-server and keeps its embedding id.
                       # a part ending on a word (cut at max_chars or before an SML tag) is sent closed with a comma:

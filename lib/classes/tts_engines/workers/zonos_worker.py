@@ -206,27 +206,32 @@ def main()->int:
                         body['max_tokens'] = max_frames
                         continue
                     # trailing silence: 10 ms windows read back from the end (up to 500 ms) while below the voiced
-                    # threshold (peak - 45 dB, floor -50 dBFS). A take stopped by the ceiling is kept as it is
+                    # threshold. The model's trailing silence (trailing_silence_s conditioning) is not digital silence:
+                    # DAC rebuilds the reference's room tone in it, often above peak - 45 dB, which read every take as
+                    # cut. The threshold follows the take's own noise floor (10th percentile of its 10 ms windows
+                    # + 10 dB), kept within [peak - 45 dB (floor -50 dBFS), peak - 20 dB]. A take stopped by the
+                    # ceiling is kept as it is
                     tail_ms = 1000
+                    thr = 0.0
                     win = sr // 100 * channels
+                    db_win = []
                     if pcm is not None and eos and win > 0 and len(pcm) >= win:
                         if sys.byteorder == 'big':
                             pcm.byteswap()
-                        thr = max(-50.0, 20 * math.log10(max(max(pcm), -min(pcm), 1) / 32768.0) - 45.0)
+                        peak_db = 20 * math.log10(max(max(pcm), -min(pcm), 1) / 32768.0)
+                        # windows aligned on the end of the take, last window first
+                        db_win = [10 * math.log10(max(sum(s * s for s in pcm[end - win:end]) / win, 1e-3) / 1073741824.0) for end in range(len(pcm), win - 1, -win)]
+                        floor_db = sorted(db_win)[len(db_win) // 10]
+                        thr = min(peak_db - 20.0, max(-50.0, peak_db - 45.0, floor_db + 10.0))
                         tail_ms = 0
-                        end = len(pcm)
-                        while tail_ms < 500 and end >= win:
-                            acc = sum(s * s for s in pcm[end - win:end]) / win
-                            if acc > 0 and 10 * math.log10(acc / 1073741824.0) >= thr:
-                                break
+                        while tail_ms < 500 and tail_ms // 10 < len(db_win) and db_win[tail_ms // 10] < thr:
                             tail_ms += 10
-                            end -= win
                     if best is None or tail_ms > best[0]:
                         best = (tail_ms, audio, pcm, sr, channels)
                     if tail_ms >= 20 or cut_draws >= 2:
                         break
                     cut_draws += 1
-                    sys.stderr.write(f'zonos worker: last word cut (tail {tail_ms} ms), new draw {cut_draws}/2\n')
+                    sys.stderr.write(f"zonos worker: last word cut (tail {tail_ms} ms, thr {thr:.1f} dBFS, last 300 ms: {' '.join(f'{d:.0f}' for d in db_win[:30])}), new draw {cut_draws}/2\n")
                 tail_ms, audio, pcm, sr, channels = best
                 if tail_ms < 20 and pcm is not None:
                     fade = min(len(pcm), sr // 50 * channels)
