@@ -19,8 +19,7 @@ class DeviceInstaller():
     # floor alone is not enough.
     transformers_caps = {'2.4': '5.1', '2.5': '5.8'}
     exclusive_pkgs = {
-        'onnxruntime': ['onnxruntime', 'onnxruntime-gpu', 'onnxruntime-directml'],
-        'num2words': ['num2words', 'num2words2']
+        'onnxruntime': ['onnxruntime', 'onnxruntime-gpu', 'onnxruntime-directml']
     }
     pip_cache_dir = os.environ.get('E2A_PIP_CACHE_DIR') or os.path.join(tempfile.gettempdir(), 'e2a_pip_cache')
 
@@ -1660,8 +1659,6 @@ class DeviceInstaller():
                         if self.version_tuple(torch_version, 2) < self.version_tuple(torch_floor, 2):
                             return f'transformers<{transformers_cap}'
                 return 'transformers'
-            case 'num2words':
-                return 'num2words2'
             case _:
                 raise ValueError(f'select_pkg(): no rule for {pkg}')
 
@@ -1722,8 +1719,7 @@ class DeviceInstaller():
                 if installed:
                     subprocess.call(self._uv_pip('uninstall', *installed))
                 self.clean_pkg_dir(pkg)
-                # install the full spec, not the bare name: keeps caps like onnxruntime-gpu<1.27
-                # (CUDA 12) and any num2words2 pin mirrored from requirements.txt
+                # install the full spec, not the bare name: keeps caps like onnxruntime-gpu<1.27 (CUDA 12)
                 subprocess.check_call(self._uv_pip('install', '--cache-dir', self.pip_cache_dir, spec))
             return 0
         except Exception as e:
