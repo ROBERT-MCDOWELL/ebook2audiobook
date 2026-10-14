@@ -19,7 +19,8 @@ class DeviceInstaller():
     # floor alone is not enough.
     transformers_caps = {'2.4': '5.1', '2.5': '5.8'}
     exclusive_pkgs = {
-        'onnxruntime': ['onnxruntime', 'onnxruntime-gpu', 'onnxruntime-directml']
+        'onnxruntime': ['onnxruntime', 'onnxruntime-gpu', 'onnxruntime-directml'],
+        'num2words': ['num2words', 'num2words2']
     }
     pip_cache_dir = os.environ.get('E2A_PIP_CACHE_DIR') or os.path.join(tempfile.gettempdir(), 'e2a_pip_cache')
 
@@ -1659,6 +1660,8 @@ class DeviceInstaller():
                         if self.version_tuple(torch_version, 2) < self.version_tuple(torch_floor, 2):
                             return f'transformers<{transformers_cap}'
                 return 'transformers'
+            case 'num2words':
+                return 'num2words2'
             case _:
                 raise ValueError(f'select_pkg(): no rule for {pkg}')
 
