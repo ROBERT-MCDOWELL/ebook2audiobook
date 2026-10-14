@@ -1709,7 +1709,8 @@ class DeviceInstaller():
     def finalize_exclusive_packages(self)->int:
         try:
             for pkg, choices in self.exclusive_pkgs.items():
-                keep = re.split(r'[<>=!\[;]', self.select_pkg(pkg), 1)[0].strip()
+                spec = self.select_pkg(pkg)
+                keep = re.split(r'[<>=!\[;]', spec, 1)[0].strip()
                 installed = [choice for choice in choices if self.get_package_version(choice)]
                 losers = [choice for choice in installed if choice != keep]
                 # also repair an env already hollowed out by a previous swap
@@ -1721,7 +1722,9 @@ class DeviceInstaller():
                 if installed:
                     subprocess.call(self._uv_pip('uninstall', *installed))
                 self.clean_pkg_dir(pkg)
-                subprocess.check_call(self._uv_pip('install', '--cache-dir', self.pip_cache_dir, keep))
+                # install the full spec, not the bare name: keeps caps like onnxruntime-gpu<1.27
+                # (CUDA 12) and any num2words2 pin mirrored from requirements.txt
+                subprocess.check_call(self._uv_pip('install', '--cache-dir', self.pip_cache_dir, spec))
             return 0
         except Exception as e:
             error = f'finalize_exclusive_packages() error: {e}'
