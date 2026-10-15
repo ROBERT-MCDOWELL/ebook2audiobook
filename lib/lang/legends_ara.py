@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'لا {engine} حزمة وحدة معالجة الرسومات لهذا الجهاز حتى الآن ({machine}): تعمل على وحدة المعالجة المركزية، وهي أبطأ بكثير.',
     'msg_zonos2_old_venv': 'إزالة بيئة Zonos v0.1 القديمة في {dir}، لا تحتاج ZONOS2 إليها...',
     'msg_zonos2_models': 'الحصول على ملفات طراز {engine} ({files})، يستغرق التنزيل الأول بعض الوقت...',
+    'msg_vulkan_engine_cpu': '{engine} لا يمكن تشغيله على Vulkan (Vulkan يعمل {engines} فقط): تم التبديل إلى وحدة المعالجة المركزية.',
+    'msg_device_not_supported_vulkan': 'لم يتم العثور على لودر فولكان على هذا النظام!<br/>قراءة {wiki}<br/>التبديل إلى وحدة المعالجة المركزية',
     'msg_zonos2_hybrid_gone': 'النموذج الهجين Zonos غير موجود في ZONOS2: تم التبديل إلى نموذج {model}.',
     'error_venv_torch_unsupported': '{engine} لا يمكن تشغيله على هذا الجهاز لأن إصدار TORCH MAX هو < {min}. يرجى تحديد محرك TTS آخر.',
     'error_venv_install_failed': '{engine} فشل تثبيت البيئة الافتراضية في: {step}',

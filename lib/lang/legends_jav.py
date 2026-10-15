@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'Ora ana paket GPU {engine} kanggo mesin iki ({machine}): mlaku ing CPU, sing luwih alon.',
     'msg_zonos2_old_venv': 'Ngilangi lingkungan Zonos v0.1 lawas ing {dir}, ZONOS2 ora butuh...',
     'msg_zonos2_models': 'Njaluk file model {engine} ({files}), download pisanan njupuk sawetara wektu...',
+    'msg_vulkan_engine_cpu': '{engine} ora bisa mlaku ing Vulkan (Vulkan mung mlaku {engines}): ngalih menyang CPU.',
+    'msg_device_not_supported_vulkan': 'Ora ana loader Vulkan sing ditemokake ing sistem iki!<br/>Waca {wiki}<br/>Ngalih menyang CPU',
     'msg_zonos2_hybrid_gone': 'Model hibrida Zonos ora ana ing ZONOS2: ngalih menyang model {model}.',
     'error_venv_torch_unsupported': '{engine} ora bisa mbukak ing piranti iki amarga versi torch max < {min}. Mangga pilih mesin TTS liyane.',
     'error_venv_install_failed': '{engine} instalasi lingkungan virtual gagal ing: {step}',

@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'இந்த இயந்திரத்திற்கான {engine} GPU பேக்கேஜ் இன்னும் இல்லை ({machine}): CPU இல் இயங்குகிறது, இது மிகவும் மெதுவாக உள்ளது.',
     'msg_zonos2_old_venv': 'பழைய Zonos v0.1 சூழலை {dir} இல் நீக்குவதால், ZONOS2 க்கு இது தேவையில்லை …',
     'msg_zonos2_models': '{engine} மாதிரி கோப்புகளைப் பெறுவதற்கு ({files}), முதல் பதிவிறக்கத்திற்கு சிறிது நேரம் ஆகும்...',
+    'msg_vulkan_engine_cpu': '{engine} வல்கனில் இயக்க முடியாது (வல்கன் ரன்கள் {engines} மட்டும்): CPU-க்கு மாற்றப்பட்டது.',
+    'msg_device_not_supported_vulkan': 'இந்த சிஸ்டத்தில் வல்கன் ஏற்றி எதுவும் காணப்படவில்லை!<br/>படிக்க {wiki}<br/> CPU க்கு மாறுகிறது',
     'msg_zonos2_hybrid_gone': 'ZONOS ஹைப்ரிட் மாடல் ZONOS2 இல் இல்லை: {model} மாடலுக்கு மாறப்பட்டது.',
     'error_venv_torch_unsupported': 'டார்ச் மேக்ஸ் பதிப்பு < {min} என்பதால் இந்த சாதனத்தில்{engine} இயக்க முடியாது. மற்றொரு TTS எஞ்சினைத் தேர்ந்தெடுக்கவும்.',
     'error_venv_install_failed': '{engine} மெய்நிகர் சூழல் நிறுவல் தோல்வியுற்றது: {step}',

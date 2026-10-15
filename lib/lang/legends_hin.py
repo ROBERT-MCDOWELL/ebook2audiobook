@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'इस मशीन के लिए अभी तक कोई {engine} जीपीयू पैकेज नहीं है ({machine}): सीपीयू पर चल रहा है, जो बहुत धीमा है।',
     'msg_zonos2_old_venv': 'पुराने Zonos v0.1 वातावरण को {dir} में हटाने के लिए, ZONOS2 को इसकी आवश्यकता नहीं है...',
     'msg_zonos2_models': '{engine} मॉडल फ़ाइलें ({files}) प्राप्त करने में, पहले डाउनलोड में कुछ समय लगता है...',
+    'msg_vulkan_engine_cpu': '{engine} वल्कन पर नहीं चल सकता (वल्कन केवल {engines} चलाता है): सीपीयू पर स्विच किया गया।',
+    'msg_device_not_supported_vulkan': 'इस सिस्टम पर कोई वल्कन लोडर नहीं मिला!<br/>पढ़ें {wiki}<br/> सीपीयू पर स्विच करना',
     'msg_zonos2_hybrid_gone': 'ZONOS2 में ZONOS हाइब्रिड मॉडल मौजूद नहीं है: {model} मॉडल पर स्विच किया गया।',
     'error_venv_torch_unsupported': '{engine} इस डिवाइस पर नहीं चल सकता क्योंकि टॉर्च का अधिकतम संस्करण < {min} है। कृपया कोई दूसरा TTS इंजन चुनें।',
     'error_venv_install_failed': '{engine} वर्चुअल एनवायरनमेंट इंस्टॉल यहाँ विफल रहा: {step}',

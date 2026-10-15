@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'Bu makine için henüz {engine} GPU paketi yok ({machine}): CPU\'da çalışıyor, bu da çok daha yavaş.',
     'msg_zonos2_old_venv': '{dir} \'daki eski Zonos v0.1 ortamının kaldırılması, ZONOS2\' nin buna ihtiyacı yok…',
     'msg_zonos2_models': '{engine} model dosyasını ({files}) almak, ilk indirme biraz zaman alır…',
+    'msg_vulkan_engine_cpu': '{engine}, Vulkan\'da çalışamaz (Vulkan yalnızca {engines} çalıştırır): CPU\'ya geçildi.',
+    'msg_device_not_supported_vulkan': 'Bu sistemde Vulkan yükleyici bulunamadı!<br/>Okuma {wiki}<br/> CPU\'ya geçiş',
     'msg_zonos2_hybrid_gone': 'Zonos hibrit modeli ZONOS2 \'de mevcut değil: {model} modeline geçildi.',
     'error_venv_torch_unsupported': 'Torch max sürümü < {min} olduğundan{engine} bu cihazda çalışamaz. Lütfen başka bir TTS motoru seçin.',
     'error_venv_install_failed': '{engine} sanal ortam kurulumu başarısız oldu: {step}',
