@@ -66,6 +66,9 @@ devices = {
     "ROCM": {"proc": "rocm", "found": False},
     "XPU": {"proc": "xpu", "found": False},
     "JETSON": {"proc": "jetson", "found": False},
+    # Vulkan: no torch device. Only engines with "vulkan": True in default_engine_settings (native GPU builds,
+    # no torch) run on it, the others switch to CPU with an alert (lib/core.py)
+    "VULKAN": {"proc": "vulkan", "found": False}
 }
 
 device_info_json = '.device_info.json'
@@ -114,8 +117,8 @@ torch_matrix = {
     "xpu":       {"os": [systems['LINUX'], systems['WINDOWS']], "arch": [archs['X86_64'], archs['AMD64']], "base": "2.7.1", "last": "2.14.1", "codec": "0.16.0"},
     # JETSON
     "jetson51":  {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.3.1", "last": "2.3.1", "codec": ""},
-    "jetson60":  {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.4.1", "last": "2.4.1", "codec": ""},
-    "jetson61":  {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.5.0", "last": "2.5.0", "codec": ""},
+    "jetson60":  {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.8.0", "last": "2.8.0", "codec": ""},
+    "jetson61":  {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.10.0", "last": "2.10.0", "codec": ""},
 }
 
 torchaudio_max = '2.11.0'
