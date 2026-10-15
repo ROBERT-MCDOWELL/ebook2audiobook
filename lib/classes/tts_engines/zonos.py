@@ -108,7 +108,8 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                # Zyphra's Vulkan build stays the last resort with --cpu (needs vulkan-1.dll and AVX2)
                candidates = (['windows-x64-cuda'] if self.device == devices['CUDA']['proc'] else []) + (['windows-x64-vulkan'] if gpu_wanted else []) + ['windows-x64-cpu-avx2', 'windows-x64-cpu-sse42', 'windows-x64-vulkan']
             elif sys.platform == systems['MACOS']:
-               candidates = ['macos-arm64-metal'] if machine == 'arm64' else ['macos-x86_64']
+               # arm64: own Metal build first, Zyphra's as the GPU fallback. x86_64: Vulkan (MoltenVK) build on a GPU device
+               candidates = ['macos-arm64', 'macos-arm64-metal'] if machine == 'arm64' else (['macos-x86_64-vulkan'] if gpu_wanted else []) + ['macos-x86_64']
             else:
                candidates = []
             # CPU features the packages may need, with /proc/cpuinfo names on every OS

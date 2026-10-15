@@ -28,7 +28,7 @@
 #
 #   DEVICE_TAG=cpu      podman-compose -f podman-compose.yml --profile cpu    up
 #   DEVICE_TAG=cu130    podman-compose -f podman-compose.yml --profile cuda   up
-#   DEVICE_TAG=jetson51 podman-compose -f podman-compose.yml --profile jetson up
+#   DEVICE_TAG=jetson5 podman-compose -f podman-compose.yml --profile jetson up
 #   DEVICE_TAG=rocm     podman-compose -f podman-compose.yml --profile rocm   up
 #   (add HSA_OVERRIDE_GFX_VERSION=x.y.z in front when the launcher printed one)
 #   DEVICE_TAG=xpu      podman-compose -f podman-compose.yml --profile xpu    up

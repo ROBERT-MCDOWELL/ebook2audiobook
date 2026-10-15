@@ -19,7 +19,7 @@ torch<2.4, <5.8 for torch<2.5, uncapped above), so every device tag resolves to
 transformers 5.x + huggingface_hub 1.x. That is only valid because the patches
 below cover what the older stacks still expect:
 • check_torch_load_is_safe → torch.load (.bin checkpoints) requires torch>=2.6 in every
-  transformers release, 4.57.6 included; macOS x86_64 (2.2.2) and jetson (2.4.x/2.5.0)
+  transformers release, 4.57.6 included; macOS x86_64 (2.2.2) and jetson (2.3.1/2.8.0)
   are below. No pin can replace this patch.
 • isin_mps_friendly        → removed in transformers 5.1, still imported by coqui-tts
   tortoise. Without it: cap transformers<5.1 on every tag.

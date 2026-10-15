@@ -15,7 +15,7 @@
 #
 #   docker compose                       --profile cpu    up
 #   DEVICE_TAG=cu130    docker compose   --profile cuda   up
-#   DEVICE_TAG=jetson51 docker compose   --profile jetson up
+#   DEVICE_TAG=jetson5 docker compose   --profile jetson up
 #   DEVICE_TAG=rocm     docker compose   --profile rocm   up
 #   (add HSA_OVERRIDE_GFX_VERSION=x.y.z in front when the launcher printed one)
 #   DEVICE_TAG=xpu      docker compose   --profile xpu    up

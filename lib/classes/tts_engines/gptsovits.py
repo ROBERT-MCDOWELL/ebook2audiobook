@@ -251,7 +251,7 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                         raise RuntimeError(error)
                     # hold torch / torchaudio to exactly what DeviceInstaller installed, or the resolver
                     # swaps them for the newest PyPI torch as soon as a package wants a newer one (jetson:
-                    # torch 2.14.1 + CUDA 13 wheels over 2.4.1+jetson51, and a torchaudio that no longer
+                    # torch 2.14.1 + CUDA 13 wheels over 2.8.0+jetson6, and a torchaudio that no longer
                     # loads). URL wheels (jetson, windows rocm) are held by their direct_url.json URL, index
                     # wheels by version, with their PyTorch index when the version carries a local tag.
                     pins_script = '\n'.join([

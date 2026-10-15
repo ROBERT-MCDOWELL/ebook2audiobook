@@ -96,7 +96,7 @@ class DeviceInstaller():
 
     def check_pyvenv(self, tag:str)->list:
         # NATIVE only. jetson wheels are cp310 only, whatever the OS ships.
-        if tag in ['jetson51', 'jetson60', 'jetson61']:
+        if tag in ['jetson5', 'jetson6', 'jetson7']:
             return [3, 10]
         # once python_env exists its interpreter is fixed, and .device_info.json is
         # the record of what it was built with — so the file wins over any
@@ -135,7 +135,7 @@ class DeviceInstaller():
         elif mode == BUILD_DOCKER:
             name, tag, msg = self.check_hardware
             os_env = 'manylinux_2_28'
-            pyvenv = [3, 10] if tag in ['jetson51', 'jetson60', 'jetson61'] else list(max_python_version)
+            pyvenv = [3, 10] if tag in ['jetson5', 'jetson6', 'jetson7'] else list(max_python_version)
             arch = archs['AARCH64'] if name in [devices['JETSON']['proc'], devices['MPS']['proc']] else self.arch
             if name in [devices['JETSON']['proc'], devices['MPS']['proc']]:
                 name = tag = devices['CPU']['proc']
@@ -278,18 +278,16 @@ class DeviceInstaller():
             if not m1 or not m2:
                 msg = legends['msg_jetpack_unknown']
                 return ('unknown', msg)
+            # L4T major -> JetPack major: R35 = 5, R36 = 6, R38+ = 7 (tags jetson5 / jetson6 / jetson7)
             l4t_major = int(m1.group(1))
-            rev = m2.group(1)
-            parts = rev.split('.')
-            rev_major = int(parts[0])
             if l4t_major < 35:
                 msg = legends['msg_jetpack_old'].format(version=l4t_major)
                 return ('unsupported', msg)
             if l4t_major == 35:
-                return ('51', msg)
-            if rev_major == 2:
-                return ('60', msg)
-            return ('61', msg)
+                return ('5', msg)
+            if l4t_major == 36:
+                return ('6', msg)
+            return ('7', msg)
 
         def has_amd_gpu_pci():
             if self.system == systems['MACOS']:
@@ -1576,7 +1574,7 @@ class DeviceInstaller():
         #   torch <  2.9 -> no torchcodec     -> pyannote 3.4.0 -> hub 1.x (use_auth_token via sitecustomize)
         # transformers itself is not part of this split: it follows the torch floor,
         # see select_pkg('transformers') and transformers_caps.
-        # torch_matrix tags with codec '' (cu118/cu121/cu124, rocm<=6.2.4, jetson*)
+        # torch_matrix tags with codec '' (cu118/cu121/cu124, rocm<=6.2.4, jetson5/jetson6)
         # top out below 2.9 and must stay on the old branch.
         # (2, 9) is the same boundary _needs_reinstall() uses to decide whether
         # torchcodec gets installed at all.
@@ -1820,7 +1818,6 @@ class DeviceInstaller():
                             print(msg)
                             os_env = device_info['os']
                             arch = device_info['arch']
-                            toolkit_version = ''.join(c for c in tag if c.isdigit())
                             tag_dir = 'cpu' if device_info['name'] == devices['MPS']['proc'] else tag
                             py_major, py_minor = device_info['pyvenv']
                             tag_py = f'cp{py_major}{py_minor}'
@@ -1834,8 +1831,8 @@ class DeviceInstaller():
                             subprocess.check_call(self._uv_pip('install', '--no-cache', 'filelock', 'typing-extensions', 'jinja2', 'fsspec', 'networkx', 'sympy'))
                             if device_info['name'] == devices['JETSON']['proc']:
                                 url = default_jetson_url
-                                torch_pkg = f"{url}/torch-v{toolkit_version}/torch-{torch_version_matrix}%2B{tag}-{tag_py}-{tag_py}-{os_env}_{arch}.whl"
-                                torchaudio_pkg = f"{url}/torchaudio-v{toolkit_version}/torchaudio-{self.torchaudio_version(torchaudio_version_matrix)}%2B{tag}-{tag_py}-{tag_py}-{os_env}_{arch}.whl"
+                                torch_pkg = f"{url}/torch/torch-{torch_version_matrix}%2B{tag}-{tag_py}-{tag_py}-{os_env}_{arch}.whl"
+                                torchaudio_pkg = f"{url}/torchaudio/torchaudio-{self.torchaudio_version(torchaudio_version_matrix)}%2B{tag}-{tag_py}-{tag_py}-{os_env}_{arch}.whl"
                                 subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', torch_pkg))
                                 subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', torchaudio_pkg))
                                 subprocess.check_call(self._uv_pip('install', '--no-cache', 'scikit-learn'))
@@ -1876,7 +1873,11 @@ class DeviceInstaller():
                                 return 1
                             #### torchcodec installation
                             if self.version_tuple(torch_version_matrix, 2) >= (2, 9) and torchcodec_version_matrix:
-                                if is_cpu_aarch64_linux:
+                                if device_info['name'] == devices['JETSON']['proc']:
+                                    # jetson7 (torch >= 2.9): no aarch64 torchcodec on PyPI, built like torch/torchaudio
+                                    torchcodec_wheel_url = f"{default_jetson_url}/torchcodec/torchcodec-{torchcodec_version_matrix}%2B{tag}-{tag_py}-{tag_py}-{os_env}_{arch}.whl"
+                                    rc = subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', torchcodec_wheel_url))
+                                elif is_cpu_aarch64_linux:
                                     torchcodec_wheel_url = f"{default_torchcodec_arm_url}/{tag}/torchcodec-{torchcodec_version_matrix}%2B{tag}-{tag_py}-{tag_py}-manylinux_2_27_{arch}.{os_env}_{arch}.whl"
                                     rc = subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', torchcodec_wheel_url))
                                 else:

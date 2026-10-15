@@ -4515,6 +4515,26 @@ def convert_ebook(args:dict)->tuple:
                         if xpu_error is not None:
                             session['device'] = devices['CPU']['proc']
                             msg += legends['msg_device_error_switch_cpu'].format(error=xpu_error, wiki=default_gpu_wiki)
+                    elif session['device'] == devices['VULKAN']['proc']:
+                        # torch has no Vulkan device: like Zonos' hybrid model, an engine that cannot run on it is
+                        # switched (to CPU) with an alert. Engines that can (native GPU builds) still need the
+                        # system Vulkan loader, e2a installs no system library. macOS has none: its packages run
+                        # Metal (arm64) or bring MoltenVK (x86_64), so no loader check there
+                        vulkan_engines = [k for k, v in default_engine_settings.items() if v.get('vulkan')]
+                        if session['tts_engine'] not in vulkan_engines:
+                            session['device'] = devices['CPU']['proc']
+                            msg += legends['msg_vulkan_engine_cpu'].format(engine=session['tts_engine'], engines=', '.join(vulkan_engines))
+                        elif sys.platform == systems['MACOS']:
+                            devices['VULKAN']['found'] = True
+                        else:
+                            import ctypes
+                            try:
+                                ctypes.CDLL('vulkan-1.dll' if sys.platform == systems['WINDOWS'] else 'libvulkan.so.1')
+                                devices['VULKAN']['found'] = True
+                            except OSError:
+                                devices['VULKAN']['found'] = False
+                                session['device'] = devices['CPU']['proc']
+                                msg += legends['msg_device_not_supported_vulkan'].format(wiki=default_gpu_wiki)
                     if session['device'] == devices['CPU']['proc']:
                         os.environ['OMP_NUM_THREADS'] = '4'
                     vram_dict = VRAMDetector().detect_vram(session['device'], session['script_mode'])

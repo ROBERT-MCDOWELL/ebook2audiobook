@@ -69,6 +69,7 @@ devices = {
     # Vulkan: no torch device. Only engines with "vulkan": True in default_engine_settings (native GPU builds,
     # no torch) run on it, the others switch to CPU with an alert (lib/core.py)
     "VULKAN": {"proc": "vulkan", "found": False}
+>>>>>>> theirs
 }
 
 device_info_json = '.device_info.json'
@@ -116,9 +117,15 @@ torch_matrix = {
     # XPU
     "xpu":       {"os": [systems['LINUX'], systems['WINDOWS']], "arch": [archs['X86_64'], archs['AMD64']], "base": "2.7.1", "last": "2.14.1", "codec": "0.16.0"},
     # JETSON
+<<<<<<< ours
     "jetson51":  {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.3.1", "last": "2.3.1", "codec": ""},
     "jetson60":  {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.8.0", "last": "2.8.0", "codec": ""},
     "jetson61":  {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.10.0", "last": "2.10.0", "codec": ""},
+=======
+    "jetson5":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.3.1", "last": "2.3.1", "codec": ""},
+    "jetson6":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.8.0", "last": "2.8.0", "codec": ""},
+    "jetson7":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.10.0", "last": "2.10.0", "codec": "0.10.0"},
+>>>>>>> theirs
 }
 
 torchaudio_max = '2.11.0'
@@ -127,7 +134,7 @@ cuda_version_range = {"min": (11,8), "max": (13,2)}
 rocm_version_range = {"min": (5,7), "max": (7,2)}
 mps_version_range = {"min": (0,0), "max": (0,0)}
 xpu_version_range = {"min": (0,0), "max": (0,0)}
-jetson_version_range = {"min": (5,1), "max": (6,1)}
+jetson_version_range = {"min": (5,1), "max": (7,0)}
 
 ############### SETTINGS BELOW CAN BE MODIFIED ###############
 
