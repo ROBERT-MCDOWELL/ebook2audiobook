@@ -117,15 +117,9 @@ torch_matrix = {
     # XPU
     "xpu":       {"os": [systems['LINUX'], systems['WINDOWS']], "arch": [archs['X86_64'], archs['AMD64']], "base": "2.7.1", "last": "2.14.1", "codec": "0.16.0"},
     # JETSON
-<<<<<<< ours
-    "jetson51":  {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.3.1", "last": "2.3.1", "codec": ""},
-    "jetson60":  {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.8.0", "last": "2.8.0", "codec": ""},
-    "jetson61":  {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.10.0", "last": "2.10.0", "codec": ""},
-=======
     "jetson5":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.3.1", "last": "2.3.1", "codec": ""},
     "jetson6":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.8.0", "last": "2.8.0", "codec": ""},
-    "jetson7":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.10.0", "last": "2.10.0", "codec": "0.10.0"},
->>>>>>> theirs
+    "jetson7":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.10.0", "last": "2.10.0", "codec": "0.10.0"}
 }
 
 torchaudio_max = '2.11.0'
