@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'Pas encore de package GPU {engine} pour cette machine ({machine}) : en cours d\'exécution sur CPU, ce qui est beaucoup plus lent.',
     'msg_zonos2_old_venv': 'Suppression de l\'ancien environnement Zonos v0.1 en {dir}, ZONOS2 n\'en a pas besoin…',
     'msg_zonos2_models': 'Obtenir les {engine} fichiers modèles ({files}), le premier téléchargement prend un certain temps…',
+    'msg_vulkan_engine_cpu': '{engine} ne peut pas fonctionner sur Vulkan (Vulkan exécute {engines} uniquement) : est passé en CPU.',
+    'msg_device_not_supported_vulkan': 'Aucun chargeur Vulkan trouvé sur ce système !<br/>Lecture {wiki}<br/>Passage en CPU',
     'msg_zonos2_hybrid_gone': 'Le modèle hybride Zonos n\'existe pas dans ZONOS2 : il est passé au modèle {model}.',
     'error_venv_torch_unsupported': '{engine} ne peut pas fonctionner sur cet appareil car la version de Torch max est < {min}. Veuillez sélectionner un autre moteur TTS.',
     'error_venv_install_failed': '{engine} l\'installation de l\'environnement virtuel a échoué à : {step}',

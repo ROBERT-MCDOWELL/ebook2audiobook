@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'এই মেশিনের জন্য এখনও কোন {engine} জিপিইউ প্যাকেজ নেই ({machine}): সিপিইউতে চলছে, যা অনেক ধীর ।',
     'msg_zonos2_old_venv': '{dir}-এ পুরানো Zonos v0.1 পরিবেশ অপসারণ করা, ZONOS2 এর এটির প্রয়োজন নেই...',
     'msg_zonos2_models': '{engine} টি মডেল ফাইল ({files}) পাওয়া, প্রথম ডাউনলোডে কিছুটা সময় লাগে...',
+    'msg_vulkan_engine_cpu': '{engine} Vulkan-এ চালাতে পারে না (Vulkan শুধুমাত্র {engines} রান করে): সিপিইউতে স্যুইচ করা হয়েছে ।',
+    'msg_device_not_supported_vulkan': 'এই সিস্টেমে কোনও ভালকান লোডার পাওয়া যায়নি!<br/>পড়ুন {wiki}<br/> সিপিইউতে স্যুইচিং',
     'msg_zonos2_hybrid_gone': 'ZONOS হাইব্রিড মডেল ZONOS2 এ নেই: {model} মডেলে স্যুইচ করা হয়েছে ।',
     'error_venv_torch_unsupported': '{engine} এই ডিভাইসে চলতে পারে না কারণ টর্চ ম্যাক্স সংস্করণ < {min} । অনুগ্রহ করে অন্য একটি TTS ইঞ্জিন নির্বাচন করুন ।',
     'error_venv_install_failed': '{engine} ভার্চুয়াল এনভায়রনমেন্ট ইন্সটল ব্যর্থ হয়েছে: {step}',

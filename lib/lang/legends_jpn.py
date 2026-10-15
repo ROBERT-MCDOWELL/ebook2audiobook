@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'いいえ {engine} このマシンのGPUパッケージはまだ（{machine}） ： CPU上で実行されていますが、これははるかに遅いです。',
     'msg_zonos2_old_venv': '古いZonos v0.1環境の削除 {dir}、ZONOS 2はそれを必要としません...',
     'msg_zonos2_models': 'コードを入手 {engine} モデルファイル（{files}）、最初のダウンロードにはしばらく時間がかかります…',
+    'msg_vulkan_engine_cpu': '{engine} vulkanで実行できません（ Vulkanは {engines} のみ） ： CPUに切り替えました。',
+    'msg_device_not_supported_vulkan': 'このシステムにVulkanローダーが見つかりません！<br/>読み取り{wiki}<br/> CPUへの切り替え',
     'msg_zonos2_hybrid_gone': 'ZONOSハイブリッドモデルはZONOS 2に存在しません： {model} 型式',
     'error_venv_torch_unsupported': '{engine} トーチの最大バージョンが<であるため、このデバイスで実行できません {min}別のTTSエンジンを選択してください。',
     'error_venv_install_failed': '{engine}仮想環境のインストールに失敗しました： {step}',
