@@ -6,6 +6,9 @@ from lib.conf import systems
 from lib.lang import legends
 
 class Zonos(TTSUtils, TTSRegistry, name='zonos'):
+    # GPU packages whose server died during a conversion, per e2a process: package -> crash count. One crash restarts
+    # the same package (driver aborts can be rare), a second one drops it until e2a restarts (next GPU package, else CPU)
+    gpu_crashes = {}
 
     def __init__(self, session:DictProxy):
         # ZONOS2 (Zyphra zonos2.cpp): a native zonos2-server package per platform (default_engine_settings
@@ -129,6 +132,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             usable = [
                k for k in dict.fromkeys(candidates)
                if k in packages and packages[k].get('enabled', True) and set(packages[k].get('cpu_flags', [])) <= cpu_flags
+               and Zonos.gpu_crashes.get(k, 0) < 2
                and glibc_version >= tuple(int(x) for x in packages[k].get('glibc_min', '0.0').split('.'))
             ]
             if not usable:
@@ -141,7 +145,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             attempts = [usable[0]]
             if packages[usable[0]]['gpu']:
                attempts = [k for k in usable if packages[k]['gpu']] + [k for k in usable if not packages[k]['gpu']][:1]
-            if gpu_wanted and not packages[usable[0]]['gpu']:
+            if gpu_wanted and not packages[usable[0]]['gpu'] and not any(n >= 2 for n in Zonos.gpu_crashes.values()):
                msg = legends['msg_zonos2_cpu_fallback'].format(engine=tts_engine, machine=machine_desc)
                if show_alert is not None:
                   show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
@@ -342,6 +346,22 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                          # inside [emotion:...]...[/emotion] the tag wins over the panel ([emotion:neutral] = {} = plain voice)
                          **({'emotion_enabled': True, 'emotion': self.params['inline_emotion']} if self.params.get('inline_emotion') is not None else {})
                       })
+                      if not reply.get('ok') and reply.get('server_exited') and self.backend == 'gpu':
+                         # the GPU server died mid-sentence (a driver abort such as MoltenVK's "Completed handler
+                         # provided after commit call"): restart it once, drop the package on its second death, and
+                         # redo the whole sentence with a fresh engine (__init__ picks the package, CPU last)
+                         crashes = Zonos.gpu_crashes[self.package_name] = Zonos.gpu_crashes.get(self.package_name, 0) + 1
+                         msg = legends['msg_zonos2_gpu_restart' if crashes < 2 else 'msg_zonos2_gpu_dropped'].format(engine=self.session['tts_engine'], package=self.package_name, error=reply.get('error'))
+                         show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
+                         if show_alert is not None:
+                            show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
+                         else:
+                            print(msg)
+                         loaded_tts.pop(self.tts_key, None)
+                         self.engine.stop()
+                         self.engine = None
+                         self.__init__(self.session)
+                         return self.convert(sentence_file, sentence, **kwargs)
                       if not reply.get('ok'):
                          # no retry: core.py unloads the engine, which stops the worker
                          error = f"convert() error: {reply.get('error')} segment: {part}"

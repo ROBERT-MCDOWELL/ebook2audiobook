@@ -254,7 +254,13 @@ def main()->int:
                 # no retry here: e2a's convert() returns False and core.py unloads the engine, which closes
                 # stdin and ends this process (and the server with it)
                 error = f'{type(e).__name__}: {e}'
-                reply = {'ok': False, 'error': error, 'oom': 'out of memory' in error.lower() or 'failed to allocate' in error.lower()}
+                # a server that aborted mid-request (GPU driver assertion, e.g. MoltenVK) shows up here as a lost
+                # connection: give it a moment to be reaped, then tell e2a so it can restart or leave that package
+                try:
+                    server.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    pass
+                reply = {'ok': False, 'error': error, 'oom': 'out of memory' in error.lower() or 'failed to allocate' in error.lower(), 'server_exited': server.poll() is not None}
             proto.write(json.dumps(reply) + '\n')
         return 0
     finally:
