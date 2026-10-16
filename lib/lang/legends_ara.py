@@ -516,7 +516,7 @@ legends = {
     'msg_zonos2_downloading': 'جارٍ تنزيل حزمة خادم {engine} {package}...',
     'error_zonos2_download': 'تعذر تثبيت حزمة الخادم {engine} {package}: {error}',
     'error_zonos2_no_package': '{engine} لا يحتوي على حزمة خادم لهذا الجهاز ({machine}).',
-    'error_zonos2_macos_min': '{engine} يحتاج إلى macOS {min} أو أحدث على أجهزة Intel Mac (يعمل هذا الـ Mac بنظام macOS {version}).',
+    'error_zonos2_macos_min': '{engine} يحتاج إلى macOS {min} أو أحدث (يعمل هذا الـ Mac بنظام macOS {version}).',
     'msg_zonos2_gpu_failed': 'تعذر بدء تشغيل خادم {engine} GPU ({package}): {error} يعمل على وحدة المعالجة المركزية بدلاً من ذلك، وهو أبطأ بكثير.',
     'msg_zonos2_cpu_fallback': 'لا {engine} حزمة وحدة معالجة الرسومات لهذا الجهاز حتى الآن ({machine}): تعمل على وحدة المعالجة المركزية، وهي أبطأ بكثير.',
     'msg_zonos2_old_venv': 'إزالة بيئة Zonos v0.1 القديمة في {dir}، لا تحتاج ZONOS2 إليها...',

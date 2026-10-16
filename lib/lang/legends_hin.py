@@ -516,7 +516,7 @@ legends = {
     'msg_zonos2_downloading': '{engine} सर्वर पैकेज {package} डाउनलोड किया जा रहा है...',
     'error_zonos2_download': '{engine} सर्वर पैकेज {package} इंस्टॉल नहीं किया जा सका: {error}',
     'error_zonos2_no_package': '{engine} में इस मशीन ({machine}) के लिए कोई सर्वर पैकेज नहीं है।',
-    'error_zonos2_macos_min': '{engine} को Intel Macs पर macOS {min} या नए की आवश्यकता है (यह Mac macOS {version} चलाता है)।',
+    'error_zonos2_macos_min': '{engine} को macOS {min} या उससे नए की ज़रूरत है (यह Mac macOS {version} चलाता है)।',
     'msg_zonos2_gpu_failed': '{engine} GPU सर्वर ({package}) शुरू नहीं हो सका: {error} इसके बजाय CPU पर चल रहा है, जो बहुत धीमा है।',
     'msg_zonos2_cpu_fallback': 'इस मशीन के लिए अभी तक कोई {engine} जीपीयू पैकेज नहीं है ({machine}): सीपीयू पर चल रहा है, जो बहुत धीमा है।',
     'msg_zonos2_old_venv': 'पुराने Zonos v0.1 वातावरण को {dir} में हटाने के लिए, ZONOS2 को इसकी आवश्यकता नहीं है...',

@@ -516,7 +516,7 @@ legends = {
     'msg_zonos2_downloading': 'A {engine} szervercsomag letöltése {package}…',
     'error_zonos2_download': 'A {engine} szerver csomag {package} nem telepíthető: {error}',
     'error_zonos2_no_package': '{engine}-nak nincs szervercsomagja ehhez a géphez ({machine}).',
-    'error_zonos2_macos_min': 'A {engine} verzióhoz macOS {min} vagy újabb verzió szükséges Intel Mac gépeken (ez a Mac Mac MacOS {version}-t futtat).',
+    'error_zonos2_macos_min': 'A {engine}-nak macOS {min} vagy újabb rendszerre van szüksége (ez a Mac a macOS {version}-t futtatja).',
     'msg_zonos2_gpu_failed': 'A {engine} GPU szerver ({package}) nem tudott elindulni: {error} Ehelyett CPU-n fut, ami sokkal lassabb.',
     'msg_zonos2_cpu_fallback': 'Még nincs {engine} GPU csomag ehhez a géphez ({machine}): CPU-n fut, ami sokkal lassabb.',
     'msg_zonos2_old_venv': 'A régi Zonos v0.1 környezet eltávolítása a {dir}-ban, a ZONOS2-nek nincs szüksége rá…',

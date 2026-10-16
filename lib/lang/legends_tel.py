@@ -516,7 +516,7 @@ legends = {
     'msg_zonos2_downloading': '{engine} సర్వర్ ప్యాకేజీని డౌన్ ‌ లోడ్ చేస్తోంది {package}...',
     'error_zonos2_download': '{engine} సర్వర్ ప్యాకేజీ {package} ఇన్ ‌ స్టాల్ చేయబడలేదు: {error}',
     'error_zonos2_no_package': '{engine} కి ఈ మెషీన్ కోసం సర్వర్ ప్యాకేజీ లేదు ({machine}).',
-    'error_zonos2_macos_min': '{engine} macOS అవసరం {min} లేదా ఇంటెల్ మాక్స్ ‌ లో కొత్తది (ఈ మాక్ మాకోస్ ‌ ను నడుపుతుంది {version}).',
+    'error_zonos2_macos_min': '{engine} macOS అవసరం {min} లేదా క్రొత్తది (ఈ Mac MacOS ను నడుపుతుంది {version}).',
     'msg_zonos2_gpu_failed': '{engine} GPU సర్వర్ ({package}) ప్రారంభించబడలేదు: {error} బదులుగా CPUలో నడుస్తోంది, ఇది చాలా నెమ్మదిగా ఉంటుంది.',
     'msg_zonos2_cpu_fallback': 'ఇంకా ఈ యంత్రం కోసం {engine} GPU ప్యాకేజీ లేదు ({machine}): CPUలో నడుస్తోంది, ఇది చాలా నెమ్మదిగా ఉంటుంది.',
     'msg_zonos2_old_venv': 'లో పాత జోనోస్ v0.1 వాతావరణాన్ని తొలగించడం {dir}, ZONOS2 కి ఇది అవసరం లేదు...',

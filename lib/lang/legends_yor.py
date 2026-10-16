@@ -516,7 +516,7 @@ legends = {
     'msg_zonos2_downloading': 'Gbigba package olupin {engine} {package}...',
     'error_zonos2_download': 'Package olupin {engine} {package} ko le fi sori ẹrọ: {error}',
     'error_zonos2_no_package': '{engine} kò ní ìpakà aṣàmúlò fún ẹ̀rọ yìí ({machine}).',
-    'error_zonos2_macos_min': '{engine} nílò macOS {min} tàbí tuntun lórí Intel Macs (Mac yìí ń ṣiṣẹ́ macOS {version}).',
+    'error_zonos2_macos_min': '{engine} nílò macOS {min} tàbí tuntun (Mac yìí ń ṣiṣẹ́ macOS {version}).',
     'msg_zonos2_gpu_failed': 'Olùpèsè GPU {engine} ({package}) kò lè bẹ̀rẹ̀: {error} Ṣiṣẹ́ lórí CPU dípò, èyí tí ó lọ́ra púpọ̀.',
     'msg_zonos2_cpu_fallback': 'Kò sí ìpakà GPU {engine} fún ẹ̀rọ yìí síbẹ̀ ({machine}): ó ń ṣiṣẹ́ lórí CPU, èyí tí ó lọ́ra púpọ̀.',
     'msg_zonos2_old_venv': 'Yíyọ àyíká Zonos v0.1 àtijọ́ ní {dir}, ZONOS2 kò nílò rẹ̀...',

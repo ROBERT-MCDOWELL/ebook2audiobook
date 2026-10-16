@@ -516,7 +516,7 @@ legends = {
     'msg_zonos2_downloading': '{engine} சேவையக தொகுப்பைப் பதிவிறக்குகிறது {package}...',
     'error_zonos2_download': '{engine} சேவையக தொகுப்பு {package} ஐ நிறுவ முடியவில்லை: {error}',
     'error_zonos2_no_package': '{engine} இல் இந்த இயந்திரத்திற்கு சேவையக தொகுப்பு இல்லை ({machine}).',
-    'error_zonos2_macos_min': '{engine} க்கு இன்டெல் மேக்ஸில் மேகோஸ் {min} அல்லது புதியது தேவைப்படுகிறது (இந்த மேக் மேகோஸ் {version} ஐ இயக்குகிறது).',
+    'error_zonos2_macos_min': '{engine} க்கு மேகோஸ் {min} அல்லது புதியது தேவைப்படுகிறது (இந்த மேக் மேகோஸ் {version} ஐ இயக்குகிறது).',
     'msg_zonos2_gpu_failed': '{engine} GPU சேவையகம் ({package}) தொடங்க முடியவில்லை: {error} அதற்கு பதிலாக CPU இல் இயங்குகிறது, இது மிகவும் மெதுவாக உள்ளது.',
     'msg_zonos2_cpu_fallback': 'இந்த இயந்திரத்திற்கான {engine} GPU பேக்கேஜ் இன்னும் இல்லை ({machine}): CPU இல் இயங்குகிறது, இது மிகவும் மெதுவாக உள்ளது.',
     'msg_zonos2_old_venv': 'பழைய Zonos v0.1 சூழலை {dir} இல் நீக்குவதால், ZONOS2 க்கு இது தேவையில்லை …',
