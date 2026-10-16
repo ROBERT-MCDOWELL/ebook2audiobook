@@ -116,7 +116,7 @@ default_engine_settings = {
             "windows-x64-cpu-sse42": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-windows-x64-cpu-sse42.zip", "gpu": False, "cpu_flags": ["sse4_2"]},
             "macos-arm64": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-macos-arm64.tar.gz", "gpu": True, "macos_min": 11, "enabled": False},
             "macos-arm64-metal": {"url": "https://github.com/Zyphra/zonos2.cpp/releases/latest/download/zonos2-macos-arm64-metal.tar.gz", "gpu": True, "macos_min": 15},
-            "macos-x86_64-vulkan": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-macos-x86_64-vulkan.tar.gz", "gpu": True, "macos_min": 12, "enabled": False},
+            "macos-x86_64-vulkan": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-macos-x86_64-vulkan.tar.gz", "gpu": True, "macos_min": 12},
             "macos-x86_64": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-macos-x86_64.tar.gz", "gpu": False, "macos_min": 11},
             "jetson5-sm72-sm87": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-jetson5-sm72-sm87.tar.gz", "gpu": True, "jetpack": 5, "sm": [72, 87]},
             "jetson6-sm87": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-jetson6-sm87.tar.gz", "gpu": True, "jetpack": 6, "sm": [87]},
