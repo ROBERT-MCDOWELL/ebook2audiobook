@@ -516,7 +516,7 @@ legends = {
     'msg_zonos2_downloading': 'دانلود بسته سرور {engine} {package}…',
     'error_zonos2_download': 'بسته سرور {engine} {package} قابل نصب نیست: {error}',
     'error_zonos2_no_package': '‎{engine}‎ هیچ بسته سروری برای این دستگاه ندارد ({machine}).',
-    'error_zonos2_macos_min': '{engine} به macOS {min} یا جدیدتر روی مک‌های اینتل نیاز دارد (این مک macOS {version} را اجرا می‌کند).',
+    'error_zonos2_macos_min': '{engine} به macOS {min} یا جدیدتر نیاز دارد (این مک macOS {version} را اجرا می‌کند).',
     'msg_zonos2_gpu_failed': 'سرور GPU {engine} ({package}) نتوانست شروع به کار کند: {error} در عوض روی CPU اجرا می‌شود که بسیار کندتر است.',
     'msg_zonos2_cpu_fallback': 'هنوز هیچ بسته‌ی پردازنده‌ی گرافیکی {engine} برای این دستگاه وجود ندارد ({machine}): روی پردازنده‌ی مرکزی اجرا می‌شود که بسیار کندتر است.',
     'msg_zonos2_old_venv': 'با حذف محیط قدیمی Zonos نسخه ۰.۱ در {dir}، ZONOS2 به آن نیازی ندارد…',

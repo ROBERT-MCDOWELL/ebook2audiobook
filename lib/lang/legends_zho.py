@@ -516,7 +516,7 @@ legends = {
     'msg_zonos2_downloading': '正在下载{engine}服务器包{package}…',
     'error_zonos2_download': '无法安装{engine}服务器包{package} ： {error}',
     'error_zonos2_no_package': '{engine}没有此计算机({machine})的服务器包。',
-    'error_zonos2_macos_min': '{engine}需要英特尔Mac上的macOS {min}或更高版本（此Mac运行macOS {version} ）。',
+    'error_zonos2_macos_min': '{engine}需要macOS {min}或更高版本（此Mac运行macOS {version} ）。',
     'msg_zonos2_gpu_failed': 'The {engine} GPU服务器({package}无法启动 {error} 而是在CPU上运行，速度要慢得多。',
     'msg_zonos2_cpu_fallback': '否 {engine} 此机器的GPU包尚未（{machine}） ：在CPU上运行，速度要慢得多。',
     'msg_zonos2_old_venv': '删除旧的Zonos v0.1环境 {dir}， ZONOS2不需要它……',

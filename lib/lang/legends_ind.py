@@ -516,7 +516,7 @@ legends = {
     'msg_zonos2_downloading': 'Mengunduh paket {engine} server {package}…',
     'error_zonos2_download': 'Paket server {engine} {package} tidak dapat diinstal: {error}',
     'error_zonos2_no_package': '{engine} tidak memiliki paket server untuk mesin ini ({machine}).',
-    'error_zonos2_macos_min': '{engine} membutuhkan macOS {min} atau yang lebih baru di Intel Mac (Mac ini menjalankan macOS {version}).',
+    'error_zonos2_macos_min': '{engine} membutuhkan macOS {min} atau yang lebih baru (Mac ini menjalankan macOS {version}).',
     'msg_zonos2_gpu_failed': 'Server GPU {engine} ({package}) tidak dapat dijalankan: {error} Berjalan pada CPU, yang jauh lebih lambat.',
     'msg_zonos2_cpu_fallback': 'Paket GPU {engine} untuk mesin ini belum ({machine}): berjalan pada CPU, yang jauh lebih lambat.',
     'msg_zonos2_old_venv': 'Menghapus lingkungan Zona v0.1 lama dalam {dir}, ZONOS2 tidak membutuhkannya...',
