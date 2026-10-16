@@ -19,6 +19,7 @@
 #   DEVICE_TAG=rocm     docker compose   --profile rocm   up
 #   (add HSA_OVERRIDE_GFX_VERSION=x.y.z in front when the launcher printed one)
 #   DEVICE_TAG=xpu      docker compose   --profile xpu    up
+#   DEVICE_TAG=vulkan   docker compose   --profile vulkan up
 #
 # Requires Compose V2 (the `docker compose` plugin), NOT the legacy
 # `docker-compose` v1 — only V2 honors deploy.resources.devices outside Swarm
@@ -132,6 +133,16 @@ services:
     extends:
       service: ebook2audiobook-base
     profiles: [xpu]
+    devices:
+      - /dev/dri
+    group_add:
+      - "${RENDER_GID:-44}"
+
+  # --- Vulkan: AMD / Intel / NVIDIA (nouveau) through Mesa ------------------
+  ebook2audiobook-vulkan:
+    extends:
+      service: ebook2audiobook-base
+    profiles: [vulkan]
     devices:
       - /dev/dri
     group_add:

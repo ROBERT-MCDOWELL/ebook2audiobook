@@ -4481,8 +4481,9 @@ def convert_ebook(args:dict)->tuple:
                     msg_extra = ''                      
                     if session['device'] == devices['CUDA']['proc']:
                         if not devices['CUDA']['found']:
-                            session['device'] = devices['CPU']['proc']
-                            msg += legends['msg_device_not_supported'].format(device='CUDA', wiki=default_gpu_wiki)
+                            # CUDA, then Vulkan (checked below), then CPU
+                            session['device'] = devices['VULKAN']['proc']
+                            msg += legends['msg_device_not_supported_try_vulkan'].format(device='CUDA', wiki=default_gpu_wiki)
                     elif session['device'] == devices['JETSON']['proc'] or session['device'] == devices['JETSON']['proc']:
                         if not devices['JETSON']['found']:
                             session['device'] = devices['CPU']['proc']
@@ -4515,7 +4516,8 @@ def convert_ebook(args:dict)->tuple:
                         if xpu_error is not None:
                             session['device'] = devices['CPU']['proc']
                             msg += legends['msg_device_error_switch_cpu'].format(error=xpu_error, wiki=default_gpu_wiki)
-                    elif session['device'] == devices['VULKAN']['proc']:
+                    if session['device'] == devices['VULKAN']['proc']:
+                        # a separate if, not elif: a CUDA session that found no CUDA arrives here too.
                         # torch has no Vulkan device: like Zonos' hybrid model, an engine that cannot run on it is
                         # switched (to CPU) with an alert. Engines that can (native GPU builds) still need the
                         # system Vulkan loader, e2a installs no system library. macOS has none: its packages run

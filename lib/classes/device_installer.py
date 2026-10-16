@@ -136,9 +136,19 @@ class DeviceInstaller():
             name, tag, msg = self.check_hardware
             os_env = 'manylinux_2_28'
             pyvenv = [3, 10] if tag in ['jetson5', 'jetson6', 'jetson7'] else list(max_python_version)
-            arch = archs['AARCH64'] if name in [devices['JETSON']['proc'], devices['MPS']['proc']] else self.arch
-            if name in [devices['JETSON']['proc'], devices['MPS']['proc']]:
+            arch = archs['AARCH64'] if name in [devices['JETSON']['proc'], devices['MPS']['proc']] or (self.system == systems['MACOS'] and self.arch == archs['ARM64']) else self.arch
+            # a macOS host's containers run in a VM without its GPU: no MPS, no Vulkan there
+            if name in [devices['JETSON']['proc'], devices['MPS']['proc']] or (self.system == systems['MACOS'] and name == devices['VULKAN']['proc']):
                 name = tag = devices['CPU']['proc']
+            elif name in [devices['CPU']['proc'], devices['VULKAN']['proc']]:
+                # the image is Linux with python max_python_version, so Vulkan is decided for that, not for the host's
+                # python: a Vulkan GPU on the host (passed in with --device=/dev/dri) and the wheels for the image
+                linux_arch = archs['X86_64'] if arch == archs['AMD64'] else arch
+                if (name == devices['VULKAN']['proc'] or self.vulkan_gpus()) and self.vulkan_wheels_ok(tuple(pyvenv), f'{os_env}_{linux_arch}'):
+                    name = tag = devices['VULKAN']['proc']
+                    arch = linux_arch
+                else:
+                    name = tag = devices['CPU']['proc']
             device_info = {"name": name, "os": os_env, "arch": arch, "pyvenv": pyvenv, "tag": tag, "note": re.sub(r'[^\w\s-]', '', msg.replace('!', ''))}
             try:
                 with open(device_info_json, 'w', encoding='utf-8') as f:
@@ -172,6 +182,73 @@ class DeviceInstaller():
             return version(pkg)
         except PackageNotFoundError:
             return False
+
+    def vulkan_gpus(self)->list:
+        # names of the real Vulkan GPUs the system loader sees: integrated, discrete or virtual.
+        # Software renderers (lavapipe/llvmpipe, SwiftShader: VK_PHYSICAL_DEVICE_TYPE_CPU) don't count
+        import ctypes
+        try:
+            vk = ctypes.CDLL('vulkan-1.dll' if self.system == systems['WINDOWS'] else 'libvulkan.so.1')
+        except OSError:
+            return []
+        class AppInfo(ctypes.Structure):
+            _fields_ = [('sType', ctypes.c_int), ('pNext', ctypes.c_void_p), ('pApplicationName', ctypes.c_char_p), ('applicationVersion', ctypes.c_uint32), ('pEngineName', ctypes.c_char_p), ('engineVersion', ctypes.c_uint32), ('apiVersion', ctypes.c_uint32)]
+        class InstInfo(ctypes.Structure):
+            _fields_ = [('sType', ctypes.c_int), ('pNext', ctypes.c_void_p), ('flags', ctypes.c_uint32), ('pApplicationInfo', ctypes.POINTER(AppInfo)), ('enabledLayerCount', ctypes.c_uint32), ('ppEnabledLayerNames', ctypes.c_void_p), ('enabledExtensionCount', ctypes.c_uint32), ('ppEnabledExtensionNames', ctypes.c_void_p)]
+        vk.vkCreateInstance.restype = ctypes.c_int
+        vk.vkCreateInstance.argtypes = [ctypes.POINTER(InstInfo), ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)]
+        vk.vkEnumeratePhysicalDevices.restype = ctypes.c_int
+        vk.vkEnumeratePhysicalDevices.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint32), ctypes.c_void_p]
+        vk.vkGetPhysicalDeviceProperties.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+        vk.vkDestroyInstance.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+        app = AppInfo(0, None, b'e2a', 0, None, 0, (1 << 22) | (1 << 12))  # VK_STRUCTURE_TYPE_APPLICATION_INFO, Vulkan 1.1
+        info = InstInfo(1, None, 0, ctypes.pointer(app), 0, None, 0, None)  # VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO
+        inst = ctypes.c_void_p()
+        if vk.vkCreateInstance(ctypes.byref(info), None, ctypes.byref(inst)) != 0:
+            return []
+        names = []
+        try:
+            count = ctypes.c_uint32(0)
+            if vk.vkEnumeratePhysicalDevices(inst, ctypes.byref(count), None) == 0 and count.value:
+                devs = (ctypes.c_void_p * count.value)()
+                vk.vkEnumeratePhysicalDevices(inst, ctypes.byref(count), devs)
+                for dev in devs:
+                    props = ctypes.create_string_buffer(1024)  # VkPhysicalDeviceProperties is 824 bytes
+                    vk.vkGetPhysicalDeviceProperties(dev, props)
+                    if int.from_bytes(props.raw[16:20], 'little') in (1, 2, 3):  # deviceType: integrated, discrete, virtual
+                        names.append(props.raw[20:276].split(b'\0')[0].decode(errors='replace'))
+        finally:
+            vk.vkDestroyInstance(inst, None)
+        return names
+
+    def vulkan_wheels_ok(self, py:tuple, plat:str)->bool:
+        # the +vulkan torch / torchaudio (and torchcodec on macOS) wheels exist on py-pkg for this Python and platform
+        # (e.g. (3, 12), 'manylinux_2_28_x86_64'). A GitHub release asset answers 302 (redirect to its storage) when
+        # present, 404 when not: no redirect is followed, nothing is downloaded
+        import urllib.request, urllib.error
+        entry = torch_matrix.get(devices['VULKAN']['proc'])
+        if not entry:
+            return False
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, *args, **kwargs):
+                return None
+        opener = urllib.request.build_opener(NoRedirect)
+        torch_ver = entry['last'] if tuple(py) >= (3, 12) else entry['base']
+        py_tag = f'cp{py[0]}{py[1]}'
+        wheel_end = f"{devices['VULKAN']['proc']}-{py_tag}-{py_tag}-{plat}.whl"
+        urls = [f'{default_jetson_url}/torch/torch-{torch_ver}%2B{wheel_end}', f'{default_jetson_url}/torchaudio/torchaudio-{self.torchaudio_version(torch_ver)}%2B{wheel_end}']
+        if plat.startswith('macosx') and entry.get('codec'):
+            urls.append(f"{default_jetson_url}/torchcodec/torchcodec-{entry['codec']}%2B{wheel_end}")
+        for url in urls:
+            try:
+                code = opener.open(urllib.request.Request(url, method='HEAD'), timeout=15).status
+            except urllib.error.HTTPError as e:
+                code = e.code
+            except Exception:
+                return False
+            if code not in (200, 302):
+                return False
+        return True
 
     def detect_platform_tag(self)->str:
         if self.system == systems['WINDOWS']:
@@ -455,6 +532,26 @@ class DeviceInstaller():
                 return False
             return False
 
+        def vulkan_ok()->str:
+            # the Vulkan GPU name when the +vulkan torch applies here, else ''. Needs this OS / arch in torch_matrix,
+            # a real Vulkan GPU (macOS: every Mac on 11+ has a Metal GPU, the wheel brings MoltenVK), and the wheels for
+            # this venv's Python on py-pkg. Already installed: no network, so an offline start keeps the Vulkan torch
+            entry = torch_matrix.get(devices['VULKAN']['proc'])
+            arch_tag = self.detect_arch_tag()
+            if not entry or self.system not in entry['os'] or arch_tag not in entry['arch']:
+                return ''
+            if self.system == systems['MACOS']:
+                gpu = 'Metal (MoltenVK)'
+            else:
+                gpus = self.vulkan_gpus()
+                if not gpus:
+                    return ''
+                gpu = gpus[0]
+            torch_ver = entry['last'] if self.python_version >= (3, 12) else entry['base']
+            if self.get_package_version('torch') == f"{torch_ver}+{devices['VULKAN']['proc']}":
+                return gpu
+            return gpu if self.vulkan_wheels_ok(self.python_version, f'{self.detect_platform_tag()}_{arch_tag}') else ''
+
         def _normalize_version(v:str)->tuple:
             '''Parse version string into (major, minor, patch). Patch defaults to 0.'''
             m = re.search(r'(\d+)\.(\d+)(?:\.(\d+))?', v or '')
@@ -474,7 +571,7 @@ class DeviceInstaller():
             tag_letters = re.match(r'[a-zA-Z]+', forced_tag)
             if tag_letters:
                 tag_letters = tag_letters.group(0).lower()
-                name = devices['CUDA']['proc'] if tag_letters == 'cu' else devices['ROCM']['proc'] if tag_letters == devices['ROCM']['proc'] else devices['JETSON']['proc'] if tag_letters == devices['JETSON']['proc'] else devices['XPU']['proc'] if tag_letters == devices['XPU']['proc'] else devices['MPS']['proc'] if tag_letters == devices['MPS']['proc'] else devices['CPU']['proc']
+                name = devices['CUDA']['proc'] if tag_letters == 'cu' else devices['ROCM']['proc'] if tag_letters == devices['ROCM']['proc'] else devices['JETSON']['proc'] if tag_letters == devices['JETSON']['proc'] else devices['XPU']['proc'] if tag_letters == devices['XPU']['proc'] else devices['MPS']['proc'] if tag_letters == devices['MPS']['proc'] else devices['VULKAN']['proc'] if tag_letters == devices['VULKAN']['proc'] else devices['CPU']['proc']
                 devices[name.upper()]['found'] = True
                 tag = forced_tag
                 if forced_tag in ['cu128', 'cu129', 'rocm7.2.1'] and self.system == systems['WINDOWS']:
@@ -1167,6 +1264,22 @@ class DeviceInstaller():
                 name = devices['MPS']['proc']
                 tag = devices['MPS']['proc']
             # ============================================================
+            # VULKAN
+            # ============================================================
+            # CUDA, ROCm, XPU and Jetson keep their torch. Otherwise (MPS, or nothing usable found, including a GPU
+            # whose CUDA/ROCm runtime did not answer) the +vulkan torch is used when vulkan_ok(), ahead of MPS: the
+            # +vulkan wheels keep MPS on Apple Silicon, so MPS stays found and selectable. Intel macOS always takes it
+            if tag in (None, devices['MPS']['proc']):
+                vulkan_gpu = vulkan_ok()
+                if not vulkan_gpu and self.system == systems['MACOS'] and self.detect_arch_tag() == archs['X86_64']:
+                    # PyTorch has no Intel macOS wheel after 2.2.2: the +vulkan build is the only current torch there
+                    vulkan_gpu = 'Metal (MoltenVK)'
+                if vulkan_gpu:
+                    devices['VULKAN']['found'] = True
+                    name = devices['VULKAN']['proc']
+                    tag = devices['VULKAN']['proc']
+                    msg = legends['msg_vulkan_selected'].format(gpu=vulkan_gpu)
+            # ============================================================
             # CPU
             # ============================================================
             if tag is None:
@@ -1799,9 +1912,6 @@ class DeviceInstaller():
                         return 1
                     torch_version_matrix = matrix_entry.get(key) or matrix_entry['base']
                     torchcodec_version_matrix = matrix_entry.get('codec') or ''
-                    if device_info['os'] == 'macosx_11_0' and device_info['arch'] == archs['X86_64']:
-                        torch_version_matrix = '2.2.2'
-                        torchcodec_version_matrix = ''  # 2.2.2 < 2.9, no torchcodec
                     torch_version_current_full = self.get_package_version('torch')
                     torch_version_current_base = None
                     current_tag = None
@@ -1837,6 +1947,12 @@ class DeviceInstaller():
                                 subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', torchaudio_pkg))
                                 subprocess.check_call(self._uv_pip('install', '--no-cache', 'scikit-learn'))
                                 subprocess.check_call(self._uv_pip('install', '--no-cache', 'scipy'))
+                            elif device_info['name'] == devices['VULKAN']['proc']:
+                                # +vulkan torch / torchaudio from py-pkg (build-torch-vulkan.sh / .cmd)
+                                url = default_jetson_url
+                                torch_pkg = f"{url}/torch/torch-{torch_version_matrix}%2B{tag}-{tag_py}-{tag_py}-{os_env}_{arch}.whl"
+                                torchaudio_pkg = f"{url}/torchaudio/torchaudio-{torchaudio_version_matrix}%2B{tag}-{tag_py}-{tag_py}-{os_env}_{arch}.whl"
+                                subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', torch_pkg, torchaudio_pkg))
                             elif device_info['name'] == devices['ROCM']['proc'] and self.system == systems['WINDOWS']:
                                 url = default_pytorch_amd_url
                                 real_tag = tag.replace('win-', '')
@@ -1877,6 +1993,9 @@ class DeviceInstaller():
                                     # jetson7 (torch >= 2.9): no aarch64 torchcodec on PyPI, built like torch/torchaudio
                                     torchcodec_wheel_url = f"{default_jetson_url}/torchcodec/torchcodec-{torchcodec_version_matrix}%2B{tag}-{tag_py}-{tag_py}-{os_env}_{arch}.whl"
                                     rc = subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', torchcodec_wheel_url))
+                                elif device_info['name'] == devices['VULKAN']['proc'] and self.system == systems['MACOS']:
+                                    torchcodec_wheel_url = f"{default_jetson_url}/torchcodec/torchcodec-{torchcodec_version_matrix}%2B{tag}-{tag_py}-{tag_py}-{os_env}_{arch}.whl"
+                                    rc = subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', torchcodec_wheel_url))
                                 elif is_cpu_aarch64_linux:
                                     torchcodec_wheel_url = f"{default_torchcodec_arm_url}/{tag}/torchcodec-{torchcodec_version_matrix}%2B{tag}-{tag_py}-{tag_py}-manylinux_2_27_{arch}.{os_env}_{arch}.whl"
                                     rc = subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', torchcodec_wheel_url))
@@ -1886,7 +2005,8 @@ class DeviceInstaller():
                                         print(msg)
                                         rc = subprocess.call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', f'torchcodec=={torchcodec_version_matrix}', f'torchcodec-xpu', 'torchlib-xpu', '--extra-index-url', f'{default_pytorch_url}/xpu'))
                                     else:
-                                        torchcodec_index_url = f'{default_pytorch_url}/cpu' if device_info['name'] == devices['ROCM']['proc'] else f'{default_pytorch_url}/{tag_dir}'
+                                        # ROCm and the +vulkan torch: the official cpu torchcodec (stable ABI from torch 2.11 on)
+                                        torchcodec_index_url = f'{default_pytorch_url}/cpu' if device_info['name'] in [devices['ROCM']['proc'], devices['VULKAN']['proc']] else f'{default_pytorch_url}/{tag_dir}'
                                         rc = subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', f'torchcodec=={torchcodec_version_matrix}', '--index-url', torchcodec_index_url))
                                 if rc == 0:
                                     try:

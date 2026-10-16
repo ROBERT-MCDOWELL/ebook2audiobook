@@ -66,8 +66,9 @@ devices = {
     "ROCM": {"proc": "rocm", "found": False},
     "XPU": {"proc": "xpu", "found": False},
     "JETSON": {"proc": "jetson", "found": False},
-    # Vulkan: no torch device. Only engines with "vulkan": True in default_engine_settings (native GPU builds,
-    # no torch) run on it, the others switch to CPU with an alert (lib/core.py)
+    # Vulkan: torch is installed from the +vulkan wheels (py-pkg) when no CUDA/ROCm/XPU/Jetson torch applies, ahead of
+    # MPS (they keep MPS on Apple Silicon). At run time only engines with "vulkan": True in default_engine_settings
+    # (native GPU builds) run on it, the others switch to CPU with an alert (lib/core.py)
     "VULKAN": {"proc": "vulkan", "found": False}
 }
 
@@ -115,6 +116,10 @@ torch_matrix = {
     "mps":       {"os": [systems['MACOS']], "arch": [archs['ARM64']], "base": "2.7.1", "last": "2.14.1", "codec": "0.17.0"},
     # XPU
     "xpu":       {"os": [systems['LINUX'], systems['WINDOWS']], "arch": [archs['X86_64'], archs['AMD64']], "base": "2.7.1", "last": "2.14.1", "codec": "0.16.0"},
+    # VULKAN: py-pkg +vulkan wheels (build-torch-vulkan.sh / .cmd), the only current torch for Intel macOS. Set to what
+    # is uploaded there: a version, platform or python without its wheels falls back (CPU / MPS). torchaudio 2.11.0
+    # and torchcodec 0.17.0 are stable-ABI, so they follow any torch >= 2.11
+    "vulkan":    {"os": [systems['LINUX'], systems['WINDOWS'], systems['MACOS']], "arch": [archs['X86_64'], archs['AMD64'], archs['ARM64']], "base": "2.11.0", "last": "2.11.0", "codec": "0.17.0"},
     # JETSON
     "jetson5":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.3.1", "last": "2.3.1", "codec": ""},
     "jetson6":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.8.0", "last": "2.8.0", "codec": ""},

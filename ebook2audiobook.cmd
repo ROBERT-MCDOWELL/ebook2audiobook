@@ -812,6 +812,8 @@ if /i "%DEVICE_TAG:~0,2%"=="cu" (
     set "cmd_options=--device=/dev/kfd --device=/dev/dri"
 ) else if /i "%DEVICE_TAG%"=="xpu" (
     set "cmd_options=--device=/dev/dri"
+) else if /i "%DEVICE_TAG%"=="vulkan" (
+    set "cmd_options=--device=/dev/dri"
 ) else if /i "%DEVICE_TAG%"=="mps" (
     set "cmd_options="
 ) else if /i "%DEVICE_TAG%"=="cpu" (
@@ -832,6 +834,8 @@ if /i "%DEVICE_TAG%"=="cpu" (
     set "COMPOSE_PROFILES=rocm"
 ) else if /i "%DEVICE_TAG%"=="xpu" (
     set "COMPOSE_PROFILES=xpu"
+) else if /i "%DEVICE_TAG%"=="vulkan" (
+    set "COMPOSE_PROFILES=vulkan"
 ) else (
     set "COMPOSE_PROFILES=cpu"
 )

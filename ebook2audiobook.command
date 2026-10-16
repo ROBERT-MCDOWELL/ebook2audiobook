@@ -321,18 +321,14 @@ check_python() {
 		}
 		if [[ "$SCRIPT_MODE" == "$NATIVE" ]]; then
 			model="other"
-			if [[ "${OSTYPE-}" == darwin* && "$ARCH" == "amd64" ]]; then	
-				PYTHON_VERSION="3.11"
+			if [[ -r /proc/device-tree/model ]]; then
+				model="$(tr -d '\0' </proc/device-tree/model 2>/dev/null | tr 'A-Z' 'a-z' || true)"
+				if [[ "$model" == *jetson* ]]; then PYTHON_VERSION="$MIN_PYTHON_VERSION"; fi
 			else
-				if [[ -r /proc/device-tree/model ]]; then
-					model="$(tr -d '\0' </proc/device-tree/model 2>/dev/null | tr 'A-Z' 'a-z' || true)"
-					if [[ "$model" == *jetson* ]]; then PYTHON_VERSION="$MIN_PYTHON_VERSION"; fi
-				else
-					compare_versions "$PYTHON_VERSION" "$MIN_PYTHON_VERSION"
-					case $? in 1) PYTHON_VERSION="$MIN_PYTHON_VERSION" ;; esac
-					compare_versions "$PYTHON_VERSION" "$MAX_PYTHON_VERSION"
-					case $? in 2) PYTHON_VERSION="$MAX_PYTHON_VERSION" ;; esac
-				fi
+				compare_versions "$PYTHON_VERSION" "$MIN_PYTHON_VERSION"
+				case $? in 1) PYTHON_VERSION="$MIN_PYTHON_VERSION" ;; esac
+				compare_versions "$PYTHON_VERSION" "$MAX_PYTHON_VERSION"
+				case $? in 2) PYTHON_VERSION="$MAX_PYTHON_VERSION" ;; esac
 			fi
 		fi
 		if ! uv python find --system --python-preference only-managed "$PYTHON_VERSION" &>/dev/null; then
@@ -634,7 +630,7 @@ build_docker_image() {
 	export CALIBRE_INSTALLER_URL
 	export ISO3_LANG
 	case "$DEVICE_TAG" in
-		cpu) cmd_options="";; cu*) cmd_options="--gpus all";; rocm*) cmd_options="--device=/dev/kfd --device=/dev/dri";; jetson*) cmd_options="--runtime nvidia --gpus all";; xpu) cmd_options="--device=/dev/dri";;
+		cpu) cmd_options="";; cu*) cmd_options="--gpus all";; rocm*) cmd_options="--device=/dev/kfd --device=/dev/dri";; jetson*) cmd_options="--runtime nvidia --gpus all";; xpu|vulkan) cmd_options="--device=/dev/dri";;
 	esac
 	local hsa_override=""
 	if [[ "$DEVICE_TAG" == rocm* ]]; then
@@ -646,7 +642,7 @@ build_docker_image() {
 	fi
 	DOCKER_IMG_NAME="${DOCKER_IMG_NAME}:${DEVICE_TAG}"
 	case "$DEVICE_TAG" in
-		cpu|mps) COMPOSE_PROFILES=cpu;; cu*) COMPOSE_PROFILES=cuda;; rocm*) COMPOSE_PROFILES=rocm;; jetson*) COMPOSE_PROFILES=jetson;; xpu) COMPOSE_PROFILES=xpu;; *) COMPOSE_PROFILES=cpu;;
+		cpu|mps) COMPOSE_PROFILES=cpu;; cu*) COMPOSE_PROFILES=cuda;; rocm*) COMPOSE_PROFILES=rocm;; jetson*) COMPOSE_PROFILES=jetson;; xpu) COMPOSE_PROFILES=xpu;; vulkan) COMPOSE_PROFILES=vulkan;; *) COMPOSE_PROFILES=cpu;;
 	esac
 	export COMPOSE_PROFILES
 	get_dri_gids

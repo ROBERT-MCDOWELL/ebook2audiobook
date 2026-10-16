@@ -135,5 +135,14 @@ services:
     group_add:
       - "${RENDER_GID:-44}"
 
+  # --- Vulkan: AMD / Intel / NVIDIA (nouveau) through Mesa ------------------
+  ebook2audiobook-vulkan:
+    <<: *common
+    profiles: [vulkan]
+    devices:
+      - /dev/dri
+    group_add:
+      - "${RENDER_GID:-44}"
+
 volumes:
   e2a_venvs:
