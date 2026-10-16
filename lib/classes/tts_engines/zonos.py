@@ -179,6 +179,10 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                if package.get('macos_min'):
                  mac_major = int((platform.mac_ver()[0] or '0').split('.')[0])
                  if mac_major < package['macos_min']:
+                    # too old a macOS for this package: the next one may start (Apple Silicon: own build 11+, then
+                    # Zyphra's 15+), the error only when none is left
+                    if attempt + 1 < len(attempts):
+                       continue
                     error = legends['error_zonos2_macos_min'].format(engine=tts_engine, min=package['macos_min'], version=platform.mac_ver()[0])
                     raise ValueError(error)
                # Metal / Vulkan / CUDA builds run --gpu only when e2a's device is a GPU (cpu keeps --cpu)
@@ -239,6 +243,12 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                   if sys.platform != systems['WINDOWS']:
                      os.chmod(self.server_bin, os.stat(self.server_bin).st_mode | 0o755)
                   self.emotion_dir = os.path.join(os.path.dirname(self.server_bin), 'emotion_directions')
+                  # macOS Vulkan package: it carries its own loader and MoltenVK in lib/, point the loader at that
+                  # MoltenVK (the system has no Vulkan driver list), unless the user set one
+                  icd = os.path.join(os.path.dirname(self.server_bin), 'lib', 'MoltenVK_icd.json')
+                  if os.path.isfile(icd) and not (os.environ.get('VK_DRIVER_FILES') or os.environ.get('VK_ICD_FILENAMES')):
+                     self.worker_env['VK_DRIVER_FILES'] = icd
+                     self.worker_env['VK_ICD_FILENAMES'] = icd
                   self.engine = self.load_engine()
                   break
                except Exception as e:

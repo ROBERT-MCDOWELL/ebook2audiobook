@@ -69,7 +69,6 @@ devices = {
     # Vulkan: no torch device. Only engines with "vulkan": True in default_engine_settings (native GPU builds,
     # no torch) run on it, the others switch to CPU with an alert (lib/core.py)
     "VULKAN": {"proc": "vulkan", "found": False}
->>>>>>> theirs
 }
 
 device_info_json = '.device_info.json'
@@ -119,7 +118,7 @@ torch_matrix = {
     # JETSON
     "jetson5":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.3.1", "last": "2.3.1", "codec": ""},
     "jetson6":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.8.0", "last": "2.8.0", "codec": ""},
-    "jetson7":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.10.0", "last": "2.10.0", "codec": "0.10.0"}
+    "jetson7":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.9.1", "last": "2.9.1", "codec": "0.9.1"}
 }
 
 torchaudio_max = '2.11.0'
