@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'No {engine} Paquete de GPU para esta máquina todavía ({machine}): se ejecuta en la CPU, que es mucho más lenta.',
     'msg_zonos2_old_venv': 'Al eliminar el antiguo entorno de Zonos v0.1 en {dir}, ZONOS2 no lo necesita...',
     'msg_zonos2_models': 'Obteniendo los {engine} archivos de modelo ({files}), la primera descarga lleva un tiempo...',
+    'msg_vulkan_selected': 'GPU Vulkan {gpu}: Antorcha Vulkan seleccionada',
+    'msg_device_not_supported_try_vulkan': '¡{device} no es compatible con la linterna instalada!<br/>Leer {wiki}<br/>Intentar Vulkan',
     'msg_vulkan_engine_cpu': '{engine} no se puede ejecutar en Vulkan (Vulkan solo ejecuta {engines}): se ha cambiado a CPU.',
     'msg_device_not_supported_vulkan': '¡No se ha encontrado ningún cargador Vulkan en este sistema!<br/>Leer {wiki}<br/>Cambiar a CPU',
     'msg_zonos2_hybrid_gone': 'El modelo híbrido de Zonos no existe en ZONOS2: se ha cambiado al modelo {model}.',

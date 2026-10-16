@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': '否 {engine} 此机器的GPU包尚未（{machine}） ：在CPU上运行，速度要慢得多。',
     'msg_zonos2_old_venv': '删除旧的Zonos v0.1环境 {dir}， ZONOS2不需要它……',
     'msg_zonos2_models': '是让大家 {engine} 模型文件（{files}） ，第一次下载需要一段时间……',
+    'msg_vulkan_selected': 'Vulkan GPU {gpu} ：已选择Vulkan Torch',
+    'msg_device_not_supported_try_vulkan': '安装的火炬不支持{device} ！<br/>读取{wiki}<br/>尝试Vulkan',
     'msg_vulkan_engine_cpu': '{engine}不能在Vulkan上运行（ Vulkan仅运行{engines} ） ：切换到CPU。',
     'msg_device_not_supported_vulkan': '在此系统上未找到Vulkan加载器！<br/>读取{wiki}<br/>切换到CPU',
     'msg_zonos2_hybrid_gone': 'ZONOS2中不存在ZONOS混合模型：切换到 {model} 车型',

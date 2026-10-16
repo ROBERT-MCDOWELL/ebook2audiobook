@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'هنوز هیچ بسته‌ی پردازنده‌ی گرافیکی {engine} برای این دستگاه وجود ندارد ({machine}): روی پردازنده‌ی مرکزی اجرا می‌شود که بسیار کندتر است.',
     'msg_zonos2_old_venv': 'با حذف محیط قدیمی Zonos نسخه ۰.۱ در {dir}، ZONOS2 به آن نیازی ندارد…',
     'msg_zonos2_models': 'برای دریافت فایل‌های مدل {engine} ({files})، اولین دانلود کمی طول می‌کشد…',
+    'msg_vulkan_selected': 'پردازنده گرافیکی Vulkan {gpu}: Vulkan Torch انتخاب شد',
+    'msg_device_not_supported_try_vulkan': '{device} توسط Torch نصب شده پشتیبانی نمی‌شود!<br/>مطالعه کنید {wiki}<br/>در حال امتحان Vulkan',
     'msg_vulkan_engine_cpu': '‎{engine} نمی‌تواند روی Vulkan اجرا شود (Vulkan فقط روی {engines} اجرا می‌شود): به CPU تغییر وضعیت داد.',
     'msg_device_not_supported_vulkan': 'هیچ لودر Vulkan روی این سیستم یافت نشد!<br/>خواندن {wiki}<br/>در حال تغییر به CPU',
     'msg_zonos2_hybrid_gone': 'مدل ترکیبی Zonos در ZONOS2 وجود ندارد: به مدل {model} تغییر یافته است.',

@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'इस मशीन के लिए अभी तक कोई {engine} जीपीयू पैकेज नहीं है ({machine}): सीपीयू पर चल रहा है, जो बहुत धीमा है।',
     'msg_zonos2_old_venv': 'पुराने Zonos v0.1 वातावरण को {dir} में हटाने के लिए, ZONOS2 को इसकी आवश्यकता नहीं है...',
     'msg_zonos2_models': '{engine} मॉडल फ़ाइलें ({files}) प्राप्त करने में, पहले डाउनलोड में कुछ समय लगता है...',
+    'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan मशाल का चयन किया गया',
+    'msg_device_not_supported_try_vulkan': '{device} स्थापित मशाल द्वारा समर्थित नहीं है!<br/>पढ़ें {wiki}<br/>कोशिश कर रहा है Vulkan',
     'msg_vulkan_engine_cpu': '{engine} वल्कन पर नहीं चल सकता (वल्कन केवल {engines} चलाता है): सीपीयू पर स्विच किया गया।',
     'msg_device_not_supported_vulkan': 'इस सिस्टम पर कोई वल्कन लोडर नहीं मिला!<br/>पढ़ें {wiki}<br/> सीपीयू पर स्विच करना',
     'msg_zonos2_hybrid_gone': 'ZONOS2 में ZONOS हाइब्रिड मॉडल मौजूद नहीं है: {model} मॉडल पर स्विच किया गया।',

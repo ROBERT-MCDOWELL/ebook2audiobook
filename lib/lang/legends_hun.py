@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'Még nincs {engine} GPU csomag ehhez a géphez ({machine}): CPU-n fut, ami sokkal lassabb.',
     'msg_zonos2_old_venv': 'A régi Zonos v0.1 környezet eltávolítása a {dir}-ban, a ZONOS2-nek nincs szüksége rá…',
     'msg_zonos2_models': 'A {engine} modellfájl ({files}) beszerzése, az első letöltés eltart egy ideig...',
+    'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan zseblámpa kiválasztva',
+    'msg_device_not_supported_try_vulkan': '{device} nem támogatott a telepített zseblámpa által!<br/>Olvass tovább {wiki}<br/> A Vulkan kipróbálása',
     'msg_vulkan_engine_cpu': 'A {engine} nem futtatható a Vulkanon (a Vulkan csak az {engines}-et futtatja): CPU-ra váltott.',
     'msg_device_not_supported_vulkan': 'Nem található Vulkan betöltő ezen a rendszeren!<br/>Olvasás {wiki}<br/>Váltás CPU-ra',
     'msg_zonos2_hybrid_gone': 'A Zonos hibrid modell nem létezik a ZONOS2-ben: átkapcsolva a {model} modellre.',

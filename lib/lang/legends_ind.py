@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'Paket GPU {engine} untuk mesin ini belum ({machine}): berjalan pada CPU, yang jauh lebih lambat.',
     'msg_zonos2_old_venv': 'Menghapus lingkungan Zona v0.1 lama dalam {dir}, ZONOS2 tidak membutuhkannya...',
     'msg_zonos2_models': 'Mendapatkan {engine} file model ({files}), unduhan pertama membutuhkan waktu…',
+    'msg_vulkan_selected': 'GPU Vulkan {gpu}: Obor Vulkan dipilih',
+    'msg_device_not_supported_try_vulkan': '{device} tidak didukung oleh Obor yang terpasang!<br/>Baca {wiki}<br/>Mencoba Vulkan',
     'msg_vulkan_engine_cpu': '{engine} tidak dapat berjalan di Vulkan (Vulkan hanya berjalan {engines}): beralih ke CPU.',
     'msg_device_not_supported_vulkan': 'Tidak ada pemuat Vulkan yang ditemukan di sistem ini!<br/>Baca {wiki}<br/>Beralih ke CPU',
     'msg_zonos2_hybrid_gone': 'Model hibrida Zonos tidak ada di ZONOS2: beralih ke model {model}.',

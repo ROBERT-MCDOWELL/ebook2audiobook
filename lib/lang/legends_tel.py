@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'ఇంకా ఈ యంత్రం కోసం {engine} GPU ప్యాకేజీ లేదు ({machine}): CPUలో నడుస్తోంది, ఇది చాలా నెమ్మదిగా ఉంటుంది.',
     'msg_zonos2_old_venv': 'లో పాత జోనోస్ v0.1 వాతావరణాన్ని తొలగించడం {dir}, ZONOS2 కి ఇది అవసరం లేదు...',
     'msg_zonos2_models': '{engine} మోడల్ ఫైళ్ళను పొందడం ({files}), మొదటి డౌన్ ‌ లోడ్ ‌ కు కొంత సమయం పడుతుంది...',
+    'msg_vulkan_selected': 'వల్కాన్ GPU {gpu}: వల్కాన్ టార్చ్ ఎంపిక చేయబడింది',
+    'msg_device_not_supported_try_vulkan': '{device} ఇన్ ‌ స్టాల్ చేసిన టార్చ్ ‌ కు మద్దతు లేదు!<br/>చదవడం {wiki}<br/>వల్కాన్ ప్రయత్నిస్తోంది',
     'msg_vulkan_engine_cpu': '{engine} వల్కాన్ ‌ లో అమలు చేయలేరు (వల్కాన్ {engines} మాత్రమే నడుస్తుంది): CPU కి మార్చబడింది.',
     'msg_device_not_supported_vulkan': 'ఈ సిస్టమ్ ‌ లో వల్కాన్ లోడర్ ఏదీ కనుగొనబడలేదు!<br/>చదవండి {wiki}<br/> CPUకు మారడం',
     'msg_zonos2_hybrid_gone': 'ZONOS హైబ్రిడ్ మోడల్ ZONOS2 లో లేదు: {model} మోడల్ ‌ కు మార్చబడింది.',

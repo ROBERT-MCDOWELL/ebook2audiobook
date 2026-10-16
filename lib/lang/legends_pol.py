@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'Nie ma jeszcze pakietu {engine} GPU dla tej maszyny ({machine}): działa na procesorze, który jest znacznie wolniejszy.',
     'msg_zonos2_old_venv': 'Usunięcie starego środowiska ZONOS v0.1 w {dir}, ZONOS2 nie potrzebuje tego…',
     'msg_zonos2_models': 'Pobieranie plików modelu {engine} ({files}), pierwsze pobranie trwa chwilę…',
+    'msg_vulkan_selected': 'Vulkan GPU {gpu}: Wybrano palnik Vulkan',
+    'msg_device_not_supported_try_vulkan': '{device} nie jest obsługiwane przez zainstalowaną latarkę!<br/>Read {wiki}<br/>Trying Vulkan',
     'msg_vulkan_engine_cpu': '{engine} nie może działać na Vulkanie (Vulkan działa tylko {engines}): przełączono na CPU.',
     'msg_device_not_supported_vulkan': 'W tym systemie nie znaleziono ładowarki Vulkan!<br/>Odczyt {wiki}<br/>Przełączanie na procesor',
     'msg_zonos2_hybrid_gone': 'Model hybrydowy Zonos nie istnieje w ZONOS2: przełączono na model {model}.',

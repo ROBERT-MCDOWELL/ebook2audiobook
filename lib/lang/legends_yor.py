@@ -521,6 +521,8 @@ legends = {
     'msg_zonos2_cpu_fallback': 'Kò sí ìpakà GPU {engine} fún ẹ̀rọ yìí síbẹ̀ ({machine}): ó ń ṣiṣẹ́ lórí CPU, èyí tí ó lọ́ra púpọ̀.',
     'msg_zonos2_old_venv': 'Yíyọ àyíká Zonos v0.1 àtijọ́ ní {dir}, ZONOS2 kò nílò rẹ̀...',
     'msg_zonos2_models': 'Gbígba àwọn fáìlì àwòṣe {engine} ({files}), ìmúṣẹ àkọ́kọ́ gba ìgbà díẹ̀...',
+    'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan Torch yàn',
+    'msg_device_not_supported_try_vulkan': '{device} kò ṣe àtìlẹyìn fún Torch tí a fi sori ẹrọ!<br/>Read {wiki}<br/>Trying Vulkan',
     'msg_vulkan_engine_cpu': '{engine} kò lè ṣiṣẹ́ lórí Vulkan (Vulkan ń ṣiṣẹ́ {engines} nìkan): yí padà sí Sipiyu.',
     'msg_device_not_supported_vulkan': 'Kò sí Vulkan loader tí a rí lórí ẹ̀rọ yìí!<br/>Ka {wiki}<br/>Yípadà sí CPU',
     'msg_zonos2_hybrid_gone': 'Àpẹẹrẹ arabara Zonos kò sí ní ZONOS2: yí padà sí àwòṣe {model}.',
