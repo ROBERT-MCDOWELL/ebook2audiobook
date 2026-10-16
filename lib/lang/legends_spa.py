@@ -517,6 +517,8 @@ legends = {
     'error_zonos2_download': 'No se ha podido instalar el paquete {package} del servidor {engine}: {error}',
     'error_zonos2_no_package': '{engine} no tiene paquete de servidor para esta máquina ({machine}).',
     'error_zonos2_macos_min': '{engine} necesita macOS {min} o posterior (este Mac ejecuta macOS {version}).',
+    'msg_zonos2_gpu_restart': 'El servidor de la GPU {engine} ({package}) se bloqueó ({error}): reiniciándolo y rehaciendo la oración.',
+    'msg_zonos2_gpu_dropped': 'El servidor de la GPU {engine} ({package}) volvió a fallar ({error}): lo dejó hasta que se reinicie e2a y volvió a hacer la oración en el siguiente paquete (CPU si no hay otra GPU), que es más lento pero estable.',
     'msg_zonos2_gpu_failed': 'El servidor {engine} GPU ({package}) no pudo iniciarse: {error} ejecutándose en la CPU en su lugar, lo que es mucho más lento.',
     'msg_zonos2_cpu_fallback': 'No {engine} Paquete de GPU para esta máquina todavía ({machine}): se ejecuta en la CPU, que es mucho más lenta.',
     'msg_zonos2_old_venv': 'Al eliminar el antiguo entorno de Zonos v0.1 en {dir}, ZONOS2 no lo necesita...',

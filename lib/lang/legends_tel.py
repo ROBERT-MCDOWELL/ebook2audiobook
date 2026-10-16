@@ -517,6 +517,8 @@ legends = {
     'error_zonos2_download': '{engine} సర్వర్ ప్యాకేజీ {package} ఇన్ ‌ స్టాల్ చేయబడలేదు: {error}',
     'error_zonos2_no_package': '{engine} కి ఈ మెషీన్ కోసం సర్వర్ ప్యాకేజీ లేదు ({machine}).',
     'error_zonos2_macos_min': '{engine} macOS అవసరం {min} లేదా క్రొత్తది (ఈ Mac MacOS ను నడుపుతుంది {version}).',
+    'msg_zonos2_gpu_restart': '{engine} GPU సర్వర్ ({package}) క్రాష్ అయింది ({error}): దానిని పునఃప్రారంభించడం మరియు వాక్యాన్ని మళ్లీ చేయడం.',
+    'msg_zonos2_gpu_dropped': '{engine} GPU సర్వర్ ({package}) మళ్లీ క్రాష్ అయింది ({error}): e2a పునఃప్రారంభమయ్యే వరకు దానిని వదిలివేసి, తదుపరి ప్యాకేజీపై వాక్యాన్ని మళ్లీ చేయండి (CPU లేకపోతే ఇతర GPU ఒకటి), ఇది నెమ్మదిగా కానీ స్థిరంగా ఉంటుంది.',
     'msg_zonos2_gpu_failed': '{engine} GPU సర్వర్ ({package}) ప్రారంభించబడలేదు: {error} బదులుగా CPUలో నడుస్తోంది, ఇది చాలా నెమ్మదిగా ఉంటుంది.',
     'msg_zonos2_cpu_fallback': 'ఇంకా ఈ యంత్రం కోసం {engine} GPU ప్యాకేజీ లేదు ({machine}): CPUలో నడుస్తోంది, ఇది చాలా నెమ్మదిగా ఉంటుంది.',
     'msg_zonos2_old_venv': 'లో పాత జోనోస్ v0.1 వాతావరణాన్ని తొలగించడం {dir}, ZONOS2 కి ఇది అవసరం లేదు...',

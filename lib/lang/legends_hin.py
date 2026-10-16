@@ -517,6 +517,8 @@ legends = {
     'error_zonos2_download': '{engine} सर्वर पैकेज {package} इंस्टॉल नहीं किया जा सका: {error}',
     'error_zonos2_no_package': '{engine} में इस मशीन ({machine}) के लिए कोई सर्वर पैकेज नहीं है।',
     'error_zonos2_macos_min': '{engine} को macOS {min} या उससे नए की ज़रूरत है (यह Mac macOS {version} चलाता है)।',
+    'msg_zonos2_gpu_restart': '{engine} GPU सर्वर ({package}) क्रैश हो गया ({error}): इसे पुनरारंभ करना और वाक्य को फिर से करना।',
+    'msg_zonos2_gpu_dropped': '{engine} GPU सर्वर ({package}) फिर से क्रैश हो गया ({error}): इसे तब तक छोड़ दें जब तक कि e2a फिर से शुरू न हो जाए और अगले पैकेज पर वाक्य को फिर से न करें (यदि कोई अन्य GPU एक नहीं है तो CPU), जो धीमा लेकिन स्थिर है।',
     'msg_zonos2_gpu_failed': '{engine} GPU सर्वर ({package}) शुरू नहीं हो सका: {error} इसके बजाय CPU पर चल रहा है, जो बहुत धीमा है।',
     'msg_zonos2_cpu_fallback': 'इस मशीन के लिए अभी तक कोई {engine} जीपीयू पैकेज नहीं है ({machine}): सीपीयू पर चल रहा है, जो बहुत धीमा है।',
     'msg_zonos2_old_venv': 'पुराने Zonos v0.1 वातावरण को {dir} में हटाने के लिए, ZONOS2 को इसकी आवश्यकता नहीं है...',

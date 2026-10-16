@@ -517,6 +517,8 @@ legends = {
     'error_zonos2_download': '{engine} সার্ভার প্যাকেজ {package} ইনস্টল করা যায়নি: {error}',
     'error_zonos2_no_package': 'এই মেশিনের জন্য {engine} এর কোনও সার্ভার প্যাকেজ নেই ({machine}) ।',
     'error_zonos2_macos_min': '{engine} এর জন্য macOS {min} বা তার বেশি প্রয়োজন (এই Mac macOS {version} চালায়) ।',
+    'msg_zonos2_gpu_restart': '{engine} জিপিইউ সার্ভার ({package}) ক্র্যাশ ({error}): এটি পুনরায় চালু করা এবং বাক্যটি পুনরায় করা ।',
+    'msg_zonos2_gpu_dropped': '{engine} জিপিইউ সার্ভার ({package}) আবার ক্র্যাশ হয়েছে ({error}): e2a পুনরায় চালু না হওয়া পর্যন্ত এটি ছেড়ে দেওয়া এবং পরবর্তী প্যাকেজে (অন্য কোনও জিপিইউ না থাকলে সিপিইউ) বাক্যটি পুনরায় করা, যা ধীর কিন্তু স্থিতিশীল ।',
     'msg_zonos2_gpu_failed': '{engine} জিপিইউ সার্ভার ({package}) শুরু করা যায়নি: {error} এর পরিবর্তে সিপিইউতে চলছে, যা অনেক ধীর ।',
     'msg_zonos2_cpu_fallback': 'এই মেশিনের জন্য এখনও কোন {engine} জিপিইউ প্যাকেজ নেই ({machine}): সিপিইউতে চলছে, যা অনেক ধীর ।',
     'msg_zonos2_old_venv': '{dir}-এ পুরানো Zonos v0.1 পরিবেশ অপসারণ করা, ZONOS2 এর এটির প্রয়োজন নেই...',
