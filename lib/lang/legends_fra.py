@@ -517,6 +517,8 @@ legends = {
     'error_zonos2_download': 'Le package {engine} serveur {package} n\'a pas pu être installé : {error}',
     'error_zonos2_no_package': '{engine} n\'a pas de package serveur pour cette machine ({machine}).',
     'error_zonos2_macos_min': '{engine} nécessite macOS {min} ou une version plus récente (ce Mac exécute macOS {version}).',
+    'msg_zonos2_gpu_restart': 'Le serveur GPU {engine} ({package}) s\'est planté ({error}) : le redémarrer et refaire la phrase.',
+    'msg_zonos2_gpu_dropped': 'Le serveur GPU {engine} ({package}) s\'est à nouveau planté ({error}) : en le laissant jusqu\'à ce que e2a redémarre et en refaisant la phrase sur le package suivant (CPU s\'il n\'y a pas d\'autre GPU), qui est plus lent mais stable.',
     'msg_zonos2_gpu_failed': 'Le serveur GPU {engine} ({package}) n\'a pas pu démarrer : {error} s\'exécutant sur le CPU à la place, ce qui est beaucoup plus lent.',
     'msg_zonos2_cpu_fallback': 'Pas encore de package GPU {engine} pour cette machine ({machine}) : en cours d\'exécution sur CPU, ce qui est beaucoup plus lent.',
     'msg_zonos2_old_venv': 'Suppression de l\'ancien environnement Zonos v0.1 en {dir}, ZONOS2 n\'en a pas besoin…',

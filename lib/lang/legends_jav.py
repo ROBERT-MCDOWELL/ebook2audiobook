@@ -517,6 +517,8 @@ legends = {
     'error_zonos2_download': 'Paket server {engine} {package} ora bisa diinstal: {error}',
     'error_zonos2_no_package': '{engine} ora duwe paket server kanggo mesin iki ({machine}).',
     'error_zonos2_macos_min': '{engine} mbutuhake macOS {min} utawa luwih anyar (Mac iki nganggo macOS {version}).',
+    'msg_zonos2_gpu_restart': 'Server {engine} GPU ({package}) nabrak ({error}): miwiti maneh lan gawe maneh ukara.',
+    'msg_zonos2_gpu_dropped': 'Server GPU {engine} ({package}) nabrak maneh ({error}): ninggalake nganti e2a miwiti maneh lan gawe maneh ukara ing paket sabanjure (CPU yen ora ana GPU liyane), sing luwih alon nanging stabil.',
     'msg_zonos2_gpu_failed': 'Server {engine} GPU ({package}) ora bisa miwiti: {error} mlaku ing CPU tinimbang, kang luwih alon.',
     'msg_zonos2_cpu_fallback': 'Ora ana paket GPU {engine} kanggo mesin iki ({machine}): mlaku ing CPU, sing luwih alon.',
     'msg_zonos2_old_venv': 'Ngilangi lingkungan Zonos v0.1 lawas ing {dir}, ZONOS2 ora butuh...',

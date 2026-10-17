@@ -517,6 +517,8 @@ legends = {
     'error_zonos2_download': 'ページは {engine} サーバーパッケージ {package} インストールできませんでした: {error}',
     'error_zonos2_no_package': '{engine} このマシンのサーバーパッケージがありません（{machine}).',
     'error_zonos2_macos_min': '{engine} macOSが必要です {min} またはそれ以降（このMacはmacOSを実行します {version}).',
+    'msg_zonos2_gpu_restart': '{engine} GPUサーバー（{package} ）がクラッシュしました（{error} ） ：それを再起動し、文章をやり直します。',
+    'msg_zonos2_gpu_dropped': '{engine} GPUサーバー（{package} ）は再びクラッシュしました（{error} ） ： e 2 aが再起動するまで残り、次のパッケージ（他のGPUがない場合はCPU ）で文をやり直します。これは遅いですが安定しています。',
     'msg_zonos2_gpu_failed': 'ページは {engine} GPUサーバー（{package}ddを起動できませんでした。 {error} 代わりにCPUで実行すると、はるかに遅くなります。',
     'msg_zonos2_cpu_fallback': 'いいえ {engine} このマシンのGPUパッケージはまだ（{machine}） ： CPU上で実行されていますが、これははるかに遅いです。',
     'msg_zonos2_old_venv': '古いZonos v0.1環境の削除 {dir}、ZONOS 2はそれを必要としません...',
