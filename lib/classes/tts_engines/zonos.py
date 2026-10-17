@@ -351,7 +351,11 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                          # provided after commit call"): restart it once, drop the package on its second death, and
                          # redo the whole sentence with a fresh engine (__init__ picks the package, CPU last)
                          crashes = Zonos.gpu_crashes[self.package_name] = Zonos.gpu_crashes.get(self.package_name, 0) + 1
-                         msg = legends['msg_zonos2_gpu_restart' if crashes < 2 else 'msg_zonos2_gpu_dropped'].format(engine=self.session['tts_engine'], package=self.package_name, error=reply.get('error'))
+                         # the worker's error carries the server's last log lines joined by ' | ': the last one is
+                         # the cause (e.g. the Metal assertion), the rest is startup noise
+                         error = str(reply.get('error') or '')
+                         error = (error.split(': ', 1)[0] + ': ' + error.split(' | ')[-1]) if ' | ' in error else error
+                         msg = legends['msg_zonos2_gpu_restart' if crashes < 2 else 'msg_zonos2_gpu_dropped'].format(engine=self.session['tts_engine'], package=self.package_name, error=error)
                          show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
                          if show_alert is not None:
                             show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
