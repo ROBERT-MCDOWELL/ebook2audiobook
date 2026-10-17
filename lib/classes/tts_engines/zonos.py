@@ -99,7 +99,7 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                except OSError:
                   board_sm = None
             if sys.platform == systems['LINUX'] and machine in ('x86_64', 'amd64'):
-               candidates = (['linux-x64-cuda'] if self.device == devices['CUDA']['proc'] else []) + (['linux-x64-vulkan', 'linux-x64-vulkan-zyphra'] if gpu_wanted else []) + ['linux-x64-cpu-avx2', 'linux-x64-cpu-sse42', 'linux-x64-cpu-zyphra', 'linux-x64-vulkan-zyphra']
+               candidates = (['linux-x64-cuda13', 'linux-x64-cuda12'] if self.device == devices['CUDA']['proc'] else []) + (['linux-x64-vulkan', 'linux-x64-vulkan-zyphra'] if gpu_wanted else []) + ['linux-x64-cpu-avx2', 'linux-x64-cpu-sse42', 'linux-x64-cpu-zyphra', 'linux-x64-vulkan-zyphra']
             elif sys.platform == systems['LINUX'] and machine in ('aarch64', 'arm64'):
                if jetpack is not None:
                   candidates = [k for k, v in packages.items() if v.get('jetpack') == jetpack and board_sm in v.get('sm', [])] + (['linux-aarch64-cuda13'] if jetpack >= 7 else [])
@@ -109,10 +109,11 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             elif sys.platform == systems['WINDOWS'] and machine in ('amd64', 'x86_64'):
                # CPU builds without Vulkan first: they start even where no vulkan-1.dll exists (old GPUs, VMs).
                # Zyphra's Vulkan build stays the last resort with --cpu (needs vulkan-1.dll and AVX2)
-               candidates = (['windows-x64-cuda'] if self.device == devices['CUDA']['proc'] else []) + (['windows-x64-vulkan'] if gpu_wanted else []) + ['windows-x64-cpu-avx2', 'windows-x64-cpu-sse42', 'windows-x64-vulkan']
+               # CUDA 13 then 12, own Vulkan build (SSE4.2 CPU part: CPUs without AVX2 too) then Zyphra's (AVX2)
+               candidates = (['windows-x64-cuda13', 'windows-x64-cuda12'] if self.device == devices['CUDA']['proc'] else []) + (['windows-x64-vulkan', 'windows-x64-vulkan-zyphra'] if gpu_wanted else []) + ['windows-x64-cpu-avx2', 'windows-x64-cpu-sse42', 'windows-x64-vulkan-zyphra']
             elif sys.platform == systems['MACOS']:
                # arm64: own Metal build first, Zyphra's as the GPU fallback. x86_64: Vulkan (MoltenVK) build on a GPU device
-               candidates = ['macos-arm64', 'macos-arm64-metal'] if machine == 'arm64' else (['macos-x86_64-vulkan'] if gpu_wanted else []) + ['macos-x86_64']
+               candidates = ['macos-arm64', 'macos-arm64-metal', 'macos-arm64-cpu'] if machine == 'arm64' else (['macos-x86_64-vulkan'] if gpu_wanted else []) + ['macos-x86_64']
             else:
                candidates = []
             # CPU features the packages may need, with /proc/cpuinfo names on every OS
@@ -203,7 +204,14 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                   marker_file = os.path.join(package_dir, '.e2a_installed.json')
                   # downloaded once: a package folder with its install record is used as it is from then on
                   # (the record is written only after a complete download and unpacking)
-                  if not os.path.exists(marker_file):
+                  # a folder whose record names another URL (a package key moved to another build, e.g. windows-x64-vulkan
+                  # from Zyphra's to e2a's own) is downloaded again
+                  try:
+                     with open(marker_file, 'r', encoding='utf-8') as f:
+                        installed_url = json.load(f).get('url')
+                  except Exception:
+                     installed_url = None
+                  if installed_url != package['url']:
                      msg = legends['msg_zonos2_downloading'].format(engine=tts_engine, package=self.package_name)
                      print(msg)
                      if progress_bar is not None:

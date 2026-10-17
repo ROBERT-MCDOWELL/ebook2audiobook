@@ -104,17 +104,24 @@ default_engine_settings = {
         # runs on the "vulkan" device (its Vulkan packages): torch engines switch to CPU there
         "vulkan": True,
         "packages": {
-            "linux-x64-cuda": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-linux-x64-cuda12.tar.gz", "gpu": True, "enabled": False},
+            # CUDA packages carry the CUDA runtime and cuBLAS (only the NVIDIA driver needed): 13 first (Turing and newer,
+            # driver 580+), 12 when 13 cannot start (Maxwell and newer, driver 525+)
+            "linux-x64-cuda13": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-linux-x64-cuda13.tar.gz", "gpu": True, "enabled": False},
+            "linux-x64-cuda12": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-linux-x64-cuda12.tar.gz", "gpu": True, "enabled": False},
             "linux-x64-vulkan": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-linux-x64-vulkan.tar.gz", "gpu": True, "cpu_flags": ["avx2", "fma", "f16c"]},
             "linux-x64-vulkan-zyphra": {"url": "https://github.com/Zyphra/zonos2.cpp/releases/latest/download/zonos2-linux-x64-vulkan.tar.gz", "gpu": True, "cpu_flags": ["avx2", "fma", "f16c"], "glibc_min": "2.34"},
             "linux-x64-cpu-avx2": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-linux-x64-cpu-avx2.tar.gz", "gpu": False, "cpu_flags": ["avx2", "fma", "f16c", "bmi2"]},
             "linux-x64-cpu-sse42": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-linux-x64-cpu-sse42.tar.gz", "gpu": False, "cpu_flags": ["sse4_2"]},
             "linux-x64-cpu-zyphra": {"url": "https://github.com/Zyphra/zonos2.cpp/releases/latest/download/zonos2-linux-x64-cpu.tar.gz", "gpu": False, "cpu_flags": ["avx512f", "avx512bw", "avx512vl", "avx512_vnni"], "glibc_min": "2.34"},
-            "windows-x64-cuda": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-windows-x64-cuda12.zip", "gpu": True, "enabled": False},
-            "windows-x64-vulkan": {"url": "https://github.com/Zyphra/zonos2.cpp/releases/latest/download/zonos2-windows-x64-vulkan.zip", "gpu": True, "cpu_flags": ["avx2", "fma", "f16c"]},
+            "windows-x64-cuda13": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-windows-x64-cuda13.zip", "gpu": True, "enabled": False},
+            "windows-x64-cuda12": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-windows-x64-cuda12.zip", "gpu": True, "enabled": False},
+            "windows-x64-vulkan": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-windows-x64-vulkan.zip", "gpu": True, "cpu_flags": ["sse4_2"], "enabled": False},
+            "windows-x64-vulkan-zyphra": {"url": "https://github.com/Zyphra/zonos2.cpp/releases/latest/download/zonos2-windows-x64-vulkan.zip", "gpu": True, "cpu_flags": ["avx2", "fma", "f16c"]},
             "windows-x64-cpu-avx2": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-windows-x64-cpu-avx2.zip", "gpu": False, "cpu_flags": ["avx2", "fma", "f16c", "bmi2"]},
             "windows-x64-cpu-sse42": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-windows-x64-cpu-sse42.zip", "gpu": False, "cpu_flags": ["sse4_2"]},
             "macos-arm64": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-macos-arm64.tar.gz", "gpu": True, "macos_min": 11, "enabled": False},
+            # the same package run with --cpu: Apple Silicon's CPU fallback when Metal fails
+            "macos-arm64-cpu": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-macos-arm64.tar.gz", "gpu": False, "macos_min": 11, "enabled": False},
             "macos-arm64-metal": {"url": "https://github.com/Zyphra/zonos2.cpp/releases/latest/download/zonos2-macos-arm64-metal.tar.gz", "gpu": True, "macos_min": 15},
             "macos-x86_64-vulkan": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-macos-x86_64-vulkan.tar.gz", "gpu": True, "macos_min": 12},
             "macos-x86_64": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-macos-x86_64.tar.gz", "gpu": False, "macos_min": 11},
