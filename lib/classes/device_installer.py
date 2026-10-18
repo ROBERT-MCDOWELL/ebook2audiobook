@@ -2005,7 +2005,6 @@ class DeviceInstaller():
                                         print(msg)
                                         rc = subprocess.call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', f'torchcodec=={torchcodec_version_matrix}', f'torchcodec-xpu', 'torchlib-xpu', '--extra-index-url', f'{default_pytorch_url}/xpu'))
                                     else:
-                                        # ROCm and the +vulkan torch: the official cpu torchcodec (stable ABI from torch 2.11 on)
                                         torchcodec_index_url = f'{default_pytorch_url}/cpu' if device_info['name'] in [devices['ROCM']['proc'], devices['VULKAN']['proc']] else f'{default_pytorch_url}/{tag_dir}'
                                         rc = subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', f'torchcodec=={torchcodec_version_matrix}', '--index-url', torchcodec_index_url))
                                 if rc == 0:
