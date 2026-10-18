@@ -511,6 +511,7 @@ legends = {
     'msg_worker_starting': 'A {engine} munkavállaló elindítása ({model}: {device})…',
     'error_worker_failed': '{engine} munkavállaló nem tudott elindulni: {error}',
     'error_worker_exited': 'Dolgozói folyamat kilépve (kód {code})',
+    'msg_venv_fetching_source': 'A {engine} forrás letöltése…',
     'msg_venv_creating': 'A {engine} virtuális környezet létrehozása {dir}…',
     'msg_venv_installing': 'Telepítés {pkgs} a következőbe: {engine} virtuális környezet, eltart egy ideig, kérjük, legyen türelemmel…',
     'msg_zonos2_downloading': 'A {engine} szervercsomag letöltése {package}…',

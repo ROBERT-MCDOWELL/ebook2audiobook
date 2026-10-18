@@ -511,6 +511,7 @@ legends = {
     'msg_worker_starting': 'Avvio del {engine} lavoratore subordinato{model} il {device})…',
     'error_worker_failed': '{engine} lavoratore non è riuscito ad avviare: {error}',
     'error_worker_exited': 'Processo lavoratore terminato (codice {code})',
+    'msg_venv_fetching_source': 'Recupero della sorgente {engine} in corso...',
     'msg_venv_creating': 'Creazione della luna {engine} Ambiente virtuale {dir}…',
     'msg_venv_installing': 'Installazione {pkgs} nelle {engine} ambiente virtuale, ci vuole un po\', per favore sii paziente...',
     'msg_zonos2_downloading': 'Download del pacchetto {engine} server {package} in corso...',

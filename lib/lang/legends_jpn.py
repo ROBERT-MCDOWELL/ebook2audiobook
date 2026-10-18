@@ -511,6 +511,7 @@ legends = {
     'msg_worker_starting': '{engine}ワーカーを開始しています（{model}対{device} ）...',
     'error_worker_failed': '{engine}ワーカーが開始に失敗しました： {error}',
     'error_worker_exited': 'ワーカープロセスが終了しました（コード{code} ）',
+    'msg_venv_fetching_source': '{engine}ソースを取得しています…',
     'msg_venv_creating': 'を作成する {engine} の仮想環境 {dir}…',
     'msg_venv_installing': 'インストール中 {pkgs} 全て学習コンテンツ {engine} 仮想環境、しばらく時間がかかります。しばらくお待ちください…',
     'msg_zonos2_downloading': 'をダウンロードする {engine} サーバーパッケージ {package}…',

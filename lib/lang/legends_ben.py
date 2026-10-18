@@ -511,6 +511,7 @@ legends = {
     'msg_worker_starting': 'শুরু হচ্ছে {engine} কর্মী{model} অন {device})…',
     'error_worker_failed': '{engine} জন কর্মী শুরু করতে ব্যর্থ হয়েছে: {error}',
     'error_worker_exited': 'কর্মী প্রক্রিয়া বন্ধ হয়ে গেছে (কোড {code})',
+    'msg_venv_fetching_source': '{engine} উৎস আনয়ন করা হচ্ছে...',
     'msg_venv_creating': 'তৈরি করা হচ্ছে {engine} ভার্চুয়াল এনভায়রনমেন্ট {dir}…',
     'msg_venv_installing': 'ইনস্টল {pkgs} মধ্যে {engine} ভার্চুয়াল পরিবেশ, এতে কিছুটা সময় লাগে, দয়া করে ধৈর্য ধরুন...',
     'msg_zonos2_downloading': '{engine} সার্ভার প্যাকেজ {package} ডাউনলোড করা হচ্ছে...',
