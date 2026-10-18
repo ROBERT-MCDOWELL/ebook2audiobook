@@ -511,6 +511,7 @@ legends = {
     'msg_worker_starting': '시작하면서 {engine} 작업자{model} 게시일 {device})…',
     'error_worker_failed': '{engine} 작업자 시작 실패: {error}',
     'error_worker_exited': '근로자 프로세스 종료 (코드 {code})',
+    'msg_venv_fetching_source': '{engine} 소스를 가져오는 중...',
     'msg_venv_creating': '{dir}... 에서 {engine} 가상 환경 만들기',
     'msg_venv_installing': '설치 {pkgs} 으로 {engine} 가상 환경, 시간이 좀 걸립니다. 잠시만 기다려주세요...',
     'msg_zonos2_downloading': '다운로드 중 {engine} 서버 패키지 {package}…',

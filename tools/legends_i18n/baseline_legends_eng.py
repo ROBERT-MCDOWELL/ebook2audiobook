@@ -511,6 +511,7 @@ legends = {
     'msg_worker_starting': 'Starting the {engine} worker ({model} on {device})…',
     'error_worker_failed': '{engine} worker failed to start: {error}',
     'error_worker_exited': 'Worker process exited (code {code})',
+    'msg_venv_fetching_source': 'Fetching the {engine} source…',
     'msg_venv_creating': 'Creating the {engine} virtual environment in {dir}…',
     'msg_venv_installing': 'Installing {pkgs} into the {engine} virtual environment, it takes a while, please be patient…',
     'msg_zonos2_downloading': 'Downloading the {engine} server package {package}…',

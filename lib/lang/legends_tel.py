@@ -511,6 +511,7 @@ legends = {
     'msg_worker_starting': 'ప్రారంభించడం {engine} కార్మికుడు ({model} మీద {device})…',
     'error_worker_failed': '{engine} వర్కర్ ప్రారంభించడంలో విఫలమయ్యారు: {error}',
     'error_worker_exited': 'వర్కర్ ప్రాసెస్ నిష్క్రమించబడింది (కోడ్ {code})',
+    'msg_venv_fetching_source': '{engine} సోర్స్ ‌ ను పొందుతోంది...',
     'msg_venv_creating': 'సృష్టించుట {engine} లో వర్చువల్ ఎన్విరాన్మెంట్ {dir}…',
     'msg_venv_installing': 'స్థాపించు {pkgs} లోకి {engine} వర్చువల్ ఎన్విరాన్ ‌ మెంట్, దీనికి కొంత సమయం పడుతుంది, దయచేసి ఓపికపట్టండి...',
     'msg_zonos2_downloading': '{engine} సర్వర్ ప్యాకేజీని డౌన్ ‌ లోడ్ చేస్తోంది {package}...',

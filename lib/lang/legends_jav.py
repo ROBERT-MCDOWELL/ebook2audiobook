@@ -511,6 +511,7 @@ legends = {
     'msg_worker_starting': 'Produse {engine} pegawe ({model} á â {device})…',
     'error_worker_failed': '{engine} buruh gagal kanggo miwiti: {error}',
     'error_worker_exited': 'Prosès buruh metu (kode {code})',
+    'msg_venv_fetching_source': 'Taken taken the {engine} wiki…',
     'msg_venv_creating': 'ЭэээээээээээээээээээээээээээээээээээээээээээЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭ {engine} lingkungan virtual ing {dir}…',
     'msg_venv_installing': 'ING BANK {pkgs} ээээээээээээээээээээээээээээээээээээээээээээЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭ {engine} lingkungan virtual, iku njupuk wektu, please sabar...',
     'msg_zonos2_downloading': 'Ngundhuh paket {engine} server {package}...',

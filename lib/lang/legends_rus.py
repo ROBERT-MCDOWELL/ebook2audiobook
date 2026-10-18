@@ -511,6 +511,7 @@ legends = {
     'msg_worker_starting': '. {engine} рабочий{model} горит {device})…',
     'error_worker_failed': 'Не удалось запустить {engine} работника: {error}',
     'error_worker_exited': 'Рабочий процесс завершен (код {code})',
+    'msg_venv_fetching_source': 'Получение источника {engine}...',
     'msg_venv_creating': 'Создание правила {engine} виртуальная среда {dir}…',
     'msg_venv_installing': 'Установка {pkgs} в {engine} виртуальная среда, это занимает некоторое время, пожалуйста, будьте терпеливы...',
     'msg_zonos2_downloading': 'Загрузка пакета сервера {engine} {package}...',

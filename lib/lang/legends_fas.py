@@ -511,6 +511,7 @@ legends = {
     'msg_worker_starting': 'شروع کارگر {engine} ({model} روی {device})…',
     'error_worker_failed': 'کارگر {engine} نتوانست شروع کند: {error}',
     'error_worker_exited': 'فرآیند کارگر خارج شد (کد {code})',
+    'msg_venv_fetching_source': 'در حال دریافت منبع {engine}…',
     'msg_venv_creating': 'ایجاد محیط مجازی {engine} در {dir}…',
     'msg_venv_installing': 'نصب {pkgs} در محیط مجازی {engine} کمی طول می‌کشد، لطفاً صبور باشید…',
     'msg_zonos2_downloading': 'دانلود بسته سرور {engine} {package}…',

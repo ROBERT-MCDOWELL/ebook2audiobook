@@ -511,6 +511,7 @@ legends = {
     'msg_worker_starting': 'தொடங்குகிறது {engine} தொழிலாளி{model} இயக்கு {device})…',
     'error_worker_failed': '{engine} தொழிலாளி தொடங்கத் தவறிவிட்டார்: {error}',
     'error_worker_exited': 'பணியாளர் செயல்முறை வெளியேறியது (குறியீடு {code})',
+    'msg_venv_fetching_source': '{engine} மூலத்தைப் பெறுகிறது...',
     'msg_venv_creating': 'உருவாக்குதல் {engine} இல் மெய்நிகர் சூழல் {dir}…',
     'msg_venv_installing': 'நிறுவப்படுகிறது {pkgs} க்குள் {engine} மெய்நிகர் சூழல், சிறிது நேரம் எடுக்கும், தயவுசெய்து பொறுமையாக இருங்கள்...',
     'msg_zonos2_downloading': '{engine} சேவையக தொகுப்பைப் பதிவிறக்குகிறது {package}...',

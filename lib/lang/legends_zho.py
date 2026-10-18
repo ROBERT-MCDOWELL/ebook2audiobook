@@ -511,6 +511,7 @@ legends = {
     'msg_worker_starting': '正在启动{engine}个工人（{model}对{device} ） ……',
     'error_worker_failed': '{engine}个工作线程启动失败： {error}',
     'error_worker_exited': '工作进程已退出（代码{code} ）',
+    'msg_venv_fetching_source': '正在获取{engine}源…',
     'msg_venv_creating': '创建名单 {engine} 虚拟环境 {dir}…',
     'msg_venv_installing': '正在安装 {pkgs} 进入 {engine} 虚拟环境，需要一段时间，请耐心等待……',
     'msg_zonos2_downloading': '正在下载{engine}服务器包{package}…',
