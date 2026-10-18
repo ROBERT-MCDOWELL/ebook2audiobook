@@ -404,7 +404,7 @@ class OmniVoice(TTSUtils, TTSRegistry, name='omnivoice'):
                     if not any(c.isalnum() for c in part):
                         continue
                     else:
-                        trim_audio_buffer = 0.006
+                        #trim_audio_buffer = 0.006
                         # only the voice path crosses the pipe: the worker cuts the reference, builds the
                         # voice clone prompt once per voice and model, and keeps it
                         reply = self.engine.send({
@@ -430,8 +430,8 @@ class OmniVoice(TTSUtils, TTSRegistry, name='omnivoice'):
                         if part_tensor.numel() == 0:
                             error = 'part_tensor not valid'
                             return False, error
-                        if part[-1].isalnum() or part[-1] == '—':
-                            part_tensor = trim_audio(part_tensor.squeeze(), self.params['samplerate'], 0.001, trim_audio_buffer).unsqueeze(0)
+                        #if part[-1].isalnum() or part[-1] == '—':
+                        #    part_tensor = trim_audio(part_tensor.squeeze(), self.params['samplerate'], 0.001, trim_audio_buffer).unsqueeze(0)
                         self.audio_segments.append(part_tensor)
                         if not re.search(r'\w$', part, flags=re.UNICODE) and part[-1] != '—':
                             silence_time = int(np.random.uniform(0.3, 0.6) * 100) / 100
