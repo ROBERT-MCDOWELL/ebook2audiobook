@@ -121,7 +121,7 @@ torch_matrix = {
     "jetson6":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.8.0", "last": "2.8.0", "codec": ""},
     "jetson7":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "base": "2.9.1", "last": "2.9.1", "codec": "0.9.1"},
     # VULKAN:
-    "vulkan":    {"os": [systems['LINUX'], systems['WINDOWS'], systems['MACOS']], "arch": [archs['X86_64'], archs['AMD64'], archs['ARM64']], "base": "2.11.0", "last": "2.14.1", "codec": "0.17.0"}
+    "vulkan":    {"os": [systems['LINUX'], systems['WINDOWS'], systems['MACOS']], "arch": [archs['X86_64'], archs['AMD64'], archs['ARM64'], archs['AARCH64']], "base": "2.11.0", "last": "2.14.1", "codec": "0.17.0"}
 }
 
 torchaudio_max = '2.11.0'
