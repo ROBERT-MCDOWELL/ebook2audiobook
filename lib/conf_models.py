@@ -7,6 +7,7 @@ xtts_builtin_speakers_list = {}
 TTS_ENGINES = {
     "ZONOS": "zonos",
     "GPTSOVITS": "gptsovits",
+    "OMNIVOICE": "omnivoice",
     "XTTS": "xtts",
     "BARK": "bark",
     "TORTOISE": "tortoise",
@@ -79,13 +80,13 @@ default_speaker = os.path.join(voices_dir, 'eng', 'adult', 'male', 'KumarDahl.wa
 
 tts_engines_from_coqui = [TTS_ENGINES['XTTS'], TTS_ENGINES['BARK'], TTS_ENGINES['TORTOISE'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
 tts_engines_with_inner_speaker = [TTS_ENGINES['PIPER'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
-tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'])
+tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['OMNIVOICE'])
 
 max_custom_model = 100
 max_custom_voices = 1000
 
 default_engine_settings = {
-    TTS_ENGINES['ZONOS']: {.
+    TTS_ENGINES['ZONOS']: {
         "version": "0.5.2",
         "vulkan": True,
         "packages": {
@@ -180,6 +181,39 @@ default_engine_settings = {
         "voice": default_speaker,
         "voices": {},
         "rating": {"VRAM": 4, "CPU": 2, "RAM": 8, "Realism": 4}
+    },
+    TTS_ENGINES['OMNIVOICE']: {
+        # runs in its own uv venv (lib/classes/tts_engines/venvs/omnivoice) behind a persistent worker
+        "repo": "k2-fsa/OmniVoice",
+        "source": "https://github.com/k2-fsa/OmniVoice/archive/08be0b4ccbac3e13e374e86fbfead4b4cac343e2.tar.gz",
+        "python": "3.12",
+        # package list = upstream's own pyproject.toml dependencies (in the extracted tree), torch from the
+        # device's PyTorch index (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller as fallback;
+        # upstream's torch floor (torch>=2.4) stops devices that cannot reach it with a clear alert.
+        # Left out: gradio (demo UI), tensorboardX / webdataset (training). Names normalized as pip does.
+        "requirements_exclude": ["gradio", "tensorboardx", "webdataset"],
+        "requirements_extra": [],
+        # every package installs as a wheel, so no platform ever needs a compiler
+        "packages_sdist": [],
+        # reference transcription for the voice clone prompt (OmniVoice's own Whisper, run on cpu)
+        "asr_model": "openai/whisper-large-v3-turbo",
+        # the worker cuts a reference clip within this window (upstream asks for 3-10 s)
+        "ref_min": 3.2,
+        "ref_max": 9.5,
+        # e2a's iso-639-3 codes -> OmniVoice language ids (upstream docs/lang_id_name_map.tsv, 646 languages);
+        # the ones e2a's own language list does not have yet are a separate step
+        "languages": {"adx": "adx", "amh": "am", "ara": "arb", "asm": "as", "bak": "ba", "bba": "bba", "bel": "be", "ben": "bn", "bmq": "bmq", "bod": "bo", "bul": "bg", "cat": "ca", "ceb": "ceb", "ces": "cs", "chv": "cv", "cnh": "cnh", "cym": "cy", "dan": "da", "dar": "dar", "deu": "de", "dgo": "dgo", "div": "dv", "dyu": "dyu", "ell": "el", "eng": "en", "est": "et", "eus": "eu", "fas": "fa", "fin": "fi", "fra": "fr", "ful": "ff", "gbm": "gbm", "gej": "gej", "gle": "ga", "grn": "gn", "guj": "gu", "hat": "ht", "hau": "ha", "heb": "he", "hin": "hi", "hrv": "hr", "hun": "hu", "ind": "id", "isl": "is", "ita": "it", "jav": "jv", "jpn": "ja", "kab": "kab", "kan": "kn", "kaz": "kk", "kdh": "kdh", "khg": "khg", "khm": "km", "kin": "rw", "kir": "ky", "kor": "ko", "lao": "lo", "lav": "lv", "lin": "ln", "lit": "lt", "lug": "lg", "mai": "mai", "mal": "ml", "mar": "mr", "mhr": "mhr", "mlg": "plt", "mlt": "mt", "mon": "mn", "mya": "my", "myv": "myv", "nan": "nan", "nhi": "nhi", "nld": "nl", "nmz": "nmz", "nob": "nb", "nya": "ny", "orm": "om", "ory": "ory", "oss": "os", "pan": "pa", "pcm": "pcm", "pol": "pl", "por": "pt", "quy": "quy", "ron": "ro", "rus": "ru", "sah": "sah", "slk": "sk", "sln": "sl", "sna": "sn", "som": "so", "spa": "es", "sqi": "sq", "swe": "sv", "swh": "sw", "tam": "ta", "tat": "tt", "tel": "te", "tgk": "tg", "tha": "th", "tir": "ti", "tur": "tr", "twu": "twu", "ukr": "uk", "vie": "vi", "yor": "yo", "zga": "zga", "zho": "zh", "zlm": "ms", "zza": "zza"},
+        "samplerate": 24000,
+        # upstream defaults: 32 unmasking steps (16 = faster), classifier-free guidance 2.0
+        "num_step": 32,
+        "guidance_scale": 2.0,
+        "speed": 1.0,
+        # custom model upload: a fine-tuned OmniVoice checkpoint (save_pretrained folder) + ref.wav; its
+        # audio_tokenizer / chat_template come from the base model when the upload does not carry them
+        "files": ["config.json", "model.safetensors", "tokenizer.json", "tokenizer_config.json", "ref.wav"],
+        "voice": default_speaker,
+        "voices": {},
+        "rating": {"VRAM": 4, "CPU": 3, "RAM": 8, "Realism": 5}
     },
     TTS_ENGINES['XTTS']: {
         "repo": "coqui/XTTS-v2",
