@@ -3,7 +3,7 @@
 
 CPU/GPU Converter from E-Book to audiobook with chapters and metadata<br/>
 using advanced TTS engines and much more.<br/>
-Supports voice cloning and 1158 languages!
+Supports voice cloning and 1696 languages!
 > [!IMPORTANT]
 **This tool is intended for use with non-DRM, legally acquired eBooks only.** <br>
 The authors are not responsible for any misuse of this software or any resulting legal consequences. <br>
@@ -109,7 +109,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - 🔍 **OCR scanning** for files with text pages as images
 - 🔊 **High-quality text-to-speech** from near realtime to near real voice
 - 🗣️ **Optional voice cloning** using your own voice file
-- 🌐 **Supports 1158 languages** ([supported languages list](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html))
+- 🌐 **Supports 1696 languages** ([supported languages list](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html))
 - 💻 **Low-resource friendly** — runs on **2 GB RAM / 1 GB VRAM (minimum)**
 - 🎵 **Audiobook output formats**: mono or stereo `aac`, `flac`, `mp3`, `m4b`, `m4a`, `mp4`, `mov`, `ogg`, `wav`, `webm`
 - 🧠 **SML tags supported** — fine-grained control of breaks, pauses, voice switching and more ([see below](#sml-tags-available))
