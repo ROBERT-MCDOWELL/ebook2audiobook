@@ -4,21 +4,19 @@ Executed automatically on Python startup before user code.
 Use this for lightweight, idempotent environment patches.
 
 This version is guaranteed build-safe for:
-• PyTorch source builds
-• CMake / pip toolchains
-• Deep NLP toolchains (stanza, transformers, etc.)
-• Jetson CUDA environments
+- PyTorch source builds
+- CMake / pip toolchains
+- Deep NLP toolchains (stanza, transformers, etc.)
+- Jetson CUDA environments
 
 It patches transformers.check_torch_load_is_safe ONLY if/when transformers is imported.
 It replaces torchaudio.load ONLY if/when torchaudio is imported (avoids torchcodec
 DLL load failures on PyTorch ROCm/Windows builds).
-
 """
 
-import sys, os, importlib
-# importlib.machinery is NOT loaded at interpreter startup: the hook below would
-# raise AttributeError on the first transformers/huggingface_hub/torchaudio import
-# of any process that did not happen to import it earlier (python -c, subprocesses).
+import sys
+import os
+import importlib
 import importlib.machinery
 from types import ModuleType, FunctionType
 from typing import Any
@@ -26,6 +24,7 @@ from typing import Any
 # Enable debug logging via:
 #   export DEBUG_SITECUSTOMIZE=1
 debug = os.environ.get('DEBUG_SITECUSTOMIZE') == '1'
+
 def warn(msg: str) -> None:
     if debug:
         print(f'[sitecustomize] {msg}')
@@ -51,29 +50,33 @@ def wrapped_check_torch_load_is_safe(*args: Any, **kwargs: Any) -> None:
     warn('patched transformers check_torch_load_is_safe')
     return None
 
-def patch_module(mod: ModuleType, attr='check_torch_load_is_safe') -> None:
-    if hasattr(mod, attr):
-        setattr(mod, attr, wrapped_check_torch_load_is_safe)
-        warn(f'patched {mod.__name__}.{attr}')
+def patch_transformers(mod: ModuleType) -> None:
+    if hasattr(mod, 'check_torch_load_is_safe'):
+        setattr(mod, 'check_torch_load_is_safe', wrapped_check_torch_load_is_safe)
+        warn(f'patched {mod.__name__}.check_torch_load_is_safe')
 
-    # Rewrite use_auth_token → token for newer huggingface_hub
-    if mod.__name__ == 'huggingface_hub':
-        for fn_name in dir(mod):
-            fn = getattr(mod, fn_name, None)
-            if not isinstance(fn, FunctionType) or fn_name.startswith('_'):
-                continue
+def patch_huggingface_hub(mod: ModuleType) -> None:
+    # Rewrite use_auth_token → token for newer huggingface_hub safely
+    for fn_name in dir(mod):
+        if fn_name.startswith('_'):
+            continue
+        fn = getattr(mod, fn_name, None)
+        if not isinstance(fn, FunctionType):
+            continue
 
-            def _make_wrapper(fn):
+        def _make_wrapper(original_fn):
+            def wrapper(*args, **kwargs):
+                if 'use_auth_token' in kwargs:
+                    kwargs['token'] = kwargs.pop('use_auth_token')
+                    warn(f'rewrote use_auth_token → token in {original_fn.__name__}()')
+                return original_fn(*args, **kwargs)
+            return wrapper
 
-                def wrapper(*args, **kwargs):
-                    if 'use_auth_token' in kwargs:
-                        kwargs['token'] = kwargs.pop('use_auth_token')
-                        warn(f'rewrote use_auth_token → token in {fn.__name__}()')
-                    return fn(*args, **kwargs)
-                return wrapper
-
+        try:
             setattr(mod, fn_name, _make_wrapper(fn))
-        warn(f'patched all callables in {mod.__name__} (use_auth_token compat)')
+        except Exception as e:
+            warn(f'failed to wrap {fn_name}: {e!r}')
+    warn(f'patched callables in {mod.__name__} (use_auth_token compat)')
 
 def patch_torchaudio(mod: ModuleType) -> None:
     """Replace torchaudio.load with a soundfile-backed shim.
@@ -84,8 +87,7 @@ def patch_torchaudio(mod: ModuleType) -> None:
     WAV/FLAC/OGG natively without FFmpeg or torchcodec.
 
     Idempotent. Lazy: torch/soundfile are imported only when this
-    function fires, never at sitecustomize startup time (which would
-    hang during torch's ROCm SDK init on Windows).
+    function fires, never at sitecustomize startup time.
     """
     if getattr(getattr(mod, 'load', None), '__name__', '') == '_load_via_soundfile':
         return
@@ -96,11 +98,11 @@ def patch_torchaudio(mod: ModuleType) -> None:
         warn(f'torchaudio.load patch skipped: {e!r}')
         return
 
-    def _load_via_soundfile(uri, frame_offset:int=0, num_frames:int=-1,
-                           normalize:bool=True, channels_first:bool=True,
-                           **_ignored):
+    def _load_via_soundfile(uri, frame_offset: int = 0, num_frames: int = -1,
+                            normalize: bool = True, channels_first: bool = True,
+                            **_ignored):
         start = int(frame_offset) if frame_offset else 0
-        frames = -1 if (num_frames is None or num_frames<0) else int(num_frames)
+        frames = -1 if (num_frames is None or num_frames < 0) else int(num_frames)
         dtype = 'float32' if normalize else 'int16'
         data, sr = sf.read(uri, start=start, frames=frames,
                            dtype=dtype, always_2d=True)
@@ -122,7 +124,6 @@ if patch_enabled:
         """Composition-based loader wrapper.
         Delegates to the original loader regardless of its type,
         avoiding constructor signature mismatches across loader classes.
-        Compatible with all loader types (source, extension, frozen, namespace).
         """
 
         def __init__(self, orig):
@@ -136,12 +137,17 @@ if patch_enabled:
         def exec_module(self, module):
             self._orig.exec_module(module)
             name = module.__name__
-            if name == 'torchaudio':
+            if name == 'transformers':
+                patch_transformers(module)
+            elif name == 'huggingface_hub':
+                patch_huggingface_hub(module)
+            elif name == 'torchaudio':
                 patch_torchaudio(module)
 
     class LazyPatchHook:
+
         def find_spec(self, fullname, path, target=None):
-            spec = importlib.machinery.PathFinder.find_spec(fullname, path)
+            spec = importlib.machinery.PathFinder.find_spec(fullname, path, target)
             if not spec or not spec.loader:
                 return spec
             spec.loader = WrappedLoader(spec.loader)
