@@ -480,7 +480,7 @@ class TTSUtils:
                             config = XttsConfig()
                             config.models_dir = os.path.join('models','tts')
                             config.load_json(config_path)
-                            engine = Xtts(config)
+                            engine = Xtts.init_from_config(config)
                             engine.load_checkpoint(
                                 config,
                                 checkpoint_path = checkpoint_path,
