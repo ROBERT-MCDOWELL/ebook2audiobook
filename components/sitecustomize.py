@@ -20,7 +20,7 @@ from types import ModuleType
 # Enable debug logging via:
 #   export DEBUG_SITECUSTOMIZE=1
 debug = os.environ.get('DEBUG_SITECUSTOMIZE') == '1'
-def warn(msg: str) -> None:
+def warn(msg: str)->None:
     if debug:
         print(f'[sitecustomize] {msg}')
 
@@ -41,7 +41,7 @@ else:
 # ─────────────────────────────────────────────────────
 # Patch definitions (lazy applied only after modules load)
 # ─────────────────────────────────────────────────────
-def patch_torchaudio(mod: ModuleType) -> None:
+def patch_torchaudio(mod: ModuleType)->None:
     """Replace torchaudio.load with a soundfile-backed shim."""
     if getattr(getattr(mod, 'load', None), '__name__', '') == '_load_via_soundfile':
         return
@@ -68,7 +68,7 @@ def patch_torchaudio(mod: ModuleType) -> None:
     mod.load = _load_via_soundfile
     warn('patched torchaudio.load → soundfile (bypass torchcodec)')
 
-def patch_torch(mod: ModuleType) -> None:
+def patch_torch(mod: ModuleType)->None:
     """Allowlist Coqui-TTS classes for PyTorch 2.6+ weights_only=True loading."""
     try:
         from TTS.tts.configs.xtts_config import XttsConfig
