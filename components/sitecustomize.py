@@ -6,6 +6,7 @@ Use this for lightweight, idempotent environment patches.
 This version is guaranteed build-safe for:
 - PyTorch source builds
 - CMake / pip toolchains
+- Deep NLP toolchains (stanza, transformers, etc.)
 - Jetson CUDA environments
 
 It replaces torchaudio.load ONLY if/when torchaudio is imported (avoids torchcodec
@@ -14,16 +15,13 @@ DLL load failures on PyTorch ROCm/Windows builds).
 """
 
 import sys, os, importlib
-# importlib.machinery is NOT loaded at interpreter startup: the hook below would
-# raise AttributeError on the first torchaudio import of any process that did not
-# happen to import it earlier (python -c, subprocesses).
 import importlib.machinery
 from types import ModuleType
 
 # Enable debug logging via:
 #   export DEBUG_SITECUSTOMIZE=1
 debug = os.environ.get('DEBUG_SITECUSTOMIZE') == '1'
-def warn(msg: str)->None:
+def warn(msg: str) -> None:
     if debug:
         print(f'[sitecustomize] {msg}')
 
@@ -44,7 +42,7 @@ else:
 # ─────────────────────────────────────────────────────
 # Patch definitions (lazy applied only after modules load)
 # ─────────────────────────────────────────────────────
-def patch_torchaudio(mod: ModuleType)->None:
+def patch_torchaudio(mod: ModuleType) -> None:
     """Replace torchaudio.load with a soundfile-backed shim.
 
     torchaudio >=2.9 routes load() through torchcodec by default, whose
@@ -91,7 +89,6 @@ if patch_enabled:
         """Composition-based loader wrapper.
         Delegates to the original loader regardless of its type,
         avoiding constructor signature mismatches across loader classes.
-        Compatible with all loader types (source, extension, frozen, namespace).
         """
 
         def __init__(self, orig):
@@ -104,13 +101,16 @@ if patch_enabled:
 
         def exec_module(self, module):
             self._orig.exec_module(module)
-            name = module.__name__
-            if name == 'torchaudio':
+            if module.__name__ == 'torchaudio':
                 patch_torchaudio(module)
 
     class LazyPatchHook:
 
         def find_spec(self, fullname, path, target=None):
+            # Only intercept target modules to prevent breaking package resource loading (e.g., certifi)
+            if fullname != 'torchaudio':
+                return None
+            
             spec = importlib.machinery.PathFinder.find_spec(fullname, path)
             if not spec or not spec.loader:
                 return spec
