@@ -2292,7 +2292,7 @@ def build_interface(args:dict)->gr.Blocks:
                                                 if os.path.exists(new_voice_path) and any(v[1] == new_voice_path for v in voice_options):
                                                     session['voice'] = new_voice_path
                                                 else:
-                                                    if voice_options and len(voice_options) > 0 and len(voice_options[0]) > 1:
+                                                    if voice_options and len(voice_options) > 0:
                                                         session['voice'] = voice_options[0][1]
                                                     else:
                                                         session['voice'] = default_engine_settings[session['tts_engine']]['voice']]
