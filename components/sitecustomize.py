@@ -2,58 +2,27 @@
 Global environment initialization hook.
 Executed automatically on Python startup before user code.
 Use this for lightweight, idempotent environment patches.
-
-This version is guaranteed build-safe for:
-- PyTorch source builds
-- CMake / pip toolchains
-- Deep NLP toolchains (stanza, transformers, etc.)
-- Jetson CUDA environments
-
-It replaces torchaudio.load ONLY if/when torchaudio is imported (avoids torchcodec
-DLL load failures on PyTorch ROCm/Windows builds).
-
 """
 
 import sys, os, importlib
 import importlib.machinery
 from types import ModuleType
 
-# Enable debug logging via:
-#   export DEBUG_SITECUSTOMIZE=1
 debug = os.environ.get('DEBUG_SITECUSTOMIZE') == '1'
 def warn(msg: str) -> None:
     if debug:
         print(f'[sitecustomize] {msg}')
 
-# ────────────────────────────────────────────────────────
-# SAFETY MODE → skip entirely during PyTorch/CMake builds
-# (but DO NOT exit Python — just skip logic)
-# ────────────────────────────────────────────────────────
 inactive = any(os.environ.get(v) == '1' for v in [
     'TORCH_BUILD', 'PYTORCH_BUILD', 'DISABLE_SITECUSTOMIZE'
 ])
 
 if inactive:
-    warn('inactive (torch build or manual disable)')
     patch_enabled = False
 else:
     patch_enabled = True
 
-# ─────────────────────────────────────────────────────
-# Patch definitions (lazy applied only after modules load)
-# ─────────────────────────────────────────────────────
 def patch_torchaudio(mod: ModuleType) -> None:
-    """Replace torchaudio.load with a soundfile-backed shim.
-
-    torchaudio >=2.9 routes load() through torchcodec by default, whose
-    bundled libtorchcodec_core*.dll fails to link against PyTorch ROCm
-    Windows builds (WinError 127). soundfile (libsndfile) handles
-    WAV/FLAC/OGG natively without FFmpeg or torchcodec.
-
-    Idempotent. Lazy: torch/soundfile are imported only when this
-    function fires, never at sitecustomize startup time (which would
-    hang during torch's ROCm SDK init on Windows).
-    """
     if getattr(getattr(mod, 'load', None), '__name__', '') == '_load_via_soundfile':
         return
     try:
@@ -77,20 +46,23 @@ def patch_torchaudio(mod: ModuleType) -> None:
         return tensor, sr
 
     mod.load = _load_via_soundfile
-    warn('patched torchaudio.load → soundfile (bypass torchcodec)')
+    warn('patched torchaudio.load → soundfile')
+
+def patch_torch(mod: ModuleType) -> None:
+    """Allowlist Coqui-TTS classes for PyTorch 2.6+ weights_only=True loading."""
+    try:
+        import torch
+        from TTS.tts.configs.xtts_config import XttsConfig
+        if hasattr(torch.serialization, 'add_safe_globals'):
+            torch.serialization.add_safe_globals([XttsConfig])
+            warn('added XttsConfig to torch safe globals')
+    except Exception as e:
+        warn(f'failed to add torch safe globals: {e!r}')
 
 
-# ─────────────────────────────────────────────────────
-# IMPORT HOOK (activates only when modules load)
-# ─────────────────────────────────────────────────────
 if patch_enabled:
 
     class WrappedLoader:
-        """Composition-based loader wrapper.
-        Delegates to the original loader regardless of its type,
-        avoiding constructor signature mismatches across loader classes.
-        """
-
         def __init__(self, orig):
             self._orig = orig
 
@@ -101,16 +73,16 @@ if patch_enabled:
 
         def exec_module(self, module):
             self._orig.exec_module(module)
-            if module.__name__ == 'torchaudio':
+            name = module.__name__
+            if name == 'torchaudio':
                 patch_torchaudio(module)
+            elif name == 'torch':
+                patch_torch(module)
 
     class LazyPatchHook:
-
         def find_spec(self, fullname, path, target=None):
-            # Only intercept target modules to prevent breaking package resource loading (e.g., certifi)
-            if fullname != 'torchaudio':
+            if fullname not in ('torchaudio', 'torch'):
                 return None
-            
             spec = importlib.machinery.PathFinder.find_spec(fullname, path)
             if not spec or not spec.loader:
                 return spec
@@ -118,5 +90,3 @@ if patch_enabled:
             return spec
 
     sys.meta_path.insert(0, LazyPatchHook())
-else:
-    warn('loaded but inactive (no patches applied)')
