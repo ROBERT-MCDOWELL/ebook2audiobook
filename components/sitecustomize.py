@@ -13,23 +13,6 @@ It patches transformers.check_torch_load_is_safe ONLY if/when transformers is im
 It replaces torchaudio.load ONLY if/when torchaudio is imported (avoids torchcodec
 DLL load failures on PyTorch ROCm/Windows builds).
 
-Contract with device_installer.select_pkg('transformers'):
-the installer only caps transformers under the installed torch floor (<5.1 for
-torch<2.4, <5.8 for torch<2.5, uncapped above), so every device tag resolves to
-transformers 5.x + huggingface_hub 1.x. That is only valid because the patches
-below cover what the older stacks still expect:
-• check_torch_load_is_safe → torch.load (.bin checkpoints) requires torch>=2.6 in every
-  transformers release, 4.57.6 included; jetson (2.3.1/2.8.0) is below. No pin can replace this patch.
-• isin_mps_friendly        → removed in transformers 5.1, still imported by coqui-tts
-  tortoise. Without it: cap transformers<5.1 on every tag.
-• GPT2InferenceModel mask  → transformers 5.18 drops an all-1s attention_mask in generate(),
-  but coqui-tts tortoise AND xtts GPT2InferenceModel.forward read attention_mask.shape[1] on
-  every cached (1-token) step. Without it: cap transformers<5.18 on every tag. No-op once
-  coqui-tts ships the upstream fix (idiap/coqui-ai-TTS#592).
-• use_auth_token → token   → removed in huggingface_hub 1.x, still passed by pyannote 3.4
-  (torch<2.9 branch). Without it: transformers==4.57.6 + huggingface_hub<1.0 there.
-
-Compatible with Python 3.10 → 3.14.
 """
 
 import sys, os, importlib
@@ -72,53 +55,6 @@ def patch_module(mod: ModuleType, attr='check_torch_load_is_safe') -> None:
     if hasattr(mod, attr):
         setattr(mod, attr, wrapped_check_torch_load_is_safe)
         warn(f'patched {mod.__name__}.{attr}')
-
-    # Patch missing isin_mps_friendly for newer transformers
-    if mod.__name__ == 'transformers.pytorch_utils' and not hasattr(mod, 'isin_mps_friendly'):
-        import torch
-
-        # Safely check PyTorch version for MPS compatibility
-        try:
-            import packaging.version
-            _is_torch_gte_2_4 = packaging.version.parse(
-                torch.__version__.split('+')[0]
-            ) >= packaging.version.parse("2.4.0")
-        except ImportError:
-            _is_torch_gte_2_4 = False
-
-        def _isin_mps_friendly(elements, test_elements):
-            """MPS-safe fallback for torch.isin on PyTorch < 2.4."""
-            if elements.device.type == "mps" and not _is_torch_gte_2_4:
-                test_elements = torch.as_tensor(test_elements, device=elements.device)
-                if test_elements.ndim == 0:
-                    test_elements = test_elements.unsqueeze(0)
-                return (
-                    elements.tile(test_elements.shape[0], 1)
-                    .eq(test_elements.unsqueeze(1))
-                    .sum(dim=0)
-                    .bool()
-                    .squeeze()
-                )
-            else:
-                # Note: don't use named arguments in `torch.isin`,
-                # see https://github.com/pytorch/pytorch/issues/126045
-                return torch.isin(elements, test_elements)
-
-        mod.isin_mps_friendly = _isin_mps_friendly
-        warn(f'patched {mod.__name__}.isin_mps_friendly')
-    # Restore the attention_mask transformers>=5.18 drops from generate() when it is all 1s
-    if mod.__name__ in ('TTS.tts.layers.tortoise.autoregressive', 'TTS.tts.layers.xtts.gpt_inference') and hasattr(mod, 'GPT2InferenceModel'):
-        import functools, torch
-        orig_forward = mod.GPT2InferenceModel.forward
-        if not getattr(orig_forward, '_e2a_mask_patch', False):
-            @functools.wraps(orig_forward)
-            def forward(self, input_ids=None, past_key_values=None, attention_mask=None, *args, **kwargs):
-                if attention_mask is None and input_ids is not None and input_ids.shape[1] == 1 and past_key_values is not None:
-                    attention_mask = torch.ones((input_ids.shape[0], past_key_values.get_seq_length()+1), dtype=torch.long, device=input_ids.device)
-                return orig_forward(self, input_ids, past_key_values, attention_mask, *args, **kwargs)
-            forward._e2a_mask_patch = True
-            mod.GPT2InferenceModel.forward = forward
-            warn(f'patched {mod.__name__}.GPT2InferenceModel.forward (attention_mask)')
 
     # Rewrite use_auth_token → token for newer huggingface_hub
     if mod.__name__ == 'huggingface_hub':
@@ -200,16 +136,11 @@ if patch_enabled:
         def exec_module(self, module):
             self._orig.exec_module(module)
             name = module.__name__
-            if name.startswith(('transformers', 'huggingface_hub')) or name in ('TTS.tts.layers.tortoise.autoregressive', 'TTS.tts.layers.xtts.gpt_inference'):
-                patch_module(module)
-            elif name == 'torchaudio':
+            if name == 'torchaudio':
                 patch_torchaudio(module)
 
     class LazyPatchHook:
         def find_spec(self, fullname, path, target=None):
-            if not (fullname.startswith(('transformers', 'huggingface_hub'))
-                    or fullname in ('torchaudio', 'TTS.tts.layers.tortoise.autoregressive', 'TTS.tts.layers.xtts.gpt_inference')):
-                return None
             spec = importlib.machinery.PathFinder.find_spec(fullname, path)
             if not spec or not spec.loader:
                 return spec
@@ -217,7 +148,5 @@ if patch_enabled:
             return spec
 
     sys.meta_path.insert(0, LazyPatchHook())
-    warn('active (lazy patch mode: transformers, huggingface_hub, torchaudio, TTS tortoise/xtts)')
-
 else:
     warn('loaded but inactive (no patches applied)')
