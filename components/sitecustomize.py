@@ -4,19 +4,38 @@ Executed automatically on Python startup before user code.
 Use this for lightweight, idempotent environment patches.
 
 This version is guaranteed build-safe for:
-- PyTorch source builds
-- CMake / pip toolchains
-- Deep NLP toolchains (stanza, transformers, etc.)
-- Jetson CUDA environments
+• PyTorch source builds
+• CMake / pip toolchains
+• Deep NLP toolchains (stanza, transformers, etc.)
+• Jetson CUDA environments
 
 It patches transformers.check_torch_load_is_safe ONLY if/when transformers is imported.
 It replaces torchaudio.load ONLY if/when torchaudio is imported (avoids torchcodec
 DLL load failures on PyTorch ROCm/Windows builds).
+
+Contract with device_installer.select_pkg('transformers'):
+the installer only caps transformers under the installed torch floor (<5.1 for
+torch<2.4, <5.8 for torch<2.5, uncapped above), so every device tag resolves to
+transformers 5.x + huggingface_hub 1.x. That is only valid because the patches
+below cover what the older stacks still expect:
+• check_torch_load_is_safe → torch.load (.bin checkpoints) requires torch>=2.6 in every
+  transformers release, 4.57.6 included; jetson (2.3.1/2.8.0) is below. No pin can replace this patch.
+• isin_mps_friendly        → removed in transformers 5.1, still imported by coqui-tts
+  tortoise. Without it: cap transformers<5.1 on every tag.
+• GPT2InferenceModel mask  → transformers 5.18 drops an all-1s attention_mask in generate(),
+  but coqui-tts tortoise AND xtts GPT2InferenceModel.forward read attention_mask.shape[1] on
+  every cached (1-token) step. Without it: cap transformers<5.18 on every tag. No-op once
+  coqui-tts ships the upstream fix (idiap/coqui-ai-TTS#592).
+• use_auth_token → token   → removed in huggingface_hub 1.x, still passed by pyannote 3.4
+  (torch<2.9 branch). Without it: transformers==4.57.6 + huggingface_hub<1.0 there.
+
+Compatible with Python 3.10 → 3.14.
 """
 
-import sys
-import os
-import importlib
+import sys, os, importlib
+# importlib.machinery is NOT loaded at interpreter startup: the hook below would
+# raise AttributeError on the first transformers/huggingface_hub/torchaudio import
+# of any process that did not happen to import it earlier (python -c, subprocesses).
 import importlib.machinery
 from types import ModuleType, FunctionType
 from typing import Any
@@ -24,7 +43,6 @@ from typing import Any
 # Enable debug logging via:
 #   export DEBUG_SITECUSTOMIZE=1
 debug = os.environ.get('DEBUG_SITECUSTOMIZE') == '1'
-
 def warn(msg: str) -> None:
     if debug:
         print(f'[sitecustomize] {msg}')
@@ -50,33 +68,76 @@ def wrapped_check_torch_load_is_safe(*args: Any, **kwargs: Any) -> None:
     warn('patched transformers check_torch_load_is_safe')
     return None
 
-def patch_transformers(mod: ModuleType) -> None:
-    if hasattr(mod, 'check_torch_load_is_safe'):
-        setattr(mod, 'check_torch_load_is_safe', wrapped_check_torch_load_is_safe)
-        warn(f'patched {mod.__name__}.check_torch_load_is_safe')
+def patch_module(mod: ModuleType, attr='check_torch_load_is_safe') -> None:
+    if hasattr(mod, attr):
+        setattr(mod, attr, wrapped_check_torch_load_is_safe)
+        warn(f'patched {mod.__name__}.{attr}')
 
-def patch_huggingface_hub(mod: ModuleType) -> None:
-    # Rewrite use_auth_token → token for newer huggingface_hub safely
-    for fn_name in dir(mod):
-        if fn_name.startswith('_'):
-            continue
-        fn = getattr(mod, fn_name, None)
-        if not isinstance(fn, FunctionType):
-            continue
+    # Patch missing isin_mps_friendly for newer transformers
+    if mod.__name__ == 'transformers.pytorch_utils' and not hasattr(mod, 'isin_mps_friendly'):
+        import torch
 
-        def _make_wrapper(original_fn):
-            def wrapper(*args, **kwargs):
-                if 'use_auth_token' in kwargs:
-                    kwargs['token'] = kwargs.pop('use_auth_token')
-                    warn(f'rewrote use_auth_token → token in {original_fn.__name__}()')
-                return original_fn(*args, **kwargs)
-            return wrapper
-
+        # Safely check PyTorch version for MPS compatibility
         try:
+            import packaging.version
+            _is_torch_gte_2_4 = packaging.version.parse(
+                torch.__version__.split('+')[0]
+            ) >= packaging.version.parse("2.4.0")
+        except ImportError:
+            _is_torch_gte_2_4 = False
+
+        def _isin_mps_friendly(elements, test_elements):
+            """MPS-safe fallback for torch.isin on PyTorch < 2.4."""
+            if elements.device.type == "mps" and not _is_torch_gte_2_4:
+                test_elements = torch.as_tensor(test_elements, device=elements.device)
+                if test_elements.ndim == 0:
+                    test_elements = test_elements.unsqueeze(0)
+                return (
+                    elements.tile(test_elements.shape[0], 1)
+                    .eq(test_elements.unsqueeze(1))
+                    .sum(dim=0)
+                    .bool()
+                    .squeeze()
+                )
+            else:
+                # Note: don't use named arguments in `torch.isin`,
+                # see https://github.com/pytorch/pytorch/issues/126045
+                return torch.isin(elements, test_elements)
+
+        mod.isin_mps_friendly = _isin_mps_friendly
+        warn(f'patched {mod.__name__}.isin_mps_friendly')
+    # Restore the attention_mask transformers>=5.18 drops from generate() when it is all 1s
+    if mod.__name__ in ('TTS.tts.layers.tortoise.autoregressive', 'TTS.tts.layers.xtts.gpt_inference') and hasattr(mod, 'GPT2InferenceModel'):
+        import functools, torch
+        orig_forward = mod.GPT2InferenceModel.forward
+        if not getattr(orig_forward, '_e2a_mask_patch', False):
+            @functools.wraps(orig_forward)
+            def forward(self, input_ids=None, past_key_values=None, attention_mask=None, *args, **kwargs):
+                if attention_mask is None and input_ids is not None and input_ids.shape[1] == 1 and past_key_values is not None:
+                    attention_mask = torch.ones((input_ids.shape[0], past_key_values.get_seq_length()+1), dtype=torch.long, device=input_ids.device)
+                return orig_forward(self, input_ids, past_key_values, attention_mask, *args, **kwargs)
+            forward._e2a_mask_patch = True
+            mod.GPT2InferenceModel.forward = forward
+            warn(f'patched {mod.__name__}.GPT2InferenceModel.forward (attention_mask)')
+
+    # Rewrite use_auth_token → token for newer huggingface_hub
+    if mod.__name__ == 'huggingface_hub':
+        for fn_name in dir(mod):
+            fn = getattr(mod, fn_name, None)
+            if not isinstance(fn, FunctionType) or fn_name.startswith('_'):
+                continue
+
+            def _make_wrapper(fn):
+
+                def wrapper(*args, **kwargs):
+                    if 'use_auth_token' in kwargs:
+                        kwargs['token'] = kwargs.pop('use_auth_token')
+                        warn(f'rewrote use_auth_token → token in {fn.__name__}()')
+                    return fn(*args, **kwargs)
+                return wrapper
+
             setattr(mod, fn_name, _make_wrapper(fn))
-        except Exception as e:
-            warn(f'failed to wrap {fn_name}: {e!r}')
-    warn(f'patched callables in {mod.__name__} (use_auth_token compat)')
+        warn(f'patched all callables in {mod.__name__} (use_auth_token compat)')
 
 def patch_torchaudio(mod: ModuleType) -> None:
     """Replace torchaudio.load with a soundfile-backed shim.
@@ -87,7 +148,8 @@ def patch_torchaudio(mod: ModuleType) -> None:
     WAV/FLAC/OGG natively without FFmpeg or torchcodec.
 
     Idempotent. Lazy: torch/soundfile are imported only when this
-    function fires, never at sitecustomize startup time.
+    function fires, never at sitecustomize startup time (which would
+    hang during torch's ROCm SDK init on Windows).
     """
     if getattr(getattr(mod, 'load', None), '__name__', '') == '_load_via_soundfile':
         return
@@ -98,11 +160,11 @@ def patch_torchaudio(mod: ModuleType) -> None:
         warn(f'torchaudio.load patch skipped: {e!r}')
         return
 
-    def _load_via_soundfile(uri, frame_offset: int = 0, num_frames: int = -1,
-                            normalize: bool = True, channels_first: bool = True,
-                            **_ignored):
+    def _load_via_soundfile(uri, frame_offset:int=0, num_frames:int=-1,
+                           normalize:bool=True, channels_first:bool=True,
+                           **_ignored):
         start = int(frame_offset) if frame_offset else 0
-        frames = -1 if (num_frames is None or num_frames < 0) else int(num_frames)
+        frames = -1 if (num_frames is None or num_frames<0) else int(num_frames)
         dtype = 'float32' if normalize else 'int16'
         data, sr = sf.read(uri, start=start, frames=frames,
                            dtype=dtype, always_2d=True)
@@ -124,6 +186,7 @@ if patch_enabled:
         """Composition-based loader wrapper.
         Delegates to the original loader regardless of its type,
         avoiding constructor signature mismatches across loader classes.
+        Compatible with all loader types (source, extension, frozen, namespace).
         """
 
         def __init__(self, orig):
@@ -137,22 +200,24 @@ if patch_enabled:
         def exec_module(self, module):
             self._orig.exec_module(module)
             name = module.__name__
-            if name == 'transformers':
-                patch_transformers(module)
-            elif name == 'huggingface_hub':
-                patch_huggingface_hub(module)
+            if name.startswith(('transformers', 'huggingface_hub')) or name in ('TTS.tts.layers.tortoise.autoregressive', 'TTS.tts.layers.xtts.gpt_inference'):
+                patch_module(module)
             elif name == 'torchaudio':
                 patch_torchaudio(module)
 
     class LazyPatchHook:
-
         def find_spec(self, fullname, path, target=None):
-            spec = importlib.machinery.PathFinder.find_spec(fullname, path, target)
+            if not (fullname.startswith(('transformers', 'huggingface_hub'))
+                    or fullname in ('torchaudio', 'TTS.tts.layers.tortoise.autoregressive', 'TTS.tts.layers.xtts.gpt_inference')):
+                return None
+            spec = importlib.machinery.PathFinder.find_spec(fullname, path)
             if not spec or not spec.loader:
                 return spec
             spec.loader = WrappedLoader(spec.loader)
             return spec
 
     sys.meta_path.insert(0, LazyPatchHook())
+    warn('active (lazy patch mode: transformers, huggingface_hub, torchaudio, TTS tortoise/xtts)')
+
 else:
     warn('loaded but inactive (no patches applied)')
