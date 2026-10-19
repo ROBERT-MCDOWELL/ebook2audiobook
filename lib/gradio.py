@@ -2295,7 +2295,7 @@ def build_interface(args:dict)->gr.Blocks:
                                                     if voice_options and len(voice_options) > 0 and len(voice_options[0]) > 1:
                                                         session['voice'] = voice_options[0][1]
                                                     else:
-                                                        session['voice'] = default_engine_settings[TTS_ENGINES[session['tts_engine']]['voice']]
+                                                        session['voice'] = default_engine_settings[session['tts_engine']]['voice']]
                         else:
                             if voice_options and voice_options[0][1] is not None:
                                 new_voice_path = models[session['fine_tuned']]['voice']
