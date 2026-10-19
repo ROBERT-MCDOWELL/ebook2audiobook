@@ -336,11 +336,8 @@ if errorlevel 1 (
 	goto :restart_script
 )
 :: native + build_docker: python comes from uv (installed in uv's own dir), the OS python is never used
-for /f "tokens=1,2 delims=." %%a in ("%PYTHON_VERSION%") do set /a "PY_CUR=%%a*100+%%b"
-for /f "tokens=1,2 delims=." %%a in ("%MIN_PYTHON_VERSION%") do set /a "PY_MIN=%%a*100+%%b"
-for /f "tokens=1,2 delims=." %%a in ("%MAX_PYTHON_VERSION%") do set /a "PY_MAX=%%a*100+%%b"
-if "%SCRIPT_MODE%"=="%NATIVE%" if %PY_CUR% lss %PY_MIN% set "PYTHON_VERSION=%MIN_PYTHON_VERSION%"
-if "%SCRIPT_MODE%"=="%NATIVE%" if %PY_CUR% gtr %PY_MAX% set "PYTHON_VERSION=%MAX_PYTHON_VERSION%"
+rem python per device, as DeviceInstaller.check_pyvenv: Windows has no jetson, so always MAX_PYTHON_VERSION
+set "PYTHON_VERSION=%MAX_PYTHON_VERSION%"
 uv python find --system --python-preference only-managed %PYTHON_VERSION% >nul 2>&1
 if errorlevel 1 (
 	echo Installing python %PYTHON_VERSION% via uv...
@@ -610,6 +607,20 @@ if "%SCRIPT_MODE%"=="%NATIVE%" (
 			rmdir /s /q "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%"
 			if exist "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%\" goto :failed
 		) else (
+			rem another python than PYTHON_VERSION, e.g. 3.11 from an older install: --allow-existing would swap the interpreter
+			rem but keep the packages in the old Lib and the .provisioned marker, leaving an empty venv never reprovisioned
+			set "VENV_PYVER="
+			for /f "tokens=2 delims==" %%v in ('findstr /b /c:"version_info" /c:"version " "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%\pyvenv.cfg"') do if not defined VENV_PYVER set "VENV_PYVER=%%v"
+			for /f "tokens=1,2 delims=. " %%a in ("!VENV_PYVER!") do set "VENV_PYVER=%%a.%%b"
+			if not "!VENV_PYVER!"=="%PYTHON_VERSION%" (
+				echo %PYTHON_ENV% is not python %PYTHON_VERSION% - removing and recreating...
+				rmdir /s /q "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%"
+				if exist "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%\" goto :failed
+			)
+		)
+	)
+	if exist "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%\" (
+		if exist "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%\pyvenv.cfg" (
 			uv venv "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%" --python "%PY_CMD%" --allow-existing >nul 2>&1
 			if errorlevel 1 (
 				echo %PYTHON_ENV% is inconsistent - removing and recreating...

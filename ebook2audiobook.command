@@ -309,27 +309,13 @@ check_python() {
 	fi
 	######## native + build_docker host: python comes from uv (installed in uv's own dir), the OS python is never used
 	if [[ "$SCRIPT_MODE" == "$NATIVE" || ( "$SCRIPT_MODE" == "$BUILD_DOCKER" && -z "$DOCKER_DEVICE_STR" ) ]]; then
-		compare_versions() {
-			local ver1=$1; local ver2=$2
-			IFS='.' read -r v1_major v1_minor <<<"$ver1"
-			IFS='.' read -r v2_major v2_minor <<<"$ver2"
-			((v1_major < v2_major)) && return 1
-			((v1_major > v2_major)) && return 2
-			((v1_minor < v2_minor)) && return 1
-			((v1_minor > v2_minor)) && return 2
-			return 0
-		}
 		if [[ "$SCRIPT_MODE" == "$NATIVE" ]]; then
 			model="other"
 			if [[ -r /proc/device-tree/model ]]; then
 				model="$(tr -d '\0' </proc/device-tree/model 2>/dev/null | tr 'A-Z' 'a-z' || true)"
-				if [[ "$model" == *jetson* ]]; then PYTHON_VERSION="$MIN_PYTHON_VERSION"; fi
-			else
-				compare_versions "$PYTHON_VERSION" "$MIN_PYTHON_VERSION"
-				case $? in 1) PYTHON_VERSION="$MIN_PYTHON_VERSION" ;; esac
-				compare_versions "$PYTHON_VERSION" "$MAX_PYTHON_VERSION"
-				case $? in 2) PYTHON_VERSION="$MAX_PYTHON_VERSION" ;; esac
 			fi
+			# python per device, as DeviceInstaller.check_pyvenv: jetson MIN (cp310 wheels only), every other device MAX
+			if [[ "$model" == *jetson* ]]; then PYTHON_VERSION="$MIN_PYTHON_VERSION"; else PYTHON_VERSION="$MAX_PYTHON_VERSION"; fi
 		fi
 		if ! uv python find --system --python-preference only-managed "$PYTHON_VERSION" &>/dev/null; then
 			echo -e "\e[33mInstalling python $PYTHON_VERSION via uv…\e[0m"
@@ -503,6 +489,12 @@ check_uv() {
 		if [[ -d "$SCRIPT_DIR/$PYTHON_ENV" ]]; then
 			if [[ ! -f "$SCRIPT_DIR/$PYTHON_ENV/pyvenv.cfg" ]]; then
 				echo -e "\e[33m$PYTHON_ENV is not a virtualenv — removing…\e[0m"
+				rm -rf "$SCRIPT_DIR/$PYTHON_ENV"
+			elif [[ "$(sed -n -E 's/^(version_info|version)[[:space:]]*=[[:space:]]*([0-9]+\.[0-9]+).*/\2/p' "$SCRIPT_DIR/$PYTHON_ENV/pyvenv.cfg" | head -n 1)" != "$PYTHON_VERSION" ]]; then
+				# another python than PYTHON_VERSION (e.g. 3.11 from an older install): --allow-existing below would swap the
+				# interpreter but keep the packages in the old lib/pythonX.Y and the .provisioned marker, leaving an empty venv
+				# that is never reprovisioned. Recreate it: provisioning then installs the wheels matching PYTHON_VERSION
+				echo -e "\e[33m$PYTHON_ENV is not python $PYTHON_VERSION — removing and recreating…\e[0m"
 				rm -rf "$SCRIPT_DIR/$PYTHON_ENV"
 			elif ! uv venv "$SCRIPT_DIR/$PYTHON_ENV" --python "$PY_CMD" --allow-existing >/dev/null 2>&1; then
 				echo -e "\e[33m$PYTHON_ENV is inconsistent — removing and recreating…\e[0m"

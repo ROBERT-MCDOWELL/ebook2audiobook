@@ -50,6 +50,8 @@ BUILD_DOCKER = 'build_docker'
 # ---------------------------------------------------------------------
 # Python environment references
 # ---------------------------------------------------------------------
+# python per device (DeviceInstaller.check_pyvenv, both launchers): jetson = min_python_version (cp310 wheels only),
+# every other device = max_python_version. Nothing else picks a python
 min_python_version = (3,10)
 max_python_version = (3,12)
 python_env_dir = os.path.abspath(os.path.join('.','python_env'))

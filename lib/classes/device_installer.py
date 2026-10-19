@@ -95,25 +95,14 @@ class DeviceInstaller():
         return device_info if isinstance(device_info, dict) else None
 
     def check_pyvenv(self, tag:str)->list:
-        # NATIVE only. jetson wheels are cp310 only, whatever the OS ships.
+        # fixed per device, the same rule the launchers create python_env with: jetson wheels are cp310 only
+        # (min_python_version), every other device runs max_python_version, which all other prebuilt wheels (py-pkg
+        # +vulkan ones included) target. Never read from .device_info.json nor the OS python: it lives next to the
+        # app, so it outlives a python_env the launcher recreated, and an older venv's record would pick wheels the
+        # new venv cannot load
         if tag in ['jetson5', 'jetson6', 'jetson7']:
-            return [3, 10]
-        # once python_env exists its interpreter is fixed, and .device_info.json is
-        # the record of what it was built with — so the file wins over any
-        # recomputation. Otherwise an OS python upgrade would silently disagree
-        # with the venv actually on disk. Delete .device_info.json to re-detect.
-        device_info = self.load_device_info()
-        if device_info is not None:
-            pyvenv = device_info.get('pyvenv')
-            if isinstance(pyvenv, list) and len(pyvenv) == 2:
-                return list(pyvenv)
-        # clamp the OS interpreter into [min_python_version, max_python_version].
-        os_version = tuple(sys.version_info[:2])
-        if os_version >= max_python_version:
-            return list(max_python_version)
-        if os_version < min_python_version:
             return list(min_python_version)
-        return list(os_version)
+        return list(max_python_version)
 
     def check_device_info(self, mode:str)->str:
         if mode == NATIVE:
@@ -135,7 +124,7 @@ class DeviceInstaller():
         elif mode == BUILD_DOCKER:
             name, tag, msg = self.check_hardware
             os_env = 'manylinux_2_28'
-            pyvenv = [3, 10] if tag in ['jetson5', 'jetson6', 'jetson7'] else list(max_python_version)
+            pyvenv = self.check_pyvenv(tag)
             arch = archs['AARCH64'] if name in [devices['JETSON']['proc'], devices['MPS']['proc']] or (self.system == systems['MACOS'] and self.arch == archs['ARM64']) else self.arch
             # a macOS host's containers run in a VM without its GPU: no MPS, no Vulkan there
             if name in [devices['JETSON']['proc'], devices['MPS']['proc']] or (self.system == systems['MACOS'] and name == devices['VULKAN']['proc']):
@@ -233,7 +222,7 @@ class DeviceInstaller():
             def redirect_request(self, *args, **kwargs):
                 return None
         opener = urllib.request.build_opener(NoRedirect)
-        torch_ver = entry['last'] if tuple(py) >= (3, 12) else entry['base']
+        torch_ver = entry['last']
         py_tag = f'cp{py[0]}{py[1]}'
         wheel_end = f"{devices['VULKAN']['proc']}-{py_tag}-{py_tag}-{plat}.whl"
         urls = [f'{default_jetson_url}/torch/torch-{torch_ver}%2B{wheel_end}', f'{default_jetson_url}/torchaudio/torchaudio-{self.torchaudio_version(torch_ver)}%2B{wheel_end}']
@@ -547,7 +536,7 @@ class DeviceInstaller():
                 if not gpus:
                     return ''
                 gpu = gpus[0]
-            torch_ver = entry['last'] if self.python_version >= (3, 12) else entry['base']
+            torch_ver = entry['last']
             if self.get_package_version('torch') == f"{torch_ver}+{devices['VULKAN']['proc']}":
                 return gpu
             return gpu if self.vulkan_wheels_ok(self.python_version, f'{self.detect_platform_tag()}_{arch_tag}') else ''
@@ -1904,13 +1893,13 @@ class DeviceInstaller():
                     tag = device_info.get('tag')
                     if tag in ['unknown','unsupported']:
                         return 0
-                    key = 'last' if self.python_version >= (3, 12) else 'base'
                     matrix_entry = torch_matrix.get(tag)
                     if not matrix_entry:
                         error = legends['error_no_torch_matrix'].format(tag=tag)
                         print(error)
                         return 1
-                    torch_version_matrix = matrix_entry.get(key) or matrix_entry['base']
+                    # one python per device (check_pyvenv), so one torch version per row: 'last'
+                    torch_version_matrix = matrix_entry['last']
                     torchcodec_version_matrix = matrix_entry.get('codec') or ''
                     torch_version_current_full = self.get_package_version('torch')
                     torch_version_current_base = None
