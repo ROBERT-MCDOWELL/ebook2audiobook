@@ -476,7 +476,9 @@ class TTSUtils:
                             progress_bar((0, 3), desc=msg)
                         if engine_name == TTS_ENGINES['XTTS']:
                             from TTS.tts.configs.xtts_config import XttsConfig
-                            from TTS.tts.models.xtts import Xtts
+                            from TTS.tts.models.xtts import XttsAudioConfig,XttsArgs
+                            from TTS.config.shared_configs import BaseDatasetConfig
+                            torch.serialization.add_safe_globals([XttsConfig,XttsAudioConfig,XttsArgs,BaseDatasetConfig])
                             config = XttsConfig()
                             config.models_dir = os.path.join('models','tts')
                             config.load_json(config_path)
