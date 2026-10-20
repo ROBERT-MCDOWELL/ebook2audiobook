@@ -16,7 +16,34 @@ TTS_ENGINES = {
     "FAIRSEQ": "fairseq",
     "GLOWTTS": "glowtts",
     "TACOTRON": "tacotron",
-    "YOURTTS": "yourtts"
+    "YOURTTS": "yourtts",
+    # audio.cpp (0xShug0/audio.cpp) families: one engine each, all run by the AudioCpp class (audiocpp.py)
+    "BREEZE_TTS": "breeze_tts",
+    "CHATTERBOX": "chatterbox",
+    "CONFUCIUS4_TTS": "confucius4_tts",
+    "COSYVOICE3": "cosyvoice3",
+    "DOTS_TTS": "dots_tts",
+    "DRAMABOX": "dramabox",
+    "FIRERED_AUDIO": "firered_audio",
+    "FIREREDTTS3": "fireredtts3",
+    "FISH_AUDIO": "fish_audio",
+    "HIGGS_AUDIO_TTS": "higgs_audio_tts",
+    "INDEX_TTS2": "index_tts2",
+    "IRODORI_TTS": "irodori_tts",
+    "KOKORO_TTS": "kokoro_tts",
+    "KUGELAUDIO": "kugelaudio",
+    "MAGPIE_TTS": "magpie_tts",
+    "MAYA1": "maya1",
+    "MIOTTS": "miotts",
+    "MOSS_TTS_LOCAL": "moss_tts_local",
+    "MOSS_TTS_NANO": "moss_tts_nano",
+    "NEUTTS": "neutts",
+    "POCKET_TTS": "pocket_tts",
+    "QWEN3_TTS": "qwen3_tts",
+    "SUPERTONIC": "supertonic",
+    "VIBEVOICE": "vibevoice",
+    "VOXCPM2": "voxcpm2",
+    "VOXTRAL_TTS": "voxtral_tts"
 }
 
 TTS_VOICE_CONVERSION = {
@@ -81,6 +108,47 @@ default_speaker = os.path.join(voices_dir, 'eng', 'adult', 'male', 'KumarDahl.wa
 tts_engines_from_coqui = [TTS_ENGINES['XTTS'], TTS_ENGINES['BARK'], TTS_ENGINES['TORTOISE'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
 tts_engines_with_inner_speaker = [TTS_ENGINES['PIPER'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
 tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['OMNIVOICE'])
+
+# audio.cpp engines (0xShug0/audio.cpp): one native audiocpp_server package per platform, shared by every audio.cpp
+# engine, plus the GGUF weights of each engine's fine_tuned preset (presets/audiocpp_presets.py), driven by
+# workers/audiocpp_worker.py. No torch, no venv (as ZONOS2).
+# Release pinned for the official packages: asset names carry the tag and releases/latest points at side releases
+# (v0.9.2-drama3-base-small). Bumping it re-downloads them once (a package whose install record names other urls)
+audiocpp_version = '0.9.2'
+audiocpp_release = f'https://github.com/0xShug0/audio.cpp/releases/download/v{audiocpp_version}/audio-v{audiocpp_version}'
+audiocpp_packages = {
+    # official release assets. Linux ones are built on Ubuntu 24.04: glibc 2.38 / GLIBCXX_3.4.32 / libgomp.so.1 floor
+    # (a host missing the last two fails to start them and falls through to the next package); portable = runtime CPU
+    # dispatch (libggml-cpu-<arch> picked at start, sse42 up to zen4 / sapphirerapids)
+    "linux-x64-vulkan-acpp": {"urls": [f"{audiocpp_release}-bin-ubuntu-x64-vulkan-portable.tar.gz"], "gpu": True, "backend": "vulkan", "glibc_min": "2.38"},
+    "linux-x64-cpu-acpp": {"urls": [f"{audiocpp_release}-bin-ubuntu-x64-cpu-portable.tar.gz"], "gpu": False, "glibc_min": "2.38"},
+    "windows-x64-cuda13-acpp": {"urls": [f"{audiocpp_release}-bin-windows-x64-cuda13.3.zip", f"{audiocpp_release}-cudart-windows-x64-cuda13.3.zip"], "gpu": True, "backend": "cuda"},
+    "windows-x64-cuda12-acpp": {"urls": [f"{audiocpp_release}-bin-windows-x64-cuda12.4.zip", f"{audiocpp_release}-cudart-windows-x64-cuda12.4.zip"], "gpu": True, "backend": "cuda"},
+    "windows-x64-vulkan-acpp": {"urls": [f"{audiocpp_release}-bin-windows-x64-vulkan-portable.zip"], "gpu": True, "backend": "vulkan"},
+    "windows-x64-cpu-acpp": {"urls": [f"{audiocpp_release}-bin-windows-x64-cpu-portable.zip"], "gpu": False},
+    "macos-arm64-acpp": {"urls": [f"{audiocpp_release}-bin-macos-arm64-metal.tar.gz"], "gpu": True, "backend": "metal", "macos_min": "13.3"},
+    "macos-arm64-cpu-acpp": {"urls": [f"{audiocpp_release}-bin-macos-arm64-metal.tar.gz"], "gpu": False, "macos_min": "13.3"},
+    "macos-x86_64-acpp": {"urls": [f"{audiocpp_release}-bin-macos-x64-metal.tar.gz"], "gpu": False, "macos_min": "13.3"},
+    # e2a's own builds (py-pkg release "audiocpp", runtime bundled like zonos2-server): off until published
+    "linux-x64-cuda13": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cuda13.tar.gz"], "gpu": True, "backend": "cuda", "enabled": False},
+    "linux-x64-cuda12": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cuda12.tar.gz"], "gpu": True, "backend": "cuda", "enabled": False},
+    "linux-x64-vulkan": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-vulkan.tar.gz"], "gpu": True, "backend": "vulkan", "enabled": False},
+    "linux-x64-cpu": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cpu.tar.gz"], "gpu": False, "enabled": False},
+    "macos-x86_64-vulkan": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-x86_64-vulkan.tar.gz"], "gpu": True, "backend": "vulkan", "macos_min": "12.0", "enabled": False},
+    "jetson5-sm72-sm87": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson5-sm72-sm87.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 5, "sm": [72, 87], "enabled": False},
+    "jetson6-sm87": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson6-sm87.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 6, "sm": [87], "enabled": False},
+    "jetson7-sm87-sm110": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson7-sm87-sm110.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 7, "sm": [87, 110], "enabled": False},
+    "linux-aarch64-cuda13": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64-cuda13.tar.gz"], "gpu": True, "backend": "cuda", "enabled": False},
+    "linux-aarch64-cuda12": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64-cuda12.tar.gz"], "gpu": True, "backend": "cuda", "enabled": False},
+    "linux-aarch64": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64.tar.gz"], "gpu": False, "enabled": False}
+}
+# reference transcripts for the engines whose cloning takes one (ref_text below): transcribed once per voice clip by this
+# ASR model, loaded in the same server only when needed and unloaded right after
+audiocpp_asr = {"family": "qwen3_asr", "files": ["Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf"]}
+# built-in voice engines (clone False below): a voice file picked in e2a converts their output with Seed-VC (v2_vc route),
+# loaded in the same server on first use. Without one they speak with their own voice (voice None, as Piper)
+audiocpp_vc = {"family": "seed_vc", "files": ["SeedVC-MLX-GGUF/seed-vc-mlx-q8_0.gguf"]}
+audiocpp_repo = "audio-cpp/audio.cpp-gguf"
 
 max_custom_model = 100
 max_custom_voices = 1000
@@ -428,3 +496,70 @@ default_engine_settings = {
         "rating": {"VRAM": 1, "CPU": 5, "RAM": 1, "Realism": 2}
     }
 }
+# audio.cpp engines, values from audio.cpp v0.9.2 (model_specs/<family>.json and the family's session code).
+# languages: e2a iso-639-3 -> what the family reads as the text language ("" = the model detects it);
+# language_option: also sent as the "language" request option (the family ignores the text language);
+# clone: True = clones the voice file picked in e2a, False = built-in voice (voice_ids) converted by Seed-VC when a
+# voice file is picked; voice_ids: built-in voice per language ("*" = any); ref_min / ref_max: reference clip window (s);
+# ref_text: None, "optional" (sent when the ASR finds one) or "required" (the clone needs it); ref_fallback: request
+# options sent instead when a required transcript is empty; load / session / request: the server config's load_options /
+# session_options / default_request_options; load_by_language: load options per language (one package per language);
+# speaker_label: VibeVoice reads only "Speaker N:" script lines; espeak: Kokoro phonemizes through e2a's eSpeak-ng;
+# samplerate: initial value only, the first reply sets the real one; rating: estimates from the model sizes
+audiocpp_families = {
+    TTS_ENGINES['BREEZE_TTS']: {"family": "breeze_tts", "languages": {"zho": "zh", "eng": "en"}, "clone": True, "ref_text": "required", "ref_fallback": {}, "samplerate": 24000, "rating": {"VRAM": 4, "CPU": 2, "RAM": 6, "Realism": 4}},
+    TTS_ENGINES['CHATTERBOX']: {"family": "chatterbox", "languages": {"ara": "ar", "dan": "da", "deu": "de", "ell": "el", "eng": "en", "spa": "es", "fin": "fi", "fra": "fr", "hin": "hi", "ita": "it", "kor": "ko", "zlm": "ms", "nld": "nl", "nob": "no", "nor": "no", "pol": "pl", "por": "pt", "swe": "sv", "swh": "sw", "tur": "tr"}, "clone": True, "ref_text": None, "ref_fallback": {}, "samplerate": 24000, "rating": {"VRAM": 3, "CPU": 3, "RAM": 4, "Realism": 5}},
+    # F32 package only: the heaviest of the small models
+    TTS_ENGINES['CONFUCIUS4_TTS']: {"family": "confucius4_tts", "languages": {"zho": "zh", "eng": "en", "jpn": "ja", "kor": "ko", "deu": "de", "fra": "fr", "spa": "es", "ind": "id", "ita": "it", "tha": "th", "por": "pt", "rus": "ru", "zlm": "ms", "vie": "vi"}, "clone": True, "ref_text": None, "ref_fallback": {}, "samplerate": 22050, "rating": {"VRAM": 6, "CPU": 2, "RAM": 8, "Realism": 4}},
+    # zero_shot needs the transcript; without one, cross_lingual clones from the audio alone
+    TTS_ENGINES['COSYVOICE3']: {"family": "cosyvoice3", "languages": {"zho": "zh", "eng": "en", "jpn": "ja", "kor": "ko", "deu": "de", "spa": "es", "fra": "fr", "ita": "it", "rus": "ru", "yue": "yue"}, "clone": True, "ref_text": "required", "ref_fallback": {"template_name": "cross_lingual"}, "samplerate": 24000, "rating": {"VRAM": 3, "CPU": 3, "RAM": 4, "Realism": 5}},
+    # the language becomes an [EN]-style tag; audio.cpp documents only "multilingual" (en, zh in its examples)
+    TTS_ENGINES['DOTS_TTS']: {"family": "dots_tts", "languages": {"eng": "en", "zho": "zh"}, "clone": True, "ref_text": "optional", "ref_fallback": {}, "samplerate": 24000, "rating": {"VRAM": 4, "CPU": 2, "RAM": 6, "Realism": 4}},
+    # 48 kHz stereo, mixed down to mono by convert()
+    TTS_ENGINES['DRAMABOX']: {"family": "dramabox", "languages": {"eng": "en"}, "clone": True, "ref_text": None, "ref_fallback": {}, "samplerate": 48000, "rating": {"VRAM": 8, "CPU": 1, "RAM": 10, "Realism": 5}},
+    TTS_ENGINES['FIRERED_AUDIO']: {"family": "firered_audio", "languages": {"zho": "zh", "eng": "en"}, "clone": True, "ref_text": "required", "ref_fallback": {}, "samplerate": 24000, "rating": {"VRAM": 6, "CPU": 1, "RAM": 8, "Realism": 4}},
+    # language tags are names, not codes (<|English|>)
+    TTS_ENGINES['FIREREDTTS3']: {"family": "fireredtts3", "languages": {"zho": "Chinese", "eng": "English", "yue": "Cantonese", "jpn": "Japanese", "kor": "Korean", "spa": "Spanish", "fra": "French", "rus": "Russian", "ara": "Arabic", "tur": "Turkish", "ind": "Indonesian", "por": "Portuguese", "ita": "Italian", "nld": "Dutch", "vie": "Vietnamese", "deu": "German", "ukr": "Ukrainian", "tha": "Thai", "pol": "Polish", "ron": "Romanian", "ell": "Greek", "ces": "Czech", "fin": "Finnish", "hin": "Hindi"}, "clone": True, "ref_text": "required", "ref_fallback": {}, "samplerate": 24000, "rating": {"VRAM": 6, "CPU": 1, "RAM": 8, "Realism": 5}},
+    # Fish Audio's tier 1 and 2 languages (the model detects them); audio.cpp tested English and Chinese
+    TTS_ENGINES['FISH_AUDIO']: {"family": "fish_audio", "languages": {"eng": "en", "zho": "zh", "jpn": "ja", "kor": "ko", "spa": "es", "por": "pt", "ara": "ar", "rus": "ru", "fra": "fr", "deu": "de"}, "clone": True, "ref_text": "required", "ref_fallback": {}, "samplerate": 44100, "rating": {"VRAM": 8, "CPU": 1, "RAM": 10, "Realism": 5}},
+    # Higgs v3 claims 100+ languages, detected by the model: the major ones first
+    TTS_ENGINES['HIGGS_AUDIO_TTS']: {"family": "higgs_audio_tts", "languages": {"eng": "en", "zho": "zh", "jpn": "ja", "kor": "ko", "deu": "de", "fra": "fr", "spa": "es", "ita": "it", "por": "pt", "rus": "ru"}, "clone": True, "ref_text": "optional", "ref_fallback": {}, "samplerate": 24000, "rating": {"VRAM": 8, "CPU": 1, "RAM": 10, "Realism": 5}},
+    # reads its language from the request options only (else zh on Han text, en otherwise); v2 presets: zh, en
+    TTS_ENGINES['INDEX_TTS2']: {"family": "index_tts2", "languages": {"zho": "zh", "eng": "en", "jpn": "ja", "spa": "es", "ara": "ar"}, "language_option": True, "clone": True, "ref_text": None, "ref_fallback": {}, "samplerate": 22050, "rating": {"VRAM": 4, "CPU": 2, "RAM": 6, "Realism": 5}},
+    TTS_ENGINES['IRODORI_TTS']: {"family": "irodori_tts", "languages": {"jpn": "ja"}, "clone": True, "ref_text": None, "ref_fallback": {}, "samplerate": 48000, "rating": {"VRAM": 2, "CPU": 3, "RAM": 4, "Realism": 4}},
+    # the voice prefix decides the language; Japanese needs UniDic, missing from the release GGUF
+    TTS_ENGINES['KOKORO_TTS']: {"family": "kokoro_tts", "languages": {"eng": "en-us", "spa": "es", "fra": "fr-fr", "hin": "hi", "ita": "it", "por": "pt-br", "zho": "zh"}, "clone": False, "voice_ids": {"eng": "af_heart", "spa": "ef_dora", "fra": "ff_siwis", "hin": "hf_alpha", "ita": "if_sara", "por": "pf_dora", "zho": "zf_xiaobei"}, "espeak": True, "samplerate": 24000, "rating": {"VRAM": 1, "CPU": 5, "RAM": 2, "Realism": 4}},
+    # the model reads the language from the text; "default" is a German voice, english_female a British one
+    TTS_ENGINES['KUGELAUDIO']: {"family": "kugelaudio", "languages": {"eng": "", "deu": "", "fra": "", "spa": "", "ita": "", "por": "", "nld": "", "pol": "", "rus": "", "ukr": "", "ces": "", "ron": "", "hun": "", "swe": "", "dan": "", "fin": "", "nob": "", "nor": "", "ell": "", "bul": "", "slk": "", "hrv": "", "srp": "", "tur": ""}, "clone": False, "voice_ids": {"eng": "english_female", "*": "default"}, "samplerate": 24000, "rating": {"VRAM": 6, "CPU": 1, "RAM": 8, "Realism": 4}},
+    TTS_ENGINES['MAGPIE_TTS']: {"family": "magpie_tts", "languages": {"ara": "ar-MSA", "deu": "de", "eng": "en", "spa": "es", "fra": "fr", "hin": "hi", "ita": "it", "kor": "ko", "por": "pt-BR", "vie": "vi", "zho": "zh"}, "clone": False, "voice_ids": {"*": "Aria"}, "samplerate": 22050, "rating": {"VRAM": 2, "CPU": 3, "RAM": 4, "Realism": 4}},
+    # voice designed from a description (required by the model), converted by Seed-VC when a voice file is picked
+    TTS_ENGINES['MAYA1']: {"family": "maya1", "languages": {"eng": "en"}, "clone": False, "request": {"instruct": "Calm adult narrator with a neutral American accent, warm timbre and steady audiobook pacing."}, "samplerate": 24000, "rating": {"VRAM": 6, "CPU": 1, "RAM": 8, "Realism": 5}},
+    TTS_ENGINES['MIOTTS']: {"family": "miotts", "languages": {"eng": "", "jpn": ""}, "clone": True, "ref_text": None, "ref_fallback": {}, "samplerate": 44100, "rating": {"VRAM": 4, "CPU": 2, "RAM": 6, "Realism": 4}},
+    # the language goes verbatim into the prompt template: "" lets the model detect it
+    TTS_ENGINES['MOSS_TTS_LOCAL']: {"family": "moss_tts_local", "languages": {"ara": "", "ces": "", "dan": "", "deu": "", "ell": "", "eng": "", "spa": "", "fas": "", "fin": "", "fra": "", "heb": "", "hin": "", "hun": "", "ita": "", "jpn": "", "kor": "", "mkd": "", "zlm": "", "nld": "", "pol": "", "por": "", "ron": "", "rus": "", "swe": "", "swh": "", "tha": "", "tgl": "", "fil": "", "tur": "", "vie": "", "yue": "", "zho": ""}, "clone": True, "ref_text": None, "ref_fallback": {}, "samplerate": 24000, "rating": {"VRAM": 4, "CPU": 2, "RAM": 6, "Realism": 4}},
+    TTS_ENGINES['MOSS_TTS_NANO']: {"family": "moss_tts_nano", "languages": {"ara": "", "ces": "", "dan": "", "deu": "", "ell": "", "eng": "", "spa": "", "fas": "", "fra": "", "hun": "", "ita": "", "jpn": "", "kor": "", "pol": "", "por": "", "rus": "", "swe": "", "tur": "", "zho": ""}, "clone": True, "ref_text": "optional", "ref_fallback": {}, "samplerate": 48000, "rating": {"VRAM": 1, "CPU": 5, "RAM": 2, "Realism": 3}},
+    TTS_ENGINES['NEUTTS']: {"family": "neutts", "languages": {"eng": "en"}, "clone": False, "voice_ids": {"*": "emily"}, "samplerate": 24000, "rating": {"VRAM": 2, "CPU": 3, "RAM": 4, "Realism": 4}},
+    # one package per language (the preset's files_by_language)
+    TTS_ENGINES['POCKET_TTS']: {"family": "pocket_tts", "languages": {"eng": "en", "fra": "fr", "deu": "de", "ita": "it", "por": "pt", "spa": "es"}, "clone": True, "ref_text": None, "ref_fallback": {}, "load_by_language": {"eng": {"language": "english"}, "fra": {"language": "french"}, "deu": {"language": "german"}, "ita": {"language": "italian"}, "por": {"language": "portuguese"}, "spa": {"language": "spanish"}}, "samplerate": 24000, "rating": {"VRAM": 1, "CPU": 5, "RAM": 2, "Realism": 4}},
+    TTS_ENGINES['QWEN3_TTS']: {"family": "qwen3_tts", "languages": {"zho": "zh", "eng": "en", "jpn": "ja", "kor": "ko", "deu": "de", "fra": "fr", "rus": "ru", "por": "pt", "spa": "es", "ita": "it"}, "clone": True, "ref_text": "required", "ref_fallback": {"x_vector_only_mode": True}, "samplerate": 24000, "rating": {"VRAM": 4, "CPU": 2, "RAM": 6, "Realism": 5}},
+    TTS_ENGINES['SUPERTONIC']: {"family": "supertonic", "languages": {"eng": "en", "kor": "ko", "jpn": "ja", "ara": "ar", "bul": "bg", "ces": "cs", "dan": "da", "deu": "de", "ell": "el", "spa": "es", "est": "et", "fin": "fi", "fra": "fr", "hin": "hi", "hrv": "hr", "hun": "hu", "ind": "id", "ita": "it", "lit": "lt", "lav": "lv", "nld": "nl", "pol": "pl", "por": "pt", "ron": "ro", "rus": "ru", "slk": "sk", "sln": "sl", "swe": "sv", "tur": "tr", "ukr": "uk", "vie": "vi"}, "clone": False, "voice_ids": {"*": "M1"}, "samplerate": 44100, "rating": {"VRAM": 1, "CPU": 5, "RAM": 2, "Realism": 4}},
+    TTS_ENGINES['VIBEVOICE']: {"family": "vibevoice", "languages": {"eng": "", "zho": ""}, "clone": True, "ref_text": None, "ref_fallback": {}, "speaker_label": True, "samplerate": 24000, "rating": {"VRAM": 4, "CPU": 1, "RAM": 8, "Realism": 5}},
+    TTS_ENGINES['VOXCPM2']: {"family": "voxcpm2", "languages": {"ara": "ar", "mya": "my", "zho": "zh", "dan": "da", "nld": "nl", "eng": "en", "fin": "fi", "fra": "fr", "deu": "de", "ell": "el", "heb": "he", "hin": "hi", "ind": "id", "ita": "it", "jpn": "ja", "khm": "km", "kor": "ko", "lao": "lo", "zlm": "ms", "nob": "no", "nor": "no", "pol": "pl", "por": "pt", "rus": "ru", "spa": "es", "swh": "sw", "swe": "sv", "tgl": "tl", "fil": "tl", "tha": "th", "tur": "tr", "vie": "vi"}, "clone": True, "ref_text": None, "ref_fallback": {}, "samplerate": 48000, "rating": {"VRAM": 4, "CPU": 2, "RAM": 6, "Realism": 5}},
+    TTS_ENGINES['VOXTRAL_TTS']: {"family": "voxtral_tts", "languages": {"eng": "en", "fra": "fr", "spa": "es", "deu": "de", "ita": "it", "por": "pt", "nld": "nl", "ara": "ar", "hin": "hi"}, "clone": False, "voice_ids": {"eng": "casual_male", "fra": "fr_male", "spa": "es_male", "deu": "de_male", "ita": "it_male", "por": "pt_male", "nld": "nl_male", "ara": "ar_male", "hin": "hi_male"}, "samplerate": 24000, "rating": {"VRAM": 8, "CPU": 1, "RAM": 10, "Realism": 5}}
+}
+audiocpp_engines = list(audiocpp_families)
+for _acpp_engine, _acpp_cfg in audiocpp_families.items():
+    _acpp_cfg = {"language_option": False, "voice_ids": {}, "ref_text": None, "ref_fallback": {}, "ref_min": 3.2, "ref_max": 10.0, "load": {}, "session": {}, "request": {}, "load_by_language": {}, "speaker_label": False, "espeak": False, **_acpp_cfg}
+    audiocpp_families[_acpp_engine] = _acpp_cfg
+    default_engine_settings[_acpp_engine] = {
+        "vulkan": True,
+        "audiocpp": _acpp_cfg,
+        "languages": _acpp_cfg['languages'],
+        "samplerate": _acpp_cfg['samplerate'],
+        "files": [],
+        "voice": default_speaker if _acpp_cfg['clone'] else None,
+        "voices": {},
+        "rating": _acpp_cfg['rating']
+    }
+# built-in voice engines: e2a offers their own voice as "default" (voice None), as for Piper
+tts_engines_with_inner_speaker += [_acpp_engine for _acpp_engine, _acpp_cfg in audiocpp_families.items() if not _acpp_cfg['clone']]

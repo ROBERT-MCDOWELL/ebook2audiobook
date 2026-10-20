@@ -2413,10 +2413,12 @@ def build_interface(args:dict)->gr.Blocks:
                     session = context.get_session(session_id)
                     if session and session.get('id', False):
                         models = load_engine_presets(session['tts_engine'])
+                        # a preset may list its languages (audiocpp: one family per preset), checked on the TTS language
+                        language = session['translate'] if session.get('translate_enabled') and session.get('translate') else session['language']
                         fine_tuned_options = [
                             name
                             for name, details in models.items()
-                            if details.get("lang") in ("multi", session['language'])
+                            if details.get("lang") in ("multi", session['language']) or language in (details.get("languages") or {})
                         ]
                         if session['fine_tuned'] in fine_tuned_options:
                             fine_tuned = session['fine_tuned']

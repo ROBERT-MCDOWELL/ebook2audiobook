@@ -10,3 +10,4 @@ from .yourtts import YourTTS
 from .zonos import Zonos
 from .gptsovits import GptSovits
 from .omnivoice import OmniVoice
+from .audiocpp import AudioCpp
