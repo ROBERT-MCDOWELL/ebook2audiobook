@@ -1517,8 +1517,7 @@ class DeviceInstaller():
                 base_cmd = self._uv_pip('install', '--cache-dir', self.pip_cache_dir)
                 base_cmd = self._uv_pip('install', '--cache-dir', self.pip_cache_dir)
                 if self.system == systems['MACOS'] and platform.machine().lower() in ('x86_64', 'amd64'):
-                    for nb_pkg in ('llvmlite', 'numba', 'pymupdf'):
-                        base_cmd += ['--no-build', nb_pkg]
+                    base_cmd += ['--only-binary', 'llvmlite,numba,pymupdf']
                 pins = [spec for spec in overrides.values() if spec]
                 for dpkg in self.device_pkgs:
                     try:
