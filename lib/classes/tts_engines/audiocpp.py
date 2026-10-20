@@ -151,10 +151,14 @@ class AudioCpp(TTSUtils):
             print(msg)
             if progress_bar is not None:
                progress_bar(0.0, desc=msg)
-            # the snapshot keeps the repo layout, so sidecars (pocket_tts embeddings/) land beside the model file
-            self.model_path = [hf_hub_download(repo_id=self.model_repo, filename=f, cache_dir=self.cache_dir) for f in model_files][0]
-            self.asr_path = [hf_hub_download(repo_id=audiocpp_repo, filename=f, cache_dir=self.cache_dir) for f in asr_files][0] if asr_files else ''
-            self.vc_path = [hf_hub_download(repo_id=audiocpp_repo, filename=f, cache_dir=self.cache_dir) for f in vc_files][0] if vc_files else ''
+            # real files under models/tts/audiocpp/<repo>/, not the Hugging Face cache: a cache file is a symlink to an
+            # extension-less blob (huggingface_hub 2's shared store, models/tts/blobs/<xx>/<hash>), and audiocpp_server
+            # resolves symlinks (weakly_canonical) then picks the tensor format from the file extension, so it rejects the
+            # blob ("unsupported tensor source format"). local_dir keeps the repo layout, so sidecars (pocket_tts
+            # embeddings/) land beside the model file, and a file already in the cache is copied instead of downloaded
+            self.model_path = [hf_hub_download(repo_id=self.model_repo, filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', self.model_repo.replace('/', '--'))) for f in model_files][0]
+            self.asr_path = [hf_hub_download(repo_id=audiocpp_repo, filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))) for f in asr_files][0] if asr_files else ''
+            self.vc_path = [hf_hub_download(repo_id=audiocpp_repo, filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))) for f in vc_files][0] if vc_files else ''
             engine_dir = os.path.dirname(os.path.abspath(__file__))
             self.worker_script = os.path.join(engine_dir, 'workers', 'audiocpp_worker.py')
             # the worker is stdlib only. conf.py's OMP_NUM_THREADS=1 is for e2a's torch: the server (OpenMP build) sizes its own pool
