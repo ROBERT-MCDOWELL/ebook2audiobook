@@ -337,11 +337,11 @@ class VoiceExtractor:
                     if self.is_gui_process:
                         self.progress_bar(int(result), desc=msg)
             # ---- STEP 2: silence removal + window trim ----
-            #if result:
-            #    result, msg = self._trim_and_clean(self.silence_threshold)
-            #    print(msg)
-            #    if self.is_gui_process:
-            #        self.progress_bar(int(result), desc=msg)
+            if result:
+                result, msg = self._trim_and_clean(self.silence_threshold)
+                print(msg)
+                if self.is_gui_process:
+                    self.progress_bar(int(result), desc=msg)
             # ---- STEP 3: denoise + compressor + loudnorm + EQ ----
             #if result:
             #    result, msg = self.normalize_audio(self.voice_track, self.proc_voice_file, self.final_voice_file)
