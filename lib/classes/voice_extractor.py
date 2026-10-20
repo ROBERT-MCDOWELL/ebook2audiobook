@@ -325,17 +325,17 @@ class VoiceExtractor:
                     self.progress_bar(int(result), desc=msg)
                 self.voice_track = self.wav_file
             # ---- STEP 1: background detection + demucs ----
-            #if result:
-            #    result, status, msg = self._detect_background()
-            #    print(msg)
-            #    if self.is_gui_process:
-            #        self.progress_bar(int(result), desc=msg)
-            #    if result and status:
-            #        self.voice_track = os.path.join(self.demucs_dir, 'vocals.wav')
-            #        result, msg = self._demucs_voice()
-            #        print(msg)
-            #        if self.is_gui_process:
-            #            self.progress_bar(int(result), desc=msg)
+            if result:
+                result, status, msg = self._detect_background()
+                print(msg)
+                if self.is_gui_process:
+                    self.progress_bar(int(result), desc=msg)
+                if result and status:
+                    self.voice_track = os.path.join(self.demucs_dir, 'vocals.wav')
+                    result, msg = self._demucs_voice()
+                    print(msg)
+                    if self.is_gui_process:
+                        self.progress_bar(int(result), desc=msg)
             # ---- STEP 2: silence removal + window trim ----
             #if result:
             #    result, msg = self._trim_and_clean(self.silence_threshold)
