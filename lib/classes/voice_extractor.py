@@ -323,30 +323,38 @@ class VoiceExtractor:
                 print(msg)
                 if self.is_gui_process:
                     self.progress_bar(int(result), desc=msg)
-                if result:
-                    result, status, msg = self._detect_background()
-                    print(msg)
-                    if self.is_gui_process:
-                        self.progress_bar(int(result), desc=msg)
-                    if result:
-                        if status:
-                            result, msg = self._demucs_voice()
-                            print(msg)
-                            if self.is_gui_process:
-                                self.progress_bar(int(result), desc=msg)
-                        else:
-                            self.voice_track = self.wav_file
-                        if result:
-                            result, msg = self._trim_and_clean(self.silence_threshold)
-                            print(msg)
-                            if self.is_gui_process:
-                                self.progress_bar(int(result), desc=msg)
-                            if result:
-                                result, msg = self.normalize_audio(self.voice_track, self.proc_voice_file, self.final_voice_file)
-                                print(msg)
-                                if self.is_gui_process:
-                                    self.progress_bar(int(result), desc=msg)
+                self.voice_track = self.wav_file
+            # ---- STEP 1: background detection + demucs ----
+            #if result:
+            #    result, status, msg = self._detect_background()
+            #    print(msg)
+            #    if self.is_gui_process:
+            #        self.progress_bar(int(result), desc=msg)
+            #    if result and status:
+            #        self.voice_track = os.path.join(self.demucs_dir, 'vocals.wav')
+            #        result, msg = self._demucs_voice()
+            #        print(msg)
+            #        if self.is_gui_process:
+            #            self.progress_bar(int(result), desc=msg)
+            # ---- STEP 2: silence removal + window trim ----
+            #if result:
+            #    result, msg = self._trim_and_clean(self.silence_threshold)
+            #    print(msg)
+            #    if self.is_gui_process:
+            #        self.progress_bar(int(result), desc=msg)
+            # ---- STEP 3: denoise + compressor + loudnorm + EQ ----
+            #if result:
+            #    result, msg = self.normalize_audio(self.voice_track, self.proc_voice_file, self.final_voice_file)
+            #    print(msg)
+            #    if self.is_gui_process:
+            #        self.progress_bar(int(result), desc=msg)
+            #    if result:
+            #        self.voice_track = self.final_voice_file
+            # ---- deliver whatever the enabled steps produced ----
+            if result and os.path.abspath(self.voice_track) != os.path.abspath(self.final_voice_file):
+                shutil.copyfile(self.voice_track, self.final_voice_file)
         except Exception as e:
+            result = False
             msg = f'extract_voice() error: {e}'
         shutil.rmtree(self.demucs_dir, ignore_errors = True)
         return result, msg
