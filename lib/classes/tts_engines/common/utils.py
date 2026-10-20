@@ -475,8 +475,10 @@ class TTSUtils:
                             msg = legends['msg_reading_checkpoint'].format(model=key)
                             progress_bar((0, 3), desc=msg)
                         if engine_name == TTS_ENGINES['XTTS']:
+                            import trainer.io
                             from TTS.tts.configs.xtts_config import XttsConfig
                             from TTS.tts.models.xtts import Xtts
+                            trainer.io._WEIGHTS_ONLY = False
                             config = XttsConfig()
                             config.models_dir = os.path.join('models','tts')
                             config.load_json(config_path)
