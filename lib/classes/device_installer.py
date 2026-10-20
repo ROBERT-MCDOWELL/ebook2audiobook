@@ -1377,8 +1377,10 @@ class DeviceInstaller():
         if self.system == systems['MACOS'] and platform.machine().lower() in ('x86_64', 'amd64'):
             overrides['llvmlite'] = 'llvmlite==0.44.0'
             overrides['numba'] = 'numba==0.61.0'
+            overrides['pymupdf'] = 'pymupdf<2.0'
             packages.append(overrides['llvmlite'])
             packages.append(overrides['numba'])
+            packages.append(overrides['pymupdf'])
         try:
             with open(requirements_file, 'r') as f:
                 contents = f.read().replace('\r', '\n')
@@ -1397,6 +1399,8 @@ class DeviceInstaller():
                         if overrides[head] is None:
                             continue
                         pkg = overrides[head]
+                    if pkg in packages:
+                        continue
                     packages.append(pkg)
             missing_packages = []
             for package in packages:
