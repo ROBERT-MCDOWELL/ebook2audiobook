@@ -22,8 +22,8 @@ fastapi
 hf_xet
 beautifulsoup4
 nagisa
-pymupdf
 pymupdf-layout
+pymupdf
 hangul-romanize
 iso639-lang
 soynlp
