@@ -1,4 +1,4 @@
-import os, sys, threading, gc, ctypes, tempfile, regex as re
+import os, sys, threading, gc, ctypes, tempfile, trainer.io, regex as re
 
 from typing import Any, TYPE_CHECKING
 from pathlib import Path
@@ -10,6 +10,7 @@ from lib import *
 from lib.lang import legends
 
 _lock = threading.Lock()
+trainer.io._WEIGHTS_ONLY = False
 
 if TYPE_CHECKING:
     import torch
@@ -475,10 +476,8 @@ class TTSUtils:
                             msg = legends['msg_reading_checkpoint'].format(model=key)
                             progress_bar((0, 3), desc=msg)
                         if engine_name == TTS_ENGINES['XTTS']:
-                            import trainer.io
                             from TTS.tts.configs.xtts_config import XttsConfig
                             from TTS.tts.models.xtts import Xtts
-                            trainer.io._WEIGHTS_ONLY = False
                             config = XttsConfig()
                             config.models_dir = os.path.join('models','tts')
                             config.load_json(config_path)
