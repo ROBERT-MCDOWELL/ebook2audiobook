@@ -5,6 +5,7 @@ loaded_tts = {}
 xtts_builtin_speakers_list = {}
 
 TTS_ENGINES = {
+    # listed in any order: the end of this file sorts it by rating, with default_engine_settings
     "ZONOS": "zonos",
     "GPTSOVITS": "gptsovits",
     "OMNIVOICE": "omnivoice",
@@ -563,3 +564,13 @@ for _acpp_engine, _acpp_cfg in audiocpp_families.items():
     }
 # built-in voice engines: e2a offers their own voice as "default" (voice None), as for Piper
 tts_engines_with_inner_speaker += [_acpp_engine for _acpp_engine, _acpp_cfg in audiocpp_families.items() if not _acpp_cfg['clone']]
+# engine order (gradio's engine list follows default_engine_settings, the CLI help TTS_ENGINES): most realistic first,
+# then the fastest on CPU, then the smallest VRAM, then the smallest RAM; ties by name. When a language change rules
+# out the current engine, gradio picks the first compatible one, so the best rated
+_acpp_order = sorted(default_engine_settings, key=lambda engine: (-default_engine_settings[engine]['rating']['Realism'], -default_engine_settings[engine]['rating']['CPU'], default_engine_settings[engine]['rating']['VRAM'], default_engine_settings[engine]['rating']['RAM'], engine))
+_acpp_keys = {value: key for key, value in TTS_ENGINES.items()}
+_acpp_settings = {engine: default_engine_settings[engine] for engine in _acpp_order}
+default_engine_settings.clear()
+default_engine_settings.update(_acpp_settings)
+TTS_ENGINES.clear()
+TTS_ENGINES.update({_acpp_keys[engine]: engine for engine in _acpp_order})
