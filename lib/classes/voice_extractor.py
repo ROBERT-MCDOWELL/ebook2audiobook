@@ -343,13 +343,13 @@ class VoiceExtractor:
                 if self.is_gui_process:
                     self.progress_bar(int(result), desc=msg)
             # ---- STEP 3: denoise + compressor + loudnorm + EQ ----
-            #if result:
-            #    result, msg = self.normalize_audio(self.voice_track, self.proc_voice_file, self.final_voice_file)
-            #    print(msg)
-            #    if self.is_gui_process:
-            #        self.progress_bar(int(result), desc=msg)
-            #    if result:
-            #        self.voice_track = self.final_voice_file
+            if result:
+                result, msg = self.normalize_audio(self.voice_track, self.proc_voice_file, self.final_voice_file)
+                print(msg)
+                if self.is_gui_process:
+                    self.progress_bar(int(result), desc=msg)
+                if result:
+                    self.voice_track = self.final_voice_file
             # ---- deliver whatever the enabled steps produced ----
             if result and os.path.abspath(self.voice_track) != os.path.abspath(self.final_voice_file):
                 shutil.copyfile(self.voice_track, self.final_voice_file)
