@@ -324,9 +324,7 @@ class VoiceExtractor:
                 if self.is_gui_process:
                     self.progress_bar(int(result), desc=msg)
                 if result:
-                    #result, status, msg = self._detect_background()
-                    result = True
-                    status = False
+                    result, status, msg = self._detect_background()
                     print(msg)
                     if self.is_gui_process:
                         self.progress_bar(int(result), desc=msg)
