@@ -2274,6 +2274,12 @@ def build_interface(args:dict)->gr.Blocks:
                             voice_options = [(legends['gr_voice_list_default'], None)] + sorted(voice_options, key=lambda x: x[0].lower())
                         else:
                             voice_options = sorted(voice_options, key=lambda x: x[0].lower())
+                            # no built-in voice and nothing for this language (voices/<lang>, eng fallback, session,
+                            # custom model): offer the engine's default voice so a cloning engine always has one
+                            if not voice_options:
+                                default_voice = default_engine_settings[session['tts_engine']].get('voice')
+                                if default_voice and os.path.isfile(default_voice):
+                                    voice_options = [(os.path.splitext(os.path.basename(default_voice))[0], default_voice)]
                         if session['voice'] is not None and isinstance(session.get('voice'), str):
                             if session['voice_dir'] not in session['voice']:
                                 if not any(v[1] == session['voice'] for v in voice_options):
