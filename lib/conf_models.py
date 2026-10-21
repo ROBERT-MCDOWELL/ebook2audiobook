@@ -4,8 +4,8 @@ from lib.conf import tts_dir, voices_dir
 loaded_tts = {}
 xtts_builtin_speakers_list = {}
 
+# listed in any order: the end of this file sorts it by rating, with default_engine_settings
 TTS_ENGINES = {
-    # listed in any order: the end of this file sorts it by rating, with default_engine_settings
     "ZONOS": "zonos",
     "GPTSOVITS": "gptsovits",
     "OMNIVOICE": "omnivoice",
@@ -18,7 +18,8 @@ TTS_ENGINES = {
     "GLOWTTS": "glowtts",
     "TACOTRON": "tacotron",
     "YOURTTS": "yourtts",
-    # audio.cpp (0xShug0/audio.cpp) families: one engine each, all run by the AudioCpp class (audiocpp.py)
+    # audio.cpp (0xShug0/audio.cpp) families:
+    # one engine each, all run by the AudioCpp class (audiocpp.py)
     "BREEZE_TTS": "breeze_tts",
     "CHATTERBOX": "chatterbox",
     "CONFUCIUS4_TTS": "confucius4_tts",

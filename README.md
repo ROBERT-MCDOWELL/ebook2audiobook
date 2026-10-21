@@ -511,34 +511,49 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [ ] Add Sindhi language model for xttsv2, fairseq, vits, piper at least (help welcome)
 
 #### TTS engines
-- [x] XTTSv2
-- [x] Bark
-- [x] Fairseq
-- [x] VITS
-- [x] Tacotron2
-- [x] YourTTS
-- [x] Tortoise
-- [x] GlowTTS
-- [x] Piper
+- [x] XTTSv2 (https://github.com/coqui-ai/XTTS)
+- [x] Bark (https://github.com/suno-ai/bark)
+- [x] Fairseq (https://github.com/facebookresearch/fairseq)
+- [x] VITS (https://github.com/jaywalnut330/vits)
+- [x] Tacotron2 (https://github.com/NVIDIA/Tacotron2)
+- [x] YourTTS (https://github.com/Edresson/YourTTS)
+- [x] Tortoise (https://github.com/neonbjb/tortoise-tts)
+- [x] GlowTTS (https://github.com/jaywalnut330/glow-tts)
+- [x] Piper (https://github.com/rhasspy/piper)
 - [x] Zonos (https://github.com/Zyphra/Zonos)
-- [ ] GPT-SoVITS (https://github.com/RVC-Boss/GPT-SoVITS)
+- [x] GPT-SoVITS (https://github.com/RVC-Boss/GPT-SoVITS)
 - [ ] OpenVoice (https://github.com/myshell-ai/OpenVoice)
-- [ ] fish-speech (https://github.com/fishaudio/fish-speech)
+- [x] Fish-speech / Fish Audio (https://github.com/fishaudio/fish-speech)
 - [ ] ChatTTS (https://github.com/2noise/ChatTTS)
-- [ ] CosyVoice (https://github.com/FunAudioLLM/CosyVoice)
-- [ ] F5-TTS (https://github.com/swivid/f5-tts)
-- [ ] chatterbox (https://github.com/resemble-ai/chatterbox)
-- [ ] Supertonic (https://github.com/supertone-inc/supertonic)
+- [x] CosyVoice / CosyVoice3 (https://github.com/FunAudioLLM/CosyVoice)
+- [x] F5-TTS (https://github.com/swivid/f5-tts)
+- [x] Chatterbox (https://github.com/resemble-ai/chatterbox)
+- [x] Supertonic (https://github.com/supertone-inc/supertonic)
 - [ ] Spark-TTS (https://github.com/sparkaudio/spark-tts)
-- [ ] index-tts (https://github.com/index-tts/index-tts)
+- [x] Index-tts / Index TTS2 (https://github.com/index-tts/index-tts)
 - [ ] MeloTTS (https://github.com/myshell-ai/MeloTTS)
-- [ ] Kokoro-TTS (https://github.com/hexgrad/kokoro)
-- [ ] OmniVoice (https://github.com/k2-fsa/OmniVoice)
+- [x] Kokoro-TTS (https://github.com/hexgrad/kokoro)
+- [x] OmniVoice (https://github.com/k2-fsa/OmniVoice)
 - [ ] Style-TTS2 (https://github.com/yl4579/StyleTTS2)
 - [ ] Orpheus-TTS (https://github.com/canopyai/Orpheus-TTS)
-- [ ] NewTTS (https://github.com/neuphonic/neutts?tab=readme-ov-file)
-- [ ] VIbeVoice (https://github.com/vibevoice-community/VibeVoice)
-- [ ] Qwen3-TTS (https://huggingface.co/spaces/Qwen/Qwen3-TTS)
+- [x] NewTTS / NeuTTS (https://github.com/neuphonic/neutts)
+- [x] VibeVoice (https://github.com/vibevoice-community/VibeVoice)
+- [x] Qwen3-TTS (https://huggingface.co/spaces/Qwen/Qwen3-TTS)
+- [x] Breeze TTS (https://github.com/FreedomIntelligence/Breeze-TTS)
+- [x] Confucius4 TTS (https://github.com/confucius-tts/confucius4)
+- [x] Dots TTS (https://github.com/dot-audio/dots-tts)
+- [x] DramaBox (https://github.com/dramabox-ai/dramabox)
+- [x] FireRed Audio / FireRedTTS3 (https://github.com/FireRedTeam/FireRedTTS)
+- [x] Higgs Audio TTS (https://github.com/higgs-audio/higgs-audio)
+- [x] Irodori TTS (https://github.com/irodori-tts/irodori-tts)
+- [x] KugelAudio (https://github.com/kugel-audio/kugelaudio)
+- [x] Magpie TTS (https://github.com/magpie-tts/magpie-tts)
+- [x] Maya1 (https://github.com/maya-ai/maya1)
+- [x] MioTTS (https://github.com/mio-tts/miotts)
+- [x] Moss TTS Local / Nano (https://github.com/OpenBMB/MossTTS)
+- [x] Pocket TTS (https://github.com/pocket-tts/pocket-tts)
+- [x] VoxCPM2 (https://github.com/voxcpm/voxcpm)
+- [x] Voxtral TTS (https://github.com/voxtral/voxtral-tts)
 
 #### Readme Translation
 - [x] Arabic (ara)
