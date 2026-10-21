@@ -58,8 +58,8 @@ def build_interface(args:dict)->gr.Blocks:
                                     gr_voice_highlight_css = gr.HTML(value='', elem_classes=['gr-voice-highlight-css'])
                                     gr_ebook_textarea = gr.Textbox(show_label=True, label=legends['gr_ebook_textarea'], elem_id='gr_ebook_textarea', visible=False, lines=8, max_length=max_ebook_textarea_length)
                                     with gr.Row(elem_id='gr_row_ebook_mode') as gr_row_ebook_mode:
-                                        gr_ebook_mode = gr.Dropdown(label='', elem_id='gr_ebook_mode', choices=[(legends['gr_ebook_mode_file'],ebook_modes['SINGLE']), (legends['gr_ebook_mode_directory'],ebook_modes['DIRECTORY']), (legends['gr_ebook_mode_text'],ebook_modes['TEXT'])], interactive=True, scale=2)
                                         gr_blocks_preview = gr.Checkbox(label=legends['gr_blocks_preview'], elem_id='gr_blocks_preview', value=False, interactive=True, scale=1)
+                                        gr_ebook_mode = gr.Dropdown(label='', elem_id='gr_ebook_mode', choices=[(legends['gr_ebook_mode_file'],ebook_modes['SINGLE']), (legends['gr_ebook_mode_directory'],ebook_modes['DIRECTORY']), (legends['gr_ebook_mode_text'],ebook_modes['TEXT'])], interactive=True, scale=2)
                                         gr_interlude_enabled = gr.Checkbox(label=legends['gr_interlude_enabled'], elem_id='gr_interlude_enabled', value=False, interactive=True, scale=1)
                                 with gr.Group(elem_id='gr_group_language', elem_classes=['gr-group']):
                                     gr_language_markdown = gr.Markdown(elem_id='gr_language_markdown', elem_classes=['gr-markdown'], value=legends['gr_language_markdown'])
