@@ -139,9 +139,9 @@ audiocpp_packages = {
     "linux-x64-cpu-sse42": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cpu-sse42.tar.gz"], "gpu": False, "cpu_flags": ["sse4_2"], "enabled": False},
     "macos-arm64": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-arm64.tar.gz"], "gpu": True, "backend": "metal", "macos_min": "11.0", "enabled": False},
     "macos-arm64-cpu": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-arm64.tar.gz"], "gpu": False, "macos_min": "11.0", "enabled": False},
-    # starts on macOS 11, its GPU path (MoltenVK) from the floor build-audiocpp.sh prints
-    "macos-x86_64-vulkan": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-x86_64-vulkan.tar.gz"], "gpu": True, "backend": "vulkan", "macos_min": "12.0", "enabled": False},
-    "macos-x86_64": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-x86_64.tar.gz"], "gpu": False, "macos_min": "11.0", "enabled": False},
+    # published: the server and its Vulkan loader start on macOS 11, the bundled MoltenVK (the GPU path) needs macOS 12
+    "macos-x86_64-vulkan": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-x86_64-vulkan.tar.gz"], "gpu": True, "backend": "vulkan", "macos_min": "12.0"},
+    "macos-x86_64": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-x86_64.tar.gz"], "gpu": False, "macos_min": "11.0"},
     # no JetPack 5 (CUDA 11.4) package: audio.cpp needs CUDA 12 or newer, so Xavier and JetPack 5 Orin take the
     # linux-aarch64 CPU packages
     "jetson6-sm87": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson6-sm87.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 6, "sm": [87], "enabled": False},
