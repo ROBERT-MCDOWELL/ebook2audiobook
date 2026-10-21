@@ -130,17 +130,24 @@ audiocpp_packages = {
     "macos-arm64-acpp": {"urls": [f"{audiocpp_release}-bin-macos-arm64-metal.tar.gz"], "gpu": True, "backend": "metal", "macos_min": "13.3"},
     "macos-arm64-cpu-acpp": {"urls": [f"{audiocpp_release}-bin-macos-arm64-metal.tar.gz"], "gpu": False, "macos_min": "13.3"},
     "macos-x86_64-acpp": {"urls": [f"{audiocpp_release}-bin-macos-x64-metal.tar.gz"], "gpu": False, "macos_min": "13.3"},
-    # e2a's own builds (py-pkg release "audiocpp", runtime bundled like zonos2-server): off until published
+    # e2a's own builds (py-pkg release "audiocpp", made by py-pkg's audiocpp/build-audiocpp.sh, --tag
+    # matching audiocpp_version): old glibc, no libgomp, CUDA runtime bundled, macOS 11. Off until published
     "linux-x64-cuda13": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cuda13.tar.gz"], "gpu": True, "backend": "cuda", "enabled": False},
     "linux-x64-cuda12": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cuda12.tar.gz"], "gpu": True, "backend": "cuda", "enabled": False},
-    "linux-x64-vulkan": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-vulkan.tar.gz"], "gpu": True, "backend": "vulkan", "enabled": False},
-    "linux-x64-cpu": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cpu.tar.gz"], "gpu": False, "enabled": False},
+    "linux-x64-vulkan": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-vulkan.tar.gz"], "gpu": True, "backend": "vulkan", "cpu_flags": ["avx2", "fma", "f16c"], "enabled": False},
+    "linux-x64-cpu-avx2": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cpu-avx2.tar.gz"], "gpu": False, "cpu_flags": ["avx2", "fma", "f16c", "bmi2"], "enabled": False},
+    "linux-x64-cpu-sse42": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cpu-sse42.tar.gz"], "gpu": False, "cpu_flags": ["sse4_2"], "enabled": False},
+    "macos-arm64": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-arm64.tar.gz"], "gpu": True, "backend": "metal", "macos_min": "11.0", "enabled": False},
+    "macos-arm64-cpu": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-arm64.tar.gz"], "gpu": False, "macos_min": "11.0", "enabled": False},
+    # starts on macOS 11, its GPU path (MoltenVK) from the floor build-audiocpp.sh prints
     "macos-x86_64-vulkan": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-x86_64-vulkan.tar.gz"], "gpu": True, "backend": "vulkan", "macos_min": "12.0", "enabled": False},
+    "macos-x86_64": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-x86_64.tar.gz"], "gpu": False, "macos_min": "11.0", "enabled": False},
     "jetson5-sm72-sm87": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson5-sm72-sm87.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 5, "sm": [72, 87], "enabled": False},
     "jetson6-sm87": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson6-sm87.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 6, "sm": [87], "enabled": False},
     "jetson7-sm87-sm110": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson7-sm87-sm110.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 7, "sm": [87, 110], "enabled": False},
     "linux-aarch64-cuda13": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64-cuda13.tar.gz"], "gpu": True, "backend": "cuda", "enabled": False},
     "linux-aarch64-cuda12": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64-cuda12.tar.gz"], "gpu": True, "backend": "cuda", "enabled": False},
+    "linux-aarch64-v82": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64-v82.tar.gz"], "gpu": False, "cpu_flags": ["asimddp", "asimdhp"], "enabled": False},
     "linux-aarch64": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64.tar.gz"], "gpu": False, "enabled": False}
 }
 # reference transcripts for the engines whose cloning takes one (ref_text below): transcribed once per voice clip by this

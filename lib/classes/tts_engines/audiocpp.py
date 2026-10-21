@@ -90,18 +90,19 @@ class AudioCpp(TTSUtils):
                   board_sm = None
             if sys.platform == systems['LINUX'] and machine in ('x86_64', 'amd64'):
                # own builds first (older glibc, bundled CUDA runtime), audio.cpp's official ones (glibc 2.38+) after
-               candidates = (['linux-x64-cuda13', 'linux-x64-cuda12'] if cuda_wanted else []) + (['linux-x64-vulkan', 'linux-x64-vulkan-acpp'] if gpu_wanted else []) + ['linux-x64-cpu', 'linux-x64-cpu-acpp']
+               candidates = (['linux-x64-cuda13', 'linux-x64-cuda12'] if cuda_wanted else []) + (['linux-x64-vulkan', 'linux-x64-vulkan-acpp'] if gpu_wanted else []) + ['linux-x64-cpu-avx2', 'linux-x64-cpu-sse42', 'linux-x64-cpu-acpp']
             elif sys.platform == systems['LINUX'] and machine in ('aarch64', 'arm64'):
                if jetpack is not None:
                   candidates = [k for k, v in packages.items() if v.get('jetpack') == jetpack and board_sm in v.get('sm', [])]
                else:
                   candidates = ['linux-aarch64-cuda13', 'linux-aarch64-cuda12'] if cuda_wanted else []
-               candidates = (candidates if gpu_wanted else []) + ['linux-aarch64']
+               candidates = (candidates if gpu_wanted else []) + ['linux-aarch64-v82', 'linux-aarch64']
             elif sys.platform == systems['WINDOWS'] and machine in ('amd64', 'x86_64'):
                candidates = (['windows-x64-cuda13-acpp', 'windows-x64-cuda12-acpp'] if cuda_wanted else []) + (['windows-x64-vulkan-acpp'] if gpu_wanted else []) + ['windows-x64-cpu-acpp']
             elif sys.platform == systems['MACOS']:
-               # arm64: official Metal build (the same archive runs --backend cpu). x86_64: official build is CPU only
-               candidates = ((['macos-arm64-acpp'] if gpu_wanted else []) + ['macos-arm64-cpu-acpp']) if machine == 'arm64' else ((['macos-x86_64-vulkan'] if gpu_wanted else []) + ['macos-x86_64-acpp'])
+               # own builds start on macOS 11, the official ones on 13.3. arm64: Metal (the same archive runs --backend
+               # cpu). x86_64: Vulkan through MoltenVK (own build only), else CPU
+               candidates = ((['macos-arm64', 'macos-arm64-acpp'] if gpu_wanted else []) + ['macos-arm64-cpu', 'macos-arm64-cpu-acpp']) if machine == 'arm64' else ((['macos-x86_64-vulkan'] if gpu_wanted else []) + ['macos-x86_64', 'macos-x86_64-acpp'])
             else:
                candidates = []
             # CPU features the packages may need, with /proc/cpuinfo names on every OS
