@@ -640,5 +640,8 @@ We accept any kind of hardware to test our development like:
 - A poll is open here https://github.com/DrewThomasson/ebook2audiobook/discussions/889
 -->
 
+## Credits
+- [Coqui-tts](https://github.com/idiap/coqui-ai-TTS) -- a deep learning toolkit for Text-to-Speech, battle-tested in research and production
+
 ## Special Thanks
 To all financial and code contributors, each contribution and suggestion helps to improve the quality of E2A.
