@@ -138,15 +138,17 @@ audiocpp_packages = {
     "linux-x64-vulkan": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-vulkan.tar.gz"], "gpu": True, "backend": "vulkan", "cpu_flags": ["avx2", "fma", "f16c"], "enabled": False},
     "linux-x64-cpu-avx2": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cpu-avx2.tar.gz"], "gpu": False, "cpu_flags": ["avx2", "fma", "f16c", "bmi2"], "enabled": False},
     "linux-x64-cpu-sse42": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cpu-sse42.tar.gz"], "gpu": False, "cpu_flags": ["sse4_2"], "enabled": False},
-    "macos-arm64": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-arm64.tar.gz"], "gpu": True, "backend": "metal", "macos_min": "11.0", "enabled": False},
-    "macos-arm64-cpu": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-arm64.tar.gz"], "gpu": False, "macos_min": "11.0", "enabled": False},
+    # published: Metal shaders embedded, macOS 11 on (audio.cpp's own macos-arm64-metal: 13.3)
+    "macos-arm64": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-arm64.tar.gz"], "gpu": True, "backend": "metal", "macos_min": "11.0"},
+    "macos-arm64-cpu": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-arm64.tar.gz"], "gpu": False, "macos_min": "11.0"},
     # published: the server and its Vulkan loader start on macOS 11, the bundled MoltenVK (the GPU path) needs macOS 12
     "macos-x86_64-vulkan": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-x86_64-vulkan.tar.gz"], "gpu": True, "backend": "vulkan", "macos_min": "12.0"},
     "macos-x86_64": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-x86_64.tar.gz"], "gpu": False, "macos_min": "11.0"},
     # no JetPack 5 (CUDA 11.4) package: audio.cpp needs CUDA 12 or newer, so Xavier and JetPack 5 Orin take the
     # linux-aarch64 CPU packages
-    "jetson6-sm87": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson6-sm87.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 6, "sm": [87], "enabled": False},
-    "jetson7-sm87-sm110": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson7-sm87-sm110.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 7, "sm": [87, 110], "enabled": False},
+    # published: JetPack's own CUDA libraries (6: CUDA 12.6, Ubuntu 22.04; 7: CUDA 13, Ubuntu 24.04), nothing bundled
+    "jetson6-sm87": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson6-sm87.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 6, "sm": [87]},
+    "jetson7-sm87-sm110": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson7-sm87-sm110.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 7, "sm": [87, 110]},
     "linux-aarch64-cuda13": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64-cuda13.tar.gz"], "gpu": True, "backend": "cuda", "enabled": False},
     "linux-aarch64-cuda12": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64-cuda12.tar.gz"], "gpu": True, "backend": "cuda", "enabled": False},
     "linux-aarch64-v82": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64-v82.tar.gz"], "gpu": False, "cpu_flags": ["asimddp", "asimdhp"], "enabled": False},
