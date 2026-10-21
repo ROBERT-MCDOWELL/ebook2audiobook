@@ -641,7 +641,10 @@ We accept any kind of hardware to test our development like:
 -->
 
 ## Credits
-- [Coqui-tts](https://github.com/idiap/coqui-ai-TTS) -- a deep learning toolkit for Text-to-Speech, battle-tested in research and production
+- [Coqui-tts](https://github.com/idiap/coqui-ai-TTS) -- A deep learning toolkit for Text-to-Speech, battle-tested in research and production.
+- [Piper-TTS](https://github.com/OHF-Voice/piper1-gpl) -- Fast and local neural text-to-speech engine.
+- [Zonos2.cpp](https://github.com/Zyphra/zonos2.cpp) -- ggml inference code for Zonos2.
+- [Audio.cpp](https://github.com/0xShug0/audio.cpp) -- An all-in-one, pure C++ inference engine for audio models, powered by ggml.
 
 ## Special Thanks
 To all financial and code contributors, each contribution and suggestion helps to improve the quality of E2A.
