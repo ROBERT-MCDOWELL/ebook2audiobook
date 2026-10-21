@@ -146,3 +146,4 @@ services:
 
 volumes:
   e2a_venvs:
+    name: e2a_venvs

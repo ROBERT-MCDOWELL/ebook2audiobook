@@ -42,7 +42,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
 	DOCKER_DEVICE_STR=${DOCKER_DEVICE_STR} \
 	PIP_BREAK_SYSTEM_PACKAGES=1 \
 	PATH="/root/.cargo/bin:${PATH}" \
-	IN_DOCKER=1
+	IN_DOCKER=1 \
+	UV_PYTHON_INSTALL_DIR="/app/lib/classes/tts_engines/venvs/.python" \
+	UV_LINK_MODE="copy"
 
 WORKDIR /app
 

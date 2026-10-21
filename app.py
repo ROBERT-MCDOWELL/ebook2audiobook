@@ -159,7 +159,7 @@ Gradio/GUI:
 ebook2audiobook.cmd
 Headless mode:
 ebook2audiobook.cmd --headless --ebook '/path/to/file' --language eng
-Linux/Mac natvie mode:
+Linux/Mac native mode:
 Gradio/GUI:
 ./ebook2audiobook.command
 Headless mode:
@@ -182,36 +182,36 @@ Podman Compose:
 Docker run image:
 Gradio/GUI:
 CPU:
-{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" --rm -it -p 7860:7860 athomasson2/ebook2audiobook:cpu
+{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" --rm -it -p 7860:7860 athomasson2/ebook2audiobook:cpu
 CUDA:
-{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" --gpus all --rm -it -p 7860:7860 athomasson2/ebook2audiobook:cu[118/122/124/126 etc..]
+{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" --gpus all --rm -it -p 7860:7860 athomasson2/ebook2audiobook:cu[118/122/124/126 etc..]
 ROCM:
-{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" --device=/dev/kfd --device=/dev/dri --rm -it -p 7860:7860 athomasson2/ebook2audiobook:rocm[6.0/6.1/6.4 etc..]
+{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" --device=/dev/kfd --device=/dev/dri --rm -it -p 7860:7860 athomasson2/ebook2audiobook:rocm[6.0/6.1/6.4 etc..]
 XPU:
-{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" --device=/dev/dri --rm -it -p 7860:7860 athomasson2/ebook2audiobook:xpu
+{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" --device=/dev/dri --rm -it -p 7860:7860 athomasson2/ebook2audiobook:xpu
 JETSON:
-{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" --runtime nvidia  --rm -it -p 7860:7860 athomasson2/ebook2audiobook:jetson[5/6/7 etc...]
+{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" --runtime nvidia --rm -it -p 7860:7860 athomasson2/ebook2audiobook:jetson[5/6/7 etc...]
 Headless mode:
 CPU:
-{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --rm -it -p 7860:7860 ebook2audiobook:cpu --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
+{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --rm -it -p 7860:7860 athomasson2/ebook2audiobook:cpu --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
 CUDA:
-{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --gpus all --rm -it -p 7860:7860 ebook2audiobook:cu[118/122/124/126 etc..] --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
+{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --gpus all --rm -it -p 7860:7860 athomasson2/ebook2audiobook:cu[118/122/124/126 etc..] --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
 ROCM:
-{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --device=/dev/kfd --device=/dev/dri --rm -it -p 7860:7860 ebook2audiobook:rocm[6.0/6.1/6.4 etc.] --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
+{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --device=/dev/kfd --device=/dev/dri --rm -it -p 7860:7860 athomasson2/ebook2audiobook:rocm[6.0/6.1/6.4 etc.] --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
 XPU:
-{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --device=/dev/dri --rm -it -p 7860:7860 ebook2audiobook:xpu --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
+{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --device=/dev/dri --rm -it -p 7860:7860 athomasson2/ebook2audiobook:xpu --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
 JETSON:
-{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --runtime nvidia --rm -it -p 7860:7860 ebook2audiobook:jetson[5/6/7 etc.] --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
+{wsl_cmd} docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --runtime nvidia --rm -it -p 7860:7860 athomasson2/ebook2audiobook:jetson[5/6/7 etc.] --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
 Docker Compose (i.e. cuda 12.8:
 Run Gradio GUI:
-{wsl_cmd} {wsl_extra} docker compose --profile gpu up --no-log-prefix
+{wsl_cmd} {wsl_extra} docker compose --profile cuda up --no-log-prefix
 Run Headless mode:
-{wsl_cmd} {wsl_extra} docker compose --profile gpu run --rm ebook2audiobook --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
+{wsl_cmd} {wsl_extra} docker compose --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 Podman Compose (i.e. cuda 12.8:
 Run Gradio GUI:
-{wsl_cmd} {wsl_extra} podman-compose -f podman-compose.yml --profile gpu up
+{wsl_cmd} {wsl_extra} podman-compose -f podman-compose.yml --profile cuda up
 Run Headless mode:
-{wsl_cmd} {wsl_extra} podman-compose -f podman-compose.yml --profile gpu run --rm ebook2audiobook-gpu --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
+{wsl_cmd} {wsl_extra} podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 SML tags available:
 [break] — silence (random range 0.3–0.6 sec.)
 [pause] — silence (random range 1.0–1.6 sec.)
@@ -229,10 +229,10 @@ SML tags available:
     all_group.add_argument(cli_options[1], type=str, help='Optional. The only values are: podman and compose. without this option standard docker buildx is used.')
     parser.add_argument(cli_options[2], type=str, help='Session to resume the conversion in case of interruption, crash, or reuse of custom models and custom cloning voices.')
 
-    gui_group = parser.add_argument_group('**** The following option are for gradio/gui mode only', 'Optional')
+    gui_group = parser.add_argument_group('**** The following option is for gradio/gui mode only', 'Optional')
     gui_group.add_argument(cli_options[3], action='store_true', help='''Enable a public shareable Gradio link.''')
 
-    headless_group = parser.add_argument_group('**** The followin cli_options are for --headless mode only')
+    headless_group = parser.add_argument_group('**** The following options are for --headless mode only')
     headless_group.add_argument(cli_options[4], action='store_true', help='Run the script in headless mode')
     headless_group.add_argument(cli_options[5], type=str, help='Path to the ebook file for conversion. Cannot be used when --ebooks_dir or --text is present.')
     headless_group.add_argument(cli_options[6], type=str, help='Relative or absolute path of the directory containing the files to convert. Cannot be used when --ebook or --text is present.')
@@ -253,7 +253,7 @@ Keys may be absolute paths or basenames. Example:
 Default is set in ./lib/conf.py if not present. Fall back to CPU if CUDA or MPS is not available.''')
     headless_optional_group.add_argument(cli_options[13], type=str, default=TTS_ENGINES['XTTS'], choices=tts_engine_list_keys+tts_engine_list_values, help=f'''Preferred TTS engine (available are: {tts_engine_list_keys+tts_engine_list_values}.
 Default depends on the selected language. The tts engine should be compatible with the chosen language''')
-    headless_optional_group.add_argument(cli_options[14], type=str, default=None, help='Path to the custom model zip file cntaining mandatory model files. Please refer to ./lib/models.py')
+    headless_optional_group.add_argument(cli_options[14], type=str, default=None, help='Path to the custom model zip file containing mandatory model files. Please refer to ./lib/models.py')
     headless_optional_group.add_argument(cli_options[15], type=str, default=default_fine_tuned, help='Fine tuned model path. Default is builtin model.')
     headless_optional_group.add_argument(cli_options[16], type=str, default=default_output_format, help=f'Output audio format. Default is {default_output_format} set in ./lib/conf.py')
     headless_optional_group.add_argument(cli_options[17], type=str, default=default_output_channel, help=f'Output audio channel. Default is {default_output_channel} set in ./lib/conf.py')
