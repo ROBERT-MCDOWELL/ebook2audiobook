@@ -133,11 +133,13 @@ audiocpp_packages = {
     "macos-x86_64-acpp": {"urls": [f"{audiocpp_release}-bin-macos-x64-metal.tar.gz"], "gpu": False, "macos_min": "13.3"},
     # e2a's own builds (py-pkg release "audiocpp", made by py-pkg's audiocpp/build-audiocpp.sh, --tag
     # matching audiocpp_version): old glibc, no libgomp, CUDA runtime bundled, macOS 11. Off until published
+    # the uploaded linux-x64-cuda12 / -cuda13 lack lib/libcufft (audio.cpp's CUDA iSTFT): off until repacked by the
+    # current build-audiocpp.sh, which bundles it. linux-x64-vulkan and -cpu-*: published (glibc 2.27, only libc/libm/libdl)
     "linux-x64-cuda13": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cuda13.tar.gz"], "gpu": True, "backend": "cuda", "enabled": False},
     "linux-x64-cuda12": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cuda12.tar.gz"], "gpu": True, "backend": "cuda", "enabled": False},
-    "linux-x64-vulkan": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-vulkan.tar.gz"], "gpu": True, "backend": "vulkan", "cpu_flags": ["avx2", "fma", "f16c"], "enabled": False},
-    "linux-x64-cpu-avx2": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cpu-avx2.tar.gz"], "gpu": False, "cpu_flags": ["avx2", "fma", "f16c", "bmi2"], "enabled": False},
-    "linux-x64-cpu-sse42": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cpu-sse42.tar.gz"], "gpu": False, "cpu_flags": ["sse4_2"], "enabled": False},
+    "linux-x64-vulkan": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-vulkan.tar.gz"], "gpu": True, "backend": "vulkan", "cpu_flags": ["avx2", "fma", "f16c"]},
+    "linux-x64-cpu-avx2": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cpu-avx2.tar.gz"], "gpu": False, "cpu_flags": ["avx2", "fma", "f16c", "bmi2"]},
+    "linux-x64-cpu-sse42": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-x64-cpu-sse42.tar.gz"], "gpu": False, "cpu_flags": ["sse4_2"]},
     # published: Metal shaders embedded, macOS 11 on (audio.cpp's own macos-arm64-metal: 13.3)
     "macos-arm64": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-arm64.tar.gz"], "gpu": True, "backend": "metal", "macos_min": "11.0"},
     "macos-arm64-cpu": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-macos-arm64.tar.gz"], "gpu": False, "macos_min": "11.0"},
