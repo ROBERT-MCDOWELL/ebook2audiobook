@@ -433,7 +433,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - NOTE: MPS is not exposed in docker so CPU must be used
-- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice etc.)
+- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS etc.)
   across container runs, so they are not reinstalled each time. To reset them: `docker volume rm e2a_venvs`
 
 ## Cloned Voices
@@ -519,6 +519,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Higgs Audio TTS (https://github.com/higgs-audio/higgs-audio)[cite: 1]
 - [x] Maya1 (https://github.com/maya-ai/maya1)[cite: 1]
 - [x] OmniVoice (https://github.com/k2-fsa/OmniVoice)[cite: 1]
+- [x] F5-TTS (https://github.com/swivid/f5-tts)[cite: 1]
 - [x] Qwen3-TTS (https://huggingface.co/spaces/Qwen/Qwen3-TTS)[cite: 1]
 - [x] VibeVoice (https://github.com/vibevoice-community/VibeVoice)[cite: 1]
 - [x] VoxCPM2 (https://github.com/voxcpm/voxcpm)[cite: 1]
@@ -549,7 +550,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Zonos (https://github.com/Zyphra/Zonos)[cite: 1]
 - [x] Bark (https://github.com/suno-ai/bark)[cite: 1]
 - [x] YourTTS (https://github.com/Edresson/YourTTS)[cite: 1]
-- [ ] F5-TTS (https://github.com/swivid/f5-tts)
 - [ ] Style-TTS2 (https://github.com/yl4579/StyleTTS2)
 - [ ] Orpheus-TTS (https://github.com/canopyai/Orpheus-TTS)
 - [ ] ChatTTS (https://github.com/2noise/ChatTTS)

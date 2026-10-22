@@ -9,6 +9,7 @@ TTS_ENGINES = {
     "ZONOS": "zonos",
     "GPTSOVITS": "gptsovits",
     "OMNIVOICE": "omnivoice",
+    "F5TTS": "f5tts",
     "XTTS": "xtts",
     "BARK": "bark",
     "TORTOISE": "tortoise",
@@ -109,7 +110,7 @@ default_speaker = os.path.join(voices_dir, 'eng', 'adult', 'male', 'KumarDahl.wa
 
 tts_engines_from_coqui = [TTS_ENGINES['XTTS'], TTS_ENGINES['BARK'], TTS_ENGINES['TORTOISE'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
 tts_engines_with_inner_speaker = [TTS_ENGINES['PIPER'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
-tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['OMNIVOICE'])
+tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['OMNIVOICE'], TTS_ENGINES['F5TTS'])
 
 # audio.cpp engines (0xShug0/audio.cpp): one native audiocpp_server package per platform, shared by every audio.cpp
 # engine, plus the GGUF weights of each engine's fine_tuned preset (presets/audiocpp_presets.py), driven by
@@ -277,7 +278,8 @@ default_engine_settings = {
         "requirements_extra": [],
         # every package installs as a wheel, so no platform ever needs a compiler
         "packages_sdist": [],
-        # reference transcription for the voice clone prompt (OmniVoice's own Whisper, run on cpu)
+        # reference transcription for the voice clone prompt (OmniVoice's own Whisper, run on cpu); one copy under
+        # models/tts shared with the other engines using it
         "asr_model": "openai/whisper-large-v3-turbo",
         # the worker cuts a reference clip within this window (upstream asks for 3-10 s)
         "ref_min": 3.2,
@@ -295,6 +297,52 @@ default_engine_settings = {
         "voice": default_speaker,
         "voices": {},
         "rating": {"VRAM": 4, "CPU": 3, "RAM": 8, "Realism": 5}
+    },
+    TTS_ENGINES['F5TTS']: {
+        # runs in its own uv venv (lib/classes/tts_engines/venvs/f5tts) behind a persistent worker
+        "repo": "SWivid/F5-TTS",
+        "source": "https://github.com/SWivid/F5-TTS/archive/2f866649b779881af8bd644e76b9a6d95053da29.tar.gz",
+        "python": "3.12",
+        # package list = upstream's own pyproject.toml dependencies (in the extracted tree), torch from the
+        # device's PyTorch index (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller as fallback.
+        # Left out: what inference never imports (gradio demo UI, bitsandbytes training optimizer, cached_path /
+        # hydra-core used only by upstream's api / cli / socket server, transformers_stream_generator unused) and
+        # torchcodec (the worker reads audio with soundfile). wandb / datasets / accelerate / ema_pytorch stay:
+        # f5_tts.model imports its Trainer. Names normalized as pip does. onnxruntime (cpu) runs the Arabic
+        # diacritizer below.
+        "requirements_exclude": ["gradio", "bitsandbytes", "cached-path", "hydra-core", "transformers-stream-generator", "torchcodec"],
+        "requirements_extra": ["onnxruntime"],
+        # every package installs as a wheel, so no platform ever needs a compiler; encodec (vocos' dependency)
+        # only exists as a pure-python source
+        "packages_sdist": ["encodec"],
+        # installed without their dependencies: catt-tashkeel declares onnxruntime-gpu (no macOS wheels, and the
+        # cpu build is plenty for it)
+        "packages_nodeps": ["catt-tashkeel==1.0.2"],
+        "vocoder": "charactr/vocos-mel-24khz",
+        # Arabic diacritization (SILMA's own choice, CATT encoder-only ONNX model), for checkpoints with tashkeel True
+        "tashkeel": {"url": "https://github.com/abjadai/catt/releases/download/v2/eo_model_onnx.zip", "dir": "abjadai--catt-eo_model"},
+        # reference transcription (F5-TTS clones from audio + its text), upstream's own Whisper, run on cpu; one
+        # copy under models/tts shared with the other engines using it
+        "asr_model": "openai/whisper-large-v3-turbo",
+        # upstream clips references at 12 s (a checkpoint may set its own); no minimum: silence padding would slow
+        # the speech, as F5-TTS derives the generated duration from the reference's seconds per character
+        "ref_max": 12.0,
+        # languages a checkpoint exists for (presets/f5tts_presets.py: v1 base for eng/zho, community models)
+        "languages": {"eng": "en", "zho": "zh", "fra": "fr", "deu": "de", "ita": "it", "rus": "ru", "spa": "es", "fin": "fi", "hin": "hi", "lav": "lv", "jpn": "ja", "ara": "ar"},
+        "samplerate": 24000,
+        # upstream defaults (utils_infer.py)
+        "nfe_step": 32,
+        "cfg_strength": 2.0,
+        "sway_sampling_coef": -1.0,
+        "speed": 1.0,
+        "cross_fade_duration": 0.15,
+        "target_rms": 0.1,
+        # custom model upload: a fine-tuned checkpoint (EMA weights as safetensors), its vocab, its DiT config
+        # (SHARED.md "Config" line as json) + ref.wav; vocoder and ASR are the base ones
+        "files": ["config.json", "model.safetensors", "vocab.txt", "ref.wav"],
+        "voice": default_speaker,
+        "voices": {},
+        "rating": {"VRAM": 3, "CPU": 2, "RAM": 4, "Realism": 4}
     },
     TTS_ENGINES['XTTS']: {
         "repo": "coqui/XTTS-v2",

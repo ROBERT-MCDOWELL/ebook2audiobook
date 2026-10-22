@@ -71,9 +71,14 @@ class OmniVoice(TTSUtils, TTSRegistry, name='omnivoice'):
             self.venv_dir = os.path.join(engine_dir, 'venvs', tts_engine)
             self.venv_python = os.path.join(self.venv_dir, 'Scripts', 'python.exe') if sys.platform == systems['WINDOWS'] else os.path.join(self.venv_dir, 'bin', 'python')
             self.worker_script = os.path.join(engine_dir, 'workers', f'{tts_engine}_worker.py')
-            # model and whisper as plain folders under models/tts (see the worker for why)
+            # model and whisper as plain folders under models/tts (see the worker for why); whisper sits at
+            # models/tts itself, one copy for every engine using it
             self.model_dir = os.path.join(self.cache_dir, tts_engine, settings['repo'].replace('/', '--'))
-            self.asr_dir = os.path.join(self.cache_dir, tts_engine, settings['asr_model'].replace('/', '--'))
+            self.asr_dir = os.path.join(self.cache_dir, settings['asr_model'].replace('/', '--'))
+            # a whisper downloaded before, under models/tts/omnivoice, is moved up once, not fetched again
+            asr_dir_engine = os.path.join(self.cache_dir, tts_engine, settings['asr_model'].replace('/', '--'))
+            if os.path.isdir(asr_dir_engine) and not os.path.exists(self.asr_dir):
+                os.replace(asr_dir_engine, self.asr_dir)
             self.worker_env = {k: v for k, v in os.environ.items() if k not in ('PYTHONHOME', 'PYTHONPATH', 'PYTHONSTARTUP', 'VIRTUAL_ENV', 'CONDA_PREFIX', 'CONDA_DEFAULT_ENV', 'CONDA_PYTHON_EXE', 'CONDA_SHLVL', '__PYVENV_LAUNCHER__')}
             self.worker_env['VIRTUAL_ENV'] = self.venv_dir
             self.worker_env['PATH'] = os.pathsep.join([os.path.dirname(self.venv_python), self.worker_env.get('PATH', '')])
