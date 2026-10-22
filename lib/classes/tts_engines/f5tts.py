@@ -335,7 +335,16 @@ class F5TTS(TTSUtils, TTSRegistry, name='f5tts'):
                 except Exception as e:
                     print(f"Warning: Failed to copy sitecustomize.py: {e}")
                 # the worker's own import chain: f5_tts.model pulls its Trainer (wandb, datasets, accelerate...)
-                probe = subprocess.run([self.venv_python, '-c', 'import f5_tts.infer.utils_infer'], env=self.worker_env, capture_output=True, text=True, timeout=600)
+                probe_script = '\n'.join([
+                    # same torch.distributed stubs as the worker, for torch built without distributed (jetson, macOS vulkan)
+                    'import types, torch, torch.distributed',
+                    'if not torch.distributed.is_available():',
+                    '    for attr, value in (("ReduceOp", types.SimpleNamespace(SUM="sum", AVG="avg", PRODUCT="product", MIN="min", MAX="max")), ("is_initialized", lambda: False), ("get_rank", lambda: 0), ("get_world_size", lambda: 1)):',
+                    '        if not hasattr(torch.distributed, attr):',
+                    '            setattr(torch.distributed, attr, value)',
+                    'import f5_tts.infer.utils_infer'
+                ])
+                probe = subprocess.run([self.venv_python, '-c', probe_script], env=self.worker_env, capture_output=True, text=True, timeout=600)
                 if probe.returncode != 0:
                     error = legends['error_venv_install_failed'].format(engine=tts_engine, step=f'import f5_tts.infer.utils_infer: {probe.stderr.strip()[-500:]}')
                     raise RuntimeError(error)
