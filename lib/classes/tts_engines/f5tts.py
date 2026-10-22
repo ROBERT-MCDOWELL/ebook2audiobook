@@ -378,7 +378,7 @@ class F5TTS(TTSUtils, TTSRegistry, name='f5tts'):
                 '--arch', json.dumps(self.checkpoint['arch']),
                 '--model_dir', self.model_dir,
                 '--ema', '1' if self.checkpoint.get('ema', True) else '0'
-            ]) + (['--tashkeel_url', settings['tashkeel']['url'], '--tashkeel_dir', self.tashkeel_dir] if self.checkpoint.get('tashkeel') else [])
+            ]) + (['--tashkeel_url', settings['tashkeel']['url'], '--tashkeel_dir', self.tashkeel_dir] if self.checkpoint.get('tashkeel') else []) + (['--habibi', self.checkpoint['habibi']] if self.checkpoint.get('habibi') else [])
             engine = loaded_tts.get(self.tts_key)
             if isinstance(engine, SubprocessPipe) and (engine.cmd != cmd or engine.process is None or engine.process.poll() is not None):
                 # dead worker, or one serving another model (another language's checkpoint, another custom

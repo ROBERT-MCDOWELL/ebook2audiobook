@@ -36,6 +36,7 @@ def main()->int:
     parser.add_argument('--ref_max', type=float, default=12.0)
     parser.add_argument('--tashkeel_url', default='')
     parser.add_argument('--tashkeel_dir', default='')
+    parser.add_argument('--habibi', default='')
     args = parser.parse_args()
     try:
         os.makedirs(args.cache_dir, exist_ok=True)
@@ -114,6 +115,16 @@ def main()->int:
         ema_model = load_model(DiT, arch, weights_file, mel_spec_type='vocos', vocab_file=vocab_file, device=load_device)
         ema_model = ema_model.to(device=device, dtype=torch.float16 if half else torch.float32)
         vocoder = load_vocoder('vocos', True, args.vocoder_dir, load_device).to(device)
+        harakat = None
+        if args.habibi:
+            # Habibi-TTS: its inference (habibi_tts infer_batch_process) is upstream's with the text step alone changed,
+            # the text reaches the model as is (no pinyin), as <dialect id>〈ref + gen〉 for the Unified model and bare for
+            # the specialized ones; the process serves one checkpoint, so upstream's step is swapped here once
+            dialect_ids = {'UNK': '\u24ea', 'MSA': '\u2460', 'SAU': '\u2461', 'UAE': '\u2462', 'ALG': '\u2463', 'IRQ': '\u2464', 'EGY': '\u2465', 'MAR': '\u2466', 'OMN': '\u2467', 'TUN': '\u2468', 'LEV': '\u2469', 'SDN': '\u246a', 'LBY': '\u246b'}
+            dialect_id = dialect_ids.get(args.habibi, '')
+            utils_infer.convert_char_to_pinyin = lambda text_list, polyphone=True: [f'{dialect_id}\u3008{text}\u3009' if dialect_id else text for text in text_list]
+            # trained on undiacritized ASR transcripts: diacritized input garbles (audio.cpp's port strips them too)
+            harakat = re.compile(r'[\u0640\u064B-\u065F\u0670]')
         tashkeel = None
         if args.tashkeel_url:
             # cpu ONNX model, small next to the TTS
@@ -192,6 +203,8 @@ def main()->int:
                 refs[voice_key] = (torch.from_numpy(data.T.copy()), sr, ref_text)
             ref_audio, ref_sr, ref_text = refs[voice_key]
             text = req['text']
+            if harakat is not None:
+                text = harakat.sub('', text)
             speed = float(req.get('speed', 1.0))
             if tashkeel is not None and arabic_runs.search(text):
                 # SILMA's own text path (silma_tts infer_process): Arabic without diacritics gets them, and the
