@@ -96,7 +96,8 @@ class AudioCpp(TTSUtils):
                   candidates = [k for k, v in packages.items() if v.get('jetpack') == jetpack and board_sm in v.get('sm', [])]
                else:
                   candidates = ['linux-aarch64-cuda13', 'linux-aarch64-cuda12'] if cuda_wanted else []
-               candidates = (candidates if gpu_wanted else []) + ['linux-aarch64-v82', 'linux-aarch64']
+               # Vulkan after CUDA: the GPU path of a Jetson without a CUDA package (Xavier, JetPack 5), the fallback of one with
+               candidates = ((candidates + ['linux-aarch64-vulkan']) if gpu_wanted else []) + ['linux-aarch64-v82', 'linux-aarch64']
             elif sys.platform == systems['WINDOWS'] and machine in ('amd64', 'x86_64'):
                candidates = (['windows-x64-cuda13-acpp', 'windows-x64-cuda12-acpp'] if cuda_wanted else []) + (['windows-x64-vulkan-acpp'] if gpu_wanted else []) + ['windows-x64-cpu-acpp']
             elif sys.platform == systems['MACOS']:
