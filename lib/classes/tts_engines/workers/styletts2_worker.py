@@ -111,6 +111,7 @@ def main()->int:
         bert = load_plbert(plbert_dir)
         model_params = recursive_munch(config['model_params'])
         model = build_model(model_params, text_aligner, pitch_extractor, bert)
+        style_dim = int(model_params.style_dim)
         params = torch.load(checkpoint_path, map_location='cpu', weights_only=True)['net']
         for key in model:
             if key in params:
@@ -205,16 +206,16 @@ def main()->int:
                 bert_dur = model.bert(tokens, attention_mask=(~text_mask).int())
                 d_en = model.bert_encoder(bert_dur).transpose(-1, -2)
                 s_pred = sampler(
-                    noise=torch.randn((1, 256)).unsqueeze(1).to(device),
+                    noise=torch.randn((1, 2 * style_dim)).unsqueeze(1).to(device),
                     embedding=bert_dur,
                     embedding_scale=float(req.get('embedding_scale', 1.0)),
                     features=ref_s,
                     num_steps=int(req.get('diffusion_steps', 5))
                 ).squeeze(1)
-                s = s_pred[:, 128:]
-                ref = s_pred[:, :128]
-                ref = alpha * ref + (1 - alpha) * ref_s[:, :128]
-                s = beta * s + (1 - beta) * ref_s[:, 128:]
+                s = s_pred[:, style_dim:]
+                ref = s_pred[:, :style_dim]
+                ref = alpha * ref + (1 - alpha) * ref_s[:, :style_dim]
+                s = beta * s + (1 - beta) * ref_s[:, style_dim:]
                 d = model.predictor.text_encoder(d_en, s, input_lengths, text_mask)
                 x, _ = model.predictor.lstm(d)
                 duration = torch.sigmoid(model.predictor.duration_proj(x)).sum(axis=-1)
