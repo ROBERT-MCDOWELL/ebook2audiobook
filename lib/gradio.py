@@ -3258,13 +3258,17 @@ def build_interface(args:dict)->gr.Blocks:
                         if isinstance(custom_model_dir, str) and not os.path.exists(custom_model_dir):
                             session['custom_model'] = None
                     if isinstance(session.get('tts_engine'), str):
-                        models = load_engine_presets(session['tts_engine'])
-                        if models:
-                            if session['fine_tuned'] not in models.keys():
+                        try:
+                            models = load_engine_presets(session['tts_engine'])
+                            if models:
+                                if session['fine_tuned'] not in models.keys():
+                                    session['fine_tuned'] = default_fine_tuned
+                            else:
+                                session['tts_engine'] = default_tts_engine
                                 session['fine_tuned'] = default_fine_tuned
-                        else:
+                        except Exception as e:
                             session['tts_engine'] = default_tts_engine
-                            session['fine_tuned'] = default_fine_tuned
+                            pass
                     if session.get('translate_enabled'):
                         translate_target = session.get('translate')
                         if not translate_target or translate_target not in language_mapping:
