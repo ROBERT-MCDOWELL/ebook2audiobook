@@ -10,7 +10,6 @@ TTS_ENGINES = {
     "GPTSOVITS": "gptsovits",
     "OMNIVOICE": "omnivoice",
     "F5TTS": "f5tts",
-    "STYLETTS2": "styletts2",
     "XTTS": "xtts",
     "BARK": "bark",
     "TORTOISE": "tortoise",
@@ -111,7 +110,7 @@ default_speaker = os.path.join(voices_dir, 'eng', 'adult', 'male', 'KumarDahl.wa
 
 tts_engines_from_coqui = [TTS_ENGINES['XTTS'], TTS_ENGINES['BARK'], TTS_ENGINES['TORTOISE'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
 tts_engines_with_inner_speaker = [TTS_ENGINES['PIPER'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
-tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['OMNIVOICE'], TTS_ENGINES['F5TTS'], TTS_ENGINES['STYLETTS2'])
+tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['OMNIVOICE'], TTS_ENGINES['F5TTS'])
 
 # audio.cpp engines (0xShug0/audio.cpp): one native audiocpp_server package per platform, shared by every audio.cpp
 # engine, plus the GGUF weights of each engine's fine_tuned preset (presets/audiocpp_presets.py), driven by
@@ -301,41 +300,6 @@ default_engine_settings = {
         "voice": default_speaker,
         "voices": {},
         "rating": {"VRAM": 4, "CPU": 3, "RAM": 8, "Realism": 5}
-    },
-    TTS_ENGINES['STYLETTS2']: {
-        # runs in its own uv venv (lib/classes/tts_engines/venvs/styletts2) behind a persistent worker, from the
-        # pinned source tree: upstream is not a package, the worker runs it from its repo root
-        "repo": "yl4579/StyleTTS2-LibriTTS",
-        "model_files": ["Models/LibriTTS/config.yml", "Models/LibriTTS/epochs_2nd_00020.pth"],
-        "source": "https://github.com/yl4579/StyleTTS2/archive/5cedc71c333f8d8b8551ca59378bdcc7af4c9529.tar.gz",
-        "python": "3.12",
-        # package list = upstream's requirements.txt, minus what inference never imports (training: accelerate,
-        # matplotlib, pydub, monotonic_align) plus what e2a's worker needs instead of librosa / nltk: phonemizer with
-        # a wheel-bundled espeak-ng (espeakng-loader). torch from the device's PyTorch index (--torch-backend, e2a's
-        # detected tag) or e2a's DeviceInstaller as fallback. Names normalized as pip does.
-        "requirements": ["soundfile", "torchaudio", "munch", "pyyaml", "transformers", "einops", "einops-exts", "scipy", "tqdm", "numpy", "phonemizer", "espeakng-loader"],
-        # every package installs as a wheel, so no platform ever needs a compiler
-        "packages_sdist": ["einops-exts"],
-        # multilingual PL-BERT (Papercup): the text encoder a custom (multilingual) StyleTTS2 checkpoint is trained
-        # with. The base LibriTTS model keeps upstream's own English PL-BERT (Utils/PLBERT in the source tree)
-        "plbert_repo": "papercup-ai/multilingual-pl-bert",
-        # reference clip window in s (voice cloning = the model's style / predictor encoders on this clip)
-        "ref_max": 15.0,
-        # the 14 languages of the multilingual PL-BERT, e2a's iso-639-3 -> espeak-ng voice. Without a custom
-        # checkpoint only the base LibriTTS model (English) is available, see the engine
-        "languages": {"eng": "en-us", "fra": "fr-fr", "spa": "es", "cat": "ca", "deu": "de", "ell": "el", "fas": "fa", "fin": "fi", "por": "pt", "pol": "pl", "rus": "ru", "swe": "sv", "ukr": "uk", "zho": "cmn"},
-        "samplerate": 24000,
-        # upstream inference defaults (Demo/Inference_LibriTTS.ipynb)
-        "alpha": 0.3,
-        "beta": 0.7,
-        "diffusion_steps": 5,
-        "embedding_scale": 1.0,
-        # custom model upload: a StyleTTS2 checkpoint (the epoch .pth with the 'net' weights, trained with the
-        # multilingual PL-BERT), its training config.yml + ref.wav; ASR / F0 / PL-BERT are e2a's own
-        "files": ["config.yml", "model.pth", "ref.wav"],
-        "voice": default_speaker,
-        "voices": {},
-        "rating": {"VRAM": 3, "CPU": 2, "RAM": 4, "Realism": 4}
     },
     TTS_ENGINES['F5TTS']: {
         # runs in its own uv venv (lib/classes/tts_engines/venvs/f5tts) behind a persistent worker
