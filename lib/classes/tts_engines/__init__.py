@@ -10,5 +10,6 @@ from .yourtts import YourTTS
 from .zonos import Zonos
 from .gptsovits import GptSovits
 from .omnivoice import OmniVoice
+from .styletts2 import StyleTTS2
 from .f5tts import F5TTS
 from .audiocpp import AudioCpp
