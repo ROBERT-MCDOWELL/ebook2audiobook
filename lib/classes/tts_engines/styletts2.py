@@ -1,7 +1,9 @@
 import json
+from pathlib import Path
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
+from lib.conf import voices_dir
 from lib.conf import systems, torch_matrix, transformers_caps, default_pytorch_url, default_pytorch_nightly_url
 from lib.lang import legends
 
@@ -48,14 +50,20 @@ class StyleTTS2(TTSUtils, TTSRegistry, name='styletts2'):
                     error = legends['error_fine_tuned_missing_key'].format(model=fine_tuned, key=required_key)
                     raise ValueError(error)
             self.params['samplerate'] = model_cfg['samplerate']
-            self.model_repo = model_cfg['repo']
-            # an uploaded custom model is an extracted folder (core.extract_custom_model), used instead of
-            # the base weights; it is trained with the multilingual PL-BERT, so it serves every language of
-            # settings['languages']. The base LibriTTS model only speaks English.
+            # An uploaded custom model is an extracted folder (core.extract_custom_model), used instead of
+            # the language-specific internal weights and trained with the multilingual PL-BERT.
             self.custom_model = self.session.get('custom_model') if self.session.get('custom_model') and os.path.isdir(self.session['custom_model']) else ''
-            if not self.custom_model and self.language != 'eng':
+            self.language_model = model_cfg.get('language_models', {}).get(self.language)
+            if not self.custom_model and self.language_model is None:
                 error = legends['error_language_not_supported_engine'].format(lang=self.language, engine=f'{tts_engine} (upload a multilingual custom model)')
                 raise ValueError(error)
+            self.model_repo = self.language_model['repo'] if self.language_model else model_cfg['repo']
+            self.model_files = self.language_model.get('model_files', settings['model_files']) if self.language_model else settings['model_files']
+            self.model_plbert_repo = settings['plbert_repo'] if self.custom_model else self.language_model.get('plbert_repo', '') if self.language_model else ''
+            self.plbert_config_file = self.language_model.get('plbert_config_file', 'config.yml') if self.language_model and not self.custom_model else 'config.yml'
+            self.phonemizer_language = self.language_model.get('phonemizer', self.language_code) if self.language_model else self.language_code
+            # The pipe cache compares its command and replaces this worker when language/model changes.
+            self.tts_key = self.session['model_cache']
             self.xtts_speakers = self._load_xtts_builtin_list()
             self.device = devices['CUDA']['proc'] if self.session['device'] in [devices['CUDA']['proc'], devices['ROCM']['proc'], devices['JETSON']['proc']] else self.session['device']
             self.worker_device = self.device
@@ -77,8 +85,8 @@ class StyleTTS2(TTSUtils, TTSRegistry, name='styletts2'):
             self.venv_python = os.path.join(self.venv_dir, 'Scripts', 'python.exe') if sys.platform == systems['WINDOWS'] else os.path.join(self.venv_dir, 'bin', 'python')
             self.worker_script = os.path.join(engine_dir, 'workers', f'{tts_engine}_worker.py')
             # models as plain folders under models/tts (no symlinks, see the worker)
-            self.model_dir = os.path.join(self.cache_dir, tts_engine, settings['repo'].replace('/', '--'))
-            self.plbert_dir = os.path.join(self.cache_dir, tts_engine, settings['plbert_repo'].replace('/', '--'))
+            self.model_dir = os.path.join(self.cache_dir, tts_engine, self.model_repo.replace('/', '--'))
+            self.plbert_dir = os.path.join(self.cache_dir, tts_engine, self.model_plbert_repo.replace('/', '--')) if self.model_plbert_repo else ''
             self.worker_env = {k: v for k, v in os.environ.items() if k not in ('PYTHONHOME', 'PYTHONPATH', 'PYTHONSTARTUP', 'VIRTUAL_ENV', 'CONDA_PREFIX', 'CONDA_DEFAULT_ENV', 'CONDA_PYTHON_EXE', 'CONDA_SHLVL', '__PYVENV_LAUNCHER__')}
             self.worker_env['VIRTUAL_ENV'] = self.venv_dir
             self.worker_env['PATH'] = os.pathsep.join([os.path.dirname(self.venv_python), self.worker_env.get('PATH', '')])
@@ -333,8 +341,9 @@ class StyleTTS2(TTSUtils, TTSRegistry, name='styletts2'):
                 '--repo', self.model_repo,
                 '--src', self.src_dir,
                 '--model_dir', self.model_dir,
-                '--model_files', json.dumps(settings['model_files']),
-                '--plbert_repo', settings['plbert_repo'],
+                '--model_files', json.dumps(self.model_files),
+                '--plbert_repo', self.model_plbert_repo,
+                '--plbert_config_file', self.plbert_config_file,
                 '--plbert_dir', self.plbert_dir,
                 '--device', self.worker_device,
                 '--cache_dir', os.path.join(self.venv_dir, 'refs'),
@@ -367,6 +376,21 @@ class StyleTTS2(TTSUtils, TTSRegistry, name='styletts2'):
             error = f'load_engine() error: {e}'
             raise RuntimeError(error) from e
 
+    def _internal_voice_path(self)->str:
+        voice_dir = Path(voices_dir) / self.language
+        internal_voices = [
+            path for path in voice_dir.rglob('*.wav')
+            if path.is_file() and path.stem.lower() == 'internal'
+        ] if voice_dir.is_dir() else []
+        if len(internal_voices) != 1:
+            error = (
+                f"StyleTTS2's internal {self.language} voice needs exactly one reference WAV named "
+                f"'internal.wav' under {voice_dir} (for example voices/{self.language}/adult/female/internal.wav); "
+                f"found {len(internal_voices)}."
+            )
+            raise FileNotFoundError(error)
+        return str(internal_voices[0])
+
     def convert(self, sentence_file:str, sentence:str, **kwargs)->tuple:
         part_file = f'{os.path.splitext(sentence_file)[0]}.{self.session["tts_engine"]}.wav'
         try:
@@ -379,6 +403,13 @@ class StyleTTS2(TTSUtils, TTSRegistry, name='styletts2'):
                 self.params['block_voice'] = kwargs.get('block_voice', self.session['voice'])
                 if self.params.get('inline_voice'):
                     self.params['current_voice'] = self.params['inline_voice']
+                elif (
+                    self.params['block_voice'] is None
+                    and not self.custom_model
+                    and self.language_model
+                    and self.language_model.get('internal_voice')
+                ):
+                    self.params['current_voice'] = self._internal_voice_path()
                 else:
                     self.params['current_voice'], error = self._set_voice(self.params['block_voice'])
                     if self.params['current_voice'] is None and error is not None:
@@ -402,7 +433,7 @@ class StyleTTS2(TTSUtils, TTSRegistry, name='styletts2'):
                         reply = self.engine.send({
                             'op': 'tts',
                             'text': part,
-                            'language': self.language_code,
+                            'language': self.phonemizer_language,
                             'voice': self.params['current_voice'],
                             'file': part_file,
                             **self.fine_tuned_params

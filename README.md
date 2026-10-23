@@ -550,7 +550,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Zonos (https://github.com/Zyphra/Zonos)[cite: 1]
 - [x] Bark (https://github.com/suno-ai/bark)[cite: 1]
 - [x] YourTTS (https://github.com/Edresson/YourTTS)[cite: 1]
-- [x] Style-TTS2 (https://github.com/yl4579/StyleTTS2) with multilingual PL-BERT (https://huggingface.co/papercup-ai/multilingual-pl-bert): built-in English LibriTTS model with zero-shot voice cloning; for the 14 PL-BERT languages (fr, en, es, ca, de, el, fa, fi, pt, pl, ru, sv, uk, zh) upload a custom model zip (`config.yml`, `model.pth`, `ref.wav`) trained with the multilingual PL-BERT.
+- [x] Style-TTS2 (https://github.com/yl4579/StyleTTS2): the `internal` preset selects English LibriTTS, French Scralius, or Spanish BSC-LT based on the chosen language; add a 10-15 second `internal.wav` under `voices/<fra-or-spa>/<age>/<gender>/` for those built-in model voices. Voice cloning remains available with selected or uploaded reference audio. For the remaining multilingual PL-BERT languages (ca, de, el, fa, fi, pt, pl, ru, sv, uk, zh), upload a custom model zip (`config.yml`, `model.pth`, `ref.wav`) trained with the multilingual PL-BERT.
 - [ ] Orpheus-TTS (https://github.com/canopyai/Orpheus-TTS)
 - [ ] ChatTTS (https://github.com/2noise/ChatTTS)
 - [ ] Spark-TTS (https://github.com/sparkaudio/spark-tts)

@@ -2270,8 +2270,11 @@ def build_interface(args:dict)->gr.Blocks:
                                 for f in Path(session['custom_model_dir']).rglob('*.wav')
                                 if f.is_file()
                             )
+                        if session['tts_engine'] == TTS_ENGINES['STYLETTS2']:
+                            voice_options = [(label, path) for label, path in voice_options if Path(path).stem.lower() != 'internal']
                         if session['tts_engine'] in tts_engines_with_inner_speaker:
-                            voice_options = [(legends['gr_voice_list_default'], None)] + sorted(voice_options, key=lambda x: x[0].lower())
+                            default_voice_option = ('internal', None) if session['tts_engine'] == TTS_ENGINES['STYLETTS2'] else (legends['gr_voice_list_default'], None)
+                            voice_options = [default_voice_option] + sorted(voice_options, key=lambda x: x[0].lower())
                         else:
                             voice_options = sorted(voice_options, key=lambda x: x[0].lower())
                             # no built-in voice and nothing for this language (voices/<lang>, eng fallback, session,
@@ -2280,6 +2283,8 @@ def build_interface(args:dict)->gr.Blocks:
                                 default_voice = default_engine_settings[session['tts_engine']].get('voice')
                                 if default_voice and os.path.isfile(default_voice):
                                     voice_options = [(os.path.splitext(os.path.basename(default_voice))[0], default_voice)]
+                        if session['tts_engine'] == TTS_ENGINES['STYLETTS2'] and session.get('voice') == default_engine_settings[session['tts_engine']]['voice']:
+                            session['voice'] = None
                         if session['voice'] is not None and isinstance(session.get('voice'), str):
                             if session['voice_dir'] not in session['voice']:
                                 if not any(v[1] == session['voice'] for v in voice_options):
@@ -2297,11 +2302,10 @@ def build_interface(args:dict)->gr.Blocks:
                                                 new_voice_path = str(Path(*parts))
                                                 if os.path.exists(new_voice_path) and any(v[1] == new_voice_path for v in voice_options):
                                                     session['voice'] = new_voice_path
+                                                elif voice_options:
+                                                    session['voice'] = voice_options[0][1]
                                                 else:
-                                                    if voice_options and len(voice_options) > 0:
-                                                        session['voice'] = voice_options[0][1]
-                                                    else:
-                                                        session['voice'] = default_engine_settings[session['tts_engine']]['voice']
+                                                    session['voice'] = default_engine_settings[session['tts_engine']]['voice']
                         else:
                             if voice_options and voice_options[0][1] is not None:
                                 new_voice_path = models[session['fine_tuned']]['voice']

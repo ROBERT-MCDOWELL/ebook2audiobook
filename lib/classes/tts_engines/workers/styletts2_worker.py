@@ -32,8 +32,9 @@ def main()->int:
     parser.add_argument('--src', required=True)
     parser.add_argument('--model_dir', required=True)
     parser.add_argument('--model_files', required=True)
-    parser.add_argument('--plbert_repo', required=True)
+    parser.add_argument('--plbert_repo', default='')
     parser.add_argument('--plbert_dir', required=True)
+    parser.add_argument('--plbert_config_file', default='config.yml')
     parser.add_argument('--custom', default='')
     parser.add_argument('--device', default='cpu')
     parser.add_argument('--cache_dir', required=True)
@@ -69,12 +70,16 @@ def main()->int:
             checkpoint_path = os.path.join(args.custom, 'model.pth')
             # a custom checkpoint is trained with the multilingual PL-BERT (its weights come with the checkpoint,
             # the architecture and the config from here)
-            snapshot_download(args.plbert_repo, local_dir=args.plbert_dir, allow_patterns=['config.yml', 'step_*.t7'])
+            snapshot_download(args.plbert_repo, local_dir=args.plbert_dir, allow_patterns=[args.plbert_config_file, 'step_*.t7'])
             plbert_dir = args.plbert_dir
         else:
             snapshot_download(args.repo, local_dir=args.model_dir, allow_patterns=json.loads(args.model_files))
             config_path, checkpoint_path = (os.path.join(args.model_dir, f) for f in json.loads(args.model_files))
-            plbert_dir = os.path.join(args.src, 'Utils', 'PLBERT')
+            if args.plbert_repo:
+                snapshot_download(args.plbert_repo, local_dir=args.plbert_dir, allow_patterns=[args.plbert_config_file, 'step_*.t7'])
+                plbert_dir = args.plbert_dir
+            else:
+                plbert_dir = os.path.join(args.src, 'Utils', 'PLBERT')
 
         def recursive_munch(d):
             if isinstance(d, dict):
@@ -88,11 +93,18 @@ def main()->int:
                 return super().forward(*a, **kw).last_hidden_state
 
         def load_plbert(log_dir):
-            with open(os.path.join(log_dir, 'config.yml'), 'r', encoding='utf-8') as f:
+            with open(os.path.join(log_dir, args.plbert_config_file), 'r', encoding='utf-8') as f:
                 plbert_config = yaml.safe_load(f)
             bert = CustomAlbert(AlbertConfig(**plbert_config['model_params']))
-            steps = [int(f.split('_')[-1].split('.')[0]) for f in os.listdir(log_dir) if f.startswith('step_') and f.endswith('.t7')]
-            checkpoint = torch.load(os.path.join(log_dir, f'step_{max(steps)}.t7'), map_location='cpu', weights_only=True)
+            steps = [
+                (int(match.group(1)), name)
+                for name in os.listdir(log_dir)
+                if (match := re.match(r'^step_(\d+)(?:_[^.]+)?\.t7$', name))
+            ]
+            if not steps:
+                raise FileNotFoundError(f'No PL-BERT step checkpoint found in {log_dir}')
+            _, checkpoint_name = max(steps, key=lambda item: item[0])
+            checkpoint = torch.load(os.path.join(log_dir, checkpoint_name), map_location='cpu', weights_only=True)
             state = OrderedDict()
             for k, v in checkpoint['net'].items():
                 name = k[7:] if k.startswith('module.') else k

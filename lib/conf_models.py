@@ -110,7 +110,7 @@ default_voice_detection_model = 'drewThomasson/segmentation'
 default_speaker = os.path.join(voices_dir, 'eng', 'adult', 'male', 'KumarDahl.wav')
 
 tts_engines_from_coqui = [TTS_ENGINES['XTTS'], TTS_ENGINES['BARK'], TTS_ENGINES['TORTOISE'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
-tts_engines_with_inner_speaker = [TTS_ENGINES['PIPER'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
+tts_engines_with_inner_speaker = [TTS_ENGINES['PIPER'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS'], TTS_ENGINES['STYLETTS2']]
 tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['OMNIVOICE'], TTS_ENGINES['F5TTS'], TTS_ENGINES['STYLETTS2'])
 
 # audio.cpp engines (0xShug0/audio.cpp): one native audiocpp_server package per platform, shared by every audio.cpp
@@ -321,9 +321,9 @@ default_engine_settings = {
         "plbert_repo": "papercup-ai/multilingual-pl-bert",
         # reference clip window in s (voice cloning = the model's style / predictor encoders on this clip)
         "ref_max": 15.0,
-        # the 14 languages of the multilingual PL-BERT, e2a's iso-639-3 -> espeak-ng voice. Without a custom
-        # checkpoint only the base LibriTTS model (English) is available, see the engine
-        "languages": {"eng": "en-us", "fra": "fr-fr", "spa": "es", "cat": "ca", "deu": "de", "ell": "el", "fas": "fa", "fin": "fi", "por": "pt", "pol": "pl", "rus": "ru", "swe": "sv", "ukr": "uk", "zho": "cmn"},
+        # e2a's iso-639-3 -> espeak-ng voice. Internal presets are provided for English, French, and Spanish;
+        # other multilingual PL-BERT languages need a custom checkpoint.
+        "languages": {"eng": "en-us", "fra": "fr-fr", "spa": "es-419", "cat": "ca", "deu": "de", "ell": "el", "fas": "fa", "fin": "fi", "por": "pt", "pol": "pl", "rus": "ru", "swe": "sv", "ukr": "uk", "zho": "cmn"},
         "samplerate": 24000,
         # upstream inference defaults (Demo/Inference_LibriTTS.ipynb)
         "alpha": 0.3,
