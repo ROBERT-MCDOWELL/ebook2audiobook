@@ -551,10 +551,11 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Bark (https://github.com/suno-ai/bark)[cite: 1]
 - [x] YourTTS (https://github.com/Edresson/YourTTS)[cite: 1]
 - [ ] Orpheus-TTS (https://github.com/canopyai/Orpheus-TTS)
+- [ ] OpenVoice (https://github.com/myshell-ai/OpenVoice)
 - [ ] ChatTTS (https://github.com/2noise/ChatTTS)
 - [ ] Spark-TTS (https://github.com/sparkaudio/spark-tts)
-- [ ] OpenVoice (https://github.com/myshell-ai/OpenVoice)
 - [ ] MeloTTS (https://github.com/myshell-ai/MeloTTS)
+- [ ] CRM (https://github.com/SesameAILabs/csm)
 
 #### Readme Translation
 - [x] Arabic (ara)
