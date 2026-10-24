@@ -479,7 +479,7 @@ class TTSUtils:
                             from TTS.tts.configs.xtts_config import XttsConfig
                             from TTS.tts.models.xtts import Xtts
                             config = XttsConfig()
-                            config.models_dir = os.path.join('models','tts')
+                            config.models_dir = tts_dir
                             config.load_json(config_path)
                             engine = Xtts(config)
                             engine.load_checkpoint(

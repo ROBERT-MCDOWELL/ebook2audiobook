@@ -9,7 +9,7 @@
 #   stdout <- {"ok": true, "file": "...", "samplerate": n, "samples": n}
 #             {"ok": false, "error": "...", "oom": bool}
 #   EOF on stdin -> exit 0 (that is how e2a unloads the model and frees its VRAM)
-import os, sys, json, argparse, hashlib, subprocess, faulthandler
+import os, sys, json, shutil, argparse, hashlib, subprocess, faulthandler
 
 def main()->int:
     # the protocol owns a private copy of fd 1; fd 1 itself is pointed at stderr so
@@ -27,6 +27,7 @@ def main()->int:
     parser.add_argument('--device', default='cpu')
     parser.add_argument('--asr_model', default='large-v3-turbo')
     parser.add_argument('--cache_dir', required=True)
+    parser.add_argument('--models_dir', required=True)
     parser.add_argument('--ref_min', type=float, default=3.2)
     parser.add_argument('--ref_max', type=float, default=9.5)
     args = parser.parse_args()
@@ -36,6 +37,32 @@ def main()->int:
         os.chdir(args.src)
         sys.path[:0] = [args.src, os.path.join(args.src, 'GPT_SoVITS')]
         os.makedirs(args.cache_dir, exist_ok=True)
+        # upstream keeps its weights inside the tree: GPT_SoVITS/pretrained_models (fast_langdetect included) and
+        # GPT_SoVITS/text/G2PWModel become links (junctions on windows: no symlink rights needed) to models/tts/gptsovits,
+        # so every model sits in e2a's models folder. A real folder left by an older install is moved there once.
+        # G2PWModel is linked only once it exists: upstream downloads it on first chinese use into the tree, and the
+        # next start moves it over (a dangling link would make upstream's rename fail)
+        for rel, name in ((os.path.join('GPT_SoVITS', 'pretrained_models'), 'pretrained_models'), (os.path.join('GPT_SoVITS', 'text', 'G2PWModel'), 'G2PWModel')):
+            target = os.path.abspath(os.path.join(args.models_dir, name))
+            linked = os.path.islink(rel) or getattr(os.path, 'isjunction', lambda path: False)(rel)
+            if linked and os.path.realpath(rel) == os.path.realpath(target):
+                continue
+            if linked:
+                os.rmdir(rel) if sys.platform == 'win32' else os.unlink(rel)
+            elif os.path.isdir(rel):
+                os.makedirs(target, exist_ok=True)
+                for item in os.listdir(rel):
+                    if not os.path.exists(os.path.join(target, item)):
+                        shutil.move(os.path.join(rel, item), os.path.join(target, item))
+                shutil.rmtree(rel, ignore_errors=True)
+            if name == 'pretrained_models':
+                os.makedirs(target, exist_ok=True)
+            if os.path.isdir(target):
+                if sys.platform == 'win32':
+                    import _winapi
+                    _winapi.CreateJunction(target, os.path.abspath(rel))
+                else:
+                    os.symlink(target, rel, target_is_directory=True)
         try:
             import jieba_fast
         except ImportError:
@@ -49,7 +76,7 @@ def main()->int:
             try:
                 nltk.data.find(resource)
             except LookupError:
-                nltk.download(package, quiet=True)
+                nltk.download(package, download_dir=os.environ.get('NLTK_DATA'), quiet=True)
         from huggingface_hub import snapshot_download
         # only this version's files; the HF repo layout is the pretrained_models layout
         snapshot_download(args.repo, local_dir=os.path.join('GPT_SoVITS', 'pretrained_models'), allow_patterns=[w for w in args.weights.split(',') if w])

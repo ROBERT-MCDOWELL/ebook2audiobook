@@ -81,8 +81,15 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
             # a python uv has to download for the venv is kept with the venvs, so a docker volume
             # on lib/classes/tts_engines/venvs (or deleting that folder) covers everything
             self.worker_env['UV_PYTHON_INSTALL_DIR'] = os.path.join(engine_dir, 'venvs', '.python')
-            # nltk data for the english frontend lives in the venv too
-            self.worker_env['NLTK_DATA'] = os.path.join(self.venv_dir, 'nltk_data')
+            # weights, G2PWModel and nltk data for the english frontend live under models/tts/gptsovits (the worker
+            # links the tree's folders there), so a copied or offline models folder carries them; a venv-era
+            # nltk_data is moved there once
+            self.models_dir = os.path.join(self.cache_dir, tts_engine)
+            self.worker_env['NLTK_DATA'] = os.path.join(self.models_dir, 'nltk_data')
+            if os.path.isdir(os.path.join(self.venv_dir, 'nltk_data')) and not os.path.exists(self.worker_env['NLTK_DATA']):
+                os.makedirs(self.models_dir, exist_ok=True)
+                shutil.move(os.path.join(self.venv_dir, 'nltk_data'), self.worker_env['NLTK_DATA'])
+            os.makedirs(self.worker_env['NLTK_DATA'], exist_ok=True)
             self.worker_env['NLTK_ALLOW_PROXIED_URLOPEN'] = '1'
             if self.worker_device != devices['CUDA']['proc']:
                 # keep the worker off the GPU entirely
@@ -344,6 +351,7 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 '--device', self.worker_device,
                 '--asr_model', settings['asr_model'],
                 '--cache_dir', os.path.join(self.venv_dir, 'refs'),
+                '--models_dir', self.models_dir,
                 '--ref_min', str(settings['ref_min']),
                 '--ref_max', str(settings['ref_max'])
             ]
