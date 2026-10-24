@@ -187,11 +187,18 @@ def main()->int:
                         snapshot_download(args.asr_model, local_dir=args.asr_dir)
                         open(asr_marker, 'w').close()
                     from transformers import pipeline
-                    utils_infer.asr_pipe = pipeline('automatic-speech-recognition', model=args.asr_dir, device='cpu')
+                    from transformers.utils import logging as transformers_logging
+                    # upstream's Whisper call only draws transformers' advice here (chunk_length_s on a clip that
+                    # never needs chunking, its own deprecated generation arguments, the BPE cleanup it ignores):
+                    # errors only while it runs, an empty transcript is caught below
+                    verbosity = transformers_logging.get_verbosity()
+                    transformers_logging.set_verbosity_error()
                     try:
+                        utils_infer.asr_pipe = pipeline('automatic-speech-recognition', model=args.asr_dir, device='cpu')
                         ref_text = utils_infer.transcribe(clip).strip()
                     finally:
                         utils_infer.asr_pipe = None
+                        transformers_logging.set_verbosity(verbosity)
                         gc.collect()
                     if not ref_text:
                         raise ValueError(f'no speech found in the voice reference {voice}')
