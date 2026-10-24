@@ -153,10 +153,10 @@ audiocpp_packages = {
     # published: JetPack's own CUDA libraries (6: CUDA 12.6, Ubuntu 22.04; 7: CUDA 13, Ubuntu 24.04), nothing bundled
     "jetson6-sm87": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson6-sm87.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 6, "sm": [87]},
     "jetson7-sm87-sm110": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-jetson7-sm87-sm110.tar.gz"], "gpu": True, "backend": "cuda", "jetpack": 7, "sm": [87, 110]},
-    # published (not linux-aarch64-cuda12, only built on request): ARM CUDA servers with cudart, cuBLAS and cuFFT in
+    # published: ARM CUDA servers (cuda13 first, cuda12 for drivers < 580) with cudart, cuBLAS and cuFFT in
     # lib/, CPU part ARMv8.2 + fp16; linux-aarch64(-v82, -vulkan): glibc 2.30, only libc/libm/libdl (+ libvulkan.so.1)
     "linux-aarch64-cuda13": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64-cuda13.tar.gz"], "gpu": True, "backend": "cuda", "cpu_flags": ["asimdhp"]},
-    "linux-aarch64-cuda12": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64-cuda12.tar.gz"], "gpu": True, "backend": "cuda", "cpu_flags": ["asimdhp"], "enabled": False},
+    "linux-aarch64-cuda12": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64-cuda12.tar.gz"], "gpu": True, "backend": "cuda", "cpu_flags": ["asimdhp"]},
     # GPU through JetPack's own Vulkan driver where there is no CUDA package (Jetson Xavier, JetPack 5 Orin), and any
     # aarch64 Linux with a Vulkan driver; CPU part ARMv8.2 + fp16 (asimdhp), no dotprod (Xavier has none)
     "linux-aarch64-vulkan": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-linux-aarch64-vulkan.tar.gz"], "gpu": True, "backend": "vulkan", "cpu_flags": ["asimdhp"]},
