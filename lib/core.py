@@ -269,6 +269,10 @@ class SessionContext:
             "gptsovits_top_p": default_engine_settings[TTS_ENGINES['GPTSOVITS']]['top_p'],
             "gptsovits_temperature": default_engine_settings[TTS_ENGINES['GPTSOVITS']]['temperature'],
             "gptsovits_repetition_penalty": default_engine_settings[TTS_ENGINES['GPTSOVITS']]['repetition_penalty'],
+            ####### Orpheus settings
+            "orpheus_temperature": default_engine_settings[TTS_ENGINES['ORPHEUS']]['temperature'],
+            "orpheus_top_p": default_engine_settings[TTS_ENGINES['ORPHEUS']]['top_p'],
+            "orpheus_repetition_penalty": default_engine_settings[TTS_ENGINES['ORPHEUS']]['repetition_penalty'],
             ####### Audiobook editor
             "audiobook": None,
             "audiobooks_dir": None,
@@ -424,7 +428,7 @@ def check_programs(prog_name:str, command:str, options:str)->bool:
         DependencyError(e)
     return False
 
-def analyze_uploaded_file(zip_path:str, required_files:list[str])->bool:
+def analyze_uploaded_file(zip_path:str, required_files:list[str], files_sharded:str|None=None)->bool:
     try:
         if not os.path.exists(zip_path):
             error = legends['error_file_does_not_exist'].format(name=os.path.basename(zip_path))
@@ -443,6 +447,14 @@ def analyze_uploaded_file(zip_path:str, required_files:list[str])->bool:
                     empty_files.add(base_name)
         required_files = [file for file in required_files]
         missing_files = [f for f in required_files if f not in files_in_zip]
+        if files_sharded in missing_files and f'{files_sharded}.index.json' in files_in_zip:
+            # engines loading through from_pretrained (default_engine_settings 'files_sharded') take the sharded
+            # form of that file: its index and every shard the index names, none of them empty
+            with zipfile.ZipFile(zip_path, 'r') as zf:
+                index_name = next(n for n in zf.namelist() if os.path.basename(n) == f'{files_sharded}.index.json')
+                shards = set(json.loads(zf.read(index_name)).get('weight_map', {}).values())
+            if shards and all(files_in_zip.get(os.path.basename(shard)) for shard in shards):
+                missing_files.remove(files_sharded)
         required_empty_files = [f for f in required_files if f in empty_files]
         if missing_files:
             msg = legends['msg_missing_required_files'].format(files=missing_files)
@@ -466,6 +478,7 @@ def extract_custom_model(session_id)->str|None:
     if session and session.get('id', False):
         file_src = session['custom_model']
         required_files = default_engine_settings[session['tts_engine']]['files']
+        files_sharded = default_engine_settings[session['tts_engine']].get('files_sharded')
         model_path = None
         model_name = re.sub('.zip', '', os.path.basename(file_src), flags=re.IGNORECASE)
         model_name = get_sanitized(model_name)
@@ -473,6 +486,11 @@ def extract_custom_model(session_id)->str|None:
             with zipfile.ZipFile(file_src, 'r') as zip_ref:
                 files = zip_ref.namelist()
                 files_length = len(files)
+                if files_sharded:
+                    # the sharded form of a required file (analyze_uploaded_file accepted it): its index and shards too
+                    index_name = next((n for n in files if os.path.basename(n) == f'{files_sharded}.index.json'), None)
+                    if index_name is not None:
+                        required_files = list(required_files) + [os.path.basename(index_name)] + [os.path.basename(shard) for shard in set(json.loads(zip_ref.read(index_name)).get('weight_map', {}).values())]
                 tts_dir = session['tts_engine']
                 model_path = os.path.join(session['custom_model_dir'], tts_dir, model_name)
                 os.makedirs(model_path, exist_ok=True)
@@ -4396,6 +4414,9 @@ def convert_ebook(args:dict)->tuple:
             for gptsovits_key, gptsovits_cast in (('gptsovits_speed', float), ('gptsovits_top_k', int), ('gptsovits_top_p', float), ('gptsovits_temperature', float), ('gptsovits_repetition_penalty', float)):
                 if args.get(gptsovits_key) is not None:
                     session[gptsovits_key] = gptsovits_cast(args[gptsovits_key])
+            for orpheus_key, orpheus_cast in (('orpheus_temperature', float), ('orpheus_top_p', float), ('orpheus_repetition_penalty', float)):
+                if args.get(orpheus_key) is not None:
+                    session[orpheus_key] = orpheus_cast(args[orpheus_key])
             session['output_format'] = str(args['output_format'])
             session['output_channel'] = str(args['output_channel'])
             session['output_split'] = bool(args['output_split'])
@@ -4455,7 +4476,7 @@ def convert_ebook(args:dict)->tuple:
                         custom_src_name = custom_src_path.stem
                         if not os.path.exists(os.path.join(session['custom_model_dir'], custom_src_name)):
                             try:
-                                if analyze_uploaded_file(session['custom_model'], default_engine_settings[session['tts_engine']]['files']):
+                                if analyze_uploaded_file(session['custom_model'], default_engine_settings[session['tts_engine']]['files'], default_engine_settings[session['tts_engine']].get('files_sharded')):
                                     model = extract_custom_model(session_id)
                                     if model is not None:
                                         session['custom_model'] = model

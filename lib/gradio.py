@@ -39,6 +39,7 @@ def build_interface(args:dict)->gr.Blocks:
         visible_gr_tab_bark_params = interface_component_options['gr_tab_bark_params']
         visible_gr_tab_zonos_params = interface_component_options['gr_tab_zonos_params']
         visible_gr_tab_gptsovits_params = interface_component_options['gr_tab_gptsovits_params']
+        visible_gr_tab_orpheus_params = interface_component_options['gr_tab_orpheus_params']
         visible_gr_group_voice_file = interface_component_options['gr_group_voice_file']
         visible_gr_group_custom_model = interface_component_options['gr_group_custom_model']
         visible_gr_tab_abs_params = interface_component_options['gr_tab_abs_params']
@@ -383,6 +384,39 @@ def build_interface(args:dict)->gr.Blocks:
                                 value=float(default_engine_settings[TTS_ENGINES['GPTSOVITS']]['repetition_penalty']),
                                 elem_id='gr_gptsovits_repetition_penalty',
                                 info=legends['gr_gptsovits_repetition_penalty_info']
+                            )
+                    with gr.Tab(legends['gr_tab_orpheus_params'], elem_id='gr_tab_orpheus_params', elem_classes='gr-tab', visible=False) as gr_tab_orpheus_params:
+                        gr_markdown_tab_orpheus_params = gr.Markdown(
+                            elem_id='gr_markdown_tab_orpheus_params',
+                            value=f"### {legends['gr_markdown_tab_orpheus_params_title']}\n{legends['gr_markdown_tab_orpheus_params_desc']}"
+                        )
+                        with gr.Group(elem_id='gr_group_orpheus_params', elem_classes=['gr-group']):
+                            gr_orpheus_temperature = gr.Slider(
+                                label=legends['gr_orpheus_temperature'],
+                                minimum=0.1,
+                                maximum=1.5,
+                                step=0.05,
+                                value=float(default_engine_settings[TTS_ENGINES['ORPHEUS']]['temperature']),
+                                elem_id='gr_orpheus_temperature',
+                                info=legends['gr_orpheus_temperature_info']
+                            )
+                            gr_orpheus_top_p = gr.Slider(
+                                label=legends['gr_orpheus_top_p'],
+                                minimum=0.1,
+                                maximum=1.0,
+                                step=0.05,
+                                value=float(default_engine_settings[TTS_ENGINES['ORPHEUS']]['top_p']),
+                                elem_id='gr_orpheus_top_p',
+                                info=legends['gr_orpheus_top_p_info']
+                            )
+                            gr_orpheus_repetition_penalty = gr.Slider(
+                                label=legends['gr_orpheus_repetition_penalty'],
+                                minimum=1.1,
+                                maximum=2.0,
+                                step=0.05,
+                                value=float(default_engine_settings[TTS_ENGINES['ORPHEUS']]['repetition_penalty']),
+                                elem_id='gr_orpheus_repetition_penalty',
+                                info=legends['gr_orpheus_repetition_penalty_info']
                             )
                     with gr.Tab(legends['gr_tab_abs_params'], elem_id='gr_tab_abs_params', elem_classes='gr-tab', visible=visible_gr_tab_abs_params) as gr_tab_abs_params:
                         with gr.Row(elem_id='gr_row1_abs'):
@@ -794,6 +828,7 @@ def build_interface(args:dict)->gr.Blocks:
                         visible_bark = False
                         visible_zonos = False
                         visible_gptsovits = False
+                        visible_orpheus = False
                         if session['tts_engine'] == TTS_ENGINES['XTTS']:
                             visible_xtts = visible_gr_tab_xtts_params
                         elif session['tts_engine'] == TTS_ENGINES['BARK']:
@@ -802,6 +837,8 @@ def build_interface(args:dict)->gr.Blocks:
                             visible_zonos = visible_gr_tab_zonos_params
                         elif session['tts_engine'] == TTS_ENGINES['GPTSOVITS']:
                             visible_gptsovits = visible_gr_tab_gptsovits_params
+                        elif session['tts_engine'] == TTS_ENGINES['ORPHEUS']:
+                            visible_orpheus = visible_gr_tab_orpheus_params
                         visible_group_custom_model = visible_gr_group_custom_model if session['fine_tuned'] == 'internal' and session['tts_engine'] in tts_engines_with_custom_model else False
                         visible_voice_buttons = True if session.get('voice') is not None else False
                         visible_row_voice_player = _row_voice_player_visible(session.get('ebook_mode'), False)
@@ -825,6 +862,7 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(visible=visible_bark),
                             gr.update(visible=visible_zonos),
                             gr.update(visible=visible_gptsovits),
+                            gr.update(visible=visible_orpheus),
                             gr.update(visible=visible_ebook_src, value=ebook_data, file_count=ebook_file_count),
                             gr.update(visible=visible_ebook_textarea, value=ebook_textarea),
                             gr.update(value=session['ebook_mode']),
@@ -897,6 +935,7 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(label=legends['gr_tab_bark_params']),
                             gr.update(label=legends['gr_tab_zonos_params']),
                             gr.update(label=legends['gr_tab_gptsovits_params']),
+                            gr.update(label=legends['gr_tab_orpheus_params']),
                             gr.update(label=legends['gr_tab_abs_params']),
                             gr.update(value=legends['gr_import_markdown']),
                             gr.update(label=legends['gr_ebook_textarea']),
@@ -949,6 +988,10 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(label=legends['gr_gptsovits_top_p'], info=legends['gr_gptsovits_top_p_info']),
                             gr.update(label=legends['gr_gptsovits_temperature'], info=legends['gr_gptsovits_temperature_info']),
                             gr.update(label=legends['gr_gptsovits_repetition_penalty'], info=legends['gr_gptsovits_repetition_penalty_info']),
+                            gr.update(value=f"### {legends['gr_markdown_tab_orpheus_params_title']}\n{legends['gr_markdown_tab_orpheus_params_desc']}"),
+                            gr.update(label=legends['gr_orpheus_temperature'], info=legends['gr_orpheus_temperature_info']),
+                            gr.update(label=legends['gr_orpheus_top_p'], info=legends['gr_orpheus_top_p_info']),
+                            gr.update(label=legends['gr_orpheus_repetition_penalty'], info=legends['gr_orpheus_repetition_penalty_info']),
                             gr.update(label=legends['gr_abs_url']),
                             gr.update(label=legends['gr_abs_api_token']),
                             gr.update(label=legends['gr_abs_audiobook']),
@@ -1047,6 +1090,7 @@ def build_interface(args:dict)->gr.Blocks:
                             visible_bark = False
                             visible_zonos = False
                             visible_gptsovits = False
+                            visible_orpheus = False
                             visible_abs = visible_gr_tab_abs_params
                             visible_ebook_src = False
                             visible_ebook_textarea = False
@@ -1061,6 +1105,8 @@ def build_interface(args:dict)->gr.Blocks:
                                 visible_zonos = visible_gr_tab_zonos_params
                             elif session['tts_engine'] == TTS_ENGINES['GPTSOVITS']:
                                 visible_gptsovits = visible_gr_tab_gptsovits_params
+                            elif session['tts_engine'] == TTS_ENGINES['ORPHEUS']:
+                                visible_orpheus = visible_gr_tab_orpheus_params
                             if session['ebook_mode'] == ebook_modes['DIRECTORY']:
                                 visible_ebook_src = True
                                 ebook_data = session['ebook_list']
@@ -1073,14 +1119,14 @@ def build_interface(args:dict)->gr.Blocks:
                             enabled_convert_btn = True if session['ebook_mode'] == ebook_modes['TEXT'] or ebook_data is not None else False
                             return (
                                 gr.update(value='', visible=False), gr.update(visible=visible_main),
-                                gr.update(visible=visible_xtts), gr.update(visible=visible_bark), gr.update(visible=visible_zonos), gr.update(visible=visible_gptsovits), gr.update(visible=visible_abs),
+                                gr.update(visible=visible_xtts), gr.update(visible=visible_bark), gr.update(visible=visible_zonos), gr.update(visible=visible_gptsovits), gr.update(visible=visible_orpheus), gr.update(visible=visible_abs),
                                 gr.update(interactive=enabled_convert_btn), gr.update(visible=visible_ebook_src, value=ebook_data), gr.update(visible=visible_ebook_textarea, value=ebook_textarea),
                                 gr.update(value=session['device']), gr.update(value=session['audiobook']), _update_gr_audiobook_list(session_id),
                                 _update_gr_voice_list(session_id), gr.update(''), gr.update(value='')
                             )
                         elif session['status'] in [status_tags['CONVERTING']]:
                             return (
-                                gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(),
+                                gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(),
                                 gr.update(), gr.update(), gr.update(visible=True, value=session['ebook_list']), gr.update(),
                                 gr.update(), gr.update(), gr.update(),
                                 gr.update(), gr.update(), gr.update(value='')
@@ -1088,7 +1134,7 @@ def build_interface(args:dict)->gr.Blocks:
                 except Exception as e:
                     error = f'_refresh_interface(): {e}'
                     exception_alert(session_id, error)
-                outputs = tuple([gr.update() for _ in range(16)])
+                outputs = tuple([gr.update() for _ in range(17)])
                 return outputs
 
             def _change_gr_audiobook_list(session_id:str, selected:str|None)->tuple:
@@ -2512,7 +2558,7 @@ def build_interface(args:dict)->gr.Blocks:
                             if session and session.get('id', False):
                                 models = load_engine_presets(session['tts_engine'])
                                 session['tts_engine'] = tts_engine
-                                if analyze_uploaded_file(custom_file, models['internal']['files']):
+                                if analyze_uploaded_file(custom_file, models['internal']['files'], default_engine_settings[tts_engine].get('files_sharded')):
                                     session['custom_model'] = custom_file
                                     model = extract_custom_model(session_id)
                                     if model is not None:
@@ -2567,6 +2613,7 @@ def build_interface(args:dict)->gr.Blocks:
                             visible_bark = visible_gr_tab_bark_params if session['tts_engine'] == TTS_ENGINES['BARK'] else False
                             visible_zonos = visible_gr_tab_zonos_params if session['tts_engine'] == TTS_ENGINES['ZONOS'] else False
                             visible_gptsovits = visible_gr_tab_gptsovits_params if session['tts_engine'] == TTS_ENGINES['GPTSOVITS'] else False
+                            visible_orpheus = visible_gr_tab_orpheus_params if session['tts_engine'] == TTS_ENGINES['ORPHEUS'] else False
                             supports_custom = session['tts_engine'] in tts_engines_with_custom_model
                             visible_custom_model = supports_custom and session['fine_tuned'] == 'internal'
                             if supports_custom:
@@ -2581,6 +2628,7 @@ def build_interface(args:dict)->gr.Blocks:
                                 gr.update(visible=visible_bark),
                                 gr.update(visible=visible_zonos),
                                 gr.update(visible=visible_gptsovits),
+                                gr.update(visible=visible_orpheus),
                                 gr.update(visible=visible_custom_model),
                                 _update_gr_fine_tuned_list(session_id),
                                 gr.update(label=file_label),
@@ -2589,7 +2637,7 @@ def build_interface(args:dict)->gr.Blocks:
                 except Exception as e:
                     error = f'_change_gr_tts_engine_list(): {e}'
                     exception_alert(session_id, error)
-                return tuple(gr.update() for _ in range(9))
+                return tuple(gr.update() for _ in range(10))
 
             def _change_gr_fine_tuned_list(session_id:str, selected:str)->dict:
                 try:
@@ -2805,6 +2853,9 @@ def build_interface(args:dict)->gr.Blocks:
                                 "gptsovits_top_p": float(session['gptsovits_top_p']),
                                 "gptsovits_temperature": float(session['gptsovits_temperature']),
                                 "gptsovits_repetition_penalty": float(session['gptsovits_repetition_penalty']),
+                                "orpheus_temperature": float(session['orpheus_temperature']),
+                                "orpheus_top_p": float(session['orpheus_top_p']),
+                                "orpheus_repetition_penalty": float(session['orpheus_repetition_penalty']),
                                 "output_split":bool(output_split),
                                 "output_split_hours": output_split_hours,
                                 "translate_enabled": bool(translate_enabled),
@@ -3472,7 +3523,7 @@ def build_interface(args:dict)->gr.Blocks:
                 *blocks_components_flat, gr_blocks_header, gr_blocks_expands
             ]
             outputs_restore_interface = [
-                gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_ebook_src, gr_ebook_textarea, gr_ebook_mode, gr_blocks_preview, gr_interlude_enabled, gr_device, gr_language,
+                gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_orpheus_params, gr_ebook_src, gr_ebook_textarea, gr_ebook_mode, gr_blocks_preview, gr_interlude_enabled, gr_device, gr_language,
                 gr_translate_enabled, gr_translate, gr_voice_list, gr_tts_engine_list, gr_tts_rating,
                 gr_custom_model_list, gr_fine_tuned_list, gr_output_format_list, gr_output_channel_list,
                 gr_output_split, gr_output_split_hours, gr_row_output_split_hours, gr_audiobook_list, gr_group_custom_model, gr_convert_btn,
@@ -3481,7 +3532,7 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_zonos_emotion_enabled, gr_group_zonos_emotion_sliders
             ]
             outputs_ui_language = [
-                gr_tab_main, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_abs_params, gr_import_markdown, gr_ebook_textarea,
+                gr_tab_main, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_orpheus_params, gr_tab_abs_params, gr_import_markdown, gr_ebook_textarea,
                 gr_ebook_mode, gr_blocks_preview, gr_interlude_enabled, gr_language_markdown, gr_translate_enabled, gr_voice_markdown,
                 gr_voice_file, gr_voice_list, gr_device_markdown, gr_tts_rating, gr_models_markdown, gr_fine_tuned_list,
                 gr_custom_model_file, gr_output_markdown, gr_output_format_list, gr_output_channel_list, gr_output_split,
@@ -3491,6 +3542,7 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_bark_waveform_temp, gr_markdown_tab_zonos_params, gr_zonos_speaking_rate, gr_zonos_emotion_enabled,
                 gr_zonos_emotion_happy, gr_zonos_emotion_sad, gr_zonos_emotion_angry, gr_zonos_emotion_surprised, gr_zonos_emotion_valence, gr_zonos_emotion_arousal, gr_zonos_emotion_strength, gr_zonos_emotion_cfg_scale,
                 gr_markdown_tab_gptsovits_params, gr_gptsovits_speed, gr_gptsovits_top_k, gr_gptsovits_top_p, gr_gptsovits_temperature, gr_gptsovits_repetition_penalty,
+                gr_markdown_tab_orpheus_params, gr_orpheus_temperature, gr_orpheus_top_p, gr_orpheus_repetition_penalty,
                 gr_abs_url, gr_abs_api_token, gr_abs_audiobook, gr_abs_status, gr_ui_language,
                 gr_tooltips, gr_tooltips_data
             ]
@@ -3569,7 +3621,7 @@ def build_interface(args:dict)->gr.Blocks:
                 window.addEventListener('resize',hide);
             }'''
             outputs_refresh_interface = [
-                gr_modal, gr_group_main, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_abs_params, gr_convert_btn,
+                gr_modal, gr_group_main, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_orpheus_params, gr_tab_abs_params, gr_convert_btn,
                 gr_ebook_src, gr_ebook_textarea, gr_device, gr_audiobook_player, gr_audiobook_list,
                 gr_voice_list, gr_voice_highlight_css, gr_progress
             ]
@@ -3590,7 +3642,8 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_bark_text_temp, gr_bark_waveform_temp,
                 gr_zonos_speaking_rate, gr_zonos_emotion_enabled,
                 gr_zonos_emotion_happy, gr_zonos_emotion_sad, gr_zonos_emotion_angry, gr_zonos_emotion_surprised, gr_zonos_emotion_valence, gr_zonos_emotion_arousal, gr_zonos_emotion_strength, gr_zonos_emotion_cfg_scale,
-                gr_gptsovits_speed, gr_gptsovits_top_k, gr_gptsovits_top_p, gr_gptsovits_temperature, gr_gptsovits_repetition_penalty
+                gr_gptsovits_speed, gr_gptsovits_top_k, gr_gptsovits_top_p, gr_gptsovits_temperature, gr_gptsovits_repetition_penalty,
+                gr_orpheus_temperature, gr_orpheus_top_p, gr_orpheus_repetition_penalty
             ]
             outputs_on_voice_upload = [
                 gr_ebook_src, gr_ebook_textarea, gr_ebook_mode, gr_language, gr_tts_engine_list,
@@ -3715,7 +3768,7 @@ def build_interface(args:dict)->gr.Blocks:
             ).then(
                 fn=_change_gr_tts_engine_list,
                 inputs=[gr_session, gr_tts_engine_list],
-                outputs=[gr_tts_rating, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_group_custom_model, gr_fine_tuned_list, gr_custom_model_file, gr_custom_model_list],
+                outputs=[gr_tts_rating, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_orpheus_params, gr_group_custom_model, gr_fine_tuned_list, gr_custom_model_file, gr_custom_model_list],
                 show_progress_on=[gr_progress]
             ).then(
                 fn=_update_gr_voice_list,
@@ -3726,7 +3779,7 @@ def build_interface(args:dict)->gr.Blocks:
             gr_tts_engine_list.change(
                 fn=_change_gr_tts_engine_list,
                 inputs=[gr_session, gr_tts_engine_list],
-                outputs=[gr_tts_rating, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_group_custom_model, gr_fine_tuned_list, gr_custom_model_file, gr_custom_model_list],
+                outputs=[gr_tts_rating, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_orpheus_params, gr_group_custom_model, gr_fine_tuned_list, gr_custom_model_file, gr_custom_model_list],
                 show_progress_on=[gr_progress]
             ).then(
                 fn=_update_gr_voice_list,
@@ -4187,6 +4240,42 @@ def build_interface(args:dict)->gr.Blocks:
             gr_gptsovits_repetition_penalty.change(
                 fn=lambda session_id, val: _change_param('gptsovits_repetition_penalty', session_id, float(val)),
                 inputs=[gr_session, gr_gptsovits_repetition_penalty],
+                outputs=None
+            )
+            ########### Orpheus Params
+
+            gr_tab_orpheus_params.select(
+                fn=None,
+                inputs=None,
+                outputs=None,
+                js='''
+                    ()=>{
+                        if (!window._orpheus_sliders_initialized) {
+                            const checkOrpheusExist = setInterval(() => {
+                                const slider = document.querySelector("#gr_orpheus_temperature input[type=range]");
+                                if(slider){
+                                    clearInterval(checkOrpheusExist);
+                                    window._orpheus_sliders_initialized = true;
+                                    init_orpheus_sliders();
+                                }
+                            }, 500);
+                        }
+                    }
+                '''
+            )
+            gr_orpheus_temperature.change(
+                fn=lambda session_id, val: _change_param('orpheus_temperature', session_id, float(val)),
+                inputs=[gr_session, gr_orpheus_temperature],
+                outputs=None
+            )
+            gr_orpheus_top_p.change(
+                fn=lambda session_id, val: _change_param('orpheus_top_p', session_id, float(val)),
+                inputs=[gr_session, gr_orpheus_top_p],
+                outputs=None
+            )
+            gr_orpheus_repetition_penalty.change(
+                fn=lambda session_id, val: _change_param('orpheus_repetition_penalty', session_id, float(val)),
+                inputs=[gr_session, gr_orpheus_repetition_penalty],
                 outputs=None
             )
             # .input (user clicks only): a restore or the tab mounting must never write the session

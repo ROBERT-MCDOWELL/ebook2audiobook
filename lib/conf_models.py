@@ -10,6 +10,7 @@ TTS_ENGINES = {
     "GPTSOVITS": "gptsovits",
     "OMNIVOICE": "omnivoice",
     "F5TTS": "f5tts",
+    "ORPHEUS": "orpheus",
     "XTTS": "xtts",
     "BARK": "bark",
     "TORTOISE": "tortoise",
@@ -109,8 +110,8 @@ default_voice_detection_model = 'drewThomasson/segmentation'
 default_speaker = os.path.join(voices_dir, 'eng', 'adult', 'male', 'KumarDahl.wav')
 
 tts_engines_from_coqui = [TTS_ENGINES['XTTS'], TTS_ENGINES['BARK'], TTS_ENGINES['TORTOISE'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
-tts_engines_with_inner_speaker = [TTS_ENGINES['PIPER'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
-tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['OMNIVOICE'], TTS_ENGINES['F5TTS'])
+tts_engines_with_inner_speaker = [TTS_ENGINES['PIPER'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS'], TTS_ENGINES['ORPHEUS']]
+tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['OMNIVOICE'], TTS_ENGINES['F5TTS'], TTS_ENGINES['ORPHEUS'])
 
 # audio.cpp engines (0xShug0/audio.cpp): one native audiocpp_server package per platform, shared by every audio.cpp
 # engine, plus the GGUF weights of each engine's fine_tuned preset (presets/audiocpp_presets.py), driven by
@@ -348,6 +349,55 @@ default_engine_settings = {
         "voice": default_speaker,
         "voices": {},
         "rating": {"VRAM": 3, "CPU": 2, "RAM": 4, "Realism": 4}
+    },
+    TTS_ENGINES['ORPHEUS']: {
+        # runs in its own uv venv (lib/classes/tts_engines/venvs/orpheus) behind a persistent worker. Upstream's own
+        # runtime is vllm (Linux CUDA only, its own torch pin): the worker runs upstream's transformers path instead
+        # (its Colab notebooks), same prompt format and SNAC code layout, so every e2a torch device runs it
+        # repo: ungated copy of the gated canopylabs/orpheus-3b-0.1-ft (English), also the tokenizer for checkpoints
+        # shipped without one (the Llama 3 BPE every Orpheus model shares: only text tokens come from it)
+        "repo": "unsloth/orpheus-3b-0.1-ft",
+        "source": "https://github.com/canopyai/Orpheus-TTS/archive/e64661fe6d02c414fc77c53578c9d64082614861.tar.gz",
+        "python": "3.12",
+        # package list = upstream's own install_requires (orpheus_tts_pypi/setup.py in the extracted tree: snac,
+        # vllm), torch from the device's PyTorch index (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller
+        # as fallback. Left out: vllm. The orpheus_tts package is not installed either: it imports vllm and loads SNAC
+        # onto cuda at import. transformers / accelerate run the model, soundfile writes the parts; hf_xet as for
+        # GPT-SoVITS (windows reports AMD64, so huggingface_hub's own marker misses it: the checkpoints are on Xet)
+        "requirements_file": "orpheus_tts_pypi/setup.py",
+        "requirements_exclude": ["vllm"],
+        "requirements_extra": ["transformers", "accelerate", "soundfile", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
+        # every package installs as a wheel, so no platform ever needs a compiler
+        "packages_sdist": [],
+        # audio codec the model's tokens decode with (24 kHz, 7 tokens per frame)
+        "snac": "hubertsiuzdak/snac_24khz",
+        # languages a fine-tuned checkpoint exists for (presets/orpheus_presets.py): English, and the multilingual
+        # research release (gated canopylabs repos: HF_TOKEN of an account that accepted their conditions)
+        "languages": {"eng": "en", "fra": "fr", "deu": "de", "kor": "ko", "hin": "hi", "zho": "zh", "spa": "es", "ita": "it"},
+        "samplerate": 24000,
+        # upstream's realtime example (realtime_streaming_example/main.py): steadier than the package defaults for
+        # narration. repetition_penalty >= 1.1 keeps generation stable, higher (with temperature) speaks faster
+        "temperature": 0.4,
+        "top_p": 0.9,
+        "repetition_penalty": 1.1,
+        # generation cap per sentence part: tokens_per_char x its length (~82 tokens per second of speech; 20 per
+        # character leaves room for slow and CJK speech), at most max_new_tokens (~50 s): a looping generation stops
+        # there instead of at upstream's 1200 (~14.6 s), which cuts long sentences
+        "tokens_per_char": 20,
+        "max_new_tokens": 4096,
+        # custom model upload: an Orpheus fine-tune (unsloth / upstream finetune/train.py save_pretrained folder),
+        # its tokenizer + ref.wav. An optional "orpheus_speaker" key in its config.json is the speaker name it was
+        # trained with (multi-speaker fine-tunes); without it the text is prompted bare (single-speaker fine-tunes)
+        "files": ["config.json", "model.safetensors", "tokenizer.json", "tokenizer_config.json", "ref.wav"],
+        # this required file may come sharded instead: <file>.index.json + every shard its weight_map names
+        # (save_pretrained's default for a 3B model, e.g. model-00001-of-00002.safetensors)
+        "files_sharded": "model.safetensors",
+        # built-in speakers (as Piper): "default" speaks with the preset's speaker, a voice file converts a
+        # same-gender built-in speaker with default_vc_model
+        "voice": None,
+        "voices": {},
+        # 3.3B params: bf16 / fp16 on GPU, fp32 on CPU (~40x slower than real time there)
+        "rating": {"VRAM": 7, "CPU": 1, "RAM": 14, "Realism": 5}
     },
     TTS_ENGINES['XTTS']: {
         "repo": "coqui/XTTS-v2",
