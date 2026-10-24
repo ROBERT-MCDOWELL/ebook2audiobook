@@ -110,8 +110,12 @@ def main()->int:
                 else:
                     # the transcript comes from OmniVoice's own Whisper, on cpu (no VRAM taken from the
                     # model), downloaded as a plain folder; released once the prompt is saved
-                    if not os.path.exists(os.path.join(args.asr_dir, 'config.json')):
+                    # complete once the marker exists: config.json lands first, so a download cut during the
+                    # 1.6 GB weights used to look finished forever; snapshot_download resumes what is missing
+                    asr_marker = os.path.join(args.asr_dir, '.e2a_complete')
+                    if not os.path.exists(asr_marker):
                         snapshot_download(args.asr_model, local_dir=args.asr_dir)
+                        open(asr_marker, 'w').close()
                     model.load_asr_model(model_name=args.asr_dir, device='cpu')
                     prompt = model.create_voice_clone_prompt(ref_audio=clip, ref_text=None)
                     prompt.save(prompt_file)

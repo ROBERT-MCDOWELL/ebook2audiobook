@@ -180,8 +180,12 @@ def main()->int:
                 else:
                     # upstream's Whisper, on cpu (no VRAM taken from the model), downloaded as a plain folder,
                     # language left to Whisper: the voice is often not in the book's language; released after
-                    if not os.path.exists(os.path.join(args.asr_dir, 'config.json')):
+                    # complete once the marker exists: config.json lands first, so a download cut during the
+                    # 1.6 GB weights used to look finished forever; snapshot_download resumes what is missing
+                    asr_marker = os.path.join(args.asr_dir, '.e2a_complete')
+                    if not os.path.exists(asr_marker):
                         snapshot_download(args.asr_model, local_dir=args.asr_dir)
+                        open(asr_marker, 'w').close()
                     from transformers import pipeline
                     utils_infer.asr_pipe = pipeline('automatic-speech-recognition', model=args.asr_dir, device='cpu')
                     try:
