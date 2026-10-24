@@ -135,7 +135,10 @@ def main()->int:
             # tokenizer adds its <|begin_of_text|>, then the turn closes and the speech opens
             prompt = f'{speaker}: {text}' if speaker else text
             input_ids = torch.tensor([[start_of_human] + tokenizer(prompt).input_ids + [end_of_text, end_of_human, start_of_ai, start_of_speech]], dtype=torch.long, device=model.device)
-            max_new_tokens = min(int(req.get('max_new_tokens', 4096)), max(28 * 20, len(text) * int(req.get('tokens_per_char', 20))))
+            # generation cap: tokens_per_char per character, a Han / kana / Hangul character counted as 3 (a whole
+            # syllable, ~0.2 s of speech, against ~0.07 s for a latin letter), at most max_new_tokens
+            text_units = len(text) + 2 * len(re.findall(r'[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uf900-\ufaff]', text))
+            max_new_tokens = min(int(req.get('max_new_tokens', 4096)), max(28 * 20, text_units * int(req.get('tokens_per_char', 20))))
             with torch.inference_mode():
                 output = model.generate(
                     input_ids=input_ids,
@@ -152,7 +155,7 @@ def main()->int:
             del output, input_ids
             capped = end_of_speech not in generated and len(generated) >= max_new_tokens
             if capped:
-                print(f'orpheus_worker: no end of speech within {max_new_tokens} tokens (looping?), the part is cut there: {text[:80]}', file=sys.stderr)
+                print(f'orpheus_worker: no end of speech within {max_new_tokens} tokens (cap reached: a loop, or a cap too low for this text), the part is cut there: {text[:80]}', file=sys.stderr)
             # audio tokens into SNAC frames, each token checked against its position in the frame (upstream counts
             # positions by index, so one stray or missing token shifts every frame after it): a token out of step
             # drops the partial frame, a position 0 starts a new one
