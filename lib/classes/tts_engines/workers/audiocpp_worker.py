@@ -42,6 +42,7 @@ def main()->int:
     parser.add_argument('--speaker-label', action='store_true')
     parser.add_argument('--vc-model', default='')
     parser.add_argument('--vc-family', default='seed_vc')
+    parser.add_argument('--vc-route', default='')
     parser.add_argument('--samplerate', type=int, default=24000)
     args = parser.parse_args()
     server_dir = os.path.dirname(os.path.abspath(args.server))
@@ -335,7 +336,7 @@ def main()->int:
                     vc_src = os.path.join(work_dir, 'vc_source.wav')
                     with open(vc_src, 'wb') as f:
                         f.write(audio)
-                    result = json.loads(post('/v1/tasks/run', {'model': 'e2a-vc', 'request': {'audio': vc_src, 'voice_ref': convert_to}}, 1800))
+                    result = json.loads(post('/v1/tasks/run', {'model': 'e2a-vc', 'request': {'audio': vc_src, 'voice_ref': convert_to, **({'route': args.vc_route} if args.vc_route else {})}}, 1800))
                     if not result.get('audio'):
                         raise RuntimeError(f"voice conversion returned no audio: {str(result)[:200]}")
                     audio = base64.b64decode(result['audio'])

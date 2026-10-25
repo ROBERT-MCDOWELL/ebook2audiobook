@@ -258,8 +258,8 @@ class AudioCpp(TTSUtils):
             cmd = [
                sys.executable, '-u', self.worker_script, '--server', self.server_bin, '--model', self.model_path, '--family', self.family, '--backend', self.backend,
                '--load-options', json.dumps(self.load_options), '--session-options', json.dumps(self.family_cfg['session']), '--request-options', json.dumps(self.family_cfg['request']),
-               '--ref-min', str(self.family_cfg['ref_min']), '--ref-max', str(self.family_cfg['ref_max']), '--ref-text', self.family_cfg['ref_text'] or 'none', '--ref-fallback', json.dumps(self.family_cfg['ref_fallback']),
-               '--asr-model', self.asr_path, '--asr-family', audiocpp_asr['family'], '--vc-model', self.vc_path, '--vc-family', audiocpp_vc['family'], '--samplerate', str(self.params['samplerate'])
+               '--ref-min', str(self.family_cfg['ref_min']), '--ref-max', str(self.family_cfg['ref_max'] if self.family_cfg['clone'] else audiocpp_vc['ref_max']), '--ref-text', self.family_cfg['ref_text'] or 'none', '--ref-fallback', json.dumps(self.family_cfg['ref_fallback']),
+               '--asr-model', self.asr_path, '--asr-family', audiocpp_asr['family'], '--vc-model', self.vc_path, '--vc-family', audiocpp_vc['family'], '--vc-route', audiocpp_vc['route'], '--samplerate', '--samplerate', str(self.params['samplerate'])
             ] + (['--language-option'] if self.family_cfg['language_option'] else []) + (['--clone'] if self.family_cfg['clone'] else []) + (['--speaker-label'] if self.family_cfg['speaker_label'] else [])
             engine = loaded_tts.get(self.tts_key)
             if isinstance(engine, SubprocessPipe) and (engine.cmd != cmd or engine.process is None or engine.process.poll() is not None):

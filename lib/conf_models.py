@@ -169,7 +169,7 @@ audiocpp_packages = {
 audiocpp_asr = {"family": "qwen3_asr", "files": ["Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf"]}
 # built-in voice engines (clone False below): a voice file picked in e2a converts their output with Seed-VC (v2_vc route),
 # loaded in the same server on first use. Without one they speak with their own voice (voice None, as Piper)
-audiocpp_vc = {"family": "seed_vc", "files": ["SeedVC-MLX-GGUF/seed-vc-mlx-q8_0.gguf"]}
+audiocpp_vc = {"family": "seed_vc", "files": ["SeedVC-MLX-GGUF/seed-vc-mlx-q8_0.gguf"], "route": "v1_whisper_bigvgan_vc", "ref_max": 15.0}
 audiocpp_repo = "audio-cpp/audio.cpp-gguf"
 
 max_custom_model = 100
