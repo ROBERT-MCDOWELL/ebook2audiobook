@@ -611,10 +611,10 @@ if "%SCRIPT_MODE%"=="%NATIVE%" (
 		) else (
 			rem another python than PYTHON_VERSION, e.g. 3.11 from an older install: --allow-existing would swap the interpreter
 			rem but keep the packages in the old Lib and the .provisioned marker, leaving an empty venv never reprovisioned
+			rem DisableDelayedExpansion is in force here so !VAR! stays literal: compare on the for variables, test with if defined
 			set "VENV_PYVER="
-			for /f "tokens=2 delims==" %%v in ('findstr /b /c:"version_info" /c:"version " "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%\pyvenv.cfg"') do if not defined VENV_PYVER set "VENV_PYVER=%%v"
-			for /f "tokens=1,2 delims=. " %%a in ("!VENV_PYVER!") do set "VENV_PYVER=%%a.%%b"
-			if not "!VENV_PYVER!"=="%PYTHON_VERSION%" (
+			for /f "tokens=2 delims==" %%v in ('findstr /b /c:"version_info" /c:"version " "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%\pyvenv.cfg"') do for /f "tokens=1,2 delims=. " %%a in ("%%v") do if "%%a.%%b"=="%PYTHON_VERSION%" set "VENV_PYVER=%%a.%%b"
+			if not defined VENV_PYVER (
 				echo %PYTHON_ENV% is not python %PYTHON_VERSION% - removing and recreating...
 				rmdir /s /q "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%"
 				if exist "%SAFE_SCRIPT_DIR%\%PYTHON_ENV%\" goto :failed
