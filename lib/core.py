@@ -5,7 +5,7 @@
 # IS USED TO PRINT IT OUT TO THE TERMINAL, AND "CHAPTER" TO THE CODE
 # WHICH IS LESS GENERIC FOR THE DEVELOPERS
 
-import argparse, asyncio, csv, difflib, fnmatch, sqlite3, hashlib, io, json, math, os, gc
+import argparse, asyncio, csv, difflib, errno, fnmatch, sqlite3, hashlib, io, json, math, os, gc
 import random, shutil, subprocess, sys, tempfile, threading, time, uvicorn, copy, base64, posixpath
 import traceback, socket, unicodedata, urllib.request, uuid, zipfile, multiprocessing
 import ebooklib, psutil, requests, stanza, importlib, queue, pykakasi
@@ -3165,6 +3165,23 @@ def convert_chapters2audio(session_id:str)->bool:
             # ends as one alert instead of an exception_alert() at every level
             traceback.print_exc()
             session['tts_init_error'] = re.sub(r'^(?:\w+\(\) error: )+', '', str(e))
+            # disk full while loading the model: an OSError ENOSPC anywhere in the chain (Windows ERROR_DISK_FULL and
+            # ERROR_HANDLE_DISK_FULL map to it too), its text when it comes back from a worker process, or for a worker
+            # that only reports its exit code, the models drive left nearly full by the failed download
+            disk_full = False
+            err, seen = e, set()
+            while err is not None and id(err) not in seen and not disk_full:
+                seen.add(id(err))
+                disk_full = (isinstance(err, OSError) and err.errno == errno.ENOSPC) or bool(re.search(r'no space left on device|not enough space on the disk|\[errno 28\]|\[winerror 112\]|\benospc\b', str(err), re.IGNORECASE))
+                err = err.__cause__ or err.__context__
+            err = None
+            if not disk_full:
+                try:
+                    disk_full = shutil.disk_usage(models_dir).free < 512 * 1024 ** 2
+                except OSError:
+                    pass
+            if disk_full:
+                session['tts_init_error'] = legends['error_disk_full_models'].format(dir=models_dir)
             return False
         blocks_current = session['blocks_current']
         blocks = blocks_current['blocks']

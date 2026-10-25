@@ -52,7 +52,7 @@ TTS_ENGINES = {
     "VOXTRAL_TTS": "voxtral_tts"
 }
 
-# voice conversion: a voice file picked for a built-in voice engine (piper, vits, fairseq, glowtts, tacotron, orpheus, and
+# voice conversion: a voice file picked for a built-in voice engine (piper, vits, fairseq, glowtts, tacotron, orpheus, phonon and
 # the audio.cpp ones with clone False) turns its output into that voice, on audio.cpp's server (common/voice_conversion.py).
 # default_vc_model below picks one; the last part of its path is the zero-shot engine's tts_zs_key (loaded_tts, model_zs_cache).
 # task "vc": voice to voice. task "tts": the engine's voice clone speaks the sentence text again (no voice to voice).
