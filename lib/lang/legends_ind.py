@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': 'Server GPU {engine} ({package}) mogok lagi ({error}): membiarkannya sampai e2a restart dan mengulang kalimat pada paket berikutnya (CPU jika tidak ada GPU lain), yang lebih lambat tetapi stabil.',
     'msg_zonos2_gpu_failed': 'Server GPU {engine} ({package}) tidak dapat dijalankan: {error} Berjalan pada CPU, yang jauh lebih lambat.',
     'msg_zonos2_cpu_fallback': 'Paket GPU {engine} untuk mesin ini belum ({machine}): berjalan pada CPU, yang jauh lebih lambat.',
+    'msg_audiocpp_offline_package': 'Membuka paket server {engine} {package} dari salinan offline…',
+    'msg_vc_model_fallback': 'Konversi suara {vc_model} tidak dapat berbicara {lang}: {fallback} mengubah suara sebagai gantinya.',
     'msg_zonos2_old_venv': 'Menghapus lingkungan Zona v0.1 lama dalam {dir}, ZONOS2 tidak membutuhkannya...',
     'msg_zonos2_models': 'Mendapatkan {engine} file model ({files}), unduhan pertama membutuhkan waktu…',
     'msg_vulkan_selected': 'GPU Vulkan {gpu}: Obor Vulkan dipilih',

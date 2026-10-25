@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': '{engine} GPUサーバー（{package} ）は再びクラッシュしました（{error} ） ： e 2 aが再起動するまで残り、次のパッケージ（他のGPUがない場合はCPU ）で文をやり直します。これは遅いですが安定しています。',
     'msg_zonos2_gpu_failed': 'ページは {engine} GPUサーバー（{package}ddを起動できませんでした。 {error} 代わりにCPUで実行すると、はるかに遅くなります。',
     'msg_zonos2_cpu_fallback': 'いいえ {engine} このマシンのGPUパッケージはまだ（{machine}） ： CPU上で実行されていますが、これははるかに遅いです。',
+    'msg_audiocpp_offline_package': 'の開梱 {engine} サーバーパッケージ {package} オフラインコピーから…',
+    'msg_vc_model_fallback': '音声変換 {vc_model} 話すことができません {lang}: {fallback} 代わりに音声を変換します。',
     'msg_zonos2_old_venv': '古いZonos v0.1環境の削除 {dir}、ZONOS 2はそれを必要としません...',
     'msg_zonos2_models': 'コードを入手 {engine} モデルファイル（{files}）、最初のダウンロードにはしばらく時間がかかります…',
     'msg_vulkan_selected': 'Vulkan GPU {gpu} ： Vulkan Torchが選択されました',

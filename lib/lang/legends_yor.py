@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': 'Olutọju GPU {engine} ({package}) tun ṣubu ({error}): fi silẹ titi e2a yoo tun bẹrẹ ati tun ṣe gbolohun naa lori package ti o tẹle (CPU ti ko ba si GPU miiran), eyiti o lọra ṣugbọn o jẹ iduroṣinṣin.',
     'msg_zonos2_gpu_failed': 'Olùpèsè GPU {engine} ({package}) kò lè bẹ̀rẹ̀: {error} Ṣiṣẹ́ lórí CPU dípò, èyí tí ó lọ́ra púpọ̀.',
     'msg_zonos2_cpu_fallback': 'Kò sí ìpakà GPU {engine} fún ẹ̀rọ yìí síbẹ̀ ({machine}): ó ń ṣiṣẹ́ lórí CPU, èyí tí ó lọ́ra púpọ̀.',
+    'msg_audiocpp_offline_package': 'Ṣíṣe àkójọpọ̀ {engine} package olupin {package} láti ẹ̀dà tí kò sí lórí ayélujára...',
+    'msg_vc_model_fallback': 'Ìyípadà ohùn {vc_model} kò lè sọ {lang}: {fallback} yí ohùn náà padà dípò.',
     'msg_zonos2_old_venv': 'Yíyọ àyíká Zonos v0.1 àtijọ́ ní {dir}, ZONOS2 kò nílò rẹ̀...',
     'msg_zonos2_models': 'Gbígba àwọn fáìlì àwòṣe {engine} ({files}), ìmúṣẹ àkọ́kọ́ gba ìgbà díẹ̀...',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan Torch yàn',

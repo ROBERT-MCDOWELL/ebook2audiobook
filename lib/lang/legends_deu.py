@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': 'Der {engine} GPU-Server ({package}) stürzte erneut ab ({error}): Er belässt ihn bis zum Neustart von e2a und wiederholt den Satz auf dem nächsten Paket (CPU, wenn keine andere GPU vorhanden ist), das langsamer, aber stabil ist.',
     'msg_zonos2_gpu_failed': 'Der {engine}-GPU-Server ({package}) konnte nicht gestartet werden: {error} Läuft stattdessen auf der CPU, was viel langsamer ist.',
     'msg_zonos2_cpu_fallback': 'Nr. {engine} GPU-Paket für diese Maschine noch ({machine}): läuft auf CPU, die viel langsamer ist.',
+    'msg_audiocpp_offline_package': 'Auspacken der {engine} server-Paket {package} aus der Offline-Kopie...',
+    'msg_vc_model_fallback': 'Die Sprachkonvertierung {vc_model} kann nicht {lang}: {fallback} sprechen und konvertiert stattdessen die Stimme.',
     'msg_zonos2_old_venv': 'Entfernen der alten Zonos v0.1-Umgebung in {dir}, ZONOS2 braucht es nicht...',
     'msg_zonos2_models': 'Abrufen der {engine} Modelldateien ({files}), der erste Download dauert eine Weile...',
     'msg_vulkan_selected': 'Vulkan-GPU {gpu}: Vulkan-Taschenlampe ausgewählt',

@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': 'تعطل خادم {engine} GPU ({package}) مرة أخرى ({error}): تركه حتى إعادة تشغيل e2a وإعادة صياغة الجملة على الحزمة التالية (CPU إذا لم يكن هناك GPU آخر)، وهو أبطأ ولكنه مستقر.',
     'msg_zonos2_gpu_failed': 'تعذر بدء تشغيل خادم {engine} GPU ({package}): {error} يعمل على وحدة المعالجة المركزية بدلاً من ذلك، وهو أبطأ بكثير.',
     'msg_zonos2_cpu_fallback': 'لا {engine} حزمة وحدة معالجة الرسومات لهذا الجهاز حتى الآن ({machine}): تعمل على وحدة المعالجة المركزية، وهي أبطأ بكثير.',
+    'msg_audiocpp_offline_package': 'تفريغ حزمة الخادم {engine} {package} من النسخة غير المتصلة بالإنترنت...',
+    'msg_vc_model_fallback': 'تحويل الصوت {vc_model} لا يستطيع التحدث {lang}: {fallback} يحول الصوت بدلاً من ذلك.',
     'msg_zonos2_old_venv': 'إزالة بيئة Zonos v0.1 القديمة في {dir}، لا تحتاج ZONOS2 إليها...',
     'msg_zonos2_models': 'الحصول على ملفات طراز {engine} ({files})، يستغرق التنزيل الأول بعض الوقت...',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: تم اختيار مشعل Vulkan',

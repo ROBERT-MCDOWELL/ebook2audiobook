@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': 'Serwer {engine} GPU ({package}) ponownie uległ awarii ({error}): pozostawiając go do ponownego uruchomienia e2a i ponownego wykonania zdania na następnym pakiecie (CPU, jeśli nie ma innego procesora GPU), który jest wolniejszy, ale stabilny.',
     'msg_zonos2_gpu_failed': 'Serwer GPU {engine} ({package}) nie mógł się uruchomić: {error} Zamiast tego działa na procesorze, co jest znacznie wolniejsze.',
     'msg_zonos2_cpu_fallback': 'Nie ma jeszcze pakietu {engine} GPU dla tej maszyny ({machine}): działa na procesorze, który jest znacznie wolniejszy.',
+    'msg_audiocpp_offline_package': 'Rozpakowywanie pakietu {engine} serwerów {package} z kopii offline…',
+    'msg_vc_model_fallback': 'Konwersja głosu {vc_model} nie może mówić {lang}: {fallback} zamiast tego konwertuje głos.',
     'msg_zonos2_old_venv': 'Usunięcie starego środowiska ZONOS v0.1 w {dir}, ZONOS2 nie potrzebuje tego…',
     'msg_zonos2_models': 'Pobieranie plików modelu {engine} ({files}), pierwsze pobranie trwa chwilę…',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Wybrano palnik Vulkan',

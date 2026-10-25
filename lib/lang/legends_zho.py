@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': '{engine} GPU服务器（{package} ）再次崩溃（{error} ） ：将其保留到e2a重新启动，并在下一个包上重做句子（如果没有其他GPU ，则重做CPU ） ，这更慢但稳定。',
     'msg_zonos2_gpu_failed': 'The {engine} GPU服务器({package}无法启动 {error} 而是在CPU上运行，速度要慢得多。',
     'msg_zonos2_cpu_fallback': '否 {engine} 此机器的GPU包尚未（{machine}） ：在CPU上运行，速度要慢得多。',
+    'msg_audiocpp_offline_package': '正在 从脱机副本中解压缩{engine}服务器包{package}…',
+    'msg_vc_model_fallback': '语音转换{vc_model}不能说话{lang}: {fallback}转换语音。',
     'msg_zonos2_old_venv': '删除旧的Zonos v0.1环境 {dir}， ZONOS2不需要它……',
     'msg_zonos2_models': '是让大家 {engine} 模型文件（{files}） ，第一次下载需要一段时间……',
     'msg_vulkan_selected': 'Vulkan GPU {gpu} ：已选择Vulkan Torch',

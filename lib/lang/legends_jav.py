@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': 'Server GPU {engine} ({package}) nabrak maneh ({error}): ninggalake nganti e2a miwiti maneh lan gawe maneh ukara ing paket sabanjure (CPU yen ora ana GPU liyane), sing luwih alon nanging stabil.',
     'msg_zonos2_gpu_failed': 'Server {engine} GPU ({package}) ora bisa miwiti: {error} mlaku ing CPU tinimbang, kang luwih alon.',
     'msg_zonos2_cpu_fallback': 'Ora ana paket GPU {engine} kanggo mesin iki ({machine}): mlaku ing CPU, sing luwih alon.',
+    'msg_audiocpp_offline_package': 'Mbukak paket {engine} server {package} saka salinan offline...',
+    'msg_vc_model_fallback': 'Konversi swara {vc_model} ora bisa ngomong {lang}: {fallback} ngowahi swara tinimbang.',
     'msg_zonos2_old_venv': 'Ngilangi lingkungan Zonos v0.1 lawas ing {dir}, ZONOS2 ora butuh...',
     'msg_zonos2_models': 'Njaluk file model {engine} ({files}), download pisanan njupuk sawetara wektu...',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan Torch',
