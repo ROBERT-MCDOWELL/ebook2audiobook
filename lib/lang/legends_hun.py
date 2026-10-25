@@ -544,6 +544,8 @@ legends = {
     'error_venv_install_failed': '{engine} virtuális környezet telepítése nem sikerült itt: {step}',
     'msg_orpheus_cpu_slow': 'A{engine} egy 3B modell: a CPU-n körülbelül 40-szer lassabban fut, mint a valós idő, és körülbelül 14 GB RAM-ot igényel. A GPU erősen ajánlott.',
     'error_orpheus_gated': 'A{repo} be van zárva az Ölelő Arcra: fogadja el a feltételeket https://huggingface.co/{repo}-nél a fiókjával, majd állítsa be a HF_TOKEN környezeti változót az adott fiók tokenjére, és indítsa újra az e2a-t.',
+    'msg_phonon_cpu': '{engine} csak CPU-n fut (gyorsabban, mint a valós idő); a hangkonverzió az {device}-en marad.',
+    'error_phonon_cpu_flags': '{engine}-nak AVX2, FMA és F16C processzorra van szüksége (hiányzik: {flags}). Válasszon másik TTS-motort.',
     'gr_ui_language': 'Felület nyelve',
     'gr_ui_language_auto': 'Automatikus (böngésző)',
     'gr_tooltips': 'Súgók',

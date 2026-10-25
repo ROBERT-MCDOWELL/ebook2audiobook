@@ -544,6 +544,8 @@ legends = {
     'error_venv_install_failed': '{engine} sanal ortam kurulumu başarısız oldu: {step}',
     'msg_orpheus_cpu_slow': '{engine} bir 3B modelidir: CPU\'da gerçek zamanlıdan yaklaşık 40 kat daha yavaş çalışır ve yaklaşık 14 GB RAM\'e ihtiyaç duyar. GPU şiddetle tavsiye edilir.',
     'error_orpheus_gated': '{repo}, Sarılma Yüzünde kapılıdır: https://huggingface.co/{repo} \'deki koşullarını hesabınızla kabul edin, ardından HF_TOKEN ortam değişkenini o hesabın bir belirtecine ayarlayın ve e2a\'yı yeniden başlatın.',
+    'msg_phonon_cpu': '{engine} sadece CPU\'da çalışır (oradaki gerçek zamandan daha hızlı); ses dönüşümü {device} \'de kalır.',
+    'error_phonon_cpu_flags': '{engine} AVX2, FMA ve F16C\'li bir CPU\'ya ihtiyaç duyar (eksik: {flags}). Lütfen başka bir TTS motoru seçin.',
     'gr_ui_language': 'Arayüz dili',
     'gr_ui_language_auto': 'Otomatik (tarayıcı)',
     'gr_tooltips': 'İpuçları',

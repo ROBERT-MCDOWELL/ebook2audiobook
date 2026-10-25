@@ -544,6 +544,8 @@ legends = {
     'error_venv_install_failed': '{engine}仮想環境のインストールに失敗しました： {step}',
     'msg_orpheus_cpu_slow': '{engine}は3 Bモデルです。CPUではリアルタイムより約40倍遅く、約14 GBのRAMが必要です。GPUを強くお勧めします。',
     'error_orpheus_gated': '{repo} hugging Faceでゲートされています：でその条件を受け入れます https://huggingface.co/{repo} あなたのアカウントで、次に設定します HF_TOKEN 環境変数をそのアカウントのトークンに変換し、e 2 aを再起動します。',
+    'msg_phonon_cpu': '{engine} cPUでのみ実行されます（リアルタイムよりも速い）。音声変換はオンのままです {device}.',
+    'error_phonon_cpu_flags': '{engine} aVX 2、FMA、およびF 16 Cを搭載したCPUが必要です（以下がありません： {flags}）。別のTTSエンジンを選択してください。',
     'gr_ui_language': '表示言語',
     'gr_ui_language_auto': '自動（ブラウザー）',
     'gr_tooltips': 'ツールチップ',

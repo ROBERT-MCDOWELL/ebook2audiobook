@@ -544,6 +544,8 @@ legends = {
     'error_venv_install_failed': '{engine} instalação do ambiente virtual falhou em: {step}',
     'msg_orpheus_cpu_slow': '{engine} é um modelo 3B: na CPU, ele é cerca de 40 vezes mais lento que o tempo real e precisa de cerca de 14 GB de RAM. Uma GPU é altamente recomendada.',
     'error_orpheus_gated': '{repo} é bloqueado no Hugging Face: aceite suas condições em https://huggingface.co/{repo} com sua conta, defina a variável de ambiente HF_TOKEN para um token dessa conta e reinicie o e2a.',
+    'msg_phonon_cpu': '{engine} é executado apenas na CPU (mais rápido do que em tempo real); a conversão de voz permanece em {device}.',
+    'error_phonon_cpu_flags': '{engine} precisa de uma CPU com AVX2, FMA e F16C (ausente: {flags}). Seleccione outro motor TTS.',
     'gr_ui_language': 'Idioma da interface',
     'gr_ui_language_auto': 'Auto (navegador)',
     'gr_tooltips': 'Dicas',

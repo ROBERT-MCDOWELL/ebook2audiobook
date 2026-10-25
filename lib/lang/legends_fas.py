@@ -544,6 +544,8 @@ legends = {
     'error_venv_install_failed': 'نصب محیط مجازی در {engine} با شکست مواجه شد: {step}',
     'msg_orpheus_cpu_slow': '{engine} یک مدل ۳B است: روی CPU حدود ۴۰ برابر کندتر از حالت بلادرنگ اجرا می‌شود و به حدود ۱۴ گیگابایت رم نیاز دارد. استفاده از GPU اکیداً توصیه می‌شود.',
     'error_orpheus_gated': '{repo} روی Hugging Face مسدود شده است: شرایط آن را در https://huggingface.co/{repo} با حساب خود بپذیرید، سپس متغیر محیطی HF_TOKEN را روی توکن آن حساب تنظیم کنید و e2a را مجدداً راه‌اندازی کنید.',
+    'msg_phonon_cpu': '‎{engine} فقط روی CPU اجرا می‌شود (سریع‌تر از زمان واقعی در آنجا)؛ تبدیل صدا روی ‎{device} باقی می‌ماند.',
+    'error_phonon_cpu_flags': '{engine} به یک پردازنده با AVX2، FMA و F16C نیاز دارد (موجود نیست: {flags}). لطفاً موتور TTS دیگری انتخاب کنید.',
     'gr_ui_language': 'زبان رابط کاربری',
     'gr_ui_language_auto': 'خودکار (مرورگر)',
     'gr_tooltips': 'راهنمای ابزار',

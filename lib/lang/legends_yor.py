@@ -544,6 +544,8 @@ legends = {
     'error_venv_install_failed': '{engine} fi sori ẹrọ ayika foju kuna ni: {step}',
     'msg_orpheus_cpu_slow': '{engine} jẹ́ àwòṣe 3B: lórí Sipiyu ó máa ń sáré ní ìlọ́po 40 ju àkókò gidi lọ ó sì nílò nǹkan bí 14 GB ti RAM. A gba GPU níyànjú gidigidi.',
     'error_orpheus_gated': '{repo} jẹ gated lori Hugging Face: gba awọn ipo rẹ ni https://huggingface.co/{repo} pẹlu akọọlẹ rẹ, lẹhinna ṣeto iyipada ayika HF_TOKEN si ami ti akọọlẹ yẹn ki o tun bẹrẹ e2a.',
+    'msg_phonon_cpu': '{engine} ń ṣiṣẹ́ lórí CPU nìkan (yára ju àkókò gidi lọ níbẹ̀); yípadà ohùn dúró lórí {device}.',
+    'error_phonon_cpu_flags': '{engine} nílò CPU pẹ̀lú AVX2, FMA àti F16C (kò sí: {flags}). Jọ̀wọ́ yan ẹ̀rọ TTS mìíràn.',
     'gr_ui_language': 'Èdè ojú-iṣẹ́',
     'gr_ui_language_auto': 'Aládàáṣe (aṣàwákiri)',
     'gr_tooltips': 'Àlàyé kúkúrú',
