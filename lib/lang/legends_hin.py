@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': '{engine} GPU सर्वर ({package}) फिर से क्रैश हो गया ({error}): इसे तब तक छोड़ दें जब तक कि e2a फिर से शुरू न हो जाए और अगले पैकेज पर वाक्य को फिर से न करें (यदि कोई अन्य GPU एक नहीं है तो CPU), जो धीमा लेकिन स्थिर है।',
     'msg_zonos2_gpu_failed': '{engine} GPU सर्वर ({package}) शुरू नहीं हो सका: {error} इसके बजाय CPU पर चल रहा है, जो बहुत धीमा है।',
     'msg_zonos2_cpu_fallback': 'इस मशीन के लिए अभी तक कोई {engine} जीपीयू पैकेज नहीं है ({machine}): सीपीयू पर चल रहा है, जो बहुत धीमा है।',
+    'msg_audiocpp_offline_package': 'ऑफ़लाइन कॉपी से {engine} सर्वर पैकेज {package} को अनपैक किया जा रहा है...',
+    'msg_vc_model_fallback': 'आवाज रूपांतरण {vc_model} {lang}: {fallback} नहीं बोल सकता, इसके बजाय आवाज को रूपांतरित करता है।',
     'msg_zonos2_old_venv': 'पुराने Zonos v0.1 वातावरण को {dir} में हटाने के लिए, ZONOS2 को इसकी आवश्यकता नहीं है...',
     'msg_zonos2_models': '{engine} मॉडल फ़ाइलें ({files}) प्राप्त करने में, पहले डाउनलोड में कुछ समय लगता है...',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan मशाल का चयन किया गया',

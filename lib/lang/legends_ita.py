@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': 'Il server {engine} GPU ({package}) si è schiantato di nuovo ({error}): lasciandolo fino al riavvio di e2a e rifacendo la frase sul pacchetto successivo (CPU se non altro GPU), più lento ma stabile.',
     'msg_zonos2_gpu_failed': 'Impossibile avviare il server GPU {engine} ({package}): {error} In esecuzione sulla CPU, che è molto più lento.',
     'msg_zonos2_cpu_fallback': 'No {engine} Pacchetto GPU per questa macchina ({machine}): in esecuzione su CPU, che è molto più lenta.',
+    'msg_audiocpp_offline_package': 'Disimballaggio del pacchetto {engine} server {package} dalla copia offline...',
+    'msg_vc_model_fallback': 'La conversione vocale {vc_model} non può parlare {lang}: {fallback} converte invece la voce.',
     'msg_zonos2_old_venv': 'Rimuovendo il vecchio ambiente Zonos v0.1 in {dir}, ZONOS2 non ne ha bisogno...',
     'msg_zonos2_models': 'Ottenere i file del modello {engine} ({files}), il primo download richiede un po\' di tempo...',
     'msg_vulkan_selected': 'GPU Vulkan {gpu}: selezionata torcia Vulkan',

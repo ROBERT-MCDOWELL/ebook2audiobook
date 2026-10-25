@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': 'Сервер {engine} GPU ({package}) снова вышел из строя ({error}): оставив его до перезапуска e2a и переделав предложение на следующем пакете (CPU, если нет другого GPU), который медленнее, но стабилен.',
     'msg_zonos2_gpu_failed': 'Сервер {engine} GPU ({package}) не может запустить: {error} вместо этого работает на процессоре, что намного медленнее.',
     'msg_zonos2_cpu_fallback': 'Нет {engine} Пакет GPU для этой машины еще ({machine}): работает на процессоре, что намного медленнее.',
+    'msg_audiocpp_offline_package': 'Распаковка пакета сервера {engine} {package} из автономной копии...',
+    'msg_vc_model_fallback': 'Голосовое преобразование {vc_model} не может говорить {lang}: {fallback} вместо этого преобразует голос.',
     'msg_zonos2_old_venv': 'Удаление старой среды Zonos v0.1 в {dir}, ZONOS2 в этом не нуждается...',
     'msg_zonos2_models': 'Получение {engine} файлов модели ({files}), первая загрузка занимает некоторое время...',
     'msg_vulkan_selected': 'Графический процессор Vulkan {gpu}: выбран факел Vulkan',

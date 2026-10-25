@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': 'Le serveur GPU {engine} ({package}) s\'est à nouveau planté ({error}) : en le laissant jusqu\'à ce que e2a redémarre et en refaisant la phrase sur le package suivant (CPU s\'il n\'y a pas d\'autre GPU), qui est plus lent mais stable.',
     'msg_zonos2_gpu_failed': 'Le serveur GPU {engine} ({package}) n\'a pas pu démarrer : {error} s\'exécutant sur le CPU à la place, ce qui est beaucoup plus lent.',
     'msg_zonos2_cpu_fallback': 'Pas encore de package GPU {engine} pour cette machine ({machine}) : en cours d\'exécution sur CPU, ce qui est beaucoup plus lent.',
+    'msg_audiocpp_offline_package': 'Déballage du package serveur {engine} {package} à partir de la copie hors ligne…',
+    'msg_vc_model_fallback': 'La conversion vocale {vc_model} ne peut pas parler {lang}: {fallback} convertit la voix à la place.',
     'msg_zonos2_old_venv': 'Suppression de l\'ancien environnement Zonos v0.1 en {dir}, ZONOS2 n\'en a pas besoin…',
     'msg_zonos2_models': 'Obtenir les {engine} fichiers modèles ({files}), le premier téléchargement prend un certain temps…',
     'msg_vulkan_selected': 'GPU Vulkan {gpu} : Torche Vulkan sélectionnée',

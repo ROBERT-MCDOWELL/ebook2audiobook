@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': 'سرور GPU {engine} ({package}) دوباره از کار افتاد ({error}): آن را تا زمان راه‌اندازی مجدد e2a رها کردم و جمله را روی بسته بعدی (CPU اگر هیچ GPU دیگری نباشد) که کندتر اما پایدار است، دوباره انجام دادم.',
     'msg_zonos2_gpu_failed': 'سرور GPU {engine} ({package}) نتوانست شروع به کار کند: {error} در عوض روی CPU اجرا می‌شود که بسیار کندتر است.',
     'msg_zonos2_cpu_fallback': 'هنوز هیچ بسته‌ی پردازنده‌ی گرافیکی {engine} برای این دستگاه وجود ندارد ({machine}): روی پردازنده‌ی مرکزی اجرا می‌شود که بسیار کندتر است.',
+    'msg_audiocpp_offline_package': 'باز کردن بسته سرور {engine} {package} از نسخه آفلاین…',
+    'msg_vc_model_fallback': 'تبدیل صدا {vc_model} نمی‌تواند صحبت کند {lang}: {fallback} به جای آن صدا را تبدیل می‌کند.',
     'msg_zonos2_old_venv': 'با حذف محیط قدیمی Zonos نسخه ۰.۱ در {dir}، ZONOS2 به آن نیازی ندارد…',
     'msg_zonos2_models': 'برای دریافت فایل‌های مدل {engine} ({files})، اولین دانلود کمی طول می‌کشد…',
     'msg_vulkan_selected': 'پردازنده گرافیکی Vulkan {gpu}: Vulkan Torch انتخاب شد',

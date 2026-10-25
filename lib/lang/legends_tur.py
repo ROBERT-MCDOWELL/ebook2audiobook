@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': '{engine} GPU sunucusu ({package}) tekrar çöktü ({error}): e2a yeniden başlayana kadar bırakın ve cümleyi bir sonraki pakette (başka bir GPU yoksa CPU) yeniden yapın, bu daha yavaş ancak kararlıdır.',
     'msg_zonos2_gpu_failed': '{engine} GPU sunucusu ({package}) başlatılamadı: {error} Bunun yerine CPU üzerinde çalışıyor, bu da çok daha yavaş.',
     'msg_zonos2_cpu_fallback': 'Bu makine için henüz {engine} GPU paketi yok ({machine}): CPU\'da çalışıyor, bu da çok daha yavaş.',
+    'msg_audiocpp_offline_package': 'Çevrimdışı kopyadan {engine} sunucu paketi {package} açılıyor…',
+    'msg_vc_model_fallback': 'Ses dönüştürme {vc_model} konuşamaz {lang}: {fallback} bunun yerine sesi dönüştürür.',
     'msg_zonos2_old_venv': '{dir} \'daki eski Zonos v0.1 ortamının kaldırılması, ZONOS2\' nin buna ihtiyacı yok…',
     'msg_zonos2_models': '{engine} model dosyasını ({files}) almak, ilk indirme biraz zaman alır…',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan Meşalesi seçildi',

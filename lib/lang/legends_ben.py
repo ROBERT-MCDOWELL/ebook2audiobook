@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': '{engine} জিপিইউ সার্ভার ({package}) আবার ক্র্যাশ হয়েছে ({error}): e2a পুনরায় চালু না হওয়া পর্যন্ত এটি ছেড়ে দেওয়া এবং পরবর্তী প্যাকেজে (অন্য কোনও জিপিইউ না থাকলে সিপিইউ) বাক্যটি পুনরায় করা, যা ধীর কিন্তু স্থিতিশীল ।',
     'msg_zonos2_gpu_failed': '{engine} জিপিইউ সার্ভার ({package}) শুরু করা যায়নি: {error} এর পরিবর্তে সিপিইউতে চলছে, যা অনেক ধীর ।',
     'msg_zonos2_cpu_fallback': 'এই মেশিনের জন্য এখনও কোন {engine} জিপিইউ প্যাকেজ নেই ({machine}): সিপিইউতে চলছে, যা অনেক ধীর ।',
+    'msg_audiocpp_offline_package': 'অফলাইন কপি থেকে {engine} সার্ভার প্যাকেজ {package} আনপ্যাক করা হচ্ছে...',
+    'msg_vc_model_fallback': 'ভয়েস কনভার্সন {vc_model} কথা বলতে পারে না {lang}: {fallback} এর পরিবর্তে ভয়েসকে রূপান্তরিত করে ।',
     'msg_zonos2_old_venv': '{dir}-এ পুরানো Zonos v0.1 পরিবেশ অপসারণ করা, ZONOS2 এর এটির প্রয়োজন নেই...',
     'msg_zonos2_models': '{engine} টি মডেল ফাইল ({files}) পাওয়া, প্রথম ডাউনলোডে কিছুটা সময় লাগে...',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan Torch নির্বাচিত হয়েছে',

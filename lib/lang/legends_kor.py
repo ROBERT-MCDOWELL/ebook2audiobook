@@ -531,6 +531,8 @@ legends = {
     'msg_zonos2_gpu_dropped': '{engine} GPU 서버 ({package}) 가 다시 충돌했습니다 ({error}): e2a가 다시 시작될 때까지 그대로 두고 다음 패키지 (다른 GPU가 없는 경우 CPU) 의 문장을 다시 실행합니다. 느리지만 안정적입니다.',
     'msg_zonos2_gpu_failed': '결과 {engine} GPU 서버 ({package}dd를 시작할 수 없습니다. {error} 대신 CPU에서 실행되므로 속도가 훨씬 느립니다.',
     'msg_zonos2_cpu_fallback': '아니오 {engine} 아직 이 기계용 GPU 패키지 ({machine}): CPU에서 실행되며 속도가 훨씬 느립니다.',
+    'msg_audiocpp_offline_package': '포장 풀기 {engine} 서버 패키지 {package} 오프라인 사본에서...',
+    'msg_vc_model_fallback': '음성 변환 {vc_model} Czukhjmh {lang}: {fallback} 대신 음성을 변환합니다.',
     'msg_zonos2_old_venv': '에서 이전 Zonos v0.1 환경 제거 {dir}, ZONOS2는 필요하지 않습니다...',
     'msg_zonos2_models': '받기 {engine} 모델 파일 ({files}), 첫 번째 다운로드는 시간이 걸립니다...',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan Torch 선택됨',
