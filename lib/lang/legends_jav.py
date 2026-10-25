@@ -544,6 +544,8 @@ legends = {
     'error_venv_install_failed': '{engine} instalasi lingkungan virtual gagal ing: {step}',
     'msg_orpheus_cpu_slow': '{engine} minangka model 3B: ing CPU mlaku udakara 40 kali luwih alon tinimbang wektu nyata lan butuh udakara 14 GB RAM. GPU dianjurake banget.',
     'error_orpheus_gated': '{repo} dilebokake ing Hugging Face: nampa syarat-syarat ing https://huggingface.co/{repo} karo akun sampeyan, banjur nyetel variabel lingkungan HF_TOKEN dadi token akun kasebut lan miwiti maneh e2a.',
+    'msg_phonon_cpu': '{engine} mlaku ing CPU mung (luwih cepet tinimbang wektu nyata ana); konversi swara tetep ing {device}.',
+    'error_phonon_cpu_flags': '{engine} perlu CPU karo AVX2, FMA lan F16C (ilang: {flags}). Mangga pilih mesin TTS liyane.',
     'gr_ui_language': 'Basa antarmuka',
     'gr_ui_language_auto': 'Otomatis (peramban)',
     'gr_tooltips': 'Pitulung',

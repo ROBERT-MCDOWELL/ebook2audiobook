@@ -544,6 +544,8 @@ legends = {
     'error_venv_install_failed': '{engine} فشل تثبيت البيئة الافتراضية في: {step}',
     'msg_orpheus_cpu_slow': '{engine} هو نموذج 3B: يعمل في وحدة المعالجة المركزية أبطأ بحوالي 40 مرة من الوقت الفعلي ويحتاج إلى حوالي 14 جيجابايت من ذاكرة الوصول العشوائي. يوصى بشدة باستخدام وحدة معالجة الرسومات.',
     'error_orpheus_gated': '{repo} مغلق على Huging Face: اقبل شروطه عند https://huggingface.co/{repo} باستخدام حسابك، ثم اضبط متغير البيئة HF_TOKEN على رمز مميز لهذا الحساب وأعد تشغيل e2a.',
+    'msg_phonon_cpu': '{engine} يعمل على وحدة المعالجة المركزية فقط (أسرع من الوقت الفعلي هناك )؛ يبقى تحويل الصوت على {device}.',
+    'error_phonon_cpu_flags': '{engine} يحتاج إلى وحدة معالجة مركزية مع AVX2 و FMA و F16C (مفقود: {flags}). يرجى تحديد محرك TTS آخر.',
     'gr_ui_language': 'لغة الواجهة',
     'gr_ui_language_auto': 'تلقائي (المتصفح)',
     'gr_tooltips': 'تلميحات',

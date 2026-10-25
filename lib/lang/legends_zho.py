@@ -544,6 +544,8 @@ legends = {
     'error_venv_install_failed': '{engine}虚拟环境安装失败： {step}',
     'msg_orpheus_cpu_slow': '{engine}是3B型号：在CPU上，它的运行速度比实时慢约40倍，需要约14 GB的RAM。强烈建议使用GPU。',
     'error_orpheus_gated': '{repo}在Hugging Face上封闭：使用您的帐户接受其条件https://huggingface.co/{repo} ，然后将HF_TOKEN环境变量设置为该帐户的令牌并重新启动e2a。',
+    'msg_phonon_cpu': '{engine} 仅在CPU上运行（比那里的实时更快）;语音转换保持开启 {device}.',
+    'error_phonon_cpu_flags': '{engine}需要具有AVX2、FMA和F16C的CPU （缺少： {flags} ）。请选择其他TTS引擎。',
     'gr_ui_language': '界面语言',
     'gr_ui_language_auto': '自动（浏览器）',
     'gr_tooltips': '工具提示',

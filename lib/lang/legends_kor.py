@@ -544,6 +544,8 @@ legends = {
     'error_venv_install_failed': '{engine} 가상 환경 설치 실패 시간: {step}',
     'msg_orpheus_cpu_slow': '{engine} 3B 모델입니다. CPU에서 실시간보다 약 40배 느리게 실행되며 약 14GB의 RAM이 필요합니다. GPU를 강력히 권장합니다.',
     'error_orpheus_gated': '{repo} hugging Face에 게이트가 있습니다: 다음에서 조건을 수락하십시오: https://huggingface.co/{repo} 계정으로 을 (를) 설정한 다음 HF_TOKEN 해당 계정의 토큰에 환경 변수를 적용하고 e2a를 다시 시작합니다.',
+    'msg_phonon_cpu': '{engine} cPU에서만 실행됩니다 (실시간보다 빠름). 음성 변환은 계속 켜져 있습니다. {device}.',
+    'error_phonon_cpu_flags': '{engine} aVX2, FMA 및 F16C가 있는 CPU 필요 (누락: {flags}). 다른 TTS 엔진을 선택하십시오.',
     'gr_ui_language': '인터페이스 언어',
     'gr_ui_language_auto': '자동(브라우저)',
     'gr_tooltips': '도움말 풍선',
