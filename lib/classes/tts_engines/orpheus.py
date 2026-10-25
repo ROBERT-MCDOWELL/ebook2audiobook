@@ -473,24 +473,30 @@ class Orpheus(TTSUtils, TTSRegistry, name='orpheus'):
                                 if not self.engine_zs:
                                     error = legends['error_engine_not_loaded'].format(engine=self.tts_zs_key)
                                     return False, error
-                            zs_samplerate = TTS_VOICE_CONVERSION[self.tts_zs_key]['samplerate']
-                            source_wav = self._resample_wav(part_file, zs_samplerate)
-                            target_wav = self._resample_wav(current_voice, zs_samplerate)
-                            voice_name = Path(current_voice).stem
-                            speaker_argument = {}
-                            if self.engine_zs.speakers is None or voice_name not in self.engine_zs.speakers:
-                                speaker_argument['target_wav'] = target_wav
-                            audio_part = self.engine_zs.voice_conversion(
-                                source_wav=source_wav,
-                                speaker=voice_name,
-                                **speaker_argument
-                            )
-                            for tmp_wav in (source_wav, target_wav):
-                                if tmp_wav not in (part_file, current_voice) and os.path.exists(tmp_wav):
-                                    os.remove(tmp_wav)
-                            if torch.is_tensor(audio_part):
-                                audio_part = audio_part.detach().cpu()
-                            audio_part = self._resample_audiodata(audio_part, zs_samplerate, int(samplerate))
+                            # Seed-VC worker (VoiceConversion): only paths cross the pipe, the worker cuts and keeps one reference
+                            # clip per voice file and the server resamples both sides itself
+                            vc_file = f'{os.path.splitext(part_file)[0]}.vc.wav'
+                            reply = self.engine_zs.send({
+                                'op': 'vc',
+                                'source': os.path.abspath(part_file),
+                                'voice': os.path.abspath(current_voice),
+                                'file': os.path.abspath(vc_file)
+                            })
+                            if not reply.get('ok'):
+                                # no retry: core.py unloads the engine, which stops the VC worker. A GPU server that died counts
+                                # against its package (dropped on the second death, CPU last)
+                                if reply.get('server_exited') and self.engine_zs.backend != 'cpu':
+                                    self.engine_zs.gpu_crashes[self.engine_zs.package_name] = self.engine_zs.gpu_crashes.get(self.engine_zs.package_name, 0) + 1
+                                if os.path.exists(vc_file):
+                                    os.unlink(vc_file)
+                                error = f"convert() error: {reply.get('error')} segment: {part}"
+                                print(error)
+                                return False, error
+                            audio_part, zs_samplerate = sf.read(vc_file, dtype='float32')
+                            os.unlink(vc_file)
+                            if audio_part.ndim > 1:
+                                audio_part = audio_part.mean(axis=1)
+                            audio_part = self._resample_audiodata(audio_part, int(zs_samplerate), int(samplerate))
                         os.unlink(part_file)
                         if not is_audio_data_valid(audio_part):
                             error = 'audio_part not valid'

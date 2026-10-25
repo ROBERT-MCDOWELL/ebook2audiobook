@@ -2,22 +2,17 @@ import json
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
-from lib.conf import systems
+from lib.classes.tts_engines.common.voice_conversion import VoiceConversion
 from lib.conf_models import audiocpp_packages, audiocpp_asr, audiocpp_vc, audiocpp_engines, audiocpp_repo
 from lib.lang import legends
 
 class AudioCpp(TTSUtils):
-    # GPU packages whose server died during a conversion, per e2a process: package -> crash count (shared by every
-    # audio.cpp engine, they run the same packages). One crash restarts the same package, a second one drops it until
-    # e2a restarts (next GPU package, else CPU)
-    gpu_crashes = {}
 
     def __init__(self, session:DictProxy):
         # audio.cpp (0xShug0/audio.cpp): a native audiocpp_server package per platform (audiocpp_packages, shared by
         # every audio.cpp engine) plus the GGUF weights of the fine_tuned preset, driven by workers/audiocpp_worker.py.
         # No torch, no venv
         try:
-            import platform, tarfile, zipfile, urllib.request
             self.session = session
             self.cache_dir = tts_dir
             self.speakers_path = None
@@ -70,79 +65,8 @@ class AudioCpp(TTSUtils):
             self.model_repo = model_cfg['repo']
             self.xtts_speakers = self._load_xtts_builtin_list()
             self.device = devices['CUDA']['proc'] if self.session['device'] in [devices['CUDA']['proc'], devices['ROCM']['proc'], devices['JETSON']['proc']] else self.session['device']
-            # --- the audiocpp_server package for this machine ---
-            machine = platform.machine().lower()
-            gpu_wanted = self.session['device'] != devices['CPU']['proc']
-            # CUDA packages for NVIDIA devices only: ROCm and XPU go to Vulkan, MPS to Metal
-            cuda_wanted = self.session['device'] in [devices['CUDA']['proc'], devices['JETSON']['proc']]
-            packages = audiocpp_packages
-            jetpack = board_sm = None
-            if sys.platform == systems['LINUX'] and os.path.exists('/etc/nv_tegra_release'):
-               # L4T release -> JetPack major (R35 = 5, R36 = 6, R38+ = 7); board -> GPU architecture
-               with open('/etc/nv_tegra_release', 'r', encoding='utf-8', errors='replace') as f:
-                  l4t = re.search(r'R(\d+)', f.read())
-               jetpack = {35: 5, 36: 6}.get(int(l4t.group(1)), 7 if int(l4t.group(1)) >= 38 else None) if l4t else None
-               try:
-                  with open('/proc/device-tree/model', 'r', encoding='utf-8', errors='replace') as f:
-                     board = f.read()
-                  board_sm = 110 if 'Thor' in board else 87 if 'Orin' in board else 72 if 'Xavier' in board else None
-               except OSError:
-                  board_sm = None
-            if sys.platform == systems['LINUX'] and machine in ('x86_64', 'amd64'):
-               # own builds first (older glibc, bundled CUDA runtime), audio.cpp's official ones (glibc 2.38+) after
-               candidates = (['linux-x64-cuda13', 'linux-x64-cuda12'] if cuda_wanted else []) + (['linux-x64-vulkan', 'linux-x64-vulkan-acpp'] if gpu_wanted else []) + ['linux-x64-cpu-avx2', 'linux-x64-cpu-sse42', 'linux-x64-cpu-acpp']
-            elif sys.platform == systems['LINUX'] and machine in ('aarch64', 'arm64'):
-               if jetpack is not None:
-                  candidates = [k for k, v in packages.items() if v.get('jetpack') == jetpack and board_sm in v.get('sm', [])]
-               else:
-                  candidates = ['linux-aarch64-cuda13', 'linux-aarch64-cuda12'] if cuda_wanted else []
-               # Vulkan after CUDA: the GPU path of a Jetson without a CUDA package (Xavier, JetPack 5), the fallback of one with
-               candidates = ((candidates + ['linux-aarch64-vulkan']) if gpu_wanted else []) + ['linux-aarch64-v82', 'linux-aarch64']
-            elif sys.platform == systems['WINDOWS'] and machine in ('amd64', 'x86_64'):
-               candidates = (['windows-x64-cuda13-acpp', 'windows-x64-cuda12-acpp'] if cuda_wanted else []) + (['windows-x64-vulkan-acpp'] if gpu_wanted else []) + ['windows-x64-cpu-acpp']
-            elif sys.platform == systems['MACOS']:
-               # own builds start on macOS 11, the official ones on 13.3. arm64: Metal (the same archive runs --backend
-               # cpu). x86_64: Vulkan through MoltenVK (own build only), else CPU
-               candidates = ((['macos-arm64', 'macos-arm64-acpp'] if gpu_wanted else []) + ['macos-arm64-cpu', 'macos-arm64-cpu-acpp']) if machine == 'arm64' else ((['macos-x86_64-vulkan'] if gpu_wanted else []) + ['macos-x86_64', 'macos-x86_64-acpp'])
-            else:
-               candidates = []
-            # CPU features the packages may need, with /proc/cpuinfo names on every OS
-            cpu_flags = set()
-            if os.path.exists('/proc/cpuinfo'):
-               with open('/proc/cpuinfo', 'r', encoding='utf-8', errors='replace') as f:
-                  features = re.search(r'^(?:Features|flags)\s*:\s*(.*)$', f.read(), re.M)
-               cpu_flags = set(features.group(1).split()) if features else set()
-            elif sys.platform == systems['WINDOWS']:
-               import ctypes
-               present = ctypes.windll.kernel32.IsProcessorFeaturePresent
-               cpu_flags = ({'sse4_2'} if present(38) else set()) | ({'avx2', 'fma', 'f16c', 'bmi2'} if present(40) else set())
-            glibc = platform.libc_ver()
-            glibc_version = tuple(int(x) for x in re.findall(r'\d+', glibc[1])[:2]) if glibc[0] == 'glibc' and glibc[1] else (0, 0)
-            mac_version = tuple(int(x) for x in (platform.mac_ver()[0] or '0').split('.')[:2]) if sys.platform == systems['MACOS'] else (0, 0)
-            machine_desc = f'{sys.platform} {machine}' + (f' JetPack {jetpack}' if jetpack else '') + (f' sm_{board_sm}' if board_sm else '')
-            usable = [
-               k for k in dict.fromkeys(candidates)
-               if k in packages and packages[k].get('enabled', True) and set(packages[k].get('cpu_flags', [])) <= cpu_flags
-               and AudioCpp.gpu_crashes.get(k, 0) < 2
-               and glibc_version >= tuple(int(x) for x in packages[k].get('glibc_min', '0.0').split('.'))
-               and mac_version >= tuple(int(x) for x in packages[k].get('macos_min', '0.0').split('.'))
-            ]
-            if not usable:
-               if sys.platform == systems['MACOS'] and any(k in packages and packages[k].get('enabled', True) for k in candidates):
-                  error = legends['error_zonos2_macos_min'].format(engine=tts_engine, min=min(packages[k].get('macos_min', '0') for k in candidates if k in packages and packages[k].get('enabled', True)), version=platform.mac_ver()[0])
-               else:
-                  error = legends['error_zonos2_no_package'].format(engine=tts_engine, machine=machine_desc)
-               raise ValueError(error)
-            # first choice, then the other GPU packages, then one CPU package to fall back on if a GPU one cannot start
-            attempts = [usable[0]]
-            if packages[usable[0]]['gpu']:
-               attempts = [k for k in usable if packages[k]['gpu']] + [k for k in usable if not packages[k]['gpu']][:1]
-            if gpu_wanted and not packages[usable[0]]['gpu'] and not any(n >= 2 for n in AudioCpp.gpu_crashes.values()):
-               msg = legends['msg_zonos2_cpu_fallback'].format(engine=tts_engine, machine=machine_desc)
-               if show_alert is not None:
-                  show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
-               else:
-                  print(msg)
+            # --- the audiocpp_server package for this machine (VoiceConversion: shared with the VC stage of the built-in voice engines) ---
+            attempts, gpu_wanted = VoiceConversion.packages(self.session, tts_engine)
             # --- GGUF weights through e2a's Hugging Face cache (tts_dir) ---
             from huggingface_hub import hf_hub_download
             # cloning engines taking a reference transcript also get the ASR model, loaded by the worker only for a voice it
@@ -175,67 +99,10 @@ class AudioCpp(TTSUtils):
                if espeak_data and os.path.isfile(os.path.join(espeak_data, 'phontab')):
                   self.worker_env['AUDIOCPP_ESPEAK_DATA'] = espeak_data
             for attempt, self.package_name in enumerate(attempts):
-               package = packages[self.package_name]
+               package = audiocpp_packages[self.package_name]
                self.backend = package.get('backend', 'cpu') if package['gpu'] and gpu_wanted else 'cpu'
                try:
-                  package_dir = os.path.join(engine_dir, 'venvs', 'audiocpp', self.package_name)
-                  marker_file = os.path.join(package_dir, '.e2a_installed.json')
-                  # downloaded once: a package folder with its install record is used as it is from then on; a record
-                  # naming other urls (version bump, package moved to another build) is downloaded again
-                  try:
-                     with open(marker_file, 'r', encoding='utf-8') as f:
-                        installed_urls = json.load(f).get('urls')
-                  except Exception:
-                     installed_urls = None
-                  if installed_urls != package['urls']:
-                     msg = legends['msg_zonos2_downloading'].format(engine=tts_engine, package=self.package_name)
-                     print(msg)
-                     if progress_bar is not None:
-                        progress_bar(0.0, desc=msg)
-                     shutil.rmtree(package_dir, ignore_errors=True)
-                     os.makedirs(package_dir, exist_ok=True)
-                     try:
-                        # Windows CUDA: the bin archive and its cudart archive unpack into the same folder
-                        for url in package['urls']:
-                           archive = os.path.join(package_dir, os.path.basename(url))
-                           # urllib: no quarantine flag on macOS, so the unsigned binaries start without a Gatekeeper prompt
-                           with urllib.request.urlopen(url, timeout=60) as r, open(archive, 'wb') as f:
-                              total = int(r.headers.get('Content-Length') or 0)
-                              done = 0
-                              while True:
-                                 chunk = r.read(1 << 20)
-                                 if not chunk:
-                                    break
-                                 f.write(chunk)
-                                 done += len(chunk)
-                                 if progress_bar is not None and total:
-                                    progress_bar(done / total, desc=msg)
-                           if archive.endswith('.zip'):
-                              with zipfile.ZipFile(archive) as z:
-                                 z.extractall(package_dir)
-                           else:
-                              with tarfile.open(archive, 'r:gz') as t:
-                                 t.extractall(package_dir, **({'filter': 'data'} if hasattr(tarfile, 'data_filter') else {}))
-                           os.unlink(archive)
-                     except Exception as e:
-                        shutil.rmtree(package_dir, ignore_errors=True)
-                        error = legends['error_zonos2_download'].format(engine=tts_engine, package=self.package_name, error=e)
-                        raise RuntimeError(error)
-                     with open(marker_file, 'w', encoding='utf-8') as f:
-                        json.dump({'urls': package['urls']}, f, indent=2)
-                  server_name = 'audiocpp_server.exe' if sys.platform == systems['WINDOWS'] else 'audiocpp_server'
-                  self.server_bin = next((os.path.join(root, server_name) for root, _, files in os.walk(package_dir) if server_name in files), None)
-                  if self.server_bin is None:
-                     shutil.rmtree(package_dir, ignore_errors=True)
-                     error = legends['error_zonos2_download'].format(engine=tts_engine, package=self.package_name, error=f'{server_name} not found in the package')
-                     raise RuntimeError(error)
-                  if sys.platform != systems['WINDOWS']:
-                     os.chmod(self.server_bin, os.stat(self.server_bin).st_mode | 0o755)
-                  # own macOS Vulkan package: it carries its loader and MoltenVK in lib/, unless the user set a driver list
-                  icd = os.path.join(os.path.dirname(self.server_bin), 'lib', 'MoltenVK_icd.json')
-                  if os.path.isfile(icd) and not (os.environ.get('VK_DRIVER_FILES') or os.environ.get('VK_ICD_FILENAMES')):
-                     self.worker_env['VK_DRIVER_FILES'] = icd
-                     self.worker_env['VK_ICD_FILENAMES'] = icd
+                  self.server_bin = VoiceConversion.install(self.package_name, tts_engine, self.worker_env)
                   self.engine = self.load_engine()
                   break
                except Exception as e:
@@ -259,7 +126,7 @@ class AudioCpp(TTSUtils):
                sys.executable, '-u', self.worker_script, '--server', self.server_bin, '--model', self.model_path, '--family', self.family, '--backend', self.backend,
                '--load-options', json.dumps(self.load_options), '--session-options', json.dumps(self.family_cfg['session']), '--request-options', json.dumps(self.family_cfg['request']),
                '--ref-min', str(self.family_cfg['ref_min']), '--ref-max', str(self.family_cfg['ref_max'] if self.family_cfg['clone'] else audiocpp_vc['ref_max']), '--ref-text', self.family_cfg['ref_text'] or 'none', '--ref-fallback', json.dumps(self.family_cfg['ref_fallback']),
-               '--asr-model', self.asr_path, '--asr-family', audiocpp_asr['family'], '--vc-model', self.vc_path, '--vc-family', audiocpp_vc['family'], '--vc-route', audiocpp_vc['route'], '--samplerate', '--samplerate', str(self.params['samplerate'])
+               '--asr-model', self.asr_path, '--asr-family', audiocpp_asr['family'], '--vc-model', self.vc_path, '--vc-family', audiocpp_vc['family'], '--vc-route', audiocpp_vc['route'], '--samplerate', str(self.params['samplerate'])
             ] + (['--language-option'] if self.family_cfg['language_option'] else []) + (['--clone'] if self.family_cfg['clone'] else []) + (['--speaker-label'] if self.family_cfg['speaker_label'] else [])
             engine = loaded_tts.get(self.tts_key)
             if isinstance(engine, SubprocessPipe) and (engine.cmd != cmd or engine.process is None or engine.process.poll() is not None):
@@ -330,7 +197,7 @@ class AudioCpp(TTSUtils):
                       if not reply.get('ok') and reply.get('server_exited') and self.backend != 'cpu':
                          # the GPU server died mid-sentence (driver abort): restart it once, drop the package on its second
                          # death, and redo the whole sentence with a fresh engine (__init__ picks the package, CPU last)
-                         crashes = AudioCpp.gpu_crashes[self.package_name] = AudioCpp.gpu_crashes.get(self.package_name, 0) + 1
+                         crashes = VoiceConversion.gpu_crashes[self.package_name] = VoiceConversion.gpu_crashes.get(self.package_name, 0) + 1
                          error = str(reply.get('error') or '')
                          error = (error.split(': ', 1)[0] + ': ' + error.split(' | ')[-1]) if ' | ' in error else error
                          msg = legends['msg_zonos2_gpu_restart' if crashes < 2 else 'msg_zonos2_gpu_dropped'].format(engine=self.session['tts_engine'], package=self.package_name, error=error)

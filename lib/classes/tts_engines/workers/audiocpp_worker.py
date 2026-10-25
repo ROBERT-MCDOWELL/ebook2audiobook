@@ -11,6 +11,8 @@
 #              (built-in voice, optional), "file", "options" ({name: value}, optional)}
 #             --clone: the voice file is the model's reference; otherwise the model speaks with voice_id and a voice
 #             file converts its output with the --vc-model (Seed-VC)
+#   stdin  -> --vc-only (the VC stage of e2a's built-in voice engines, VoiceConversion): --model/--family is the VC model
+#             and the only op is {"op": "vc", "source" (the wav to convert), "voice" (the voice file), "file"}
 #   stdout <- {"ok": true, "file": "..."}
 #             {"ok": false, "error": "...", "oom": bool, "server_exited": bool}
 #   EOF on stdin -> the server is stopped, exit 0
@@ -43,6 +45,7 @@ def main()->int:
     parser.add_argument('--vc-model', default='')
     parser.add_argument('--vc-family', default='seed_vc')
     parser.add_argument('--vc-route', default='')
+    parser.add_argument('--vc-only', action='store_true')
     parser.add_argument('--samplerate', type=int, default=24000)
     args = parser.parse_args()
     server_dir = os.path.dirname(os.path.abspath(args.server))
@@ -56,7 +59,8 @@ def main()->int:
     vc_wanted = not args.clone and bool(args.vc_model)
     # ggml's CPU pool (also the CPU side of GPU backends): physical cores on x86 (SMT siblings slow ggml down), all elsewhere
     threads = max(1, (os.cpu_count() or 2) // (2 if platform.machine().lower() in ('x86_64', 'amd64') else 1))
-    models = [{'id': 'e2a', 'family': args.family, 'path': os.path.abspath(args.model), 'task': 'tts', 'mode': 'offline'}]
+    # --vc-only: the model is the VC one (same id as the lazy VC entry below), resident before the server listens
+    models = [{'id': 'e2a-vc' if args.vc_only else 'e2a', 'family': args.family, 'path': os.path.abspath(args.model), 'task': 'vc' if args.vc_only else 'tts', 'mode': 'offline'}]
     for key, value in (('load_options', json.loads(args.load_options)), ('session_options', json.loads(args.session_options)), ('default_request_options', json.loads(args.request_options))):
         if value:
             models[0][key] = value
@@ -285,6 +289,8 @@ def main()->int:
                     raise RuntimeError(f'no transcript for the reference clip of {voice}: {args.family} cannot clone without one')
             refs[key] = (dst, text)
             return refs[key]
+        # no route = the family's default (seed_vc: v2_vc)
+        vc_route = {'route': args.vc_route} if args.vc_route else {}
         proto.write(json.dumps({'ready': True, 'samplerate': args.samplerate, 'backend': args.backend, 'port': config['port']}) + '\n')
         while True:
             raw = sys.stdin.buffer.readline()
@@ -295,12 +301,22 @@ def main()->int:
             except Exception as e:
                 proto.write(json.dumps({'ok': False, 'error': f'bad request: {e}', 'oom': False}) + '\n')
                 continue
-            if req.get('op') != 'tts':
+            if req.get('op') != ('vc' if args.vc_only else 'tts'):
                 proto.write(json.dumps({'ok': False, 'error': f"unknown op {req.get('op')!r}", 'oom': False}) + '\n')
                 continue
             try:
                 if server.poll() is not None:
                     raise RuntimeError(f'audiocpp_server exited ({server.poll()}): ' + ' | '.join(state['tail'][-5:]))
+                if args.vc_only:
+                    # the source file -> the voice file's reference clip (Seed-VC resamples both itself)
+                    clip, _ = reference(req['voice'])
+                    result = json.loads(post('/v1/tasks/run', {'model': 'e2a-vc', 'request': {'audio': os.path.abspath(req['source']), 'voice_ref': clip, **vc_route}}, 1800))
+                    if not result.get('audio'):
+                        raise RuntimeError(f"voice conversion returned no audio: {str(result)[:200]}")
+                    with open(req['file'], 'wb') as f:
+                        f.write(base64.b64decode(result['audio']))
+                    proto.write(json.dumps({'ok': True, 'file': req['file']}) + '\n')
+                    continue
                 text = req['text']
                 if args.speaker_label:
                     # VibeVoice reads only "Speaker N:" script lines
@@ -336,7 +352,7 @@ def main()->int:
                     vc_src = os.path.join(work_dir, 'vc_source.wav')
                     with open(vc_src, 'wb') as f:
                         f.write(audio)
-                    result = json.loads(post('/v1/tasks/run', {'model': 'e2a-vc', 'request': {'audio': vc_src, 'voice_ref': convert_to, **({'route': args.vc_route} if args.vc_route else {})}}, 1800))
+                    result = json.loads(post('/v1/tasks/run', {'model': 'e2a-vc', 'request': {'audio': vc_src, 'voice_ref': convert_to, **vc_route}}, 1800))
                     if not result.get('audio'):
                         raise RuntimeError(f"voice conversion returned no audio: {str(result)[:200]}")
                     audio = base64.b64decode(result['audio'])

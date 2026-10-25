@@ -6,6 +6,7 @@ from lib.classes.vram_detector import VRAMDetector
 from lib.classes.bug_reporter import bug_reporter
 from lib.classes.tts_engines.common.audio import normalize_audio, get_audiolist_duration, is_audio_data_valid
 from lib.classes.subprocess_pipe import SubprocessPipe
+from lib.classes.tts_engines.common.voice_conversion import VoiceConversion
 from lib import *
 from lib.lang import legends
 
@@ -573,9 +574,19 @@ class TTSUtils:
             if progress_bar is not None:
                 progress_bar(0.0, desc=msg)
             self.cleanup_memory()
-            engine_zs = loaded_tts.get(self.tts_zs_key, False)
-            if not engine_zs:
-                engine_zs = self._load_api(self.tts_zs_key, default_vc_model, device)
+            # under the load lock: two threads of one engine reaching their first voice file at once start one worker
+            with _lock:
+                engine_zs = loaded_tts.get(self.tts_zs_key, False)
+                if isinstance(engine_zs, SubprocessPipe) and (engine_zs.process is None or engine_zs.process.poll() is not None):
+                    # a VC worker that died (server crash, killed): started again below
+                    loaded_tts.pop(self.tts_zs_key, None)
+                    engine_zs.stop()
+                    engine_zs = False
+                if not engine_zs:
+                    # Seed-VC on audio.cpp's server, VC-only worker (common/voice_conversion.py). Always cached, whatever
+                    # the free VRAM: unload_tts_manager() / cleanup_models_cache() stop it through loaded_tts
+                    engine_zs = VoiceConversion(self.session)
+                    loaded_tts[self.tts_zs_key] = engine_zs
             if engine_zs:
                 self.session['model_zs_cache'] = self.tts_zs_key
                 msg = legends['msg_zeroshot_loaded'].format(model=self.tts_zs_key)

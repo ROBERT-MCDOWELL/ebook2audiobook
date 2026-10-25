@@ -52,10 +52,10 @@ TTS_ENGINES = {
 }
 
 TTS_VOICE_CONVERSION = {
-    "freevc24": {"path": "voice_conversion_models/multilingual/vctk/freevc24", "samplerate": 24000},
-    "knnvc": {"path": "voice_conversion_models/multilingual/multi-dataset/knnvc", "samplerate": 16000},
-    "openvoice_v1": {"path": "voice_conversion_models/multilingual/multi-dataset/openvoice_v1", "samplerate": 22050},
-    "openvoice_v2": {"path": "voice_conversion_models/multilingual/multi-dataset/openvoice_v2", "samplerate": 22050}
+    # the VC stage of the built-in voice engines (piper, vits, fairseq, glowtts, tacotron, orpheus) for a picked voice
+    # file: Seed-VC on audio.cpp's server (audiocpp_vc below, common/voice_conversion.py). The key is the zero-shot
+    # engine's tts_zs_key (loaded_tts, model_zs_cache)
+    "seed_vc": {"path": "audiocpp/seed_vc"}
 }
 
 TTS_SML = {
@@ -106,7 +106,7 @@ IPA_REMAINING_PATTERN = re.compile(
 
 default_tts_engine = TTS_ENGINES['XTTS']
 default_fine_tuned = 'internal'
-default_vc_model = TTS_VOICE_CONVERSION['knnvc']['path']
+default_vc_model = TTS_VOICE_CONVERSION['seed_vc']['path']
 default_voice_detection_model = 'drewThomasson/segmentation'
 default_speaker = os.path.join(voices_dir, 'eng', 'adult', 'male', 'KumarDahl.wav')
 
@@ -167,8 +167,11 @@ audiocpp_packages = {
 # reference transcripts for the engines whose cloning takes one (ref_text below): transcribed once per voice clip by this
 # ASR model, loaded in the same server only when needed and unloaded right after
 audiocpp_asr = {"family": "qwen3_asr", "files": ["Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf"]}
-# built-in voice engines (clone False below): a voice file picked in e2a converts their output with Seed-VC (v2_vc route),
-# loaded in the same server on first use. Without one they speak with their own voice (voice None, as Piper)
+# built-in voice engines (clone False below): a voice file picked in e2a converts their output with Seed-VC, loaded in the
+# same server on first use. Without one they speak with their own voice (voice None, as Piper). route: V1 Whisper-small
+# content + BigVGAN 22 kHz, Whisper's multilingual encoder (the server default v2_vc reads content from HuBERT-large,
+# pretrained on English only). ref_max: the reference clip for the conversion; V1 shares a 30 s DiT window between the
+# reference and each source chunk, so 15 s keeps a sentence in one window (no chunk crossfade)
 audiocpp_vc = {"family": "seed_vc", "files": ["SeedVC-MLX-GGUF/seed-vc-mlx-q8_0.gguf"], "route": "v1_whisper_bigvgan_vc", "ref_max": 15.0}
 audiocpp_repo = "audio-cpp/audio.cpp-gguf"
 

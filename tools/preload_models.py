@@ -25,7 +25,7 @@ os.makedirs(tts_dir, exist_ok=True)
 if not os.environ.get('HF_TOKEN'):
     from cryptography.fernet import Fernet
     os.environ['HF_TOKEN'] = Fernet(conf.fernet_key.encode('utf-8')).decrypt(conf.fernet_data).decode('utf-8')
-from lib.conf_models import TTS_ENGINES, TTS_VOICE_CONVERSION, default_engine_settings, default_voice_detection_model, audiocpp_engines, audiocpp_repo, audiocpp_asr, audiocpp_vc
+from lib.conf_models import TTS_ENGINES, default_engine_settings, default_voice_detection_model, audiocpp_engines, audiocpp_repo, audiocpp_asr, audiocpp_vc
 from lib.conf_lang import year_to_decades_languages
 from lib.conf_interlude import interlude_classifier_repo
 languages = {lang.strip().lower() for lang in args.languages.split(',') if lang.strip()}
@@ -118,15 +118,6 @@ def coqui_model(name:str)->None:
     manager.download_model(name)
     if vocoder:
         manager.download_model(vocoder)
-
-def wavlm()->None:
-    from TTS.vc.layers.freevc.wavlm import model_uri
-    from trainer.io import get_user_data_dir
-    url_file(model_uri, str(get_user_data_dir('tts') / 'wavlm' / 'WavLM-Large.pt'))
-
-def freevc_encoder()->None:
-    from trainer.io import load_fsspec
-    load_fsspec('https://github.com/coqui-ai/TTS/releases/download/v0.13.0_models/speaker_encoder.pt', map_location='cpu')
 
 def bark_extras(bark_repo:str)->None:
     from transformers import BertTokenizer, EncodecModel, AutoProcessor, HubertModel
@@ -269,10 +260,10 @@ def jieba_cache()->None:
 
 xtts_repo = default_engine_settings[TTS_ENGINES['XTTS']]['repo']
 add('common', f'{xtts_repo}/speakers_xtts.pth', lambda: hf_file(xtts_repo, 'speakers_xtts.pth'))
-for vc in TTS_VOICE_CONVERSION.values():
-    add('common', vc['path'], lambda name=vc['path']: coqui_model(name))
-add('common', 'WavLM-Large.pt', wavlm)
-add('common', 'freevc speaker_encoder.pt', freevc_encoder)
+acpp_dir = os.path.join(tts_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))
+# Seed-VC: the VC stage of every built-in voice engine (coqui ones, piper, orpheus and audio.cpp's), not only audio.cpp's
+for file in audiocpp_vc['files']:
+    add('common', f'{audiocpp_repo}/{file}', lambda file=file: hf_file(audiocpp_repo, file, acpp_dir))
 for name, cfg in load_presets('xtts').items():
     if not engine_wanted(TTS_ENGINES['XTTS']) or (name != 'internal' and languages and cfg['lang'] not in languages):
         continue
@@ -319,8 +310,7 @@ for engine in audiocpp_engines:
         local_dir = os.path.join(tts_dir, 'audiocpp', cfg['repo'].replace('/', '--'))
         for file in files:
             add('audiocpp', f"{cfg['repo']}/{file}", lambda repo=cfg['repo'], file=file, local_dir=local_dir: hf_file(repo, file, local_dir))
-acpp_dir = os.path.join(tts_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))
-for file in audiocpp_asr['files'] + audiocpp_vc['files']:
+for file in audiocpp_asr['files']:
     add('audiocpp', f'{audiocpp_repo}/{file}', lambda file=file: hf_file(audiocpp_repo, file, acpp_dir))
 gsv = default_engine_settings[TTS_ENGINES['GPTSOVITS']]
 if engine_wanted(TTS_ENGINES['GPTSOVITS']):
