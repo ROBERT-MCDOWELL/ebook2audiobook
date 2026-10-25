@@ -82,6 +82,8 @@ set "TEMP=%SAFE_SCRIPT_DIR%\run"
 if not exist "%TMP%" mkdir "%TMP%" >nul 2>&1
 set "UV_INSTALL_DIR=%SAFE_USERPROFILE%\.local\bin"
 set "UV_INSTALLER_PS1=https://astral.sh/uv/install.ps1"
+set "UV_CACHE_DIR=%SCRIPT_DIR%\.uv_cache"
+set "UV_LINK_MODE=hardlink"
 set "SCOOP_BUCKETS_URL=https://github.com/hu3rror/scoop-muggle.git"
 set "SCOOP_HOME=%SAFE_USERPROFILE%\scoop"
 set "SCOOP_SHIMS=%SCOOP_HOME%\shims"
