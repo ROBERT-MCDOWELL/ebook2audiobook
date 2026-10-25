@@ -506,6 +506,7 @@ legends = {
     'msg_loading_tts_model': 'À ń ṣí àwòṣe TTS {model}, ó máa pẹ́ díẹ̀, ẹ jọ̀wọ́ ẹ ní sùúrù…',
     'msg_tts_loaded': 'A ti ṣí TTS {model}!',
     'msg_tts_already_loaded': 'TTS {model} ti ṣí tẹ́lẹ̀',
+    'error_disk_full_models': 'Disk kíkún nígbà tí o ń gbé àwòṣe TTS. Kú àká-ẹ̀dà {dir} náà kí o sì tún bẹ̀rẹ̀ ebook2audiobook, àwọn àwòṣe náà yóò tún di gbígbé sílẹ̀.',
     'error_invalid_fine_tuned': 'Àwòṣe fine_tuned {model} kò wúlò. Àwọn àwòṣe tó wà: {models}',
     'error_fine_tuned_missing_key': 'Àwòṣe fine_tuned {model} kò ní kọ́kọ́rọ́ dandan {key}.',
     'error_invalid_tts_engine': 'tts_engine {engine} kò wúlò.',

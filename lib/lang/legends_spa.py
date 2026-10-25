@@ -506,6 +506,7 @@ legends = {
     'msg_loading_tts_model': 'Cargando el modelo TTS {model}, tarda un poco, tenga paciencia…',
     'msg_tts_loaded': '¡TTS {model} cargado!',
     'msg_tts_already_loaded': 'TTS {model} ya cargado',
+    'error_disk_full_models': 'Disco lleno mientras se carga el modelo TTS. Vacíe la carpeta {dir} y reinicie ebook2audiobook, los modelos se descargarán nuevamente.',
     'error_invalid_fine_tuned': 'Modelo fine_tuned {model} no válido. Modelos disponibles: {models}',
     'error_fine_tuned_missing_key': 'Al modelo fine_tuned {model} le falta la clave requerida {key}.',
     'error_invalid_tts_engine': 'tts_engine {engine} no válido.',

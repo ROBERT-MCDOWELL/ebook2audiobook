@@ -506,6 +506,7 @@ legends = {
     'msg_loading_tts_model': 'TTS {model} మోడల్ లోడ్ అవుతోంది, సమయం పడుతుంది, దయచేసి ఓపిక పట్టండి…',
     'msg_tts_loaded': 'TTS {model} లోడ్ అయింది!',
     'msg_tts_already_loaded': 'TTS {model} ఇప్పటికే లోడ్ అయి ఉంది',
+    'error_disk_full_models': 'TTS మోడల్ ‌ ను లోడ్ చేస్తున్నప్పుడు డిస్క్ పూర్తి అవుతుంది. {dir} ఫోల్డర్ ‌ ను ఖాళీ చేసి, ఈబుక్ 2 ఆడియోబుక్ ‌ ను రీస్టార్ట్ చేయండి, మోడల్స్ మళ్లీ డౌన్ ‌ లోడ్ చేయబడతాయి.',
     'error_invalid_fine_tuned': 'fine_tuned మోడల్ {model} చెల్లదు. అందుబాటులో ఉన్న మోడల్‌లు: {models}',
     'error_fine_tuned_missing_key': 'fine_tuned మోడల్ {model}లో అవసరమైన కీ {key} లేదు.',
     'error_invalid_tts_engine': 'tts_engine {engine} చెల్లదు.',

@@ -506,6 +506,7 @@ legends = {
     'msg_loading_tts_model': 'TTS {model} 모델을 불러오는 중입니다. 시간이 걸리니 기다려 주세요…',
     'msg_tts_loaded': 'TTS {model}을(를) 불러왔습니다!',
     'msg_tts_already_loaded': 'TTS {model}이(가) 이미 로드되어 있습니다',
+    'error_disk_full_models': 'TTS 모델을 로드하는 동안 디스크가 가득 찼습니다. {dir} 폴더를 비우고 ebook2audiobook을 다시 시작하면 모델이 다시 다운로드됩니다.',
     'error_invalid_fine_tuned': 'fine_tuned 모델 {model}이(가) 올바르지 않습니다. 사용 가능한 모델: {models}',
     'error_fine_tuned_missing_key': 'fine_tuned 모델 {model}에 필수 키 {key}이(가) 없습니다.',
     'error_invalid_tts_engine': 'tts_engine {engine}이(가) 올바르지 않습니다.',

@@ -506,6 +506,7 @@ legends = {
     'msg_loading_tts_model': 'در حال بارگیری مدل TTS {model}، کمی طول می‌کشد، لطفاً صبور باشید…',
     'msg_tts_loaded': 'TTS {model} بارگیری شد!',
     'msg_tts_already_loaded': 'TTS {model} از قبل بارگیری شده است',
+    'error_disk_full_models': 'هنگام بارگیری مدل TTS، دیسک پر است. پوشه {dir} را خالی کنید و ebook2audiobook را مجدداً راه اندازی کنید، مدل ها دوباره دانلود خواهند شد.',
     'error_invalid_fine_tuned': 'مدل fine_tuned {model} نامعتبر است. مدل‌های موجود: {models}',
     'error_fine_tuned_missing_key': 'کلید لازم {key} در مدل fine_tuned {model} وجود ندارد.',
     'error_invalid_tts_engine': 'tts_engine {engine} نامعتبر است.',

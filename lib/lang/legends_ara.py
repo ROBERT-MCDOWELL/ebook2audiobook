@@ -506,6 +506,7 @@ legends = {
     'msg_loading_tts_model': 'جارٍ تحميل نموذج TTS {model}، يستغرق ذلك بعض الوقت، يُرجى الصبر…',
     'msg_tts_loaded': 'تم تحميل TTS {model}!',
     'msg_tts_already_loaded': 'TTS {model} محمّل بالفعل',
+    'error_disk_full_models': 'امتلأ القرص أثناء تحميل طراز TTS. قم بإفراغ المجلد {dir} وأعد تشغيل ebook2audiobook، وسيتم تنزيل الطرز مرة أخرى.',
     'error_invalid_fine_tuned': 'نموذج fine_tuned {model} غير صالح. النماذج المتاحة: {models}',
     'error_fine_tuned_missing_key': 'نموذج fine_tuned {model} ينقصه المفتاح المطلوب {key}.',
     'error_invalid_tts_engine': 'tts_engine {engine} غير صالح.',
