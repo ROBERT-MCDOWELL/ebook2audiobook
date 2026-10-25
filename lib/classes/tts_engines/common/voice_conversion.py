@@ -2,36 +2,62 @@ import os, sys, re, json, shutil, platform, tarfile, zipfile, urllib.request
 from multiprocessing.managers import DictProxy
 from lib.classes.subprocess_pipe import SubprocessPipe
 from lib.conf import systems, devices, tts_dir
-from lib.conf_models import audiocpp_packages, audiocpp_vc, audiocpp_repo
+from lib.conf_models import TTS_VOICE_CONVERSION, default_vc_model, default_engine_settings, audiocpp_packages, audiocpp_asr, audiocpp_repo
 from lib.lang import legends
 
 class VoiceConversion(SubprocessPipe):
-    # The VC stage of the built-in voice engines (piper, vits, fairseq, glowtts, tacotron, orpheus): a voice file picked
-    # for them converts their output with Seed-VC (audiocpp_vc) on audio.cpp's native server, run VC-only by
-    # workers/audiocpp_worker.py (--vc-only). A SubprocessPipe itself, cached in loaded_tts under the engine's tts_zs_key,
-    # so unload_tts_manager() / cleanup_models_cache() stop it like any worker.
+    # The voice conversion of the built-in voice engines (piper, vits, fairseq, glowtts, tacotron, orpheus): a voice file
+    # picked for them turns their output into that voice with default_vc_model (TTS_VOICE_CONVERSION) on audio.cpp's
+    # native server, driven by workers/audiocpp_worker.py. A SubprocessPipe itself, cached in loaded_tts under the engine's
+    # tts_zs_key, so unload_tts_manager() / cleanup_models_cache() stop it like any worker.
+    # The engines send {"op": "vc", "source", "voice", "file", "text", "language"} whatever the model (send() below):
+    # task "vc" converts source (worker --vc-only), task "tts" speaks text in the voice (the worker's clone op), and then
+    # resynthesis is True: the engine does not run its own voice for it.
     # Also the one place for the audiocpp_server packages (packages(), install()), shared with the audio.cpp TTS engines
     # (AudioCpp).
     # GPU packages whose server died during a conversion, per e2a process: package -> crash count (shared by the audio.cpp
-    # engines and the VC stage, they run the same packages). One crash restarts the same package, a second one drops it
-    # until e2a restarts (next GPU package, else CPU)
+    # engines and the voice conversion, they run the same packages). One crash restarts the same package, a second one
+    # drops it until e2a restarts (next GPU package, else CPU)
     gpu_crashes = {}
 
     def __init__(self, session:DictProxy)->None:
         try:
             from huggingface_hub import hf_hub_download
+            from lib.classes.tts_engines.common.preset_loader import load_engine_presets
             self.session = session
-            engine_name = audiocpp_vc['family']
             show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
             progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
+            # effective language (target when translating, else source), as the engines
+            self.language = session['translate'] if session.get('translate_enabled') and session.get('translate') else session.get('language')
+            self.vc_model = default_vc_model.rsplit('/', 1)[-1]
+            cfg = TTS_VOICE_CONVERSION[self.vc_model]
+            settings = default_engine_settings[cfg['engine']] if cfg.get('engine') else None
+            if cfg['task'] == 'tts' and self.language not in settings['languages']:
+                # it speaks the text: only in its engine's languages
+                msg = legends['msg_vc_model_fallback'].format(vc_model=self.vc_model, lang=self.language, fallback=cfg['fallback'])
+                if show_alert is not None:
+                    show_alert(session['id'], {'type': 'warning', 'msg': msg})
+                else:
+                    print(msg)
+                self.vc_model = cfg['fallback']
+                cfg = TTS_VOICE_CONVERSION[self.vc_model]
+                settings = default_engine_settings[cfg['engine']] if cfg.get('engine') else None
+            self.resynthesis = cfg['task'] == 'tts'
+            # task "tts": e2a language -> the model's code (send())
+            self.languages = settings['languages'] if self.resynthesis else None
+            family_cfg = settings['audiocpp'] if settings else {}
+            engine_name = cfg.get('engine') or cfg['family']
             attempts, gpu_wanted = VoiceConversion.packages(session, engine_name)
-            # the same GGUF the audio.cpp engines use (one file, every Seed-VC route), real files under
-            # models/tts/audiocpp/<repo>/ for the reason given in AudioCpp.__init__
-            msg = legends['msg_zonos2_models'].format(engine=engine_name, files=', '.join(os.path.basename(f) for f in audiocpp_vc['files']))
+            # the GGUF of the engine's internal preset (Chatterbox, Qwen3-TTS: the very file their engine uses) or the listed
+            # one, real files under models/tts/audiocpp/<repo>/ for the reason given in AudioCpp.__init__
+            preset = load_engine_presets(cfg['engine'])['internal'] if cfg.get('engine') else {'repo': audiocpp_repo, 'files': cfg['files']}
+            asr_files = audiocpp_asr['files'] if self.resynthesis and family_cfg.get('ref_text') else []
+            msg = legends['msg_zonos2_models'].format(engine=engine_name, files=', '.join(os.path.basename(f) for f in preset['files'] + asr_files))
             print(msg)
             if progress_bar is not None:
                 progress_bar(0.0, desc=msg)
-            self.model_path = [hf_hub_download(repo_id=audiocpp_repo, filename=f, cache_dir=tts_dir, local_dir=os.path.join(tts_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))) for f in audiocpp_vc['files']][0]
+            self.model_path = [hf_hub_download(repo_id=preset['repo'], filename=f, cache_dir=tts_dir, local_dir=os.path.join(tts_dir, 'audiocpp', preset['repo'].replace('/', '--'))) for f in preset['files']][0]
+            asr_path = [hf_hub_download(repo_id=audiocpp_repo, filename=f, cache_dir=tts_dir, local_dir=os.path.join(tts_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))) for f in asr_files][0] if asr_files else ''
             worker_script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workers', 'audiocpp_worker.py')
             for attempt, self.package_name in enumerate(attempts):
                 package = audiocpp_packages[self.package_name]
@@ -41,10 +67,16 @@ class VoiceConversion(SubprocessPipe):
                 worker_env['PYTHONUNBUFFERED'] = '1'
                 try:
                     server_bin = VoiceConversion.install(self.package_name, engine_name, worker_env)
-                    cmd = [
-                        sys.executable, '-u', worker_script, '--server', server_bin, '--model', self.model_path, '--family', engine_name, '--backend', self.backend,
-                        '--ref-max', str(audiocpp_vc['ref_max']), '--vc-route', audiocpp_vc['route'], '--vc-only'
-                    ]
+                    cmd = [sys.executable, '-u', worker_script, '--server', server_bin, '--model', self.model_path, '--family', cfg['family'], '--backend', self.backend]
+                    if self.resynthesis:
+                        # the engine's clone, as AudioCpp.load_engine() starts it (reference transcript by the ASR model)
+                        cmd += [
+                            '--load-options', json.dumps({**family_cfg['load'], **family_cfg['load_by_language'].get(self.language, {})}), '--session-options', json.dumps(family_cfg['session']), '--request-options', json.dumps(family_cfg['request']),
+                            '--ref-min', str(family_cfg['ref_min']), '--ref-max', str(family_cfg['ref_max']), '--ref-text', family_cfg['ref_text'] or 'none', '--ref-fallback', json.dumps(family_cfg['ref_fallback']),
+                            '--asr-model', asr_path, '--asr-family', audiocpp_asr['family'], '--samplerate', str(settings['samplerate']), '--clone'
+                        ] + (['--language-option'] if family_cfg['language_option'] else []) + (['--speaker-label'] if family_cfg['speaker_label'] else [])
+                    else:
+                        cmd += ['--ref-max', str(cfg['ref_max']), '--vc-route', cfg.get('route', ''), '--vc-only']
                     msg = legends['msg_worker_starting'].format(engine=engine_name, model=os.path.basename(self.model_path), device=f'{self.package_name}, {self.backend}')
                     print(msg)
                     if progress_bar is not None:
@@ -67,6 +99,14 @@ class VoiceConversion(SubprocessPipe):
         except Exception as e:
             error = f'VoiceConversion.__init__() error: {e}'
             raise RuntimeError(error) from e
+
+    def send(self, request:dict)->dict:
+        # the engines' request -> the worker's: task "tts" speaks the text in the voice, task "vc" converts the source
+        if self.resynthesis:
+            request = {'op': 'tts', 'text': request['text'], 'language': self.languages.get(request.get('language') or self.language, ''), 'voice': request['voice'], 'file': request['file']}
+        else:
+            request = {'op': 'vc', 'source': request['source'], 'voice': request['voice'], 'file': request['file']}
+        return SubprocessPipe.send(self, request)
 
     @staticmethod
     def packages(session:DictProxy, engine_name:str)->tuple:
@@ -149,7 +189,8 @@ class VoiceConversion(SubprocessPipe):
 
     @staticmethod
     def install(package_name:str, engine_name:str, worker_env:dict)->str:
-        # the package under lib/classes/tts_engines/venvs/audiocpp/<package>, downloaded on first use. Returns the
+        # the package under lib/classes/tts_engines/venvs/audiocpp/<package>, downloaded on first use (or unpacked from
+        # the offline copy in models/tts/audiocpp/packages/<package>/). Returns the
         # audiocpp_server path; worker_env gets the Vulkan driver list of the own macOS Vulkan package
         progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
         engines_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -164,7 +205,11 @@ class VoiceConversion(SubprocessPipe):
         except Exception:
             installed_urls = None
         if installed_urls != package['urls']:
-            msg = legends['msg_zonos2_downloading'].format(engine=engine_name, package=package_name)
+            # an archive tools/preload_models.py put in models/tts/audiocpp/packages/<package>/ (offline installs) is taken
+            # from there, no network
+            offline_dir = os.path.join(tts_dir, 'audiocpp', 'packages', package_name)
+            offline = all(os.path.isfile(os.path.join(offline_dir, os.path.basename(url))) for url in package['urls'])
+            msg = legends['msg_audiocpp_offline_package' if offline else 'msg_zonos2_downloading'].format(engine=engine_name, package=package_name)
             print(msg)
             if progress_bar is not None:
                 progress_bar(0.0, desc=msg)
@@ -174,18 +219,21 @@ class VoiceConversion(SubprocessPipe):
                 # Windows CUDA: the bin archive and its cudart archive unpack into the same folder
                 for url in package['urls']:
                     archive = os.path.join(package_dir, os.path.basename(url))
-                    # urllib: no quarantine flag on macOS, so the unsigned binaries start without a Gatekeeper prompt
-                    with urllib.request.urlopen(url, timeout=60) as r, open(archive, 'wb') as f:
-                        total = int(r.headers.get('Content-Length') or 0)
-                        done = 0
-                        while True:
-                            chunk = r.read(1 << 20)
-                            if not chunk:
-                                break
-                            f.write(chunk)
-                            done += len(chunk)
-                            if progress_bar is not None and total:
-                                progress_bar(done / total, desc=msg)
+                    if offline:
+                        shutil.copyfile(os.path.join(offline_dir, os.path.basename(url)), archive)
+                    else:
+                        # urllib: no quarantine flag on macOS, so the unsigned binaries start without a Gatekeeper prompt
+                        with urllib.request.urlopen(url, timeout=60) as r, open(archive, 'wb') as f:
+                            total = int(r.headers.get('Content-Length') or 0)
+                            done = 0
+                            while True:
+                                chunk = r.read(1 << 20)
+                                if not chunk:
+                                    break
+                                f.write(chunk)
+                                done += len(chunk)
+                                if progress_bar is not None and total:
+                                    progress_bar(done / total, desc=msg)
                     if archive.endswith('.zip'):
                         with zipfile.ZipFile(archive) as z:
                             z.extractall(package_dir)

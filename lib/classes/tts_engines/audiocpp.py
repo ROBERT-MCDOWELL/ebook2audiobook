@@ -3,7 +3,7 @@ from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
 from lib.classes.tts_engines.common.voice_conversion import VoiceConversion
-from lib.conf_models import audiocpp_packages, audiocpp_asr, audiocpp_vc, audiocpp_engines, audiocpp_repo
+from lib.conf_models import TTS_VOICE_CONVERSION, default_vc_model, audiocpp_packages, audiocpp_asr, audiocpp_engines, audiocpp_repo
 from lib.lang import legends
 
 class AudioCpp(TTSUtils):
@@ -70,9 +70,14 @@ class AudioCpp(TTSUtils):
             # --- GGUF weights through e2a's Hugging Face cache (tts_dir) ---
             from huggingface_hub import hf_hub_download
             # cloning engines taking a reference transcript also get the ASR model, loaded by the worker only for a voice it
-            # has never transcribed, then unloaded. Built-in voice engines get Seed-VC for a picked voice file
+            # has never transcribed, then unloaded. Built-in voice engines get default_vc_model for a picked voice file, run in
+            # the same server; one that speaks the text again (task "tts") would only replace this engine, so they take its
+            # fallback then
             asr_files = audiocpp_asr['files'] if self.family_cfg['clone'] and self.family_cfg['ref_text'] else []
-            vc_files = audiocpp_vc['files'] if not self.family_cfg['clone'] else []
+            self.vc_cfg = TTS_VOICE_CONVERSION[default_vc_model.rsplit('/', 1)[-1]]
+            self.vc_cfg = self.vc_cfg if self.vc_cfg['task'] == 'vc' else TTS_VOICE_CONVERSION[self.vc_cfg['fallback']]
+            vc_preset = load_engine_presets(self.vc_cfg['engine'])['internal'] if self.vc_cfg.get('engine') else {'repo': audiocpp_repo, 'files': self.vc_cfg['files']}
+            vc_files = vc_preset['files'] if not self.family_cfg['clone'] else []
             msg = legends['msg_zonos2_models'].format(engine=tts_engine, files=', '.join(os.path.basename(f) for f in model_files + asr_files + vc_files))
             print(msg)
             if progress_bar is not None:
@@ -84,7 +89,7 @@ class AudioCpp(TTSUtils):
             # embeddings/) land beside the model file, and a file already in the cache is copied instead of downloaded
             self.model_path = [hf_hub_download(repo_id=self.model_repo, filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', self.model_repo.replace('/', '--'))) for f in model_files][0]
             self.asr_path = [hf_hub_download(repo_id=audiocpp_repo, filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))) for f in asr_files][0] if asr_files else ''
-            self.vc_path = [hf_hub_download(repo_id=audiocpp_repo, filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))) for f in vc_files][0] if vc_files else ''
+            self.vc_path = [hf_hub_download(repo_id=vc_preset['repo'], filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', vc_preset['repo'].replace('/', '--'))) for f in vc_files][0] if vc_files else ''
             engine_dir = os.path.dirname(os.path.abspath(__file__))
             self.worker_script = os.path.join(engine_dir, 'workers', 'audiocpp_worker.py')
             # the worker is stdlib only. conf.py's OMP_NUM_THREADS=1 is for e2a's torch: the server (OpenMP build) sizes its own pool
@@ -125,8 +130,8 @@ class AudioCpp(TTSUtils):
             cmd = [
                sys.executable, '-u', self.worker_script, '--server', self.server_bin, '--model', self.model_path, '--family', self.family, '--backend', self.backend,
                '--load-options', json.dumps(self.load_options), '--session-options', json.dumps(self.family_cfg['session']), '--request-options', json.dumps(self.family_cfg['request']),
-               '--ref-min', str(self.family_cfg['ref_min']), '--ref-max', str(self.family_cfg['ref_max'] if self.family_cfg['clone'] else audiocpp_vc['ref_max']), '--ref-text', self.family_cfg['ref_text'] or 'none', '--ref-fallback', json.dumps(self.family_cfg['ref_fallback']),
-               '--asr-model', self.asr_path, '--asr-family', audiocpp_asr['family'], '--vc-model', self.vc_path, '--vc-family', audiocpp_vc['family'], '--vc-route', audiocpp_vc['route'], '--samplerate', str(self.params['samplerate'])
+               '--ref-min', str(self.family_cfg['ref_min']), '--ref-max', str(self.family_cfg['ref_max'] if self.family_cfg['clone'] else self.vc_cfg['ref_max']), '--ref-text', self.family_cfg['ref_text'] or 'none', '--ref-fallback', json.dumps(self.family_cfg['ref_fallback']),
+               '--asr-model', self.asr_path, '--asr-family', audiocpp_asr['family'], '--vc-model', self.vc_path, '--vc-family', self.vc_cfg['family'], '--vc-route', self.vc_cfg.get('route', ''), '--samplerate', str(self.params['samplerate'])
             ] + (['--language-option'] if self.family_cfg['language_option'] else []) + (['--clone'] if self.family_cfg['clone'] else []) + (['--speaker-label'] if self.family_cfg['speaker_label'] else [])
             engine = loaded_tts.get(self.tts_key)
             if isinstance(engine, SubprocessPipe) and (engine.cmd != cmd or engine.process is None or engine.process.poll() is not None):

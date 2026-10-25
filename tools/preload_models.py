@@ -4,12 +4,13 @@ from typing import Callable
 root_dir = str(Path(__file__).resolve().parents[1])
 os.chdir(root_dir)
 sys.path.insert(0, root_dir)
-categories = ['common', 'xtts', 'bark', 'tortoise', 'vits', 'fairseq', 'glowtts', 'tacotron', 'yourtts', 'piper', 'zonos', 'audiocpp', 'gptsovits', 'f5tts', 'omnivoice', 'orpheus', 'openvoice', 'stanza', 'pyannote', 'demucs', 'interlude', 'argos', 'tessdata', 'jieba', 'voices']
+categories = ['common', 'xtts', 'bark', 'tortoise', 'vits', 'fairseq', 'glowtts', 'tacotron', 'yourtts', 'piper', 'zonos', 'audiocpp', 'audiocpp_server', 'gptsovits', 'f5tts', 'omnivoice', 'orpheus', 'openvoice', 'stanza', 'pyannote', 'demucs', 'interlude', 'argos', 'tessdata', 'jieba', 'voices']
 parser = argparse.ArgumentParser(description='Download every model e2a uses into one folder laid out exactly like ./models (i.e. a USB key for offline installs).')
 parser.add_argument('models_dir', type=str, help='Target folder, i.e. /media/user/KEY/models or E:\\models')
 parser.add_argument('--only', type=str, default='', help=f"Comma list of categories: {','.join(categories)}")
 parser.add_argument('--skip', type=str, default='', help='Comma list of categories to leave out')
 parser.add_argument('--languages', type=str, default='', help='Comma list of e2a ISO-639-3 codes (eng,fra,ita...): single-language models and fine-tunes for these only, multilingual models only for engines speaking one of them')
+parser.add_argument('--audiocpp_packages', type=str, default='auto', help='audiocpp_server category: auto (the packages this machine runs, GPU and CPU), all (every platform, for a key used elsewhere), or a comma list of audiocpp_packages keys from lib/conf_models.py')
 parser.add_argument('--refresh', action='store_true', help='Run every job again, even those already marked done (files already there are still not downloaded twice)')
 parser.add_argument('--dry_run', action='store_true', help='List every download job with its state (done, interrupted, todo) and exit')
 args = parser.parse_args()
@@ -25,7 +26,7 @@ os.makedirs(tts_dir, exist_ok=True)
 if not os.environ.get('HF_TOKEN'):
     from cryptography.fernet import Fernet
     os.environ['HF_TOKEN'] = Fernet(conf.fernet_key.encode('utf-8')).decrypt(conf.fernet_data).decode('utf-8')
-from lib.conf_models import TTS_ENGINES, default_engine_settings, default_voice_detection_model, audiocpp_engines, audiocpp_repo, audiocpp_asr, audiocpp_vc
+from lib.conf_models import TTS_ENGINES, TTS_VOICE_CONVERSION, default_engine_settings, default_voice_detection_model, audiocpp_engines, audiocpp_packages, audiocpp_repo, audiocpp_asr
 from lib.conf_lang import year_to_decades_languages
 from lib.conf_interlude import interlude_classifier_repo
 languages = {lang.strip().lower() for lang in args.languages.split(',') if lang.strip()}
@@ -103,6 +104,13 @@ def url_file(url:str, dest:str)->None:
     part = f'{dest}.part'
     urllib.request.urlretrieve(url, part)
     os.replace(part, dest)
+
+def audiocpp_package(name:str)->None:
+    # one audiocpp_server package (the native server of the audio.cpp engines and of the voice conversion), kept as
+    # downloaded in tts/audiocpp/packages/<package>/: e2a unpacks it from there on first use (VoiceConversion.install), so
+    # an offline machine never needs the network for it
+    for url in audiocpp_packages[name]['urls']:
+        url_file(url, os.path.join(tts_dir, 'audiocpp', 'packages', name, os.path.basename(url)))
 
 def coqui_model(name:str)->None:
     from TTS.utils.manage import ModelManager
@@ -261,9 +269,11 @@ def jieba_cache()->None:
 xtts_repo = default_engine_settings[TTS_ENGINES['XTTS']]['repo']
 add('common', f'{xtts_repo}/speakers_xtts.pth', lambda: hf_file(xtts_repo, 'speakers_xtts.pth'))
 acpp_dir = os.path.join(tts_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))
-# Seed-VC: the VC stage of every built-in voice engine (coqui ones, piper, orpheus and audio.cpp's), not only audio.cpp's
-for file in audiocpp_vc['files']:
-    add('common', f'{audiocpp_repo}/{file}', lambda file=file: hf_file(audiocpp_repo, file, acpp_dir))
+# the voice conversions (TTS_VOICE_CONVERSION) of every built-in voice engine (coqui ones, piper, orpheus and audio.cpp's):
+# the ones with their own files here (seed_vc, the default); those taking an engine's preset are with the audio.cpp ones
+for vc_cfg in TTS_VOICE_CONVERSION.values():
+    for file in vc_cfg.get('files', []):
+        add('common', f'{audiocpp_repo}/{file}', lambda file=file: hf_file(audiocpp_repo, file, acpp_dir))
 for name, cfg in load_presets('xtts').items():
     if not engine_wanted(TTS_ENGINES['XTTS']) or (name != 'internal' and languages and cfg['lang'] not in languages):
         continue
@@ -312,6 +322,38 @@ for engine in audiocpp_engines:
             add('audiocpp', f"{cfg['repo']}/{file}", lambda repo=cfg['repo'], file=file, local_dir=local_dir: hf_file(repo, file, local_dir))
 for file in audiocpp_asr['files']:
     add('audiocpp', f'{audiocpp_repo}/{file}', lambda file=file: hf_file(audiocpp_repo, file, acpp_dir))
+# the voice conversions taking an engine's internal preset (chatterbox_vc, qwen3_tts), even when that engine itself is not
+# wanted; one that speaks the text (task "tts") only for its languages
+for vc_cfg in TTS_VOICE_CONVERSION.values():
+    if not vc_cfg.get('engine') or (vc_cfg['task'] == 'tts' and not engine_wanted(vc_cfg['engine'])):
+        continue
+    cfg = audiocpp_presets[vc_cfg['engine']]['internal']
+    local_dir = os.path.join(tts_dir, 'audiocpp', cfg['repo'].replace('/', '--'))
+    for file in cfg['files']:
+        add('audiocpp', f"{cfg['repo']}/{file}", lambda repo=cfg['repo'], file=file, local_dir=local_dir: hf_file(repo, file, local_dir))
+if 'audiocpp_server' in selected:
+    if args.audiocpp_packages == 'all':
+        acpp_packages = [name for name, package in audiocpp_packages.items() if package.get('enabled', True)]
+    elif args.audiocpp_packages == 'auto':
+        # the packages e2a would try here (VoiceConversion.packages: the one place for that choice), for a CPU, a CUDA and
+        # a Vulkan/Metal device; loaded from its file so the TTS engines are not imported
+        vc_spec = importlib.util.spec_from_file_location('e2a_voice_conversion', os.path.join(root_dir, 'lib', 'classes', 'tts_engines', 'common', 'voice_conversion.py'))
+        vc_module = importlib.util.module_from_spec(vc_spec)
+        vc_spec.loader.exec_module(vc_module)
+        acpp_packages = []
+        for device in (conf.devices['CPU']['proc'], conf.devices['CUDA']['proc'], conf.devices['VULKAN']['proc']):
+            try:
+                acpp_packages += vc_module.VoiceConversion.packages({'device': device, 'id': None}, 'audiocpp')[0]
+            except ValueError as e:
+                print(f'audiocpp_server ({device}): {e}', flush=True)
+        acpp_packages = list(dict.fromkeys(acpp_packages))
+    else:
+        acpp_packages = [name.strip() for name in args.audiocpp_packages.split(',') if name.strip()]
+        unknown_packages = [name for name in acpp_packages if name not in audiocpp_packages]
+        if unknown_packages:
+            parser.error(f"unknown audiocpp packages: {', '.join(unknown_packages)} (known: {', '.join(audiocpp_packages)})")
+    for name in acpp_packages:
+        add('audiocpp_server', f'audiocpp_server {name}', lambda name=name: audiocpp_package(name), (os.path.join(tts_dir, 'audiocpp', 'packages', name),))
 gsv = default_engine_settings[TTS_ENGINES['GPTSOVITS']]
 if engine_wanted(TTS_ENGINES['GPTSOVITS']):
     gsv_dir = os.path.join(tts_dir, TTS_ENGINES['GPTSOVITS'])

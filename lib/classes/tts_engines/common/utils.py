@@ -577,14 +577,19 @@ class TTSUtils:
             # under the load lock: two threads of one engine reaching their first voice file at once start one worker
             with _lock:
                 engine_zs = loaded_tts.get(self.tts_zs_key, False)
-                if isinstance(engine_zs, SubprocessPipe) and (engine_zs.process is None or engine_zs.process.poll() is not None):
-                    # a VC worker that died (server crash, killed): started again below
+                # the model this language gets: one that speaks the text (task "tts") only in its engine's languages, its
+                # fallback for the others (VoiceConversion falls back the same way)
+                vc_cfg = TTS_VOICE_CONVERSION[self.tts_zs_key]
+                vc_model = self.tts_zs_key if vc_cfg['task'] == 'vc' or getattr(self, 'language', None) in default_engine_settings[vc_cfg['engine']]['languages'] else vc_cfg['fallback']
+                # a VC worker that died (server crash, killed), or one running another model for this key (the cached one
+                # fell back for another language): started again below
+                if isinstance(engine_zs, SubprocessPipe) and (engine_zs.process is None or engine_zs.process.poll() is not None or getattr(engine_zs, 'vc_model', vc_model) != vc_model):
                     loaded_tts.pop(self.tts_zs_key, None)
                     engine_zs.stop()
                     engine_zs = False
                 if not engine_zs:
-                    # Seed-VC on audio.cpp's server, VC-only worker (common/voice_conversion.py). Always cached, whatever
-                    # the free VRAM: unload_tts_manager() / cleanup_models_cache() stop it through loaded_tts
+                    # default_vc_model on audio.cpp's server (common/voice_conversion.py). Always cached, whatever the
+                    # free VRAM: unload_tts_manager() / cleanup_models_cache() stop it through loaded_tts
                     engine_zs = VoiceConversion(self.session)
                     loaded_tts[self.tts_zs_key] = engine_zs
             if engine_zs:

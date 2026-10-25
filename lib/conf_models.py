@@ -51,11 +51,23 @@ TTS_ENGINES = {
     "VOXTRAL_TTS": "voxtral_tts"
 }
 
+# voice conversion: a voice file picked for a built-in voice engine (piper, vits, fairseq, glowtts, tacotron, orpheus, and
+# the audio.cpp ones with clone False) turns its output into that voice, on audio.cpp's server (common/voice_conversion.py).
+# default_vc_model below picks one; the last part of its path is the zero-shot engine's tts_zs_key (loaded_tts, model_zs_cache).
+# task "vc": voice to voice. task "tts": the engine's voice clone speaks the sentence text again (no voice to voice).
+# files: GGUF in audiocpp_repo; engine: the files of that engine's "internal" preset instead (one download for both).
+# ref_max: the reference clip cut from the voice file, seconds (task "tts": the engine's own ref_min / ref_max)
+#   seed_vc: Seed-VC V1 route, Whisper-small content + BigVGAN 22 kHz (the server default v2_vc reads content from
+#     HuBERT-large, pretrained on English only). V1 shares a 30 s DiT window between the reference and each source
+#     chunk: 15 s keeps a sentence in one window (no chunk crossfade)
+#   chatterbox_vc: Chatterbox's S3Gen conditioned on the reference
+#   qwen3_tts: Qwen3-TTS has no voice to voice: its Base clone speaks the text in the voice, in its own languages only
+#     (fallback for the others); the built-in engine is not run for those sentences. The audio.cpp engines take the
+#     fallback always (speaking their text again would only replace them)
 TTS_VOICE_CONVERSION = {
-    # the VC stage of the built-in voice engines (piper, vits, fairseq, glowtts, tacotron, orpheus) for a picked voice
-    # file: Seed-VC on audio.cpp's server (audiocpp_vc below, common/voice_conversion.py). The key is the zero-shot
-    # engine's tts_zs_key (loaded_tts, model_zs_cache)
-    "seed_vc": {"path": "audiocpp/seed_vc"}
+    "seed_vc": {"path": "audiocpp/seed_vc", "task": "vc", "family": "seed_vc", "files": ["SeedVC-MLX-GGUF/seed-vc-mlx-q8_0.gguf"], "route": "v1_whisper_bigvgan_vc", "ref_max": 15.0},
+    "chatterbox_vc": {"path": "audiocpp/chatterbox_vc", "task": "vc", "family": "chatterbox", "engine": TTS_ENGINES['CHATTERBOX'], "ref_max": 10.0},
+    "qwen3_tts": {"path": "audiocpp/qwen3_tts", "task": "tts", "family": "qwen3_tts", "engine": TTS_ENGINES['QWEN3_TTS'], "fallback": "seed_vc"}
 }
 
 TTS_SML = {
@@ -167,12 +179,6 @@ audiocpp_packages = {
 # reference transcripts for the engines whose cloning takes one (ref_text below): transcribed once per voice clip by this
 # ASR model, loaded in the same server only when needed and unloaded right after
 audiocpp_asr = {"family": "qwen3_asr", "files": ["Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf"]}
-# built-in voice engines (clone False below): a voice file picked in e2a converts their output with Seed-VC, loaded in the
-# same server on first use. Without one they speak with their own voice (voice None, as Piper). route: V1 Whisper-small
-# content + BigVGAN 22 kHz, Whisper's multilingual encoder (the server default v2_vc reads content from HuBERT-large,
-# pretrained on English only). ref_max: the reference clip for the conversion; V1 shares a 30 s DiT window between the
-# reference and each source chunk, so 15 s keeps a sentence in one window (no chunk crossfade)
-audiocpp_vc = {"family": "seed_vc", "files": ["SeedVC-MLX-GGUF/seed-vc-mlx-q8_0.gguf"], "route": "v1_whisper_bigvgan_vc", "ref_max": 15.0}
 audiocpp_repo = "audio-cpp/audio.cpp-gguf"
 
 max_custom_model = 100

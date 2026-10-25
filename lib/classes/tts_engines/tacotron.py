@@ -157,50 +157,56 @@ class Tacotron2(TTSUtils, TTSRegistry, name='tacotron'):
                                     self.engine_zs = self._load_engine_zs(self.device)
                                 tmp_in_wav = os.path.join(proc_dir, f'{uuid.uuid4()}.wav')
                                 tmp_out_wav = os.path.join(proc_dir, f'{uuid.uuid4()}.wav')
-                                with torch.inference_mode():
-                                    with torch.autocast(self.device, dtype=self.amp_dtype, enabled=(self.amp_dtype != torch.float32)):
-                                        self.engine.tts_to_file(
-                                            text=part,
-                                            file_path=tmp_in_wav
-                                        )
-                                if self.params['current_voice'] in self.params['semitones'].keys():
-                                    semitones = self.params['semitones'][self.params['current_voice']]
-                                else:
-                                    current_voice_gender = detect_gender(self.params['current_voice'])
-                                    voice_builtin_gender = detect_gender(tmp_in_wav)
-                                    if voice_builtin_gender != current_voice_gender:
-                                        semitones = -4 if current_voice_gender == 'male' else 4
-                                        msg = legends['msg_voice_gender_adapt'].format(cloned=current_voice_gender, builtin=voice_builtin_gender)
-                                        print(msg)
-                                    else:
-                                        semitones = 0
-                                    self.params['semitones'][self.params['current_voice']] = semitones
-                                if semitones > 0:
-                                    try:
-                                        cmd = [
-                                            shutil.which('sox'), tmp_in_wav,
-                                            '-r', str(self.params['samplerate']), tmp_out_wav,
-                                            'pitch', str(semitones * 100)
-                                        ]
-                                        subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                                    except subprocess.CalledProcessError as e:
-                                        error = legends['error_subprocess'].format(e=e.stderr)
-                                        DependencyError(error)
-                                        return False, error
-                                    except FileNotFoundError as e:
-                                        error = legends['error_file_not_found_detail'].format(e=e)
-                                        DependencyError(error)
-                                        return False, error
-                                else:
-                                    tmp_out_wav = tmp_in_wav
-                                # Seed-VC worker (VoiceConversion): only paths cross the pipe, the worker cuts and keeps one reference
-                                # clip per voice file and the server resamples both sides itself
+                                # a voice conversion that speaks the text itself (task "tts", qwen3_tts) does not need the built-in voice
+                                if not self.engine_zs.resynthesis:
+                                    with torch.inference_mode():
+                                        with torch.autocast(self.device, dtype=self.amp_dtype, enabled=(self.amp_dtype != torch.float32)):
+                                            self.engine.tts_to_file(
+                                                text=part,
+                                                file_path=tmp_in_wav
+                                            )
+                                # gender pitch pre-shift (sox), off: the voice conversion takes the pitch from the target voice
+                                #if self.params['current_voice'] in self.params['semitones'].keys():
+                                #    semitones = self.params['semitones'][self.params['current_voice']]
+                                #else:
+                                #    current_voice_gender = detect_gender(self.params['current_voice'])
+                                #    voice_builtin_gender = detect_gender(tmp_in_wav)
+                                #    if voice_builtin_gender != current_voice_gender:
+                                #        semitones = -4 if current_voice_gender == 'male' else 4
+                                #        msg = legends['msg_voice_gender_adapt'].format(cloned=current_voice_gender, builtin=voice_builtin_gender)
+                                #        print(msg)
+                                #    else:
+                                #        semitones = 0
+                                #    self.params['semitones'][self.params['current_voice']] = semitones
+                                #if semitones > 0:
+                                #    try:
+                                #        cmd = [
+                                #            shutil.which('sox'), tmp_in_wav,
+                                #            '-r', str(self.params['samplerate']), tmp_out_wav,
+                                #            'pitch', str(semitones * 100)
+                                #        ]
+                                #        subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                                #    except subprocess.CalledProcessError as e:
+                                #        error = legends['error_subprocess'].format(e=e.stderr)
+                                #        DependencyError(error)
+                                #        return False, error
+                                #    except FileNotFoundError as e:
+                                #        error = legends['error_file_not_found_detail'].format(e=e)
+                                #        DependencyError(error)
+                                #        return False, error
+                                #else:
+                                #    tmp_out_wav = tmp_in_wav
+                                tmp_out_wav = tmp_in_wav
+                                # voice conversion worker (VoiceConversion, default_vc_model): only paths and the text cross the pipe, the
+                                # worker cuts and keeps one reference clip per voice file and the server resamples both sides itself
                                 vc_wav = f'{os.path.splitext(tmp_in_wav)[0]}.vc.wav'
                                 reply = self.engine_zs.send({
                                     'op': 'vc',
                                     'source': os.path.abspath(tmp_out_wav),
                                     'voice': os.path.abspath(self.params['current_voice']),
-                                    'file': os.path.abspath(vc_wav)
+                                    'file': os.path.abspath(vc_wav),
+                                    'text': part,
+                                    'language': self.language
                                 })
                                 if os.path.exists(tmp_in_wav):
                                     os.remove(tmp_in_wav)

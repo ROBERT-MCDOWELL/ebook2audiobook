@@ -453,34 +453,40 @@ class Orpheus(TTSUtils, TTSRegistry, name='orpheus'):
                                 gender = detect_gender(current_voice)
                                 self.params['speakers'][current_voice] = next((name for name, name_gender in self.checkpoint['speakers'].items() if gender is not None and name_gender == gender), self.speaker)
                             speaker = self.params['speakers'][current_voice]
-                        reply = self.engine.send({
-                            'op': 'tts',
-                            'text': part,
-                            'speaker': speaker,
-                            'file': part_file,
-                            **self.fine_tuned_params
-                        })
-                        if not reply.get('ok'):
-                            # no retry: core.py unloads the engine, which stops the worker
-                            error = f"convert() error: {reply.get('error')} segment: {part}"
-                            print(error)
-                            return False, error
-                        audio_part, samplerate = sf.read(part_file, dtype='float32')
-                        if use_zs:
+                        if use_zs and not self.engine_zs:
                             # loaded on the first voice file only: the model's own voices never need it
+                            self.engine_zs = self._load_engine_zs(self.device)
                             if not self.engine_zs:
-                                self.engine_zs = self._load_engine_zs(self.device)
-                                if not self.engine_zs:
-                                    error = legends['error_engine_not_loaded'].format(engine=self.tts_zs_key)
-                                    return False, error
-                            # Seed-VC worker (VoiceConversion): only paths cross the pipe, the worker cuts and keeps one reference
-                            # clip per voice file and the server resamples both sides itself
+                                error = legends['error_engine_not_loaded'].format(engine=self.tts_zs_key)
+                                return False, error
+                        # a voice conversion that speaks the text itself (task "tts", qwen3_tts) does not need Orpheus
+                        if use_zs and self.engine_zs.resynthesis:
+                            samplerate = self.params['samplerate']
+                        else:
+                            reply = self.engine.send({
+                                'op': 'tts',
+                                'text': part,
+                                'speaker': speaker,
+                                'file': part_file,
+                                **self.fine_tuned_params
+                            })
+                            if not reply.get('ok'):
+                                # no retry: core.py unloads the engine, which stops the worker
+                                error = f"convert() error: {reply.get('error')} segment: {part}"
+                                print(error)
+                                return False, error
+                            audio_part, samplerate = sf.read(part_file, dtype='float32')
+                        if use_zs:
+                            # voice conversion worker (VoiceConversion, default_vc_model): only paths and the text cross the
+                            # pipe, the worker cuts and keeps one reference clip per voice file and the server resamples both sides itself
                             vc_file = f'{os.path.splitext(part_file)[0]}.vc.wav'
                             reply = self.engine_zs.send({
                                 'op': 'vc',
                                 'source': os.path.abspath(part_file),
                                 'voice': os.path.abspath(current_voice),
-                                'file': os.path.abspath(vc_file)
+                                'file': os.path.abspath(vc_file),
+                                'text': part,
+                                'language': self.language
                             })
                             if not reply.get('ok'):
                                 # no retry: core.py unloads the engine, which stops the VC worker. A GPU server that died counts
@@ -497,7 +503,8 @@ class Orpheus(TTSUtils, TTSRegistry, name='orpheus'):
                             if audio_part.ndim > 1:
                                 audio_part = audio_part.mean(axis=1)
                             audio_part = self._resample_audiodata(audio_part, int(zs_samplerate), int(samplerate))
-                        os.unlink(part_file)
+                        if os.path.exists(part_file):
+                            os.unlink(part_file)
                         if not is_audio_data_valid(audio_part):
                             error = 'audio_part not valid'
                             return False, error
