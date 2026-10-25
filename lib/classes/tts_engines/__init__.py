@@ -13,4 +13,5 @@ from .omnivoice import OmniVoice
 from .f5tts import F5TTS
 from .orpheus import Orpheus
 from .openvoice import OpenVoice
+from .phonon import Phonon
 from .audiocpp import AudioCpp

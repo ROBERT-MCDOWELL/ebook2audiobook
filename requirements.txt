@@ -51,3 +51,4 @@ torchvggish
 pyannote-audio
 demucs-simple
 huggingface-hub
+ptts==0.4.1

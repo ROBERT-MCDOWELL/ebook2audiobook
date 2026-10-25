@@ -4,7 +4,7 @@ from typing import Callable
 root_dir = str(Path(__file__).resolve().parents[1])
 os.chdir(root_dir)
 sys.path.insert(0, root_dir)
-categories = ['common', 'xtts', 'bark', 'tortoise', 'vits', 'fairseq', 'glowtts', 'tacotron', 'yourtts', 'piper', 'zonos', 'audiocpp', 'audiocpp_server', 'gptsovits', 'f5tts', 'omnivoice', 'orpheus', 'openvoice', 'stanza', 'pyannote', 'demucs', 'interlude', 'argos', 'tessdata', 'jieba', 'voices']
+categories = ['common', 'xtts', 'bark', 'tortoise', 'vits', 'fairseq', 'glowtts', 'tacotron', 'yourtts', 'piper', 'zonos', 'audiocpp', 'audiocpp_server', 'gptsovits', 'f5tts', 'omnivoice', 'orpheus', 'openvoice', 'phonon', 'stanza', 'pyannote', 'demucs', 'interlude', 'argos', 'tessdata', 'jieba', 'voices']
 parser = argparse.ArgumentParser(description='Download every model e2a uses into one folder laid out exactly like ./models (i.e. a USB key for offline installs).')
 parser.add_argument('models_dir', type=str, help='Target folder, i.e. /media/user/KEY/models or E:\\models')
 parser.add_argument('--only', type=str, default='', help=f"Comma list of categories: {','.join(categories)}")
@@ -402,6 +402,12 @@ if ov_repos:
         add('openvoice', f'{repo} tokenizer', lambda repo=repo, bert_path=bert_path: hf_folder(repo, bert_path, ['*.json', '*.txt'], True))
         if melo_lang in (ov['languages'][lang] for lang in ov_languages):
             add('openvoice', f'{repo} weights', lambda repo=repo, bert_path=bert_path: hf_folder(repo, bert_path, ['model.safetensors'] if 'model.safetensors' in HfApi().list_repo_files(repo) else ['pytorch_model.bin']))
+# phonon: the checkpoint folders and catalog voices the engine reads (same folders, same .e2a_complete marker)
+ph = default_engine_settings[TTS_ENGINES['PHONON']]
+for lang, ckpt in load_presets('phonon')['internal']['checkpoints'].items():
+    if wanted(lang):
+        add('phonon', ckpt['repo'], lambda repo=ckpt['repo']: hf_folder(repo, os.path.join(tts_dir, 'phonon', repo.replace('/', '--')), ph['checkpoint_files'], True))
+        add('phonon', f"{ph['voices_repo']} {lang}", lambda ckpt=ckpt: hf_folder(ph['voices_repo'], os.path.join(tts_dir, 'phonon', ph['voices_repo'].replace('/', '--')), [f'voices/{voice[0]}.safetensors' for voice in ckpt['voices'].values()]))
 if 'stanza' in selected:
     from iso639 import Lang
     for lang in year_to_decades_languages:

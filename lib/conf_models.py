@@ -12,6 +12,7 @@ TTS_ENGINES = {
     "F5TTS": "f5tts",
     "ORPHEUS": "orpheus",
     "OPENVOICE": "openvoice",
+    "PHONON": "phonon",
     "XTTS": "xtts",
     "BARK": "bark",
     "TORTOISE": "tortoise",
@@ -123,7 +124,7 @@ default_voice_detection_model = 'drewThomasson/segmentation'
 default_speaker = os.path.join(voices_dir, 'eng', 'adult', 'male', 'KumarDahl.wav')
 
 tts_engines_from_coqui = [TTS_ENGINES['XTTS'], TTS_ENGINES['BARK'], TTS_ENGINES['TORTOISE'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
-tts_engines_with_inner_speaker = [TTS_ENGINES['PIPER'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS'], TTS_ENGINES['ORPHEUS'], TTS_ENGINES['OPENVOICE']]
+tts_engines_with_inner_speaker = [TTS_ENGINES['PIPER'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS'], TTS_ENGINES['ORPHEUS'], TTS_ENGINES['OPENVOICE'], TTS_ENGINES['PHONON']]
 tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['OMNIVOICE'], TTS_ENGINES['F5TTS'], TTS_ENGINES['ORPHEUS'], TTS_ENGINES['OPENVOICE'])
 
 # audio.cpp engines (0xShug0/audio.cpp): one native audiocpp_server package per platform, shared by every audio.cpp
@@ -465,6 +466,30 @@ default_engine_settings = {
         "voices": {},
         # MeloTTS (~52M params) + its language's BERT + the converter (~33M): real time on CPU
         "rating": {"VRAM": 2, "CPU": 4, "RAM": 4, "Realism": 4}
+    },
+    TTS_ENGINES['PHONON']: {
+        # Phonon (gradium-ai/xn-ptts): the ptts wheel lives in python_env like coqui-tts (one abi3 Rust extension,
+        # numpy only, no torch). CPU only: ptts.available_devices() is ['cpu'] in the PyPI wheels. Linux / Windows x86_64
+        # wheels are built for x86-64-v3: the engine checks these flags before importing ptts (a SIGILL otherwise)
+        "cpu_flags": ["avx2", "fma", "f16c"],
+        # voice catalog: embeddings only, the open checkpoints have no voice encoder (no local cloning)
+        "voices_repo": "gradium/phonon-voices",
+        # what ptts reads from a local checkpoint folder (q8 prefers model.q8.gguf)
+        "checkpoint_files": ["config.json", "tokenizer.json", "model.q8.gguf", "default-voice.safetensors"],
+        "quant": "q8",
+        # e2a iso-639-3 -> ptts text normalization language
+        "languages": {"eng": "en", "fra": "fr", "deu": "de", "spa": "es", "por": "pt"},
+        "samplerate": 24000,
+        # ptts defaults; duration_delta 0 = the checkpoint's own pace (negative faster, positive slower)
+        "temperature": 0.3,
+        "duration_delta": 0.0,
+        "files": [],
+        # built-in voices (as Orpheus): "default" speaks with the preset's voice, a voice file converts a
+        # same-gender catalog voice with default_vc_model
+        "voice": None,
+        "voices": {},
+        # 31M / 40M params, q8 weights ~65-75 MB, faster than real time on one CPU core
+        "rating": {"VRAM": 1, "CPU": 5, "RAM": 1, "Realism": 4}
     },
     TTS_ENGINES['XTTS']: {
         "repo": "coqui/XTTS-v2",
