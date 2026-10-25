@@ -607,8 +607,11 @@ class TTSUtils:
         import torch
         device_type = torch.device(device).type
         dtypes:list = []
-        if self.amp_dtype != torch.float32:
-            dtypes.append(self.amp_dtype)
+        # venv engines (their model runs in a worker, never through _apply_gpu_policy) have no amp_dtype: the
+        # builtin voice conversion then runs xtts in fp32
+        amp_dtype = getattr(self, 'amp_dtype', torch.float32)
+        if amp_dtype != torch.float32:
+            dtypes.append(amp_dtype)
         dtypes.append(torch.float32)
         for dtype in dtypes:
             try:
