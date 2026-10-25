@@ -12,4 +12,5 @@ from .gptsovits import GptSovits
 from .omnivoice import OmniVoice
 from .f5tts import F5TTS
 from .orpheus import Orpheus
+from .openvoice import OpenVoice
 from .audiocpp import AudioCpp

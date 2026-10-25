@@ -11,6 +11,7 @@ TTS_ENGINES = {
     "OMNIVOICE": "omnivoice",
     "F5TTS": "f5tts",
     "ORPHEUS": "orpheus",
+    "OPENVOICE": "openvoice",
     "XTTS": "xtts",
     "BARK": "bark",
     "TORTOISE": "tortoise",
@@ -110,8 +111,8 @@ default_voice_detection_model = 'drewThomasson/segmentation'
 default_speaker = os.path.join(voices_dir, 'eng', 'adult', 'male', 'KumarDahl.wav')
 
 tts_engines_from_coqui = [TTS_ENGINES['XTTS'], TTS_ENGINES['BARK'], TTS_ENGINES['TORTOISE'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
-tts_engines_with_inner_speaker = [TTS_ENGINES['PIPER'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS'], TTS_ENGINES['ORPHEUS']]
-tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['OMNIVOICE'], TTS_ENGINES['F5TTS'], TTS_ENGINES['ORPHEUS'])
+tts_engines_with_inner_speaker = [TTS_ENGINES['PIPER'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS'], TTS_ENGINES['ORPHEUS'], TTS_ENGINES['OPENVOICE']]
+tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['OMNIVOICE'], TTS_ENGINES['F5TTS'], TTS_ENGINES['ORPHEUS'], TTS_ENGINES['OPENVOICE'])
 
 # audio.cpp engines (0xShug0/audio.cpp): one native audiocpp_server package per platform, shared by every audio.cpp
 # engine, plus the GGUF weights of each engine's fine_tuned preset (presets/audiocpp_presets.py), driven by
@@ -399,6 +400,62 @@ default_engine_settings = {
         "voices": {},
         # 3.3B params: bf16 / fp16 on GPU, fp32 on CPU (~40x slower than real time there)
         "rating": {"VRAM": 7, "CPU": 1, "RAM": 14, "Realism": 5}
+    },
+    TTS_ENGINES['OPENVOICE']: {
+        # runs in its own uv venv (lib/classes/tts_engines/venvs/openvoice) behind a persistent worker. OpenVoice V2 as
+        # upstream's demo_part3 runs it: MeloTTS speaks with its base speakers, OpenVoice's ToneColorConverter moves the base
+        # speaker's tone color to the voice file's. repo: the converter and every base speaker's tone color embedding
+        "repo": "myshell-ai/OpenVoiceV2",
+        "source": "https://github.com/myshell-ai/OpenVoice/archive/74a1d147b17a8c3092dd5430504bd83ef6c7eb23.tar.gz",
+        "source_melo": "https://github.com/myshell-ai/MeloTTS/archive/209145371cff8fc3bd60d7be902ea69cbdb7965a.tar.gz",
+        "python": "3.12",
+        # package list = OpenVoice's own install_requires (setup.py) + MeloTTS' requirements.txt (in the extracted trees),
+        # torch from the device's PyTorch index (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller as fallback.
+        # Left out: what inference never imports (faster-whisper / whisper-timestamped: se_extractor's VAD split, gradio:
+        # demo UI, tensorboard: training, cached-path: melo's own downloads, done by the worker), the pins without py3.12
+        # wheels (numpy 1.22.0, transformers 4.27.4 -> tokenizers 0.13, fugashi 1.3.0), unidic (770 MB
+        # dictionary fetched by a post-install command: MeCab reads unidic-lite without it) and mecab-python3 (its MeCab
+        # folder is python-mecab-ko's mecab folder on case-insensitive filesystems: the worker serves MeCab from fugashi,
+        # same libmecab, same dictionary). Names normalized as pip does.
+        "requirements_file": "setup.py",
+        "requirements_file_melo": "requirements.txt",
+        "requirements_exclude": ["faster-whisper", "whisper-timestamped", "gradio", "tensorboard", "cached-path", "numpy", "transformers", "fugashi", "unidic", "mecab-python3"],
+        # transformers below 5: melo's BERT frontends are written for 4.x; soxr: transformers imports it whenever librosa
+        # is there (librosa >= 0.10 brings it, upstream's 0.9.1 does not); setuptools below 82: librosa 0.9.1 imports
+        # pkg_resources, gone from 82 on (torch 2.11 / 2.12 cap it there, 2.13 does not); fugashi unpinned: the japanese
+        # BERT tokenizer and the MeCab stand-in; python-mecab-ko: g2pkk (korean) pip-installs it at runtime otherwise;
+        # hf_xet as for GPT-SoVITS (windows reports AMD64, so huggingface_hub's own marker misses it: the weights are on Xet)
+        "requirements_extra": ["transformers<5", "soxr", "setuptools<82", "fugashi", "python-mecab-ko", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
+        # every package installs as a wheel, so no platform ever needs a compiler; these only exist as pure-python sources
+        "packages_sdist": ["jieba", "eng-to-ipa", "langid", "txtsplit", "unidic-lite", "gruut", "gruut-ipa", "gruut-lang-de", "gruut-lang-en", "gruut-lang-es", "gruut-lang-fr", "docopt", "distance"],
+        # MeloTTS' text frontend BERTs (melo/text/*_bert.py) by MeloTTS language: the worker fetches every tokenizer (melo
+        # loads them all at import) and the language's weights, as plain folders under models/tts/openvoice
+        "berts": {"EN": "bert-base-uncased", "ES": "dccuchile/bert-base-spanish-wwm-uncased", "FR": "dbmdz/bert-base-french-europeana-cased", "ZH": "bert-base-multilingual-uncased", "JP": "tohoku-nlp/bert-base-japanese-v3", "KR": "kykim/bert-kor-base"},
+        # upstream's inaudible watermark on cloned audio (ToneColorConverter's default, wavmark): False builds the converter
+        # without it (upstream's own enable_watermark switch cannot be used, OpenVoiceBaseClass refuses the kwarg)
+        "watermark": True,
+        "wavmark": {"repo": "M4869/WavMark", "file": "step59000_snr39.99_pesq4.35_BERP_none0.30_mean1.81_std1.81.model.pkl"},
+        # upstream's reference split (se_extractor.split_audio_vad split_seconds): the voice file cut into pieces of about
+        # that many seconds, their tone color embeddings averaged
+        "ref_split": 10.0,
+        # languages a MeloTTS checkpoint exists for (presets/openvoice_presets.py) -> MeloTTS' language codes
+        "languages": {"eng": "EN", "spa": "ES", "fra": "FR", "zho": "ZH", "jpn": "JP", "kor": "KR"},
+        "samplerate": 44100,
+        # upstream defaults (melo tts_to_file, ToneColorConverter.convert); tau is the sampling temperature of the
+        # converter's posterior encoder (0 = deterministic)
+        "speed": 1.0,
+        "sdp_ratio": 0.2,
+        "noise_scale": 0.6,
+        "noise_scale_w": 0.8,
+        "tau": 0.3,
+        # custom model upload: a MeloTTS fine-tune (its train.py config.json + a G_<step>.pth renamed checkpoint.pth) +
+        # ref.wav, the voice it was trained on: the tone color a voice file is converted from
+        "files": ["config.json", "checkpoint.pth", "ref.wav"],
+        # built-in speakers (as Orpheus): "default" speaks with the preset's speaker, a voice file is cloned onto it
+        "voice": None,
+        "voices": {},
+        # MeloTTS (~52M params) + its language's BERT + the converter (~33M): real time on CPU
+        "rating": {"VRAM": 2, "CPU": 4, "RAM": 4, "Realism": 4}
     },
     TTS_ENGINES['XTTS']: {
         "repo": "coqui/XTTS-v2",
