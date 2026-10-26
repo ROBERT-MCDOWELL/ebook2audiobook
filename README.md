@@ -539,6 +539,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Moss TTS Local / Nano (https://github.com/OpenBMB/MossTTS)[cite: 1]
 - [x] NewTTS / NeuTTS (https://github.com/neuphonic/neutts)[cite: 1]
 - [x] Pocket TTS (https://github.com/pocket-tts/pocket-tts)[cite: 1]
+- [x] Gradium Phonon (https://github.com/gradium-ai/xn-ptts)[cite: 1]
 - [x] Supertonic (https://github.com/supertone-inc/supertonic)[cite: 1]
 - [x] Irodori TTS (https://github.com/irodori-tts/irodori-tts)[cite: 1]
 - [x] Piper (https://github.com/rhasspy/piper)[cite: 1]
@@ -554,7 +555,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] OpenVoice (https://github.com/myshell-ai/OpenVoice)
 - [ ] ChatTTS (https://github.com/2noise/ChatTTS)
 - [ ] Spark-TTS (https://github.com/sparkaudio/spark-tts)
-- [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
+- [ ] MeloTTS (https://github.com/myshell-ai/MeloTTS)
 - [ ] CRM (https://github.com/SesameAILabs/csm)
 
 #### Readme Translation
