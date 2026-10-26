@@ -26,8 +26,9 @@ class VoiceExtractor:
         self.output_dir = self.session['voice_dir']
         self.demucs_dir = os.path.join(self.output_dir,'htdemucs', voice_name)
         self.voice_track = os.path.join(self.demucs_dir, 'vocals.wav')
-        self.proc_voice_file = os.path.join(self.session['voice_dir'], f'{self.voice_name}_proc.wav')
         self.final_voice_file = final_voice_file if final_voice_file is not None else os.path.join(self.session['voice_dir'], f'{self.voice_name}.wav')
+        # work files sit next to the final file: no stray voice left in voice_dir, and os.replace() never crosses mounts
+        self.proc_voice_file = os.path.join(os.path.dirname(self.final_voice_file), f'{self.voice_name}_proc.wav')
         self.silence_threshold = -60
         self.is_gui_process = session['is_gui_process']
         if self.is_gui_process:
@@ -50,7 +51,7 @@ class VoiceExtractor:
             print(msg)
             if self.is_gui_process:
                 self.progress_bar(1, desc=msg)
-            self.wav_file = os.path.join(self.session['voice_dir'], f'{self.voice_name}.wav')
+            self.wav_file = self.final_voice_file
             cmd = [
                 shutil.which('ffmpeg'), '-hide_banner', '-nostats', '-i', self.voice_file,
                 '-ac', '1', '-y', self.wav_file
