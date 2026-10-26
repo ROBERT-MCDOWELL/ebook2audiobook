@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'محرك TTS',
     'gr_tts_rating_realism': 'الواقعية',
     'gr_models_markdown': 'النماذج',
-    'gr_fine_tuned_list': 'نماذج مُعدّة مسبقًا ومضبوطة بدقة',
     'gr_custom_model_file': 'رفع ملف ZIP',
     'gr_custom_model_file_engine': 'رفع ملف ZIP لـ {engine} (مطلوب: {files})',
     'gr_custom_model_file_unavailable': '*رفع نموذج مخصص غير متاح لـ {engine}',

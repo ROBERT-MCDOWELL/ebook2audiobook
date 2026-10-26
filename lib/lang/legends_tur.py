@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'TTS Motoru',
     'gr_tts_rating_realism': 'Gerçekçilik',
     'gr_models_markdown': 'Modeller',
-    'gr_fine_tuned_list': 'İnce Ayarlı Hazır Modeller',
     'gr_custom_model_file': 'ZIP Dosyası Yükle',
     'gr_custom_model_file_engine': '{engine} ZIP dosyası yükleyin (Gerekli: {files})',
     'gr_custom_model_file_unavailable': '*{engine} için özel model yükleme kullanılamıyor',

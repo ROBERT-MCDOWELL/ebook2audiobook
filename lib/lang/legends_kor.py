@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'TTS 엔진',
     'gr_tts_rating_realism': '사실감',
     'gr_models_markdown': '모델',
-    'gr_fine_tuned_list': '파인튜닝된 프리셋 모델',
     'gr_custom_model_file': 'ZIP 파일 업로드',
     'gr_custom_model_file_engine': '{engine} ZIP 파일 업로드 (필수: {files})',
     'gr_custom_model_file_unavailable': '*{engine}에서는 사용자 지정 모델 업로드를 사용할 수 없습니다',

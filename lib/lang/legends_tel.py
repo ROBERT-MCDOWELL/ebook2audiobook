@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'TTS ఇంజిన్',
     'gr_tts_rating_realism': 'వాస్తవికత',
     'gr_models_markdown': 'మోడల్‌లు',
-    'gr_fine_tuned_list': 'ఫైన్-ట్యూన్ చేసిన ప్రీసెట్ మోడల్‌లు',
     'gr_custom_model_file': 'ZIP ఫైల్‌ను అప్‌లోడ్ చేయండి',
     'gr_custom_model_file_engine': '{engine} ZIP ఫైల్‌ను అప్‌లోడ్ చేయండి (అవసరం: {files})',
     'gr_custom_model_file_unavailable': '*{engine}కు కస్టమ్ మోడల్ అప్‌లోడ్ అందుబాటులో లేదు',

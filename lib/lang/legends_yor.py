@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'Ẹ̀rọ TTS',
     'gr_tts_rating_realism': 'Ìjọra Òtítọ́',
     'gr_models_markdown': 'Àwọn Àwòṣe',
-    'gr_fine_tuned_list': 'Àwọn Àwòṣe Tí A Ti Ṣàtúnṣe',
     'gr_custom_model_file': 'Gbé Fáìlì ZIP Sókè',
     'gr_custom_model_file_engine': 'Gbé fáìlì ZIP {engine} sókè (Ó pọn dandan: {files})',
     'gr_custom_model_file_unavailable': '*Gbígbé àwòṣe àdáni sókè kò sí fún {engine}',

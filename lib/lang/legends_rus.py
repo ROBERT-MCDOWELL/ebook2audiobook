@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'Движок TTS',
     'gr_tts_rating_realism': 'Реализм',
     'gr_models_markdown': 'Модели',
-    'gr_fine_tuned_list': 'Дообученные предустановленные модели',
     'gr_custom_model_file': 'Загрузить ZIP-файл',
     'gr_custom_model_file_engine': 'Загрузить ZIP-файл {engine} (требуется: {files})',
     'gr_custom_model_file_unavailable': '*Загрузка пользовательской модели недоступна для {engine}',

@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'TTS इंजन',
     'gr_tts_rating_realism': 'यथार्थता',
     'gr_models_markdown': 'मॉडल',
-    'gr_fine_tuned_list': 'फ़ाइन-ट्यून किए गए प्रीसेट मॉडल',
     'gr_custom_model_file': 'ZIP फ़ाइल अपलोड करें',
     'gr_custom_model_file_engine': '{engine} ZIP फ़ाइल अपलोड करें (आवश्यक: {files})',
     'gr_custom_model_file_unavailable': '*{engine} के लिए कस्टम मॉडल अपलोड उपलब्ध नहीं है',

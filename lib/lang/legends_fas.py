@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'موتور TTS',
     'gr_tts_rating_realism': 'واقع‌گرایی',
     'gr_models_markdown': 'مدل‌ها',
-    'gr_fine_tuned_list': 'مدل‌های پیش‌تنظیم ریزتنظیم‌شده',
     'gr_custom_model_file': 'بارگذاری فایل ZIP',
     'gr_custom_model_file_engine': 'بارگذاری فایل ZIP برای {engine} (الزامی: {files})',
     'gr_custom_model_file_unavailable': '*بارگذاری مدل سفارشی برای {engine} در دسترس نیست',

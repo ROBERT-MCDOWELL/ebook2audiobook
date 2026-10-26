@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'TTS இயந்திரம்',
     'gr_tts_rating_realism': 'யதார்த்தம்',
     'gr_models_markdown': 'மாதிரிகள்',
-    'gr_fine_tuned_list': 'நுண்-சரிசெய்யப்பட்ட முன்னமைவு மாதிரிகள்',
     'gr_custom_model_file': 'ZIP கோப்பைப் பதிவேற்று',
     'gr_custom_model_file_engine': '{engine} ZIP கோப்பைப் பதிவேற்று (தேவை: {files})',
     'gr_custom_model_file_unavailable': '*{engine}க்கு தனிப்பயன் மாதிரி பதிவேற்றம் கிடைக்கவில்லை',

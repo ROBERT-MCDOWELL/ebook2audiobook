@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'Motor TTS',
     'gr_tts_rating_realism': 'Realismo',
     'gr_models_markdown': 'Modelos',
-    'gr_fine_tuned_list': 'Modelos predefinidos ajustados',
     'gr_custom_model_file': 'Enviar um arquivo ZIP',
     'gr_custom_model_file_engine': 'Enviar um arquivo ZIP do {engine} (obrigatórios: {files})',
     'gr_custom_model_file_unavailable': '*Envio de modelo personalizado indisponível para {engine}',

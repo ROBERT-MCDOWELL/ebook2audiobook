@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'TTS-Engine',
     'gr_tts_rating_realism': 'Realismus',
     'gr_models_markdown': 'Modelle',
-    'gr_fine_tuned_list': 'Feinabgestimmte Modellvorlagen',
     'gr_custom_model_file': 'ZIP-Datei hochladen',
     'gr_custom_model_file_engine': '{engine}-ZIP-Datei hochladen (erforderlich: {files})',
     'gr_custom_model_file_unavailable': '*Hochladen eigener Modelle für {engine} nicht verfügbar',

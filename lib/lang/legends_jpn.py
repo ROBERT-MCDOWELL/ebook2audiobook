@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'TTS エンジン',
     'gr_tts_rating_realism': 'リアルさ',
     'gr_models_markdown': 'モデル',
-    'gr_fine_tuned_list': 'ファインチューニング済みプリセットモデル',
     'gr_custom_model_file': 'ZIP ファイルをアップロード',
     'gr_custom_model_file_engine': '{engine} の ZIP ファイルをアップロード（必須: {files}）',
     'gr_custom_model_file_unavailable': '*{engine} ではカスタムモデルのアップロードは利用できません',

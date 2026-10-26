@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'Mesin TTS',
     'gr_tts_rating_realism': 'Realisme',
     'gr_models_markdown': 'Model',
-    'gr_fine_tuned_list': 'Model Prasetel Hasil Fine-Tuning',
     'gr_custom_model_file': 'Unggah Berkas ZIP',
     'gr_custom_model_file_engine': 'Unggah berkas ZIP {engine} (Wajib: {files})',
     'gr_custom_model_file_unavailable': '*Unggah model kustom tidak tersedia untuk {engine}',

@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'TTS-motor',
     'gr_tts_rating_realism': 'Realizmus',
     'gr_models_markdown': 'Modellek',
-    'gr_fine_tuned_list': 'Finomhangolt előre beállított modellek',
     'gr_custom_model_file': 'ZIP-fájl feltöltése',
     'gr_custom_model_file_engine': '{engine} ZIP-fájl feltöltése (szükséges: {files})',
     'gr_custom_model_file_unavailable': '*Egyéni modell feltöltése nem érhető el ehhez: {engine}',

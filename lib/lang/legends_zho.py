@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'TTS 引擎',
     'gr_tts_rating_realism': '真实感',
     'gr_models_markdown': '模型',
-    'gr_fine_tuned_list': '微调预设模型',
     'gr_custom_model_file': '上传 ZIP 文件',
     'gr_custom_model_file_engine': '上传 {engine} ZIP 文件（必需：{files}）',
     'gr_custom_model_file_unavailable': '*{engine} 不支持上传自定义模型',

@@ -25,7 +25,6 @@ legends = {
     'gr_tts_rating': 'TTS Engine',
     'gr_tts_rating_realism': 'Realism',
     'gr_models_markdown': 'Models',
-    'gr_fine_tuned_list': 'Fine Tuned Preset Models',
     'gr_custom_model_file': 'Upload a ZIP File',
     'gr_custom_model_file_engine': 'Upload a {engine} ZIP file (Required: {files})',
     'gr_custom_model_file_unavailable': '*Upload Custom Model not available for {engine}',
