@@ -15,3 +15,4 @@ from .orpheus import Orpheus
 from .openvoice import OpenVoice
 from .phonon import Phonon
 from .audiocpp import AudioCpp
+from .sparktts import SparkTTS

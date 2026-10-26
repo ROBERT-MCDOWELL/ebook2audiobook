@@ -11,6 +11,7 @@ TTS_ENGINES = {
     "OMNIVOICE": "omnivoice",
     "F5TTS": "f5tts",
     "ORPHEUS": "orpheus",
+    "SPARKTTS": "sparktts",
     "OPENVOICE": "openvoice",
     "PHONON": "phonon",
     "XTTS": "xtts",
@@ -410,6 +411,50 @@ default_engine_settings = {
         "voices": {},
         # 3.3B params: bf16 / fp16 on GPU, fp32 on CPU (~40x slower than real time there)
         "rating": {"VRAM": 7, "CPU": 1, "RAM": 14, "Realism": 5}
+    },
+    TTS_ENGINES['SPARKTTS']: {
+        # runs in its own uv venv (lib/classes/tts_engines/venvs/sparktts) behind a persistent worker, from the pinned
+        # source tree: upstream is not a package, the worker imports sparktts from the extracted repo root. Same
+        # pipeline as Orpheus: a Qwen2.5-0.5B LLM (transformers) writes BiCodec tokens, BiCodec decodes them to 16 kHz.
+        # repo: the LLM, BiCodec and the wav2vec2-large-xlsr-53 the references are tokenized with, in one folder
+        "repo": "SparkAudio/Spark-TTS-0.5B",
+        "source": "https://github.com/SparkAudio/Spark-TTS/archive/2f1ea9082400547242641f5271b6f941c9f439d1.tar.gz",
+        "python": "3.12",
+        # package list = upstream's own requirements.txt (in the extracted tree), torch from the device's PyTorch index
+        # (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller as fallback. Left out: gradio (webui).
+        # requirements_unpinned: upstream pins every package to its February 2025 release (torch 2.5.1 has no Blackwell
+        # kernels nor torch_matrix's newer builds, transformers 4.46.2 no recent tokenizers wheels): names only, the
+        # resolver takes what fits the device's torch. hf_xet as for GPT-SoVITS (windows reports AMD64, so
+        # huggingface_hub's own marker misses it: the weights are on Xet)
+        "requirements_file": "requirements.txt",
+        "requirements_unpinned": True,
+        "requirements_exclude": ["gradio"],
+        "requirements_extra": ["hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
+        # every package installs as a wheel, so no platform ever needs a compiler
+        "packages_sdist": [],
+        # reference transcription (the voice clone prompt is the reference's audio tokens + its text), Whisper run on
+        # cpu; one copy under models/tts shared with the other engines using it
+        "asr_model": "openai/whisper-large-v3-turbo",
+        # the worker cuts a reference clip of at most ref_max seconds; no minimum: BiCodec repeats a short reference
+        # itself for the speaker tokens (6 s window), silence padding would end up in the prompt
+        "ref_max": 10.0,
+        # upstream's languages (no language token: the text alone tells)
+        "languages": {"eng": "en", "zho": "zh"},
+        "samplerate": 16000,
+        # upstream defaults (cli/SparkTTS.py inference)
+        "temperature": 0.8,
+        "top_k": 50,
+        "top_p": 0.95,
+        # generation cap per sentence part: tokens_per_char x its length (50 semantic tokens per second of speech; 10 per
+        # character is ~3x a latin letter's speech, a Han character counts as 3), at most max_new_tokens (upstream's
+        # 3000, 60 s): a looping generation stops there
+        "tokens_per_char": 10,
+        "max_new_tokens": 3000,
+        "files": [],
+        "voice": default_speaker,
+        "voices": {},
+        # 0.5B LLM (bf16 from sm 8.0, fp32 below) + BiCodec + wav2vec2-large (fp32)
+        "rating": {"VRAM": 3, "CPU": 2, "RAM": 6, "Realism": 4}
     },
     TTS_ENGINES['OPENVOICE']: {
         # runs in its own uv venv (lib/classes/tts_engines/venvs/openvoice) behind a persistent worker. OpenVoice V2 as

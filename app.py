@@ -257,7 +257,7 @@ Default depends on the selected language. The tts engine should be compatible wi
     headless_optional_group.add_argument(cli_options[15], type=str, default=default_fine_tuned, help='Fine tuned model path. Default is builtin model.')
     headless_optional_group.add_argument(cli_options[16], type=str, default=default_output_format, help=f'Output audio format. Default is {default_output_format} set in ./lib/conf.py')
     headless_optional_group.add_argument(cli_options[17], type=str, default=default_output_channel, help=f'Output audio channel. Default is {default_output_channel} set in ./lib/conf.py')
-    headless_optional_group.add_argument(cli_options[18], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['temperature'], help=f"""(xtts, gptsovits and orpheus, optional) Temperature for the model. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['temperature']}, orpheus default {default_engine_settings[TTS_ENGINES['ORPHEUS']]['temperature']}.
+    headless_optional_group.add_argument(cli_options[18], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['temperature'], help=f"""(xtts, gptsovits, orpheus and sparktts, optional) Temperature for the model. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['temperature']}, orpheus default {default_engine_settings[TTS_ENGINES['ORPHEUS']]['temperature']}, sparktts default {default_engine_settings[TTS_ENGINES['SPARKTTS']]['temperature']}.
 Default to config.json model. Higher temperatures lead to more creative outputs.""")
     headless_optional_group.add_argument(cli_options[19], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['length_penalty'], help=f"""(xtts only, optional) A length penalty applied to the autoregressive decoder.
 Default to config.json model. Not applied to custom models.""")
@@ -265,10 +265,10 @@ Default to config.json model. Not applied to custom models.""")
 Default to config.json model.""")
     headless_optional_group.add_argument(cli_options[21], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['repetition_penalty'], help=f"""(xtts, gptsovits and orpheus, optional) A penalty that prevents the autoregressive decoder from repeating itself. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['repetition_penalty']}, orpheus default {default_engine_settings[TTS_ENGINES['ORPHEUS']]['repetition_penalty']} (1.1 at least keeps it stable).
 Default to config.json model.""")
-    headless_optional_group.add_argument(cli_options[22], type=int, default=default_engine_settings[TTS_ENGINES['XTTS']]['top_k'], help=f"""(xtts and gptsovits, optional) Top-k sampling. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['top_k']}.
+    headless_optional_group.add_argument(cli_options[22], type=int, default=default_engine_settings[TTS_ENGINES['XTTS']]['top_k'], help=f"""(xtts, gptsovits and sparktts, optional) Top-k sampling. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['top_k']}, sparktts default {default_engine_settings[TTS_ENGINES['SPARKTTS']]['top_k']}.
 Lower values mean more likely outputs and increased audio generation speed.
 Default to config.json model.""")
-    headless_optional_group.add_argument(cli_options[23], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['top_p'], help=f"""(xtts, gptsovits and orpheus, optional) Top-p sampling. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['top_p']}, orpheus default {default_engine_settings[TTS_ENGINES['ORPHEUS']]['top_p']}.
+    headless_optional_group.add_argument(cli_options[23], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['top_p'], help=f"""(xtts, gptsovits, orpheus and sparktts, optional) Top-p sampling. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['top_p']}, orpheus default {default_engine_settings[TTS_ENGINES['ORPHEUS']]['top_p']}, sparktts default {default_engine_settings[TTS_ENGINES['SPARKTTS']]['top_p']}.
 Lower values mean more likely outputs and increased audio generation speed. Default to config.json model.""")
     headless_optional_group.add_argument(cli_options[24], type=float, default=default_engine_settings[TTS_ENGINES['XTTS']]['speed'], help=f"""(xtts and gptsovits, optional) Speed factor for the speech generation. gptsovits default {default_engine_settings[TTS_ENGINES['GPTSOVITS']]['speed']}.
 Default to config.json model.""")
@@ -407,6 +407,9 @@ valence, arousal (-1 to 1).""")
             # same for orpheus (its speaker is the --fine_tuned preset)
             for option, key in ((cli_options[23], 'top_p'), (cli_options[18], 'temperature'), (cli_options[21], 'repetition_penalty')):
                 args[f'orpheus_{key}'] = args[key] if option in sys.argv else default_engine_settings[TTS_ENGINES['ORPHEUS']][key]
+            # same for sparktts
+            for option, key in ((cli_options[22], 'top_k'), (cli_options[23], 'top_p'), (cli_options[18], 'temperature')):
+                args[f'sparktts_{key}'] = args[key] if option in sys.argv else default_engine_settings[TTS_ENGINES['SPARKTTS']][key]
             args['zonos_emotion_enabled'] = args.get('enable_emotion') is not None
             if args['zonos_emotion_enabled']:
                 emotion = {name: 0.0 for name in default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']}

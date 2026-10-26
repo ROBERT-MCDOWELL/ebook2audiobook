@@ -273,6 +273,10 @@ class SessionContext:
             "orpheus_temperature": default_engine_settings[TTS_ENGINES['ORPHEUS']]['temperature'],
             "orpheus_top_p": default_engine_settings[TTS_ENGINES['ORPHEUS']]['top_p'],
             "orpheus_repetition_penalty": default_engine_settings[TTS_ENGINES['ORPHEUS']]['repetition_penalty'],
+            ####### Spark-TTS settings
+            "sparktts_temperature": default_engine_settings[TTS_ENGINES['SPARKTTS']]['temperature'],
+            "sparktts_top_k": default_engine_settings[TTS_ENGINES['SPARKTTS']]['top_k'],
+            "sparktts_top_p": default_engine_settings[TTS_ENGINES['SPARKTTS']]['top_p'],
             ####### Audiobook editor
             "audiobook": None,
             "audiobooks_dir": None,
@@ -4434,6 +4438,9 @@ def convert_ebook(args:dict)->tuple:
             for orpheus_key, orpheus_cast in (('orpheus_temperature', float), ('orpheus_top_p', float), ('orpheus_repetition_penalty', float)):
                 if args.get(orpheus_key) is not None:
                     session[orpheus_key] = orpheus_cast(args[orpheus_key])
+            for sparktts_key, sparktts_cast in (('sparktts_temperature', float), ('sparktts_top_k', int), ('sparktts_top_p', float)):
+                if args.get(sparktts_key) is not None:
+                    session[sparktts_key] = sparktts_cast(args[sparktts_key])
             session['output_format'] = str(args['output_format'])
             session['output_channel'] = str(args['output_channel'])
             session['output_split'] = bool(args['output_split'])
