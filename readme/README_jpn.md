@@ -4,7 +4,7 @@
 電子書籍から章とメタデータ付きのオーディオブックへのCPU/GPUコンバーター<br/>
 高度なTTSエンジンなどを使用。<br/>
 音声クローニングと1696言語をサポート！
-> 重要
+> [!IMPORTANT]
 **このツールは、DRMフリーで合法的に取得された電子書籍でのみ使用することを目的としています。** <br>
 作者は、このソフトウェアのいかなる誤用、またはそれに起因する法的結果について責任を負いません。 <br>
 このツールは責任を持って、適用されるすべての法律に従って使用してください。
@@ -129,14 +129,14 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 *<i> 最新のTTSエンジンはCPUで非常に遅いため、YourTTS、Tacotron2などの低品質のTTSを使用してください。</i>
 
 ## 対応言語
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **アラビア語(ar )**|**中国語(zh )**|**英語(en )**|**スペイン語(es )**|
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **フランス語(fr )** | **ドイツ語(de )** | **イタリア語(it )** | **ポルトガル語(pt )** |
+| **ポーランド語(pl )**|**トルコ語(tr )**|**ロシア語(ru )**|**オランダ語(nl )**|
+| **チェコ語(cs )**|**日本語(ja )**|**ヒンディー語(hi )**|**ベンガル語(bn )**|
+| **ハンガリー語(hu )**|**韓国語(ko )**|**ベトナム語(vi )**|**スウェーデン語(sv )**|
+| **ペルシャ語(fa )** | **ヨルバ語(yo )** | **スワヒリ語(sw )** | **インドネシア語(id )** |
+| **スロバキア語(sk )**|**クロアチア語(hr )**|**タミル語(ta )**|**デンマーク語(da )**|
 - [**+1130の言語と方言はこちら**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **インストールやバグの問題を投稿する前に、未解決および解決済みの課題タブを注意深く検索してください<br>
 あなたの問題がまだ存在しないことを確認するためです。**
 
->[!NOTE]
+注
 **EPUB形式には、章、段落、序文などが何であるかを定義する標準的な構造がありません。<br>
 そのため、まず音声に変換したくないテキストを手動で削除する必要があります。**
 
@@ -198,9 +198,9 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
    
 1. **Webアプリを開く**: ターミナルに表示されるURLをクリックして、Webアプリにアクセスし電子書籍を変換します。 `http://localhost:7860/`
 2. **公開リンクの場合**:
-   `./ebook2audiobook.command --share` (Linux/MacOS)
+   `./ebook2audiobook.command --share` （ Linux/MacOS ）
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` （すべてのOS ）
 
 > [!IMPORTANT]
 **スクリプトを停止して再実行した場合、Gradio GUIインターフェースを更新する必要があります<br>
@@ -561,7 +561,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 #### Readmeの翻訳
 - [x] アラビア語(ara)
 - [x] 中国語(zho)
-- [x] English (eng)
+- [x] 英語（ ENGLISH ）
 - [x] スペイン語（スパ）
 - [x] フランス語(fra)
 - [x] ドイツ語(DEU)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## ベータテスト用のハードウェア寄付を募集
 開発のテストのために、以下のようなあらゆる種類のハードウェアを受け付けています:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- CUDAをサポートするNVIDIA >= 11.8
+- XPUインテルカード
+- ROCmをサポートするROCm AMDカード>= 5.7
 
 @DrewThomasson どんな形でも手伝いたい方は！ 😃
 <!--

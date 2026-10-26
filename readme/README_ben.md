@@ -3,7 +3,7 @@
 
 অধ্যায় ও মেটাডেটা সহ ই-বুক থেকে অডিওবুকে রূপান্তরকারী CPU/GPU কনভার্টার<br/>
 উন্নত TTS ইঞ্জিন ইত্যাদি ব্যবহার করে।<br/>
-ভয়েস ক্লোনিং এবং ১১৫৮টি ভাষা সমর্থন করে!
+ভয়েস ক্লোনিং এবং 1696 টি ভাষা সমর্থন করে!
 > গুরুত্বপূর্ণ
 **এই টুলটি কেবল DRM-মুক্ত, বৈধভাবে অর্জিত ই-বুকের সাথে ব্যবহারের জন্য তৈরি করা হয়েছে।** <br>
 লেখকগণ এই সফটওয়্যারের কোনো অপব্যবহার বা তা থেকে উদ্ভূত কোনো আইনি পরিণতির জন্য দায়ী নন। <br>
@@ -103,13 +103,13 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 
 ## বৈশিষ্ট্য
-- 🔧 **সমর্থিত TTS ইঞ্জিন**: `XTTSv2`, `Bark`, `Fairseq`, `VITS`, `Tacotron2`, `Tortoise`, `GlowTTS`, `YourTTS`
+- 🔧 **TTS ইঞ্জিন সমর্থিত**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS`
 - 📚 **একাধিক ফাইল ফরম্যাট রূপান্তর করুন**: `.epub`, `.mobi`, `.azw3`, `.fb2`, `.lrf`, `.rb`, `.snb`, `.tcr`, `.pdf`, `.txt`, `.rtf`, `.doc`, `.docx`, `.html`, `.odt`, `.azw`, `.tiff`, `.tif`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.zip`
 - 💻 সংক্ষিপ্ত টেক্সট সরাসরি অডিওতে রূপান্তর করার জন্য **টেক্সট এরিয়া**
 - 🔍 ছবি হিসেবে টেক্সট পৃষ্ঠা সহ ফাইলের জন্য **OCR স্ক্যানিং**
 - 🔊 **উচ্চমানের টেক্সট-টু-স্পিচ**, প্রায় রিয়েল-টাইম থেকে প্রায় বাস্তব ভয়েস পর্যন্ত
 - 🗣️ আপনার নিজের ভয়েস ফাইল ব্যবহার করে **ঐচ্ছিক ভয়েস ক্লোনিং**
-- 🌐 **১১৫৮টি ভাষা সমর্থন করে** ([supported languages list](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html))
+- 🌐 ** 1696 টি ভাষা সমর্থন করে ** ([সমর্থিত ভাষার তালিকা](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html))
 - 💻 **কম সম্পদ-বান্ধব** — **2 GB RAM / 1 GB VRAM (ন্যূনতম)**-এ চলে
 - 🎵 **অডিওবুক আউটপুট ফরম্যাট**: mono or stereo `aac`, `flac`, `mp3`, `m4b`, `m4a`, `mp4`, `mov`, `ogg`, `wav`, `webm`
 - 🧠 **SML ট্যাগ সমর্থিত** — বিরতি, থামা, ভয়েস পরিবর্তন ইত্যাদির সূক্ষ্ম নিয়ন্ত্রণ ([see below](#sml-tags-available))
@@ -155,6 +155,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - `[pause]` — নীরবতা (এলোমেলো পরিসর **1.0–1.6 sec.**)
 - `[pause:N]` — নির্দিষ্ট বিরতি (**N sec.**)
 - `[voice:/path/to/voice/file]...[/voice]` — ডিফল্ট বা GUI/CLI থেকে নির্বাচিত ভয়েস থেকে ভয়েস পরিবর্তন করুন
+- `[emotion:sadness]...[/emotion]` — Zonos only: emotion for a passage (happiness, sadness, disgust, fear, surprise, anger, other, neutral) or a mix like `[emotion:sadness=0.7,neutral=0.3]`; other engines ignore it
 
 **আপনার ই-বুকে স্বয়ংক্রিয়ভাবে SML যোগ করার জন্য নিবেদিত আমাদের অন্য রেপোটি দেখুন -> [E2A-SML](https://github.com/DrewThomasson/E2A-SML)**
 
@@ -365,6 +366,7 @@ SML tags available:
 	[pause] — silence (random range **1.0–1.6 sec.**)
 	[pause:N] — fixed pause (**N sec.**)
 	[voice:/path/to/voice/file]...[/voice] — switch voice from default or selected voice from GUI/CLI
+	[emotion:sadness]...[/emotion] — Zonos only: emotion for a passage (happiness, sadness, disgust, fear, surprise, anger, other, neutral) or a mix like [emotion:sadness=0.7,neutral=0.3]; other engines ignore it
 
 ```
 
@@ -399,38 +401,40 @@ SML tags available:
 Docker run image:
     Gradio/GUI:
         CPU:
-          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" --rm -it -p 7860:7860 athomasson2/ebook2audiobook:cpu
+          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" --rm -it -p 7860:7860 athomasson2/ebook2audiobook:cpu
         CUDA:
-          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" --gpus all --rm -it -p 7860:7860 athomasson2/ebook2audiobook:cu[118/122/124/126 etc..]
+          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" --gpus all --rm -it -p 7860:7860 athomasson2/ebook2audiobook:cu[118/122/124/126 etc..]
         ROCM:
-          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" --device=/dev/kfd --device=/dev/dri --rm -it -p 7860:7860 athomasson2/ebook2audiobook:rocm[6.0/6.1/6.4 etc..]
+          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" --device=/dev/kfd --device=/dev/dri --rm -it -p 7860:7860 athomasson2/ebook2audiobook:rocm[6.0/6.1/6.4 etc..]
         XPU:
-          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" --device=/dev/dri --rm -it -p 7860:7860 athomasson2/ebook2audiobook:xpu
+          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" --device=/dev/dri --rm -it -p 7860:7860 athomasson2/ebook2audiobook:xpu
         JETSON:
-          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" --runtime nvidia  --rm -it -p 7860:7860 athomasson2/ebook2audiobook:jetson[5/6/7 etc...]
+          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" --runtime nvidia --rm -it -p 7860:7860 athomasson2/ebook2audiobook:jetson[5/6/7 etc...]
     Headless mode:
         CPU:
-          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --rm -it -p 7860:7860 ebook2audiobook:cpu --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
+          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --rm -it -p 7860:7860 athomasson2/ebook2audiobook:cpu --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
         CUDA:
-          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --gpus all --rm -it -p 7860:7860 ebook2audiobook:cu[118/122/124/126 etc..] --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
+          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --gpus all --rm -it -p 7860:7860 athomasson2/ebook2audiobook:cu[118/122/124/126 etc..] --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
         ROCM:
-          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --device=/dev/kfd --device=/dev/dri --rm -it -p 7860:7860 ebook2audiobook:rocm[6.0/6.1/6.4 etc.] --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
+          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --device=/dev/kfd --device=/dev/dri --rm -it -p 7860:7860 athomasson2/ebook2audiobook:rocm[6.0/6.1/6.4 etc.] --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
         XPU:
-          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --device=/dev/dri --rm -it -p 7860:7860 ebook2audiobook:xpu --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
+          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --device=/dev/dri --rm -it -p 7860:7860 athomasson2/ebook2audiobook:xpu --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
         JETSON:
-          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --runtime nvidia --rm -it -p 7860:7860 ebook2audiobook:jetson[5/6/7 etc.] --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
+          docker run -v "./ebooks:/app/ebooks" -v "./audiobooks:/app/audiobooks" -v "./models:/app/models" -v "./voices:/app/voices" -v "./tmp:/app/tmp" -v "e2a_venvs:/app/lib/classes/tts_engines/venvs" -v "/my/real/ebooks/folder/absolute/path:/app/another_ebook_folder" --runtime nvidia --rm -it -p 7860:7860 athomasson2/ebook2audiobook:jetson[5/6/7 etc.] --headless --ebook "/app/another_ebook_folder/myfile.pdf" [--voice /app/my/voicepath/voice.mp3 etc..]
 Docker Compose (i.e. cuda 12.8:
         Run Gradio GUI:
-               DEVICE_TAG=cu128 docker compose --profile gpu up --no-log-prefix
+               DEVICE_TAG=cu128 docker compose --profile cuda up --no-log-prefix
         Run Headless mode:
-               DEVICE_TAG=cu128 docker compose --profile gpu run --rm ebook2audiobook --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
+               DEVICE_TAG=cu128 docker compose --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 Podman Compose (i.e. cuda 12.8:
         Run Gradio GUI:
-               DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile gpu up
+               DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda up
         Run Headless mode:
-               DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile gpu run --rm ebook2audiobook-gpu --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
+               DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - NOTE: MPS is not exposed in docker so CPU must be used
+- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, OpenVoice etc.)
+  across container runs, so they are not reinstalled each time. To reset them: `docker volume rm e2a_venvs`
 
 ## ক্লোনড ভয়েসেস
 আপনি সমর্থিত যে কোনও অডিও ফর্ম্যাটে যে কোনও ভয়েস অডিও আপলোড করতে পারেন, আদর্শ সময়কাল প্রায় 1 থেকে 5 মিলিয়ন ।
@@ -509,34 +513,50 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [ ] অন্তত xttsv2, fairseq, vits, piper-এর জন্য সিন্ধি ভাষা মডেল যোগ করা (সাহায্য স্বাগত)
 
 #### TTS ইঞ্জিন
-- [x] XTTSv2
-- [x] বাকল
-- [x] ফেয়ারসিক
-- [x] VITS
-- [x] Tacotron2
-- [x] YourTTS
-- [x] কচ্ছপ
-- [x] GlowTTS
-- [x] পাইপার
-- [ ] GPT-SoVITS (https://github.com/RVC-Boss/GPT-SoVITS)
-- [ ] OpenVoice (https://github.com/myshell-ai/OpenVoice)
-- [ ] ফিশ-স্পিচ (https://github.com/fishaudio/fish-speech)
+- [x] ড্রামা বক্স (https://github.com/dramabox-ai/dramabox)[cite: 1]
+- [x] FireRed অডিও / FireRedTTS3 (https://github.com/FireRedTeam/FireRedTTS)[cite: 1]
+- [x] ফিশ-স্পিচ / ফিশ অডিও (https://github.com/fishaudio/fish-speech)[cite: 1]
+- [x] হিগস অডিও টিটিএস (https://github.com/higgs-audio/higgs-audio)[cite: 1]
+- [x] মায়া 1 (https://github.com/maya-ai/maya1)[cite: 1]
+- [x] ওমনিভয়েস (https://github.com/k2-fsa/OmniVoice)[cite: 1]
+- [x] F5-TTS (https://github.com/swivid/f5-tts)[cite: 1]
+- [x] Qwen3-TTS (https://huggingface.co/spaces/Qwen/Qwen3-TTS)[cite: 1]
+- [x] VibeVoice (https://github.com/vibevoice-community/VibeVoice)[cite: 1]
+- [x] VoxCPM2 (https://github.com/voxcpm/voxcpm)[cite: 1]
+- [x] ভক্সট্রাল টিটিএস (https://github.com/voxtral/voxtral-tts)[cite: 1]
+- [x] চ্যাটারবক্স (https://github.com/resemble-ai/chatterbox)[cite: 1]
+- [x] CosyVoice / CosyVoice3 (https://github.com/FunAudioLLM/CosyVoice)[cite: 1]
+- [x] Index-tts / Index TTS2 (https://github.com/index-tts/index-tts)[cite: 1]
+- [x] XTTSv2 (https://github.com/coqui-ai/XTTS)[cite: 1]
+- [x] Breeze TTS (https://github.com/FreedomIntelligence/Breeze-TTS)[cite: 1]
+- [x] কনফুসিয়াস 4 টিটিএস (https://github.com/confucius-tts/confucius4)[cite: 1]
+- [x] বিন্দু TTS (https://github.com/dot-audio/dots-tts)[cite: 1]
+- [x] GPT-SoVITS (https://github.com/RVC-Boss/GPT-SoVITS)[cite: 1]
+- [x] কোকোরো-টিটিএস (https://github.com/hexgrad/kokoro)[cite: 1]
+- [x] KugelAudio (https://github.com/kugel-audio/kugelaudio)[cite: 1]
+- [x] Magpie TTS (https://github.com/magpie-tts/magpie-tts)[cite: 1]
+- [x] MioTTS (https://github.com/mio-tts/miotts)[cite: 1]
+- [x] মস টিটিএস স্থানীয় / ন্যানো (https://github.com/OpenBMB/MossTTS)[cite: 1]
+- [x] নিউটিটিএস / নিউটিএস (https://github.com/neuphonic/neutts)[cite: 1]
+- [x] পকেট টিটিএস (https://github.com/pocket-tts/pocket-tts)[cite: 1]
+- [x] গ্র্যাডিয়াম ফোনন (https://github.com/gradium-ai/xn-ptts)[cite: 1]
+- [x] সুপারটনিক (https://github.com/supertone-inc/supertonic)[cite: 1]
+- [x] Irodori TTS (https://github.com/irodori-tts/irodori-tts)[cite: 1]
+- [x] পাইপার (https://github.com/rhasspy/piper)[cite: 1]
+- [x] VITS (https://github.com/jaywalnut330/vits)[cite: 1]
+- [x] ফেয়ারসিক (https://github.com/facebookresearch/fairseq)[cite: 1]
+- [x] GlowTTS (https://github.com/jaywalnut330/glow-tts)[cite: 1]
+- [x] Tacotron2 (https://github.com/NVIDIA/Tacotron2)[cite: 1]
+- [x] কচ্ছপ (https://github.com/neonbjb/tortoise-tts)[cite: 1]
+- [x] জোনোস (https://github.com/Zyphra/Zonos)[cite: 1]
+- [x] বার্ক (https://github.com/suno-ai/bark)[cite: 1]
+- [x] YourTTS (https://github.com/Edresson/YourTTS)[cite: 1]
+- [x] অর্ফিয়াস-টিটিএস (https://github.com/canopyai/Orpheus-TTS)
+- [x] OpenVoice (https://github.com/myshell-ai/OpenVoice)
 - [ ] ChatTTS (https://github.com/2noise/ChatTTS)
-- [ ] CosyVoice (https://github.com/FunAudioLLM/CosyVoice)
-- [ ] F5-TTS (https://github.com/swivid/f5-tts)
-- [ ] চ্যাটারবক্স (https://github.com/resemble-ai/chatterbox)
-- [ ] সুপারটোনিক (https://github.com/supertone-inc/supertonic)
 - [ ] স্পার্ক-টিটিএস (https://github.com/sparkaudio/spark-tts)
-- [ ] index-tts (https://github.com/index-tts/index-tts)
 - [ ] MeloTTS (https://github.com/myshell-ai/MeloTTS)
-- [ ] কোকোরো-টিটিএস (https://github.com/hexgrad/kokoro)
-- [ ] ওমনিভয়েস (https://github.com/k2-fsa/OmniVoice)
-- [ ] জোনোস (https://github.com/Zyphra/Zonos)
-- [ ] Style-TTS2 (https://github.com/yl4579/StyleTTS2)
-- [ ] অর্ফিয়াস-টিটিএস (https://github.com/canopyai/Orpheus-TTS)
-- [ ] NewTTS (https://github.com/neuphonic/neutts?tab=readme-ov-file)
-- [ ] VIbeVoice (https://github.com/vibevoice-community/VibeVoice)
-- [ ] Qwen3-TTS (https://huggingface.co/spaces/Qwen/Qwen3-TTS)
+- [ ] CRM (https://github.com/SesameAILabs/csm)
 
 #### Readme অনুবাদ
 - [x] আরবি (ara)
@@ -566,13 +586,13 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] স্লোভাক (slk)
 - [x] ক্রোয়েশীয় (hrv)
 
-#### 🐍 OS সামঞ্জস্যতা
-- [x] 🍎 Mac Intel x86
-- [x] 🪟 Windows x86
-- [x] 🐧 Linux x86
-- [x] 🖥️🍏 Apple Silicon Mac
-- [x] 🪟💪 ARM Windows
-- [x] 🐧💪 ARM Linux
+#### 💻 ওএস কম্প্যাটিবিলিটি
+- [x] 🪟 উইন্ডোজ x86
+- [x] 🪟 আর্ম উইন্ডোজ
+- [x] 🍎 ম্যাক ইন্টেল x86
+- [x] 🍎 অ্যাপল সিলিকন ম্যাক
+- [x] 🐧 লিনাক্স x86
+- [x] 🐧 আর্ম লিনাক্স
 
 **********
 
@@ -637,6 +657,12 @@ if config['default_role'] in roles:
 ## আমাদের পরিষেবা বাড়াতে আপনার কি একটি GPU ভাড়া নেওয়ার প্রয়োজন?
 - এখানে একটি জরিপ খোলা আছে https://github.com/DrewThomasson/ebook2audiobook/discussions/889
 -->
+
+## ক্রেডিট
+- [Coqui-tts](https://github.com/idiap/coqui-ai-TTS) - টেক্সট-টু-স্পীচের জন্য একটি গভীর শেখার টুলকিট, গবেষণা এবং উত্পাদনে যুদ্ধ-পরীক্ষিত ।
+- [পাইপার-টিটি](https://github.com/OHF-Voice/piper1-gpl) - দ্রুত এবং স্থানীয় নিউরাল টেক্সট-টু-স্পিচ ইঞ্জিন ।
+- [Zonos2.cpp](https://github.com/Zyphra/zonos2.cpp) -- Zonos2 এর জন্য ggml ইনফারেন্স কোড ।
+- [Audio.cpp](https://github.com/0xShug0/audio.cpp) - ggml দ্বারা চালিত অডিও মডেলের জন্য একটি অল-ইন-ওয়ান, খাঁটি C++ ইনফারেন্স ইঞ্জিন ।
 
 ## বিশেষ ধন্যবাদ
 সমস্ত আর্থিক এবং কোড অবদানকারীদের জন্য, প্রতিটি অবদান এবং পরামর্শ E2A এর গুণমান উন্নত করতে সহায়তা করে ।

@@ -4,7 +4,7 @@
 CPU/GPU-converter van e-book naar audioboek met hoofdstukken en metadata<br/>
 met geavanceerde TTS-engines en nog veel meer.<br/>
 Ondersteunt stemklonen en 1696 talen!
-> Belangrijk
+> [!IMPORTANT]
 **Deze tool is uitsluitend bedoeld voor gebruik met DRM-vrije, legaal verkregen e-books.** <br>
 De auteurs zijn niet verantwoordelijk voor enig misbruik van deze software of voor eventuele juridische gevolgen daarvan. <br>
 Gebruik deze tool verantwoord en in overeenstemming met alle toepasselijke wetten.
@@ -129,14 +129,14 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 *<i> Moderne TTS-engines zijn erg traag op de CPU, gebruik dus TTS van lagere kwaliteit zoals YourTTS, Tacotron2 enz.</i>
 
 ## Ondersteunde talen
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **Arabisch (ar)**    | **Chinees (zh)**    | **Engels (en)**   | **Spaans (es)**   |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **Frans (fr)**    | **Duits (de)**     | **Italiaans (it)**   | **Portugees (pt)** |
+| **Pools (pl)**    | **Turks (tr)**    | **Russisch (ru)**   | **Nederlands (nl)**     |
+| **Tsjechisch (cs)**     | **Japans (ja)**   | **Hindi (hi)**     | **Bengaals (bn)**   |
+| **Hongaars (hu)** | **Koreaans (ko)**     | **Vietnamees (vi)**| **Zweeds (sv)**   |
+| **Perzisch (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesisch (id)**|
+| **Slowaaks (sk)**    | **Kroatisch (hr)**   | **Tamil (ta)**     | **Deens (da)**    |
 - [**+1130 talen en dialecten hier**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Voordat je een installatie- of bugprobleem plaatst, zoek zorgvuldig in het tabblad met open en gesloten issues<br>
 om er zeker van te zijn dat je probleem nog niet bestaat.**
 
->[!NOTE]
+Opmerking
 **Het EPUB-formaat heeft geen enkele standaardstructuur die aangeeft wat een hoofdstuk, alinea, voorwoord enz. is.<br>
 Daarom moet je eerst handmatig alle tekst verwijderen die je niet naar audio wilt converteren.**
 
@@ -200,7 +200,7 @@ Daarom moet je eerst handmatig alle tekst verwijderen die je niet naar audio wil
 2. **Voor een openbare link**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (alle besturingssystemen)
 
 > [!IMPORTANT]
 **Als het script wordt gestopt en opnieuw uitgevoerd, moet je je Gradio-GUI-interface vernieuwen<br>
@@ -474,7 +474,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Veelvoorkomende problemen:
 - Mijn NVIDIA/ROCm/XPU/MPS-GPU wordt niet gedetecteerd?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  De CPU is traag (beter op een server-SMP-CPU), terwijl de GPU een bijna realtime conversie kan bereiken.
-   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   [Bespreking hierover](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Het heeft echter geen zero-shot stemklonen, en de stemmen zijn van Siri-kwaliteit, maar het is veel sneller op de CPU).
 - "Ik heb problemen met afhankelijkheden" - Gebruik gewoon Docker, het is volledig zelfstandig en heeft een headless-modus,
    voeg de parameter `--help` toe aan het einde van het docker run-commando voor meer informatie.
@@ -561,7 +561,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 #### Readme-vertaling
 - [x] Arabisch (ara)
 - [x] Chinees (zho)
-- [x] English (eng)
+- [x] Engels (ENG)
 - [x] Spaans (spa)
 - [x] Frans (fra)
 - [x] Duits (deu)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## Hardwaredonatie voor bètatests gezocht
 We accepteren elk soort hardware om onze ontwikkeling te testen, zoals:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia ondersteunende cuda >= 11,8
+- XPU INTEL-kaarten
+- ROCm AMD-kaarten die ROCm ondersteunen >=5,7
 
 @DrewThomasson als je op welke manier dan ook wilt helpen! 😃
 <!--

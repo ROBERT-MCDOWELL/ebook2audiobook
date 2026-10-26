@@ -4,7 +4,7 @@
 CPU/GPU převodník z e-knihy na audioknihu s kapitolami a metadaty<br/>
 s využitím pokročilých TTS enginů a mnoha dalšího.<br/>
 Podporuje klonování hlasu a 1696 jazyků!
-> DŮLEŽITÉ
+> [!IMPORTANT]
 **Tento nástroj je určen pouze pro použití s e-knihami bez DRM, získanými legálně.** <br>
 Autoři nenesou odpovědnost za jakékoli zneužití tohoto softwaru ani za případné právní následky. <br>
 Používejte tento nástroj zodpovědně a v souladu se všemi platnými zákony.
@@ -129,14 +129,14 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 *<i> Moderní TTS enginy jsou na CPU velmi pomalé, používejte tedy TTS nižší kvality jako YourTTS, Tacotron2 atd.</i>
 
 ## Podporované jazyky
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **Arabština (ar)**    | **Čínština (zh)**    | **Angličtina (en)**   | **Španělština (y)**   |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
+| **Francouzština (fr)**    | **Němčina (de)**     | **Italština (it)**   | **Portugalština (pt)** |
+| **Polština (pl)**    | **Turečtina (tr)**    | **Ruština (ru)**   | **Holandština (nl)**     |
 | **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **Maďarština (hu)** | **Korejština (ko)**     | **Vietnamština (vi)**| **Švédština (sv)**   |
+| **Perština (fa)**   | **Yoruba (yo)**     | **Svahilština (sw)**   | **Indonéština (id)**|
+| **Slovenština (sk)**    | **Chorvatština (hr)**   | **Tamilština (ta)**     | **Dánština (da)**    |
 - [**+1130 jazyků a dialektů zde**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Než nahlásíte problém s instalací nebo chybu, pečlivě prohledejte záložku otevřených a uzavřených issues<br>
 abyste se ujistili, že váš problém ještě neexistuje.**
 
->[!NOTE]
+POZNÁMKA
 **Formát EPUB postrádá jakoukoli standardní strukturu definující, co je kapitola, odstavec, předmluva atd.<br>
 Proto byste měli nejprve ručně odstranit veškerý text, který nechcete převádět na zvuk.**
 
@@ -200,7 +200,7 @@ Proto byste měli nejprve ručně odstranit veškerý text, který nechcete pře
 2. **Pro veřejný odkaz**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (všechny OS)
 
 > [!IMPORTANT]
 **Pokud je skript zastaven a znovu spuštěn, musíte obnovit své grafické rozhraní Gradio<br>
@@ -474,7 +474,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Časté problémy:
 - Moje GPU NVIDIA/ROCm/XPU/MPS není detekováno?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU je pomalé (lepší na serverovém SMP CPU), zatímco GPU může mít téměř převod v reálném čase.
-   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   [Diskuze o této](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Nemá však klonování hlasu zero-shot a hlasy jsou kvality Siri, ale na CPU je mnohem rychlejší).
 - „Mám problémy se závislostmi“ - Použijte prostě Docker, je zcela samostatný a má režim headless,
    pro více informací přidejte na konec příkazu docker run parametr `--help`.
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## Hledáme darování hardwaru pro beta testy
 Přijímáme jakýkoli druh hardwaru pro testování našeho vývoje, jako například:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia podporující cuda >= 11,8
+- Karty XPU intel
+- Karty ROCm AMD podporující ROCm >=5,7
 
 @DrewThomasson, pokud chcete jakkoli pomoci! 😃
 <!--
