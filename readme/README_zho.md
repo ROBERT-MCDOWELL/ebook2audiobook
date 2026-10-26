@@ -4,7 +4,7 @@
 将电子书转换为带有章节和元数据的有声书的 CPU/GPU 转换器<br/>
 使用先进的 TTS 引擎等。<br/>
 支持语音克隆和1696种语言！
-> 重要
+> [!IMPORTANT]
 **本工具仅供与合法获取的无 DRM 电子书一起使用。** <br>
 作者对本软件的任何滥用或由此产生的任何法律后果概不负责。 <br>
 请负责任地使用本工具，并遵守所有适用的法律。
@@ -129,14 +129,14 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 *<i> 现代 TTS 引擎在 CPU 上非常慢，因此请使用质量较低的 TTS，如 YourTTS、Tacotron2 等。</i>
 
 ## 支持的语言
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| * *阿拉伯语(ar) * * | * *中文(zh) * * | * *英语(en) * * | * *西班牙语(es) * * |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| * *法语(fr) * * | * *德语(de) * * | * *意大利语(it) * * | * *葡萄牙语(pt) * * |
+| * *波兰语(pl) * * | * *土耳其语(tr) * * | * *俄语(ru) * * | * *荷兰语(nl) * * |
+| * *捷克语(cs) * * | * *日语(ja) * * | * *印地语(hi) * * | * *孟加拉语(bn) * * |
+| * *匈牙利语(hu) * * | * *韩语(ko) * * | * *越南语(vi) * * | * *瑞典语(sv) * * |
+| * *波斯语(fa) * * | * *约鲁巴语(yo) * * | * *斯瓦希里语(sw) * * | * *印度尼西亚语(id) * * |
+| * *斯洛伐克语(sk) * * | * *克罗地亚语(hr) * * | * *泰米尔语(ta) * * | * *丹麦语(da) * * |
 - [**此处有 +1130 种语言和方言**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **在发布安装或错误问题之前，请仔细搜索打开和已关闭问题的标签页<br>
 以确保您的问题尚不存在。**
 
->[!NOTE]
+注
 **EPUB 格式缺乏任何定义什么是章节、段落、前言等的标准结构。<br>
 因此，您应该首先手动删除任何不想转换为音频的文本。**
 
@@ -198,7 +198,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
    
 1. **打开 Web 应用**：点击终端中提供的 URL，以访问 Web 应用并转换电子书。 `http://localhost:7860/`
 2. **获取公共链接**：
-   `./ebook2audiobook.command --share` (Linux/MacOS)
+   `./ebook2audiobook.command --share` （ Linux/MacOS ）
    `ebook2audiobook.cmd --share` (Windows)
    `python app.py --share` (all OS)
 
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## 征求用于测试版测试的硬件捐赠
 我们接受任何类型的硬件来测试我们的开发，例如：
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia支持CUDA > = 11.8
+- XPU英特尔卡
+- 支持ROCm的ROCm AMD卡> = 5.7
 
 @DrewThomasson 如果您想以任何方式提供帮助！ 😃
 <!--

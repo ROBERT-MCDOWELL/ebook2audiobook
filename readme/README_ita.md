@@ -4,7 +4,7 @@
 Convertitore CPU/GPU da e-book ad audiolibro con capitoli e metadati<br/>
 utilizzando motori TTS avanzati e molto altro.<br/>
 Supporta la clonazione vocale e 1696 lingue!
-> ATTENZIONE
+> [!IMPORTANT]
 **Questo strumento è destinato all'uso esclusivamente con e-book privi di DRM e acquisiti legalmente.** <br>
 Gli autori non sono responsabili di alcun uso improprio di questo software né di eventuali conseguenze legali. <br>
 Utilizza questo strumento in modo responsabile e nel rispetto di tutte le leggi vigenti.
@@ -122,21 +122,21 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - 2 GB di RAM min., 8 GB consigliati.
 - 1 GB di VRAM min., 4 GB consigliati.
 - Virtualizzazione abilitata se eseguito su Windows (solo Docker).
-- CPU, XPU (intel, AMD, ARM)*.
+- CPU, XPU (Intel, AMD, ARM)*.
 - CUDA, ROCm, JETSON
 - MPS (CPU Apple Silicon)
 
 *<i> I moderni motori TTS sono molto lenti su CPU, quindi usa TTS di qualità inferiore come YourTTS, Tacotron2 ecc.</i>
 
 ## Lingue supportate
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **Arabo (ar)**    | **Cinese (zh)**    | **Inglese (en)**   | **Spagnolo (es)**   |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **Francese (fr)**    | **Tedesco (de)**     | **Italiano (it)**   | **Portoghese (pt)** |
+| **Polacco (pl)**    | **Turco (tr)**    | **Russo (ru)**   | **Olandese (nl)**     |
+| **Ceco (cs)**     | **Giapponese (ja)**   | **Hindi (hi)**     | **Bengalese (bn)**   |
+| **Ungherese (hu)** | **Coreano (ko)**     | **Vietnamita (vi)**| **Svedese (sv)**   |
+| **Persiano (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesiano (id)**|
+| **Slovacco (sk)**    | **Croato (hr)**   | **Tamil (ta)**     | **Danese (da)**    |
 - [**+1130 lingue e dialetti qui**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Prima di pubblicare un problema di installazione o un bug, cerca attentamente nella scheda dei problemi aperti e chiusi<br>
 per essere sicuro che il tuo problema non esista già.**
 
->[!NOTE]
+Note
 **Il formato EPUB è privo di qualsiasi struttura standard che definisca cosa sia un capitolo, un paragrafo, una prefazione, ecc.<br>
 Quindi dovresti prima rimuovere manualmente qualsiasi testo che non vuoi convertire in audio.**
 
@@ -474,7 +474,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Problemi comuni:
 - La mia GPU NVIDIA/ROCm/XPU/MPS non viene rilevata?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  La CPU è lenta (meglio su una CPU SMP da server) mentre la GPU può ottenere una conversione quasi in tempo reale.
-   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   [Discussione su questo](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Non ha però la clonazione vocale zero-shot, e le voci sono di qualità Siri, ma è molto più veloce su CPU).
 - «Ho problemi di dipendenze» - Usa semplicemente Docker, è completamente autonomo e ha una modalità headless,
    aggiungi il parametro `--help` alla fine del comando docker run per maggiori informazioni.
@@ -561,7 +561,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 #### Traduzione del Readme
 - [x] Arabo (ara)
 - [x] Cinese (zho)
-- [x] English (eng)
+- [x] Inglese (ENG)
 - [x] Spagnolo (spa)
 - [x] Francese (fra)
 - [x] Tedesco (deu)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## Cercasi donazione di hardware per i beta test
 Accettiamo qualsiasi tipo di hardware per testare il nostro sviluppo, come:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia Supporting cuda >= 11,8
+- Schede intel XPU
+- Schede ROCm AMD che supportano ROCm >=5,7
 
 @DrewThomasson se vuoi dare una mano in qualsiasi modo! 😃
 <!--

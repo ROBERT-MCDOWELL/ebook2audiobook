@@ -4,7 +4,7 @@
 Convertisseur CPU/GPU d'e-book en livre audio avec chapitres et métadonnées<br/>
 utilisant des moteurs TTS avancés et bien plus encore.<br/>
 Prend en charge le clonage vocal et 1696 langues !
-> Important
+> [!IMPORTANT]
 **Cet outil est destiné à être utilisé uniquement avec des e-books sans DRM, acquis légalement.** <br>
 Les auteurs ne sont pas responsables d'une quelconque utilisation abusive de ce logiciel ni des conséquences juridiques qui en découleraient. <br>
 Utilisez cet outil de manière responsable et dans le respect de toutes les lois applicables.
@@ -71,7 +71,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 ![Example](https://github.com/DrewThomasson/VoxNovel/blob/dc5197dff97252fa44c391dc0596902d71278a88/readme_files/example_in_app.jpeg)
 </details>
 
-## README.md
+## Lisezmoi.md
 
 ## Table des matières
 - [ebook2audiobook](#-ebook2audiobook)
@@ -122,21 +122,21 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - 2 Go de RAM min., 8 Go recommandés.
 - 1 Go de VRAM min., 4 Go recommandés.
 - Virtualisation activée si l'exécution se fait sous Windows (Docker uniquement).
-- CPU, XPU (intel, AMD, ARM)*.
+- CPU, XPU (Intel, AMD, ARM)*.
 - CUDA, ROCm, JETSON
 - MPS (CPU Apple Silicon)
 
 *<i> Les moteurs TTS modernes sont très lents sur CPU, utilisez donc des TTS de moindre qualité comme YourTTS, Tacotron2, etc.</i>
 
 ## Langues prises en charge
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **Arabe (ar)**    | **Chinois (zh)**    | **Anglais (en)**   | **Espagnol (es)**   |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **Français (fr)**    | **Allemand (de)**     | **Italien (it)**   | **Portugais (pt)** |
+| **Polonais (pl)**    | **Turc (tr)**    | **Russe (ru)**   | **Néerlandais (nl)**     |
+| **Tchèque (cs)**     | **Japonais (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
+| **Hongrois (hu)** | **Coréen (ko)**     | **Vietnamien (vi)**| **Suédois (sv)**   |
+| **Persan (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonésien (id)**|
+| **Slovaque (sk)**    | **Croate (h)**   | **Tamoul (ta)**     | **Danois (da)**    |
 - [**+1130 langues et dialectes ici**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Avant de publier un problème d'installation ou un bug, recherchez attentivement dans l'onglet des problèmes ouverts et fermés<br>
 pour être sûr que votre problème n'existe pas déjà.**
 
->[!NOTE]
+REMARQUE
 **Le format EPUB ne possède aucune structure standard définissant ce qu'est un chapitre, un paragraphe, une préface, etc.<br>
 Vous devez donc d'abord supprimer manuellement tout texte que vous ne souhaitez pas convertir en audio.**
 
@@ -561,7 +561,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 #### Traduction du Readme
 - [x] Arabe (ara)
 - [x] Chinois (zho)
-- [x] English (eng)
+- [x] FRANCAIS (FR)
 - [x] Espagnol (spa)
 - [x] Français (FRA)
 - [x] Allemand (deu)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## Don de matériel pour les tests bêta recherché
 Nous acceptons tout type de matériel pour tester notre développement, comme :
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia soutenant cuda >= 11,8
+- Cartes intel XPU
+- Cartes ROCm AMD prenant en charge ROCm >=5,7
 
 @DrewThomasson si vous voulez aider de quelque manière que ce soit ! 😃
 <!--

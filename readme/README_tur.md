@@ -4,7 +4,7 @@
 E-Kitaptan bölümler ve meta verilerle sesli kitaba CPU/GPU dönüştürücü<br/>
 gelişmiş TTS motorları ve çok daha fazlasını kullanarak.<br/>
 Ses klonlamayı ve 1696 dili destekler!
-> ÖNEMLİ
+> [!IMPORTANT]
 **Bu araç yalnızca DRM içermeyen, yasal olarak edinilmiş e-kitaplarla kullanılmak üzere tasarlanmıştır.** <br>
 Yazarlar, bu yazılımın herhangi bir şekilde kötüye kullanılmasından veya bundan kaynaklanan yasal sonuçlardan sorumlu değildir. <br>
 Bu aracı sorumlu bir şekilde ve geçerli tüm yasalara uygun olarak kullanın.
@@ -122,21 +122,21 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - 2 GB RAM min., 8 GB önerilir.
 - 1 GB VRAM min., 4 GB önerilir.
 - Windows üzerinde çalıştırılıyorsa sanallaştırma etkin (yalnızca Docker).
-- CPU, XPU (intel, AMD, ARM)*.
-- CUDA, ROCm, JETSON
+- CPU, XPU (intel, AMD, ARM )*.
+- Cuda, ROCm, JETSON
 - MPS (Apple Silicon CPU)
 
 *<i> Modern TTS motorları CPU'da çok yavaştır, bu yüzden YourTTS, Tacotron2 gibi daha düşük kaliteli TTS kullanın.</i>
 
 ## Desteklenen Diller
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **Arapça (ar )**    | **Çince (zh )**    | **İngilizce (en )**   | **İspanyolca (es )**   |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **Fransızca (fr )**    | **Almanca (de )**     | **İtalyanca (it )**   | **Portekizce (pt )** |
+| **Lehçe (pl )**    | **Türkçe (tr )**    | **Rusça (ru )**   | **Hollandaca (nl )**     |
+| **Çekçe (cs )**| **Japonca (ja )**| **Hintçe (hi )**| **Bengalce (bn )**|
+| **Macarca (hu )**| **Korece (ko )**| **Vietnamca (vi )**| **İsveççe (sv )**|
+| **Farsça (fa )**| **Yoruba (yo )**| **Svahili (sw )**| **Endonezce (id )**|
+| **Slovakça (sk )**| **Hırvatça (hr )**| **Tamilce (ta )**| **Danca (da )**|
 - [**+1130 dil ve lehçe burada**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Bir kurulum veya hata sorunu göndermeden önce, açık ve kapalı sorunlar sekmesini dikkatlice arayın<br>
 sorununuzun zaten var olmadığından emin olmak için.**
 
->[!NOTE]
+Not
 **EPUB biçimi, bölüm, paragraf, önsöz vb. şeylerin ne olduğunu tanımlayan herhangi bir standart yapıdan yoksundur.<br>
 Bu yüzden önce sese dönüştürmek istemediğiniz her metni manuel olarak kaldırmalısınız.**
 
@@ -200,7 +200,7 @@ Bu yüzden önce sese dönüştürmek istemediğiniz her metni manuel olarak kal
 2. **Genel Bağlantı için**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (tüm işletim sistemleri)
 
 > [!IMPORTANT]
 **Komut dosyası durdurulup tekrar çalıştırılırsa, Gradio GUI arayüzünüzü yenilemeniz gerekir<br>
@@ -561,7 +561,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 #### Readme Çevirisi
 - [x] Arapça (ara)
 - [x] Çince (zho)
-- [x] English (eng)
+- [x] İngilizce (ENG)
 - [x] İspanyolca (spa)
 - [x] Fransızca (fra)
 - [x] Almanca (deu)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## Beta testleri için donanım bağışı aranıyor
 Geliştirmemizi test etmek için her türlü donanımı kabul ediyoruz, örneğin:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- NVIDIA destek Cuda >= 11.8
+- XPU bilgi kartları
+- ROCm >=5.7 destekleyen ROCm AMD kartları
 
 @DrewThomasson herhangi bir şekilde yardım etmek isterseniz! 😃
 <!--

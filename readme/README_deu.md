@@ -4,7 +4,7 @@
 CPU/GPU-Konverter von E-Book zu Hörbuch mit Kapiteln und Metadaten<br/>
 unter Verwendung fortschrittlicher TTS-Engines und vielem mehr.<br/>
 Unterstützt Sprachklonen und 1696 Sprachen!
-> WICHTIG
+> [!IMPORTANT]
 **Dieses Tool ist ausschließlich für die Verwendung mit DRM-freien, legal erworbenen E-Books bestimmt.** <br>
 Die Autoren übernehmen keine Verantwortung für jeglichen Missbrauch dieser Software oder daraus resultierende rechtliche Folgen. <br>
 Verwenden Sie dieses Tool verantwortungsvoll und in Übereinstimmung mit allen geltenden Gesetzen.
@@ -122,21 +122,21 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - 2 GB RAM min., 8 GB empfohlen.
 - 1 GB VRAM min., 4 GB empfohlen.
 - Virtualisierung aktiviert, falls unter Windows ausgeführt (nur Docker).
-- CPU, XPU (intel, AMD, ARM)*.
+- CPU, XPU (Intel, AMD, ARM)*.
 - CUDA, ROCm, JETSON
 - MPS (Apple-Silicon-CPU)
 
 *<i> Moderne TTS-Engines sind auf der CPU sehr langsam, verwenden Sie daher TTS geringerer Qualität wie YourTTS, Tacotron2 usw.</i>
 
 ## Unterstützte Sprachen
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **Arabisch (ar)**    | **Chinesisch (zh)**    | **Englisch (en)**   | **Spanisch (es)**   |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **Französisch (fr)**    | **Deutsch (de)**     | **Italienisch (it)**   | **Portugiesisch (pt)** |
+| **Polnisch (pl)**    | **Türkisch (tr)**    | **Russisch (ru)**   | **Niederländisch (nl)**     |
+| **Tschechisch (cs)**     | **Japanisch (ja)**   | **Hindi (hi)**     | **Bengalisch (bn)**   |
+| **Ungarisch (hu)** | **Koreanisch (ko)**     | **Vietnamesisch (vi)**| **Schwedisch (sv)**   |
+| **Persisch (fa)**   | **Yoruba (yo)**     | **Suaheli (sw)**   | **Indonesisch (id)**|
+| **Slowakisch (sk)**    | **Kroatisch (hr)**   | **Tamilisch (ta)**     | **Dänisch (da)**    |
 - [**+1130 Sprachen und Dialekte hier**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Bevor Sie ein Installations- oder Fehlerproblem melden, durchsuchen Sie sorgfältig den Tab mit offenen und geschlossenen Issues<br>
 um sicherzustellen, dass Ihr Problem nicht bereits existiert.**
 
->[!NOTE]
+ HINWEIS
 **Dem EPUB-Format fehlt jegliche Standardstruktur, die festlegt, was ein Kapitel, ein Absatz, ein Vorwort usw. ist.<br>
 Daher sollten Sie zunächst manuell jeglichen Text entfernen, den Sie nicht in Audio umwandeln möchten.**
 
@@ -200,7 +200,7 @@ Daher sollten Sie zunächst manuell jeglichen Text entfernen, den Sie nicht in A
 2. **Für einen öffentlichen Link**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (alle Betriebssysteme)
 
 > [!IMPORTANT]
 **Wenn das Skript gestoppt und erneut ausgeführt wird, müssen Sie Ihre Gradio-GUI-Oberfläche aktualisieren<br>
@@ -474,7 +474,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Häufige Probleme:
 - Meine NVIDIA-/ROCm-/XPU-/MPS-GPU wird nicht erkannt?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  Die CPU ist langsam (besser auf einer Server-SMP-CPU), während die GPU eine nahezu Echtzeit-Konvertierung erreichen kann.
-   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   [Diskussion darüber](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Es hat allerdings kein Zero-Shot-Stimmenklonen und bietet Stimmen in Siri-Qualität, ist aber auf der CPU deutlich schneller).
 - „Ich habe Abhängigkeitsprobleme“ - Verwenden Sie einfach Docker, es ist vollständig eigenständig und hat einen Headless-Modus,
    fügen Sie für weitere Informationen den Parameter `--help` am Ende des docker-run-Befehls hinzu.
@@ -561,7 +561,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 #### Readme-Übersetzung
 - [x] Arabisch (ara)
 - [x] Chinesisch (zho)
-- [x] English (eng)
+- [x]            Englisch (eng)
 - [x] Spanisch (Spa)
 - [x] Französisch (fra)
 - [x] Deutsch (deu)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## Hardware-Spende für Beta-Tests gesucht
 Wir nehmen jede Art von Hardware an, um unsere Entwicklung zu testen, wie zum Beispiel:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia unterstützt Cuda >= 11,8
+- XPU-Intel-Karten
+- ROCm AMD-Karten, die ROCm >=5,7 unterstützen
 
 @DrewThomasson, falls Sie auf irgendeine Weise mithelfen möchten! 😃
 <!--

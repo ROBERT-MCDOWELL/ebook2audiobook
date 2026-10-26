@@ -129,14 +129,14 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 *<i> محركات TTS الحديثة بطيئة جدًا على CPU، لذا استخدم TTS أقل جودة مثل YourTTS وTacotron2 وما إلى ذلك.</i>
 
 ## اللغات المدعومة
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+|** العربية (ar )**|** الصينية (zh )**|** الإنجليزية (en )**|** الإسبانية (الإسبانية )**|
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+|** الفرنسية (fr )**|** الألمانية (de )**|** الإيطالية (it   )**|** البرتغالية (pt )**|
+|**البولندية (pl )**|** التركية (tr )**|** الروسية (ru )**|** الهولندية (nl )**|
+|** التشيكية (cs )**|** اليابانية (ja )**|** الهندية (hi )**|** البنغالية (bn )**|
+|** المجرية (hu )**|** الكورية (ko )**|** الفيتنامية (vi )**|** السويدية (sv )**|
+|** الفارسية (fa )**|** يوروبا (yo )**|** السواحلية (sw )**|** الإندونيسية (id )**|
+|** السلوفاكية (sk )**|** الكرواتية (hr )**|** التاميلية (ta )**|** الدنماركية (da )**|
 - [**+1130 لغة ولهجة هنا**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -159,11 +159,11 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 **اطّلع على مستودعنا الآخر المخصص لإضافة SML تلقائيًا في كتابك الإلكتروني -> [E2A-SML](https://github.com/DrewThomasson/E2A-SML)**
 
-> [!IMPORTANT]
-**قبل نشر مشكلة تثبيت أو خطأ، ابحث بعناية في علامة تبويب المشكلات المفتوحة والمغلقة<br>
+> <g id="Bold">هام:</g>
+**Before to post an install or bug issue search carefully to the opened and closed issues TAB<br>
 للتأكد من أن مشكلتك غير موجودة بالفعل.**
 
->[!NOTE]
+ملاحظة
 **تفتقر صيغة EPUB إلى أي بنية معيارية لما هو الفصل أو الفقرة أو المقدمة وما إلى ذلك.<br>
 لذا يجب عليك أولًا أن تزيل يدويًا أي نص لا ترغب في تحويله إلى صوت.**
 
@@ -200,10 +200,10 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 2. **للحصول على رابط عام**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (جميع أنظمة التشغيل)
 
-> [!IMPORTANT]
-**إذا تم إيقاف السكربت وتشغيله مرة أخرى، فستحتاج إلى تحديث واجهة Gradio الرسومية<br>
+> <g id="Bold">هام:</g>
+**If the script is stopped and run again, you need to refresh your gradio GUI interface<br>
 للسماح لصفحة الويب بإعادة الاتصال بمقبس الاتصال الجديد.**
 
 ### Basic  Usage
@@ -474,7 +474,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## المشكلات الشائعة:
 - لا يتم اكتشاف بطاقة NVIDIA/ROCm/XPU/MPS الرسومية لدي؟؟ -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  المعالج بطيء (أفضل على معالج خادم SMP) بينما يمكن لبطاقة GPU إجراء تحويل شبه فوري.
-   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   [مناقشة حول هذا](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (لكنه لا يحتوي على استنساخ صوت zero-shot، وهي أصوات بجودة Siri، لكنه أسرع بكثير على cpu).
 - "أواجه مشكلات في التبعيات" - ما عليك سوى استخدام docker، فهو مكتفٍ ذاتيًا تمامًا وله وضع بدون واجهة،
    أضف المعامل `--help` في نهاية أمر docker run للمزيد من المعلومات.
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## مطلوب تبرع بالعتاد لاختبارات بيتا
 نقبل أي نوع من العتاد لاختبار تطويرنا مثل:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- نفيديا دعم كودا >= 11.8
+- بطاقات إنتل XPU
+- بطاقات ROCm AMD التي تدعم ROCm >=5.7
 
 @DrewThomasson إذا كنت ترغب في المساعدة بأي شكل من الأشكال! 😃
 <!--
