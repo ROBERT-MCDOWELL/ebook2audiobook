@@ -2254,7 +2254,7 @@ def build_interface(args:dict)->gr.Blocks:
                                         session['blocks_current'] = blocks_current
                                         save_db_blocks(session_id)
                                     session['voice'] = fallback
-                                    voice_options[:] = [(i, v) for i, v in voice_options if v != deleted_voice]
+                                    voice_options = [(i, v) for i, v in voice_options if v != deleted_voice]
                                     msg = legends['msg_voice_deleted'].format(name=re.sub(r".wav$", "", selected_name))
                                     show_alert(session_id, {'type': 'info', 'msg': msg})
                                     return gr.update(value='', visible=False), gr.update(), gr.update(), _update_gr_voice_list(session_id)
@@ -2344,35 +2344,35 @@ def build_interface(args:dict)->gr.Blocks:
                                     display_name = f'Speaker {voices_map.get(file_stem, file_stem)}'
                                     wav_path = str(f.with_suffix('.wav'))
                                     piper_options.append((display_name, wav_path))
-                        voice_options = builtin_options + eng_options + bark_options + piper_options
+                        options = builtin_options + eng_options + bark_options + piper_options
                         session['voice_dir'] = os.path.join(voices_dir, '__sessions', f'voice-{session_id}', language)
                         os.makedirs(session['voice_dir'], exist_ok=True)
                         if session['voice_dir'] is not None:
                             session_voice_dir = Path(session['voice_dir'])
-                            voice_options += [
+                            options += [
                                 (os.path.splitext(f.name)[0], str(f))
                                 for f in session_voice_dir.rglob(file_pattern)
                                 if f.is_file()
                             ]
                         if session.get('custom_model_dir'):
-                            voice_options.extend(
+                            options.extend(
                                 (f.stem, str(f))
                                 for f in Path(session['custom_model_dir']).rglob('*.wav')
                                 if f.is_file()
                             )
                         if session['tts_engine'] in tts_engines_with_inner_speaker:
-                            voice_options = [(legends['gr_voice_list_default'], None)] + sorted(voice_options, key=lambda x: x[0].lower())
+                            options = [(legends['gr_voice_list_default'], None)] + sorted(options, key=lambda x: x[0].lower())
                         else:
-                            voice_options = sorted(voice_options, key=lambda x: x[0].lower())
+                            options = sorted(options, key=lambda x: x[0].lower())
                             # no built-in voice and nothing for this language (voices/<lang>, eng fallback, session,
                             # custom model): offer the engine's default voice so a cloning engine always has one
-                            if not voice_options:
+                            if not options:
                                 default_voice = default_engine_settings[session['tts_engine']].get('voice')
                                 if default_voice and os.path.isfile(default_voice):
-                                    voice_options = [(os.path.splitext(os.path.basename(default_voice))[0], default_voice)]
+                                    options = [(os.path.splitext(os.path.basename(default_voice))[0], default_voice)]
                         if session['voice'] is not None and isinstance(session.get('voice'), str):
                             if session['voice_dir'] not in session['voice']:
-                                if not any(v[1] == session['voice'] for v in voice_options):
+                                if not any(v[1] == session['voice'] for v in options):
                                     voice_path = Path(session['voice'])
                                     parts = list(voice_path.parts)
                                     if "voices" in parts:
@@ -2380,27 +2380,27 @@ def build_interface(args:dict)->gr.Blocks:
                                         if idx + 1 < len(parts):
                                             parts[idx + 1] = language
                                             new_voice_path = str(Path(*parts))
-                                            if os.path.exists(new_voice_path) and any(v[1] == new_voice_path for v in voice_options):
+                                            if os.path.exists(new_voice_path) and any(v[1] == new_voice_path for v in options):
                                                 session['voice'] = new_voice_path
                                             else:
                                                 parts[idx + 1] = 'eng'
                                                 new_voice_path = str(Path(*parts))
-                                                if os.path.exists(new_voice_path) and any(v[1] == new_voice_path for v in voice_options):
+                                                if os.path.exists(new_voice_path) and any(v[1] == new_voice_path for v in options):
                                                     session['voice'] = new_voice_path
                                                 else:
-                                                    if voice_options and len(voice_options) > 0:
-                                                        session['voice'] = voice_options[0][1]
+                                                    if options and len(options) > 0:
+                                                        session['voice'] = options[0][1]
                                                     else:
                                                         session['voice'] = default_engine_settings[session['tts_engine']]['voice']
                         else:
-                            if voice_options and voice_options[0][1] is not None:
+                            if options and options[0][1] is not None:
                                 new_voice_path = models[session['fine_tuned']]['voice']
-                                if os.path.exists(new_voice_path) and any(v[1] == new_voice_path for v in voice_options):
+                                if os.path.exists(new_voice_path) and any(v[1] == new_voice_path for v in options):
                                     session['voice'] = new_voice_path
                                 else:
-                                    session['voice'] = voice_options[0][1]
+                                    session['voice'] = options[0][1]
                         if session['status'] in [status_tags['READY'], status_tags['END']]:
-                            voice_values = {v[1] for v in voice_options}
+                            voice_values = {v[1] for v in options}
                             blocks_current = session.get('blocks_current') or {}
                             blocks_changed = False
                             for block in blocks_current.get('blocks') or []:
@@ -2430,7 +2430,8 @@ def build_interface(args:dict)->gr.Blocks:
                         selected_voice = session['voice']
                         if session.get('ebook_mode') == ebook_modes['DIRECTORY'] and session.get('ebook_selected'):
                             selected_voice = (session.get('voice_map') or {}).get(session['ebook_selected'], session['voice'])
-                        return gr.update(choices=voice_options, value=selected_voice, label=legends['gr_voice_list'])
+                        voice_options = options
+                        return gr.update(choices=options, value=selected_voice, label=legends['gr_voice_list'])
                 except Exception as e:
                     error = f'_update_gr_voice_list(): {e}!'
                     exception_alert(session_id, error)
@@ -2482,7 +2483,7 @@ def build_interface(args:dict)->gr.Blocks:
 
             def _update_gr_custom_model_list(session_id:str)->dict:
                 try:
-                    nonlocal models, custom_model_options
+                    nonlocal models
                     session = context.get_session(session_id)
                     if session and session.get('id', False):
                         models = load_engine_presets(session['tts_engine'])
