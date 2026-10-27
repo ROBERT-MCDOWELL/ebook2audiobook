@@ -5,18 +5,18 @@
 #   stdout <- {"ready": true, "samplerate": 24000, "device": "..."} once loaded
 #             {"ready": false, "error": "..."} then exit 1 if loading failed
 #   stdin  -> {"op": "ref", "voice"}: prepares the voice file's clone prompt
-#   stdout <- {"ok": true, "cloned": bool, "language": "..."}: false when ChatTTS cannot clone it (no English or Chinese
-#             speech heard), its seeded speaker speaks instead, for e2a to convert to the voice (default_vc_model)
+#   stdout <- {"ok": true, "cloned": bool, "language": "..." | null}: cloned false when ChatTTS cannot clone it, language
+#             the one Whisper heard (null: no speech)
 #   stdin  -> {"op": "tts", "text", "voice", "file", "language", "temperature", "top_k", "top_p", "repetition_penalty",
 #              "speed", "tokens_per_char", "max_new_tokens"}
-#   stdout <- {"ok": true, "file": "...", "samplerate": 24000, "samples": n, "capped": bool, "cloned": bool}
+#   stdout <- {"ok": true, "file": "...", "samplerate": 24000, "samples": n, "capped": bool}
 #             {"ok": false, "error": "...", "oom": bool}
 #   EOF on stdin -> exit 0 (that is how e2a unloads the model and frees its VRAM)
 #
 # Upstream's Chat.infer (ChatTTS/core.py), text refinement off: the book text is read as written, never rewritten with
 # the fillers, laughs and pauses the refine pass adds. The voice file is cloned as upstream's webui does (its DVAE
 # codes as spk_smp, its transcript as txt_smp), with the reference encoded and transcribed once per voice instead of
-# at every sentence. A voice it cannot clone is spoken by one seeded speaker, which e2a converts to that voice
+# at every sentence. A voice it cannot clone (no English or Chinese speech in it) is refused: e2a stops there
 import os, sys, re, json, argparse, hashlib, gc, logging, faulthandler
 
 def main()->int:
@@ -37,7 +37,6 @@ def main()->int:
     parser.add_argument('--cache_dir', required=True)
     parser.add_argument('--ref_max', type=float, default=10.0)
     parser.add_argument('--ref_languages', default='en,zh')
-    parser.add_argument('--speaker_seed', type=int, default=2222)
     args = parser.parse_args()
     try:
         os.makedirs(args.cache_dir, exist_ok=True)
@@ -98,13 +97,11 @@ def main()->int:
     cap_flag = CapFlag()
     logger.addHandler(cap_flag)
     ref_languages = None
-    seeded_speaker = None
     refs = {}
 
     def prepare(voice:str)->dict:
-        # the voice file's clone prompt, made once per voice: cut, transcribed, encoded. A voice ChatTTS cannot clone
-        # gets the seeded speaker, which e2a then converts to that voice (default_vc_model)
-        nonlocal ref_languages, seeded_speaker
+        # the voice file's clone prompt, made once per voice: cut, transcribed, encoded
+        nonlocal ref_languages
         # the reference window is part of the clip
         voice_key = f'{voice}:{os.path.getmtime(voice)}:{args.ref_max}'
         if voice_key in refs:
@@ -170,17 +167,11 @@ def main()->int:
             with torch.inference_mode():
                 spk_smp = chat.sample_audio_speaker(np.ascontiguousarray(data, dtype=np.float32))
             txt_smp = chat.normalizer(ref_text, True, True, ref_languages.get(ref_language))
-            refs[voice_key] = {'cloned': True, 'language': ref_language, 'spk_emb': None, 'spk_smp': spk_smp, 'txt_smp': txt_smp}
+            refs[voice_key] = {'cloned': True, 'language': ref_language, 'spk_smp': spk_smp, 'txt_smp': txt_smp}
         else:
-            # the clone prompt pairs the codes with their text: a reference in a language ChatTTS does not
-            # read, or without speech, has none it can use. One fixed speaker instead, sampled once on cpu so
-            # every device gets the same one
-            if seeded_speaker is None:
-                generator = torch.Generator(device='cpu').manual_seed(args.speaker_seed)
-                std, mean = chat.speaker.std.cpu(), chat.speaker.mean.cpu()
-                seeded_speaker = chat.speaker._encode(torch.randn(chat.speaker.dim, generator=generator, dtype=std.dtype).mul_(std).add_(mean))
-            print(f'chattts_worker: the voice reference {voice} cannot be cloned (no speech in {sorted(ref_languages)} heard: {ref_language or "none"}), speaker seed {args.speaker_seed} speaks for e2a\'s voice conversion', file=sys.stderr)
-            refs[voice_key] = {'cloned': False, 'language': ref_language, 'spk_emb': seeded_speaker, 'spk_smp': None, 'txt_smp': None}
+            # the clone prompt pairs the codes with their text: a reference in a language ChatTTS does not read, or
+            # without speech, has none it can use
+            refs[voice_key] = {'cloned': False, 'language': ref_language if ref_text else None}
         return refs[voice_key]
 
     while True:
@@ -200,6 +191,8 @@ def main()->int:
             if req['op'] == 'ref':
                 proto.write(json.dumps({'ok': True, 'cloned': ref['cloned'], 'language': ref['language']}) + '\n')
                 continue
+            if not ref['cloned']:
+                raise ValueError(f"the voice reference {req['voice']} holds no English or Chinese speech ({ref['language'] or 'no speech'} heard): ChatTTS cannot clone it")
             text = req['text'].strip()
             # generation cap: tokens_per_char per character, a Han / kana / Hangul character counted as 3 (a whole
             # syllable), at least 5 s of speech, at most max_new_tokens
@@ -207,7 +200,6 @@ def main()->int:
             max_new_tokens = min(int(req.get('max_new_tokens', 2048)), max(250, text_units * int(req.get('tokens_per_char', 10))))
             params = ChatTTS.Chat.InferCodeParams(
                 prompt=f"[speed_{min(max(int(req.get('speed', 5)), 0), 9)}]",
-                spk_emb=ref['spk_emb'],
                 spk_smp=ref['spk_smp'],
                 txt_smp=ref['txt_smp'],
                 temperature=float(req.get('temperature', 0.3)),
@@ -223,7 +215,7 @@ def main()->int:
             if audio.size == 0:
                 raise ValueError(f'no audio generated for: {text[:80]}')
             sf.write(req['file'], audio, sampling_rate, subtype='FLOAT')
-            reply = {'ok': True, 'file': req['file'], 'samplerate': sampling_rate, 'samples': int(audio.shape[0]), 'capped': cap_flag.hit, 'cloned': ref['cloned']}
+            reply = {'ok': True, 'file': req['file'], 'samplerate': sampling_rate, 'samples': int(audio.shape[0]), 'capped': cap_flag.hit}
         except Exception as e:
             # no retry here: e2a's convert() returns False and core.py unloads the
             # engine, which closes stdin and ends this process.

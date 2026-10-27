@@ -14,14 +14,13 @@ class ChatTTS(TTSUtils, TTSRegistry, name='chattts'):
             self.speakers_path = None
             self.speaker = None
             self.tts_key = self.session['model_cache']
-            self.tts_zs_key = default_vc_model.rsplit('/', 1)[-1]
             self.pth_voice_file = None
             self.resampler_cache = {}
             self.resampled_wav_cache = {}
             self.audio_segments = []
             self.models = load_engine_presets(self.session['tts_engine'])
-            # cloned: voice file -> whether ChatTTS clones it (the worker tells, once per voice)
-            self.params = {'cloned': {}}
+            # cloned: the voice files the worker has accepted for cloning (asked once per voice)
+            self.params = {'cloned': set()}
             tts_engine = self.session.get('tts_engine')
             # effective language for TTS (target when translating, else source)
             self.language = self.session.get('language')
@@ -361,9 +360,8 @@ class ChatTTS(TTSUtils, TTSRegistry, name='chattts'):
                 '--asr_dir', self.asr_dir,
                 '--cache_dir', os.path.join(self.venv_dir, 'refs'),
                 '--ref_max', str(settings['ref_max']),
-                # the voice file is only cloned when Whisper hears one of these in it, else this seed's speaker speaks
-                '--ref_languages', ','.join(dict.fromkeys(settings['languages'].values())),
-                '--speaker_seed', str(settings['speaker_seed'])
+                # a voice file is only cloned when Whisper hears one of these in it
+                '--ref_languages', ','.join(dict.fromkeys(settings['languages'].values()))
             ]
             engine = loaded_tts.get(self.tts_key)
             if isinstance(engine, SubprocessPipe) and (engine.cmd != cmd or engine.process is None or engine.process.poll() is not None):
@@ -423,8 +421,8 @@ class ChatTTS(TTSUtils, TTSRegistry, name='chattts'):
                     else:
                         # re-read per part: an inline [voice:…] tag can switch the voice in the middle of the sentence.
                         # Only the voice path crosses the pipe: the worker cuts the reference, transcribes and encodes it
-                        # once per voice file, and tells whether ChatTTS clones it. One it cannot clone (no English or
-                        # Chinese speech in it) is spoken by ChatTTS' seeded speaker and converted to it (default_vc_model)
+                        # once per voice file, and tells whether ChatTTS can clone it. One it cannot (no English or
+                        # Chinese speech in it) stops the conversion: any stand-in voice would not be the one chosen
                         current_voice = self.params['current_voice']
                         if current_voice not in self.params['cloned']:
                             reply = self.engine.send({'op': 'ref', 'voice': current_voice})
@@ -433,69 +431,30 @@ class ChatTTS(TTSUtils, TTSRegistry, name='chattts'):
                                 error = f"convert() error: {reply.get('error')} voice: {current_voice}"
                                 print(error)
                                 return False, error
-                            self.params['cloned'][current_voice] = bool(reply.get('cloned'))
-                            if not self.params['cloned'][current_voice]:
-                                msg = legends['msg_chattts_voice_vc'].format(engine=self.session['tts_engine'], voice=Path(current_voice).stem, language=reply.get('language') or '-', vc_model=self.tts_zs_key)
-                                show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
-                                if show_alert is not None:
-                                    show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
+                            if not reply.get('cloned'):
+                                if reply.get('language'):
+                                    error = legends['error_chattts_voice_language'].format(engine=self.session['tts_engine'], voice=Path(current_voice).stem, language=reply['language'])
                                 else:
-                                    print(msg)
-                        use_zs = not self.params['cloned'][current_voice]
-                        if use_zs and not self.engine_zs:
-                            # loaded on the first voice ChatTTS cannot clone only: its own clones never need it
-                            self.engine_zs = self._load_engine_zs(self.device)
-                            if not self.engine_zs:
-                                error = legends['error_engine_not_loaded'].format(engine=self.tts_zs_key)
-                                return False, error
-                        # a voice conversion that speaks the text itself (task "tts", qwen3_tts) does not need ChatTTS
-                        if use_zs and self.engine_zs.resynthesis:
-                            samplerate = self.params['samplerate']
-                        else:
-                            reply = self.engine.send({
-                                'op': 'tts',
-                                'text': part,
-                                'voice': current_voice,
-                                'file': part_file,
-                                # picks upstream's text normalizer for the sentence (zh: full-width punctuation)
-                                'language': default_engine_settings[self.session['tts_engine']]['languages'][self.language],
-                                **self.fine_tuned_params
-                            })
-                            if not reply.get('ok'):
-                                # no retry: core.py unloads the engine, which stops the worker
-                                error = f"convert() error: {reply.get('error')} segment: {part}"
+                                    error = legends['error_chattts_voice_no_speech'].format(engine=self.session['tts_engine'], voice=Path(current_voice).stem)
                                 print(error)
                                 return False, error
-                            audio_part, samplerate = sf.read(part_file, dtype='float32')
-                        if use_zs:
-                            # voice conversion worker (VoiceConversion, default_vc_model): only paths and the text cross the
-                            # pipe, the worker cuts and keeps one reference clip per voice file and the server resamples both sides itself
-                            vc_file = f'{os.path.splitext(part_file)[0]}.vc.wav'
-                            reply = self.engine_zs.send({
-                                'op': 'vc',
-                                'source': os.path.abspath(part_file),
-                                'voice': os.path.abspath(current_voice),
-                                'file': os.path.abspath(vc_file),
-                                'text': part,
-                                'language': self.language
-                            })
-                            if not reply.get('ok'):
-                                # no retry: core.py unloads the engine, which stops the VC worker. A GPU server that died counts
-                                # against its package (dropped on the second death, CPU last)
-                                if reply.get('server_exited') and self.engine_zs.backend != 'cpu':
-                                    self.engine_zs.gpu_crashes[self.engine_zs.package_name] = self.engine_zs.gpu_crashes.get(self.engine_zs.package_name, 0) + 1
-                                if os.path.exists(vc_file):
-                                    os.unlink(vc_file)
-                                error = f"convert() error: {reply.get('error')} segment: {part}"
-                                print(error)
-                                return False, error
-                            audio_part, zs_samplerate = sf.read(vc_file, dtype='float32')
-                            os.unlink(vc_file)
-                            if audio_part.ndim > 1:
-                                audio_part = audio_part.mean(axis=1)
-                            audio_part = self._resample_audiodata(audio_part, int(zs_samplerate), int(samplerate))
-                        if os.path.exists(part_file):
-                            os.unlink(part_file)
+                            self.params['cloned'].add(current_voice)
+                        reply = self.engine.send({
+                            'op': 'tts',
+                            'text': part,
+                            'voice': current_voice,
+                            'file': part_file,
+                            # picks upstream's text normalizer for the sentence (zh: full-width punctuation)
+                            'language': default_engine_settings[self.session['tts_engine']]['languages'][self.language],
+                            **self.fine_tuned_params
+                        })
+                        if not reply.get('ok'):
+                            # no retry: core.py unloads the engine, which stops the worker
+                            error = f"convert() error: {reply.get('error')} segment: {part}"
+                            print(error)
+                            return False, error
+                        audio_part, samplerate = sf.read(part_file, dtype='float32')
+                        os.unlink(part_file)
                         if not is_audio_data_valid(audio_part):
                             error = 'audio_part not valid'
                             return False, error

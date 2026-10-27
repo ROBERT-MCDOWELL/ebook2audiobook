@@ -55,8 +55,7 @@ TTS_ENGINES = {
 }
 
 # voice conversion: a voice file picked for a built-in voice engine (piper, vits, fairseq, glowtts, tacotron, orpheus, phonon and
-# the audio.cpp ones with clone False), or one chattts cannot clone (no English or Chinese speech in it), turns its output into
-# that voice, on audio.cpp's server (common/voice_conversion.py).
+# the audio.cpp ones with clone False) turns its output into that voice, on audio.cpp's server (common/voice_conversion.py).
 # default_vc_model below picks one; the last part of its path is the zero-shot engine's tts_zs_key (loaded_tts, model_zs_cache).
 # task "vc": voice to voice. task "tts": the engine's voice clone speaks the sentence text again (no voice to voice).
 # files: GGUF in audiocpp_repo; engine: the files of that engine's "internal" preset instead (one download for both).
@@ -484,7 +483,8 @@ default_engine_settings = {
         "asr_model": "openai/whisper-large-v3-turbo",
         # the worker cuts a reference clip of at most ref_max seconds (its codes are part of every prompt)
         "ref_max": 10.0,
-        # upstream's languages (no language token: lang only picks its text normalizer)
+        # upstream's languages (no language token: lang only picks its text normalizer). The voice file must speak one
+        # of them too: its transcript is part of the clone prompt, so the conversion stops on any other voice file
         "languages": {"eng": "en", "zho": "zh"},
         "samplerate": 24000,
         # upstream defaults (Chat.InferCodeParams)
@@ -494,10 +494,6 @@ default_engine_settings = {
         "repetition_penalty": 1.05,
         # upstream's [speed_N] prompt token: 0 (slowest) to 9, 5 by default
         "speed": 5,
-        # speaker for a voice file ChatTTS cannot clone (no English or Chinese speech heard in it), converted to that
-        # voice by default_vc_model: sampled once on cpu from this seed, as upstream's sample_random_speaker() after
-        # torch.manual_seed()
-        "speaker_seed": 2222,
         # generation cap per sentence part: tokens_per_char x its length (46.875 codes per second of speech; 10 per
         # character is ~3x a latin letter's speech, a Han character counts as 3), at most max_new_tokens (upstream's
         # 2048, ~43 s): a looping generation stops there
