@@ -55,11 +55,17 @@ def main()->int:
         import torch
         import torch.distributed
         if not torch.distributed.is_available():
-            # torch built without distributed support (USE_DISTRIBUTED=0: the jetson wheels, e2a's macOS +vulkan
-            # builds): vector_quantize_pytorch's residual_fsq.py (ChatTTS' DVAE quantizer) imports torch.distributed and
-            # calls is_initialized() at run time; single-process inference only needs them to exist
+            # torch built without distributed support (USE_DISTRIBUTED=0: the jetson wheels, e2a's macOS builds):
+            # vector_quantize_pytorch (ChatTTS' DVAE quantizer) imports torch.distributed.nn, which takes group and
+            # ReduceOp from torch.distributed and asks torch.distributed.rpc whether it is available, and its
+            # residual_fsq.py calls is_initialized() at run time; single-process inference only needs them to exist
             import types
-            for attr, value in (('ReduceOp', types.SimpleNamespace(SUM='sum', AVG='avg', PRODUCT='product', MIN='min', MAX='max')), ('is_initialized', lambda: False), ('get_rank', lambda: 0), ('get_world_size', lambda: 1)):
+            try:
+                # importable without distributed support, it then reports itself unavailable
+                import torch.distributed.rpc
+            except Exception:
+                torch.distributed.rpc = types.SimpleNamespace(is_available=lambda: False)
+            for attr, value in (('group', types.SimpleNamespace(WORLD=None)), ('ReduceOp', types.SimpleNamespace(SUM='sum', AVG='avg', PRODUCT='product', MIN='min', MAX='max')), ('is_initialized', lambda: False), ('get_rank', lambda: 0), ('get_world_size', lambda: 1)):
                 if not hasattr(torch.distributed, attr):
                     setattr(torch.distributed, attr, value)
         import soundfile as sf

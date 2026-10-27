@@ -321,10 +321,14 @@ class ChatTTS(TTSUtils, TTSRegistry, name='chattts'):
                 probe_script = '\n'.join([
                     'import sys',
                     'sys.path.insert(0, ".")',
-                    # same torch.distributed stubs as the worker, for torch built without distributed (jetson, macOS vulkan)
+                    # same torch.distributed stubs as the worker, for torch built without distributed (jetson, macOS)
                     'import types, torch, torch.distributed',
                     'if not torch.distributed.is_available():',
-                    '    for attr, value in (("ReduceOp", types.SimpleNamespace(SUM="sum", AVG="avg", PRODUCT="product", MIN="min", MAX="max")), ("is_initialized", lambda: False), ("get_rank", lambda: 0), ("get_world_size", lambda: 1)):',
+                    '    try:',
+                    '        import torch.distributed.rpc',
+                    '    except Exception:',
+                    '        torch.distributed.rpc = types.SimpleNamespace(is_available=lambda: False)',
+                    '    for attr, value in (("group", types.SimpleNamespace(WORLD=None)), ("ReduceOp", types.SimpleNamespace(SUM="sum", AVG="avg", PRODUCT="product", MIN="min", MAX="max")), ("is_initialized", lambda: False), ("get_rank", lambda: 0), ("get_world_size", lambda: 1)):',
                     '        if not hasattr(torch.distributed, attr):',
                     '            setattr(torch.distributed, attr, value)',
                     'import soundfile',
