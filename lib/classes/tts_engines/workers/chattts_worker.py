@@ -71,6 +71,7 @@ def main()->int:
         import soundfile as sf
         import soxr
         import ChatTTS
+        import ChatTTS.model.gpt as chattts_gpt
         # upstream's warnings reach e2a's log, except the one its text normalizer gives for every sentence holding a
         # character it drops (quotes, question marks...); its info lines (homophone replacements) stay out
         logger = logging.getLogger('ChatTTS')
@@ -83,12 +84,29 @@ def main()->int:
         device = args.device
         # every model in fp32, as upstream runs them; on mps upstream itself keeps the GPT and Vocos on the cpu
         model_device = torch.device('cuda:0' if device == 'cuda' else device)
+        if model_device.type in ('cuda', 'xpu'):
+            # upstream builds the GPT on the host, then copies it to the device: two fp32 copies at once, which a
+            # unified-memory jetson cannot spare. Loaded straight onto the device instead (device_map, as the Orpheus
+            # and Spark-TTS workers do), upstream's .to() after it is then a no-op. Not on mps: upstream keeps the GPT
+            # on the cpu there
+            upstream_llama = chattts_gpt.LlamaModel
+
+            class LlamaOnDevice(upstream_llama):
+                @classmethod
+                def from_pretrained(cls, *args, **kwargs):
+                    return upstream_llama.from_pretrained(*args, **{'device_map': str(model_device), 'low_cpu_mem_usage': True, **kwargs})
+
+            chattts_gpt.LlamaModel = LlamaOnDevice
         chat = ChatTTS.Chat(logger)
         # source "custom": the folder above, checked against upstream's sha256 map, so a broken or changed file stops
         # here instead of speaking noise
         if not chat.load(source='custom', custom_path=args.model_dir, device=model_device, compile=False):
             raise RuntimeError(f'the ChatTTS files in {args.model_dir} do not match upstream\'s checksums: delete that folder to download them again')
         sampling_rate = int(chat.config.vocos.feature_extractor.init_args.sample_rate)
+        # the host copies the other models were loaded through, back to the system before the first sentence
+        gc.collect()
+        if model_device.type == 'cuda':
+            torch.cuda.empty_cache()
     except Exception as e:
         proto.write(json.dumps({'ready': False, 'error': f'{type(e).__name__}: {e}'}) + '\n')
         return 1

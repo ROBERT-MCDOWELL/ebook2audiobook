@@ -469,12 +469,13 @@ default_engine_settings = {
         # package list = upstream's own install_requires (setup.py in the extracted tree, read as Orpheus' is: its
         # requirements.txt adds the webui, the IPython examples and the Linux-only pynini text normalizers), torch from
         # the device's PyTorch index (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller as fallback.
-        # requests: ChatTTS.utils imports it, setup.py misses it (upstream fixed requirements.txt only); soundfile /
-        # soxr cut and resample the voice references; hf_xet as for GPT-SoVITS (windows reports AMD64, so
+        # requests: ChatTTS.utils imports it, setup.py misses it (upstream fixed requirements.txt only); accelerate:
+        # the worker loads the GPT straight onto the GPU (device_map, transformers needs it), no host copy first;
+        # soundfile / soxr cut and resample the voice references; hf_xet as for GPT-SoVITS (windows reports AMD64, so
         # huggingface_hub's own marker misses it)
         "requirements_file": "setup.py",
         "requirements_exclude": [],
-        "requirements_extra": ["requests", "soundfile", "soxr", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
+        "requirements_extra": ["requests", "accelerate", "soundfile", "soxr", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
         # every package installs as a wheel, so no platform ever needs a compiler; encodec (vocos' dependency) only
         # exists as a pure-python source
         "packages_sdist": ["encodec"],
