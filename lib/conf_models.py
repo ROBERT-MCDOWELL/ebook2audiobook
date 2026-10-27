@@ -425,12 +425,13 @@ default_engine_settings = {
         # (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller as fallback. Left out: gradio (webui).
         # requirements_unpinned: upstream pins every package to its February 2025 release (torch 2.5.1 has no Blackwell
         # kernels nor torch_matrix's newer builds, transformers 4.46.2 no recent tokenizers wheels): names only, the
-        # resolver takes what fits the device's torch. hf_xet as for GPT-SoVITS (windows reports AMD64, so
-        # huggingface_hub's own marker misses it: the weights are on Xet)
+        # resolver takes what fits the device's torch. accelerate: the worker loads the LLM straight onto the GPU
+        # (device_map, transformers needs it), upstream's list has none. hf_xet as for GPT-SoVITS (windows reports
+        # AMD64, so huggingface_hub's own marker misses it: the weights are on Xet)
         "requirements_file": "requirements.txt",
         "requirements_unpinned": True,
         "requirements_exclude": ["gradio"],
-        "requirements_extra": ["hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
+        "requirements_extra": ["accelerate", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
         # every package installs as a wheel, so no platform ever needs a compiler
         "packages_sdist": [],
         # reference transcription (the voice clone prompt is the reference's audio tokens + its text), Whisper run on
