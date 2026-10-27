@@ -12,6 +12,7 @@ TTS_ENGINES = {
     "F5TTS": "f5tts",
     "ORPHEUS": "orpheus",
     "SPARKTTS": "sparktts",
+    "CHATTTS": "chattts",
     "OPENVOICE": "openvoice",
     "PHONON": "phonon",
     "XTTS": "xtts",
@@ -455,6 +456,56 @@ default_engine_settings = {
         "voices": {},
         # 0.5B LLM (bf16 from sm 8.0, fp32 below) + BiCodec + wav2vec2-large (fp32)
         "rating": {"VRAM": 3, "CPU": 2, "RAM": 6, "Realism": 4}
+    },
+    TTS_ENGINES['CHATTTS']: {
+        # runs in its own uv venv (lib/classes/tts_engines/venvs/chattts) behind a persistent worker, from the pinned
+        # source tree: the worker imports ChatTTS from the extracted repo root (the PyPI package is older: this commit's
+        # tokenizer follows the latest transformers). A 20 layer Llama (transformers) writes DVAE codes, ChatTTS'
+        # decoder and Vocos turn them into 24 kHz audio.
+        # repo: GPT, DVAE (its encoder tokenizes the voice references), decoder, Vocos and tokenizer, under asset/
+        "repo": "2Noise/ChatTTS",
+        "source": "https://github.com/2noise/ChatTTS/archive/77b89ee281cd479f5b1a787ada330dc975ca1f2a.tar.gz",
+        "python": "3.12",
+        # package list = upstream's own install_requires (setup.py in the extracted tree, read as Orpheus' is: its
+        # requirements.txt adds the webui, the IPython examples and the Linux-only pynini text normalizers), torch from
+        # the device's PyTorch index (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller as fallback.
+        # requests: ChatTTS.utils imports it, setup.py misses it (upstream fixed requirements.txt only); soundfile /
+        # soxr cut and resample the voice references; hf_xet as for GPT-SoVITS (windows reports AMD64, so
+        # huggingface_hub's own marker misses it)
+        "requirements_file": "setup.py",
+        "requirements_exclude": [],
+        "requirements_extra": ["requests", "soundfile", "soxr", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
+        # every package installs as a wheel, so no platform ever needs a compiler; encodec (vocos' dependency) only
+        # exists as a pure-python source
+        "packages_sdist": ["encodec"],
+        # reference transcription (the voice clone prompt is the reference's DVAE codes + its text), Whisper run on
+        # cpu; one copy under models/tts shared with the other engines using it
+        "asr_model": "openai/whisper-large-v3-turbo",
+        # the worker cuts a reference clip of at most ref_max seconds (its codes are part of every prompt)
+        "ref_max": 10.0,
+        # upstream's languages (no language token: lang only picks its text normalizer)
+        "languages": {"eng": "en", "zho": "zh"},
+        "samplerate": 24000,
+        # upstream defaults (Chat.InferCodeParams)
+        "temperature": 0.3,
+        "top_k": 20,
+        "top_p": 0.7,
+        "repetition_penalty": 1.05,
+        # upstream's [speed_N] prompt token: 0 (slowest) to 9, 5 by default
+        "speed": 5,
+        # speaker for a voice file ChatTTS cannot clone (no English or Chinese speech heard in it): sampled once on
+        # cpu from this seed, as upstream's sample_random_speaker() after torch.manual_seed()
+        "speaker_seed": 2222,
+        # generation cap per sentence part: tokens_per_char x its length (46.875 codes per second of speech; 10 per
+        # character is ~3x a latin letter's speech, a Han character counts as 3), at most max_new_tokens (upstream's
+        # 2048, ~43 s): a looping generation stops there
+        "tokens_per_char": 10,
+        "max_new_tokens": 2048,
+        "files": [],
+        "voice": default_speaker,
+        "voices": {},
+        # 0.2B GPT + DVAE, decoder and Vocos (0.3B in all), all fp32: upstream asks 4 GB VRAM for 30 s of audio
+        "rating": {"VRAM": 4, "CPU": 2, "RAM": 4, "Realism": 4}
     },
     TTS_ENGINES['OPENVOICE']: {
         # runs in its own uv venv (lib/classes/tts_engines/venvs/openvoice) behind a persistent worker. OpenVoice V2 as

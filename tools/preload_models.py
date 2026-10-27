@@ -4,7 +4,7 @@ from typing import Callable
 root_dir = str(Path(__file__).resolve().parents[1])
 os.chdir(root_dir)
 sys.path.insert(0, root_dir)
-categories = ['common', 'xtts', 'bark', 'tortoise', 'vits', 'fairseq', 'glowtts', 'tacotron', 'yourtts', 'piper', 'zonos', 'audiocpp', 'audiocpp_server', 'gptsovits', 'f5tts', 'omnivoice', 'orpheus', 'sparktts', 'openvoice', 'phonon', 'stanza', 'pyannote', 'demucs', 'interlude', 'argos', 'tessdata', 'jieba', 'voices']
+categories = ['common', 'xtts', 'bark', 'tortoise', 'vits', 'fairseq', 'glowtts', 'tacotron', 'yourtts', 'piper', 'zonos', 'audiocpp', 'audiocpp_server', 'gptsovits', 'f5tts', 'omnivoice', 'orpheus', 'sparktts', 'chattts', 'openvoice', 'phonon', 'stanza', 'pyannote', 'demucs', 'interlude', 'argos', 'tessdata', 'jieba', 'voices']
 parser = argparse.ArgumentParser(description='Download every model e2a uses into one folder laid out exactly like ./models (i.e. a USB key for offline installs).')
 parser.add_argument('models_dir', type=str, help='Target folder, i.e. /media/user/KEY/models or E:\\models')
 parser.add_argument('--only', type=str, default='', help=f"Comma list of categories: {','.join(categories)}")
@@ -389,6 +389,11 @@ if engine_wanted(TTS_ENGINES['SPARKTTS']):
     # the worker's own patterns and marker: the model only, not the repo's figures
     add('sparktts', spark['repo'], lambda: hf_folder(spark['repo'], os.path.join(tts_dir, 'sparktts', spark['repo'].replace('/', '--')), ['config.yaml', 'BiCodec/*', 'LLM/*', 'wav2vec2-large-xlsr-53/*'], True))
     add('sparktts', f"whisper {spark['asr_model']}", lambda: hf_folder(spark['asr_model'], os.path.join(tts_dir, spark['asr_model'].replace('/', '--')), None, True))
+chat = default_engine_settings[TTS_ENGINES['CHATTTS']]
+if engine_wanted(TTS_ENGINES['CHATTTS']):
+    # the worker's own patterns and marker (upstream's Chat.download_models patterns)
+    add('chattts', chat['repo'], lambda: hf_folder(chat['repo'], os.path.join(tts_dir, 'chattts', chat['repo'].replace('/', '--')), ['*.yaml', '*.json', '*.safetensors'], True))
+    add('chattts', f"whisper {chat['asr_model']}", lambda: hf_folder(chat['asr_model'], os.path.join(tts_dir, chat['asr_model'].replace('/', '--')), None, True))
 ov = default_engine_settings[TTS_ENGINES['OPENVOICE']]
 ov_languages = [lang for lang in ov['languages'] if wanted(lang)]
 ov_repos = list(dict.fromkeys(ckpt['repo'] for cfg in load_presets('openvoice').values() for lang, ckpt in cfg['checkpoints'].items() if wanted(lang)))

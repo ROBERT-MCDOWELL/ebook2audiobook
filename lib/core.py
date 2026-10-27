@@ -277,6 +277,12 @@ class SessionContext:
             "sparktts_temperature": default_engine_settings[TTS_ENGINES['SPARKTTS']]['temperature'],
             "sparktts_top_k": default_engine_settings[TTS_ENGINES['SPARKTTS']]['top_k'],
             "sparktts_top_p": default_engine_settings[TTS_ENGINES['SPARKTTS']]['top_p'],
+            ####### ChatTTS settings
+            "chattts_temperature": default_engine_settings[TTS_ENGINES['CHATTTS']]['temperature'],
+            "chattts_top_k": default_engine_settings[TTS_ENGINES['CHATTTS']]['top_k'],
+            "chattts_top_p": default_engine_settings[TTS_ENGINES['CHATTTS']]['top_p'],
+            "chattts_repetition_penalty": default_engine_settings[TTS_ENGINES['CHATTTS']]['repetition_penalty'],
+            "chattts_speed": default_engine_settings[TTS_ENGINES['CHATTTS']]['speed'],
             ####### Audiobook editor
             "audiobook": None,
             "audiobooks_dir": None,
@@ -4441,6 +4447,9 @@ def convert_ebook(args:dict)->tuple:
             for sparktts_key, sparktts_cast in (('sparktts_temperature', float), ('sparktts_top_k', int), ('sparktts_top_p', float)):
                 if args.get(sparktts_key) is not None:
                     session[sparktts_key] = sparktts_cast(args[sparktts_key])
+            for chattts_key, chattts_cast in (('chattts_temperature', float), ('chattts_top_k', int), ('chattts_top_p', float), ('chattts_repetition_penalty', float), ('chattts_speed', int)):
+                if args.get(chattts_key) is not None:
+                    session[chattts_key] = chattts_cast(args[chattts_key])
             session['output_format'] = str(args['output_format'])
             session['output_channel'] = str(args['output_channel'])
             session['output_split'] = bool(args['output_split'])

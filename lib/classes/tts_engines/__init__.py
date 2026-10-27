@@ -16,3 +16,4 @@ from .openvoice import OpenVoice
 from .phonon import Phonon
 from .audiocpp import AudioCpp
 from .sparktts import SparkTTS
+from .chattts import ChatTTS
