@@ -328,9 +328,11 @@ default_engine_settings = {
         # hydra-core used only by upstream's api / cli / socket server, transformers_stream_generator unused) and
         # torchcodec (the worker reads audio with soundfile). wandb / datasets / accelerate / ema_pytorch stay:
         # f5_tts.model imports its Trainer. Names normalized as pip does. onnxruntime (cpu) runs the Arabic
-        # diacritizer below.
+        # diacritizer below. transformers 5.0.0 left out: its ASR pipeline pops the num_frames its own Whisper feature
+        # extractor no longer returns (KeyError on every reference transcription; 4.57 and 5.1+ are consistent), and
+        # the <5.1 cap for torch < 2.4 (jetson5) lands exactly on it: those devices get 4.57 instead.
         "requirements_exclude": ["gradio", "bitsandbytes", "cached-path", "hydra-core", "transformers-stream-generator", "torchcodec"],
-        "requirements_extra": ["onnxruntime"],
+        "requirements_extra": ["onnxruntime", "transformers!=5.0.0"],
         # every package installs as a wheel, so no platform ever needs a compiler; encodec (vocos' dependency)
         # only exists as a pure-python source
         "packages_sdist": ["encodec"],
@@ -426,12 +428,13 @@ default_engine_settings = {
         # requirements_unpinned: upstream pins every package to its February 2025 release (torch 2.5.1 has no Blackwell
         # kernels nor torch_matrix's newer builds, transformers 4.46.2 no recent tokenizers wheels): names only, the
         # resolver takes what fits the device's torch. accelerate: the worker loads the LLM straight onto the GPU
-        # (device_map, transformers needs it), upstream's list has none. hf_xet as for GPT-SoVITS (windows reports
-        # AMD64, so huggingface_hub's own marker misses it: the weights are on Xet)
+        # (device_map, transformers needs it), upstream's list has none. transformers 5.0.0 left out: its Whisper
+        # pipeline breaks the reference transcription (see F5-TTS). hf_xet as for GPT-SoVITS (windows reports AMD64,
+        # so huggingface_hub's own marker misses it: the weights are on Xet)
         "requirements_file": "requirements.txt",
         "requirements_unpinned": True,
         "requirements_exclude": ["gradio"],
-        "requirements_extra": ["accelerate", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
+        "requirements_extra": ["accelerate", "transformers!=5.0.0", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
         # every package installs as a wheel, so no platform ever needs a compiler
         "packages_sdist": [],
         # reference transcription (the voice clone prompt is the reference's audio tokens + its text), Whisper run on
@@ -472,11 +475,12 @@ default_engine_settings = {
         # the device's PyTorch index (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller as fallback.
         # requests: ChatTTS.utils imports it, setup.py misses it (upstream fixed requirements.txt only); accelerate:
         # the worker loads the GPT straight onto the GPU (device_map, transformers needs it), no host copy first;
+        # transformers 5.0.0 left out: its Whisper pipeline breaks the reference transcription (see F5-TTS);
         # soundfile / soxr cut and resample the voice references; hf_xet as for GPT-SoVITS (windows reports AMD64, so
         # huggingface_hub's own marker misses it)
         "requirements_file": "setup.py",
         "requirements_exclude": [],
-        "requirements_extra": ["requests", "accelerate", "soundfile", "soxr", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
+        "requirements_extra": ["requests", "accelerate", "transformers!=5.0.0", "soundfile", "soxr", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
         # every package installs as a wheel, so no platform ever needs a compiler; encodec (vocos' dependency) only
         # exists as a pure-python source
         "packages_sdist": ["encodec"],
