@@ -4,16 +4,19 @@
 # protocol (one JSON object per line):
 #   stdout <- {"ready": true, "samplerate": 24000, "device": "..."} once loaded
 #             {"ready": false, "error": "..."} then exit 1 if loading failed
+#   stdin  -> {"op": "ref", "voice"}: prepares the voice file's clone prompt
+#   stdout <- {"ok": true, "cloned": bool, "language": "..."}: false when ChatTTS cannot clone it (no English or Chinese
+#             speech heard), its seeded speaker speaks instead, for e2a to convert to the voice (default_vc_model)
 #   stdin  -> {"op": "tts", "text", "voice", "file", "language", "temperature", "top_k", "top_p", "repetition_penalty",
 #              "speed", "tokens_per_char", "max_new_tokens"}
-#   stdout <- {"ok": true, "file": "...", "samplerate": 24000, "samples": n, "capped": bool}
+#   stdout <- {"ok": true, "file": "...", "samplerate": 24000, "samples": n, "capped": bool, "cloned": bool}
 #             {"ok": false, "error": "...", "oom": bool}
 #   EOF on stdin -> exit 0 (that is how e2a unloads the model and frees its VRAM)
 #
 # Upstream's Chat.infer (ChatTTS/core.py), text refinement off: the book text is read as written, never rewritten with
 # the fillers, laughs and pauses the refine pass adds. The voice file is cloned as upstream's webui does (its DVAE
 # codes as spk_smp, its transcript as txt_smp), with the reference encoded and transcribed once per voice instead of
-# at every sentence
+# at every sentence. A voice it cannot clone is spoken by one seeded speaker, which e2a converts to that voice
 import os, sys, re, json, argparse, hashlib, gc, logging, faulthandler
 
 def main()->int:
@@ -97,6 +100,89 @@ def main()->int:
     ref_languages = None
     seeded_speaker = None
     refs = {}
+
+    def prepare(voice:str)->dict:
+        # the voice file's clone prompt, made once per voice: cut, transcribed, encoded. A voice ChatTTS cannot clone
+        # gets the seeded speaker, which e2a then converts to that voice (default_vc_model)
+        nonlocal ref_languages, seeded_speaker
+        # the reference window is part of the clip
+        voice_key = f'{voice}:{os.path.getmtime(voice)}:{args.ref_max}'
+        if voice_key in refs:
+            return refs[voice_key]
+        clip = os.path.join(args.cache_dir, hashlib.sha1(voice_key.encode('utf-8')).hexdigest() + '.wav')
+        if not os.path.exists(clip):
+            # keep at most ref_max, cutting at the quietest 50 ms of the last 3 s so no word is clipped; mono at
+            # the model's rate, what the DVAE encoder takes (upstream's load_audio)
+            data, sr = sf.read(voice, dtype='float32', always_2d=True)
+            mono = data.mean(axis=1)
+            max_len = int(args.ref_max * sr)
+            if len(mono) > max_len:
+                start = max(0, max_len - 3 * sr)
+                frame = int(0.05 * sr)
+                tail = mono[start:max_len]
+                energies = [float(np.mean(tail[i:i + frame] ** 2)) for i in range(0, len(tail) - frame, frame)]
+                mono = mono[:start + int(np.argmin(energies)) * frame + frame // 2] if energies else mono[:max_len]
+            if sr != sampling_rate:
+                mono = soxr.resample(mono, sr, sampling_rate)
+            sf.write(clip, mono, sampling_rate)
+        # the transcript and the language Whisper heard are kept beside the clip: Whisper runs once per voice, ever
+        transcript = f'{clip[:-4]}.json'
+        if os.path.exists(transcript):
+            with open(transcript, 'r', encoding='utf-8') as f:
+                cached = json.load(f)
+            ref_text, ref_language = cached['text'], cached['language']
+        else:
+            # Whisper on cpu (no VRAM taken from the model), downloaded as a plain folder, language left to
+            # Whisper: the voice is often not in the book's language; released after. Complete once the
+            # marker exists: config.json lands first, so a download cut during the 1.6 GB weights would look
+            # finished forever; snapshot_download resumes what is missing
+            asr_marker = os.path.join(args.asr_dir, '.e2a_complete')
+            if not os.path.exists(asr_marker):
+                snapshot_download(args.asr_model, local_dir=args.asr_dir)
+                open(asr_marker, 'w').close()
+            from transformers import pipeline
+            from transformers.utils import logging as transformers_logging
+            # the clip is handed over decoded and at Whisper's 16 kHz: a file path would go through ffmpeg
+            data, sr = sf.read(clip, dtype='float32')
+            audio_16k = soxr.resample(data, sr, 16000) if sr != 16000 else data
+            verbosity = transformers_logging.get_verbosity()
+            transformers_logging.set_verbosity_error()
+            asr_pipe = None
+            try:
+                asr_pipe = pipeline('automatic-speech-recognition', model=args.asr_dir, device='cpu')
+                result = asr_pipe({'raw': np.ascontiguousarray(audio_16k, dtype=np.float32), 'sampling_rate': 16000}, generate_kwargs={'task': 'transcribe'}, return_language=True)
+            finally:
+                del asr_pipe
+                transformers_logging.set_verbosity(verbosity)
+                gc.collect()
+            ref_text = result['text'].strip()
+            ref_language = (result.get('chunks') or [{}])[0].get('language')
+            with open(transcript, 'w', encoding='utf-8') as f:
+                json.dump({'text': ref_text, 'language': ref_language}, f, ensure_ascii=False)
+        if ref_languages is None:
+            # Whisper names the language it heard: e.g. english -> en
+            from transformers.models.whisper.tokenization_whisper import LANGUAGES
+            ref_languages = {LANGUAGES.get(code, code): code for code in args.ref_languages.split(',') if code}
+        if ref_text and (ref_language is None or ref_language in ref_languages):
+            # upstream's clone prompt: the reference's DVAE codes (spk_smp), then its text (txt_smp, normalized
+            # as the sentences are) ahead of each sentence, no speaker embedding
+            data, sr = sf.read(clip, dtype='float32')
+            with torch.inference_mode():
+                spk_smp = chat.sample_audio_speaker(np.ascontiguousarray(data, dtype=np.float32))
+            txt_smp = chat.normalizer(ref_text, True, True, ref_languages.get(ref_language))
+            refs[voice_key] = {'cloned': True, 'language': ref_language, 'spk_emb': None, 'spk_smp': spk_smp, 'txt_smp': txt_smp}
+        else:
+            # the clone prompt pairs the codes with their text: a reference in a language ChatTTS does not
+            # read, or without speech, has none it can use. One fixed speaker instead, sampled once on cpu so
+            # every device gets the same one
+            if seeded_speaker is None:
+                generator = torch.Generator(device='cpu').manual_seed(args.speaker_seed)
+                std, mean = chat.speaker.std.cpu(), chat.speaker.mean.cpu()
+                seeded_speaker = chat.speaker._encode(torch.randn(chat.speaker.dim, generator=generator, dtype=std.dtype).mul_(std).add_(mean))
+            print(f'chattts_worker: the voice reference {voice} cannot be cloned (no speech in {sorted(ref_languages)} heard: {ref_language or "none"}), speaker seed {args.speaker_seed} speaks for e2a\'s voice conversion', file=sys.stderr)
+            refs[voice_key] = {'cloned': False, 'language': ref_language, 'spk_emb': seeded_speaker, 'spk_smp': None, 'txt_smp': None}
+        return refs[voice_key]
+
     while True:
         raw = sys.stdin.buffer.readline()
         if not raw:
@@ -106,87 +192,14 @@ def main()->int:
         except Exception as e:
             proto.write(json.dumps({'ok': False, 'error': f'bad request: {e}', 'oom': False}) + '\n')
             continue
-        if req.get('op') != 'tts':
+        if req.get('op') not in ('ref', 'tts'):
             proto.write(json.dumps({'ok': False, 'error': f"unknown op {req.get('op')!r}", 'oom': False}) + '\n')
             continue
         try:
-            voice = req['voice']
-            # the reference window is part of the clip
-            voice_key = f'{voice}:{os.path.getmtime(voice)}:{args.ref_max}'
-            if voice_key not in refs:
-                clip = os.path.join(args.cache_dir, hashlib.sha1(voice_key.encode('utf-8')).hexdigest() + '.wav')
-                if not os.path.exists(clip):
-                    # keep at most ref_max, cutting at the quietest 50 ms of the last 3 s so no word is clipped; mono at
-                    # the model's rate, what the DVAE encoder takes (upstream's load_audio)
-                    data, sr = sf.read(voice, dtype='float32', always_2d=True)
-                    mono = data.mean(axis=1)
-                    max_len = int(args.ref_max * sr)
-                    if len(mono) > max_len:
-                        start = max(0, max_len - 3 * sr)
-                        frame = int(0.05 * sr)
-                        tail = mono[start:max_len]
-                        energies = [float(np.mean(tail[i:i + frame] ** 2)) for i in range(0, len(tail) - frame, frame)]
-                        mono = mono[:start + int(np.argmin(energies)) * frame + frame // 2] if energies else mono[:max_len]
-                    if sr != sampling_rate:
-                        mono = soxr.resample(mono, sr, sampling_rate)
-                    sf.write(clip, mono, sampling_rate)
-                # the transcript and the language Whisper heard are kept beside the clip: Whisper runs once per voice, ever
-                transcript = f'{clip[:-4]}.json'
-                if os.path.exists(transcript):
-                    with open(transcript, 'r', encoding='utf-8') as f:
-                        cached = json.load(f)
-                    ref_text, ref_language = cached['text'], cached['language']
-                else:
-                    # Whisper on cpu (no VRAM taken from the model), downloaded as a plain folder, language left to
-                    # Whisper: the voice is often not in the book's language; released after. Complete once the
-                    # marker exists: config.json lands first, so a download cut during the 1.6 GB weights would look
-                    # finished forever; snapshot_download resumes what is missing
-                    asr_marker = os.path.join(args.asr_dir, '.e2a_complete')
-                    if not os.path.exists(asr_marker):
-                        snapshot_download(args.asr_model, local_dir=args.asr_dir)
-                        open(asr_marker, 'w').close()
-                    from transformers import pipeline
-                    from transformers.utils import logging as transformers_logging
-                    # the clip is handed over decoded and at Whisper's 16 kHz: a file path would go through ffmpeg
-                    data, sr = sf.read(clip, dtype='float32')
-                    audio_16k = soxr.resample(data, sr, 16000) if sr != 16000 else data
-                    verbosity = transformers_logging.get_verbosity()
-                    transformers_logging.set_verbosity_error()
-                    asr_pipe = None
-                    try:
-                        asr_pipe = pipeline('automatic-speech-recognition', model=args.asr_dir, device='cpu')
-                        result = asr_pipe({'raw': np.ascontiguousarray(audio_16k, dtype=np.float32), 'sampling_rate': 16000}, generate_kwargs={'task': 'transcribe'}, return_language=True)
-                    finally:
-                        del asr_pipe
-                        transformers_logging.set_verbosity(verbosity)
-                        gc.collect()
-                    ref_text = result['text'].strip()
-                    ref_language = (result.get('chunks') or [{}])[0].get('language')
-                    with open(transcript, 'w', encoding='utf-8') as f:
-                        json.dump({'text': ref_text, 'language': ref_language}, f, ensure_ascii=False)
-                if ref_languages is None:
-                    # Whisper names the language it heard: e.g. english -> en
-                    from transformers.models.whisper.tokenization_whisper import LANGUAGES
-                    ref_languages = {LANGUAGES.get(code, code): code for code in args.ref_languages.split(',') if code}
-                if ref_text and (ref_language is None or ref_language in ref_languages):
-                    # upstream's clone prompt: the reference's DVAE codes (spk_smp), then its text (txt_smp, normalized
-                    # as the sentences are) ahead of each sentence, no speaker embedding
-                    data, sr = sf.read(clip, dtype='float32')
-                    with torch.inference_mode():
-                        spk_smp = chat.sample_audio_speaker(np.ascontiguousarray(data, dtype=np.float32))
-                    txt_smp = chat.normalizer(ref_text, True, True, ref_languages.get(ref_language))
-                    refs[voice_key] = {'spk_emb': None, 'spk_smp': spk_smp, 'txt_smp': txt_smp}
-                else:
-                    # the clone prompt pairs the codes with their text: a reference in a language ChatTTS does not
-                    # read, or without speech, has none it can use. One fixed speaker instead, sampled once on cpu so
-                    # every device gets the same one
-                    if seeded_speaker is None:
-                        generator = torch.Generator(device='cpu').manual_seed(args.speaker_seed)
-                        std, mean = chat.speaker.std.cpu(), chat.speaker.mean.cpu()
-                        seeded_speaker = chat.speaker._encode(torch.randn(chat.speaker.dim, generator=generator, dtype=std.dtype).mul_(std).add_(mean))
-                    print(f'chattts_worker: the voice reference {voice} cannot be cloned (no speech in {sorted(ref_languages)} heard: {ref_language or "none"}), speaker seed {args.speaker_seed} speaks instead', file=sys.stderr)
-                    refs[voice_key] = {'spk_emb': seeded_speaker, 'spk_smp': None, 'txt_smp': None}
-            ref = refs[voice_key]
+            ref = prepare(req['voice'])
+            if req['op'] == 'ref':
+                proto.write(json.dumps({'ok': True, 'cloned': ref['cloned'], 'language': ref['language']}) + '\n')
+                continue
             text = req['text'].strip()
             # generation cap: tokens_per_char per character, a Han / kana / Hangul character counted as 3 (a whole
             # syllable), at least 5 s of speech, at most max_new_tokens
@@ -210,7 +223,7 @@ def main()->int:
             if audio.size == 0:
                 raise ValueError(f'no audio generated for: {text[:80]}')
             sf.write(req['file'], audio, sampling_rate, subtype='FLOAT')
-            reply = {'ok': True, 'file': req['file'], 'samplerate': sampling_rate, 'samples': int(audio.shape[0]), 'capped': cap_flag.hit}
+            reply = {'ok': True, 'file': req['file'], 'samplerate': sampling_rate, 'samples': int(audio.shape[0]), 'capped': cap_flag.hit, 'cloned': ref['cloned']}
         except Exception as e:
             # no retry here: e2a's convert() returns False and core.py unloads the
             # engine, which closes stdin and ends this process.
