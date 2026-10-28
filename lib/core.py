@@ -283,6 +283,9 @@ class SessionContext:
             "chattts_top_p": default_engine_settings[TTS_ENGINES['CHATTTS']]['top_p'],
             "chattts_repetition_penalty": default_engine_settings[TTS_ENGINES['CHATTTS']]['repetition_penalty'],
             "chattts_speed": default_engine_settings[TTS_ENGINES['CHATTTS']]['speed'],
+            ####### CSM settings
+            "csm_temperature": default_engine_settings[TTS_ENGINES['CSM']]['temperature'],
+            "csm_top_k": default_engine_settings[TTS_ENGINES['CSM']]['top_k'],
             ####### Audiobook editor
             "audiobook": None,
             "audiobooks_dir": None,
@@ -4450,6 +4453,9 @@ def convert_ebook(args:dict)->tuple:
             for chattts_key, chattts_cast in (('chattts_temperature', float), ('chattts_top_k', int), ('chattts_top_p', float), ('chattts_repetition_penalty', float), ('chattts_speed', int)):
                 if args.get(chattts_key) is not None:
                     session[chattts_key] = chattts_cast(args[chattts_key])
+            for csm_key, csm_cast in (('csm_temperature', float), ('csm_top_k', int)):
+                if args.get(csm_key) is not None:
+                    session[csm_key] = csm_cast(args[csm_key])
             session['output_format'] = str(args['output_format'])
             session['output_channel'] = str(args['output_channel'])
             session['output_split'] = bool(args['output_split'])

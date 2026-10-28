@@ -4,7 +4,7 @@ from typing import Callable
 root_dir = str(Path(__file__).resolve().parents[1])
 os.chdir(root_dir)
 sys.path.insert(0, root_dir)
-categories = ['common', 'xtts', 'bark', 'tortoise', 'vits', 'fairseq', 'glowtts', 'tacotron', 'yourtts', 'piper', 'zonos', 'audiocpp', 'audiocpp_server', 'gptsovits', 'f5tts', 'omnivoice', 'orpheus', 'sparktts', 'chattts', 'openvoice', 'melotts', 'phonon', 'stanza', 'pyannote', 'demucs', 'interlude', 'argos', 'tessdata', 'jieba', 'voices']
+categories = ['common', 'xtts', 'bark', 'tortoise', 'vits', 'fairseq', 'glowtts', 'tacotron', 'yourtts', 'piper', 'zonos', 'audiocpp', 'audiocpp_server', 'gptsovits', 'f5tts', 'omnivoice', 'orpheus', 'sparktts', 'chattts', 'csm', 'openvoice', 'melotts', 'phonon', 'stanza', 'pyannote', 'demucs', 'interlude', 'argos', 'tessdata', 'jieba', 'voices']
 parser = argparse.ArgumentParser(description='Download every model e2a uses into one folder laid out exactly like ./models (i.e. a USB key for offline installs).')
 parser.add_argument('models_dir', type=str, help='Target folder, i.e. /media/user/KEY/models or E:\\models')
 parser.add_argument('--only', type=str, default='', help=f"Comma list of categories: {','.join(categories)}")
@@ -394,6 +394,14 @@ if engine_wanted(TTS_ENGINES['CHATTTS']):
     # the worker's own patterns and marker (upstream's Chat.download_models patterns)
     add('chattts', chat['repo'], lambda: hf_folder(chat['repo'], os.path.join(tts_dir, 'chattts', chat['repo'].replace('/', '--')), ['*.yaml', '*.json', '*.safetensors'], True))
     add('chattts', f"whisper {chat['asr_model']}", lambda: hf_folder(chat['asr_model'], os.path.join(tts_dir, chat['asr_model'].replace('/', '--')), None, True))
+csm = default_engine_settings[TTS_ENGINES['CSM']]
+if engine_wanted(TTS_ENGINES['CSM']):
+    # the worker's own patterns and markers: the transformers checkpoint only (sesame/csm-1b also carries ckpt.pt), the
+    # watermark model's checkpoint folder
+    add('csm', csm['repo'], lambda: hf_folder(csm['repo'], os.path.join(tts_dir, 'csm', csm['repo'].replace('/', '--')), ['*.json', '*.safetensors', '*.jinja'], True))
+    if csm['watermark']:
+        add('csm', csm['silentcipher']['repo'], lambda: hf_folder(csm['silentcipher']['repo'], os.path.join(tts_dir, 'csm', csm['silentcipher']['repo'].replace('/', '--')), [f"{csm['silentcipher']['ckpt']}/*"], True))
+    add('csm', f"whisper {csm['asr_model']}", lambda: hf_folder(csm['asr_model'], os.path.join(tts_dir, csm['asr_model'].replace('/', '--')), None, True))
 ov = default_engine_settings[TTS_ENGINES['OPENVOICE']]
 ov_languages = [lang for lang in ov['languages'] if wanted(lang)]
 ov_repos = list(dict.fromkeys(ckpt['repo'] for cfg in load_presets('openvoice').values() for lang, ckpt in cfg['checkpoints'].items() if wanted(lang)))

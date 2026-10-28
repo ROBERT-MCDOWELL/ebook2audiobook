@@ -433,7 +433,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - NOTE: MPS is not exposed in docker so CPU must be used
-- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS etc.)
+- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM etc.)
   across container runs, so they are not reinstalled each time. To reset them: `docker volume rm e2a_venvs`
 
 ## Cloned Voices
@@ -556,7 +556,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] ChatTTS (https://github.com/2noise/ChatTTS)
 - [x] Spark-TTS (https://github.com/sparkaudio/spark-tts)
 - [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
-- [ ] CRM (https://github.com/SesameAILabs/csm)
+- [x] CSM (https://github.com/SesameAILabs/csm)
 
 #### Readme Translation
 - [x] Arabic (ara)

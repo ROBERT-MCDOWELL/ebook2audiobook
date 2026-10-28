@@ -18,3 +18,4 @@ from .audiocpp import AudioCpp
 from .sparktts import SparkTTS
 from .chattts import ChatTTS
 from .melotts import MeloTTS
+from .csm import CSM

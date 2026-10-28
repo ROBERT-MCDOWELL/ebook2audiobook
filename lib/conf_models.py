@@ -15,6 +15,7 @@ TTS_ENGINES = {
     "CHATTTS": "chattts",
     "OPENVOICE": "openvoice",
     "MELOTTS": "melotts",
+    "CSM": "csm",
     "PHONON": "phonon",
     "XTTS": "xtts",
     "BARK": "bark",
@@ -614,6 +615,63 @@ default_engine_settings = {
         "voices": {},
         # MeloTTS (~52M params) + its language's BERT (base size): faster than real time on CPU
         "rating": {"VRAM": 1, "CPU": 4, "RAM": 2, "Realism": 4}
+    },
+    TTS_ENGINES['CSM']: {
+        # runs in its own uv venv (lib/classes/tts_engines/venvs/csm) behind a persistent worker. Upstream's own code
+        # (generator.py) needs torchtune / torchao / moshi pins and the gated meta-llama/Llama-3.2-1B tokenizer: the worker
+        # runs CSM through transformers' native CsmForConditionalGeneration instead (upstream's README points there since
+        # transformers 4.52.1), same prompt layout ([speaker]text segments, Mimi audio frames) and sampling, so every e2a
+        # torch device runs it. The pinned source tree only serves upstream's watermarking.py (its silentcipher watermark).
+        # repo: ungated copy of the gated sesame/csm-1b (transformers format: Llama-3.2-1B backbone, depth decoder, Mimi
+        # codec and the Llama 3 tokenizer in one folder)
+        "repo": "unsloth/csm-1b",
+        "source": "https://github.com/SesameAILabs/csm/archive/daed31e6d42cf71873999075de204fa37d2acec3.tar.gz",
+        # 3.12 at most: pydub (silentcipher) imports audioop, gone from python 3.13
+        "python": "3.12",
+        # package list = upstream's own requirements.txt (in the extracted tree), torch from the device's PyTorch index
+        # (--torch-backend, e2a's detected tag) or e2a's DeviceInstaller as fallback. Left out: what only upstream's
+        # generator.py imports (moshi, torchtune, torchao), its 2025 pins (torch / torchaudio 2.4.0, tokenizers 0.21.0,
+        # transformers 4.49.0 without CSM, huggingface_hub 0.28.1) and silentcipher (a git requirement: packages_nodeps
+        # below). Names normalized as pip does.
+        "requirements_file": "requirements.txt",
+        "requirements_exclude": ["torch", "torchaudio", "tokenizers", "transformers", "huggingface-hub", "moshi", "torchtune", "torchao", "silentcipher"],
+        # transformers from 4.56 (CSM since 4.52.1, the dtype argument since 4.56), 5.0.0 left out: its Whisper pipeline
+        # breaks the reference transcription (see F5-TTS); accelerate: the worker loads the model straight onto the GPU
+        # (device_map, transformers needs it); torchaudio, librosa, scipy, pyaml, pydub: what silentcipher and upstream's
+        # watermarking.py import; soundfile / soxr cut and resample the voice references; hf_xet as for GPT-SoVITS
+        # (windows reports AMD64, so huggingface_hub's own marker misses it)
+        "requirements_extra": ["transformers>=4.56,!=5.0.0", "accelerate", "torchaudio", "librosa", "scipy", "pyaml", "pydub", "soundfile", "soxr", "hf_xet>=1.1.3,<2.0.0; sys_platform == 'win32'"],
+        # every package installs as a wheel, so no platform ever needs a compiler
+        "packages_sdist": [],
+        # installed without their dependencies: upstream's silentcipher fork (pure python, pinned at the master commit its
+        # requirement points to) declares Flask for its demo server, its imports are in requirements_extra
+        "packages_nodeps": ["silentcipher @ https://github.com/SesameAILabs/silentcipher/archive/d46d7d0893a583d8968ab3a6626e2289faec9152.tar.gz"],
+        # upstream's imperceptible watermark on every generated part (generator.py: silentcipher, its public
+        # CSM_1B_GH_WATERMARK key): False leaves the audio unmarked. The watermark model is fetched as a plain folder
+        "watermark": True,
+        "silentcipher": {"repo": "sony/silentcipher", "model_type": "44.1k", "ckpt": "44_1_khz/73999_iteration"},
+        # reference transcription (the voice clone context is the reference's Mimi frames + its text), Whisper run on
+        # cpu; one copy under models/tts shared with the other engines using it
+        "asr_model": "openai/whisper-large-v3-turbo",
+        # the worker cuts a reference clip of at most ref_max seconds (its frames are part of every prompt, within the
+        # backbone's 2048 positions)
+        "ref_max": 10.0,
+        # upstream's language: English only ("some capacity for non-English languages ... likely won't do well")
+        "languages": {"eng": "en"},
+        "samplerate": 24000,
+        # upstream defaults (generator.py generate), for the backbone and the depth decoder alike
+        "temperature": 0.9,
+        "top_k": 50,
+        # generation cap per sentence part: tokens_per_char x its length (12.5 Mimi frames per second of speech; 3 per
+        # character is ~3.5x a latin letter's speech), at least 5 s, at most max_new_tokens (upstream's 90 s
+        # max_audio_length_ms): a looping generation stops there
+        "tokens_per_char": 3,
+        "max_new_tokens": 1125,
+        "files": [],
+        "voice": default_speaker,
+        "voices": {},
+        # 1B backbone + 0.1B depth decoder (bf16 from sm 8.0, fp16 below, fp32 on Pascal / GTX 16xx and cpu) + Mimi (fp32)
+        "rating": {"VRAM": 4, "CPU": 1, "RAM": 8, "Realism": 4}
     },
     TTS_ENGINES['PHONON']: {
         # Phonon (gradium-ai/xn-ptts): the ptts wheel lives in python_env like coqui-tts (one abi3 Rust extension,
