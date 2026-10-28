@@ -4,7 +4,7 @@
 CPU/GPU-omvandlare från e-bok till ljudbok med kapitel och metadata<br/>
 med avancerade TTS-motorer och mycket mer.<br/>
 Stöder röstkloning och 1696 språk!
-> Viktigt
+> [!IMPORTANT]
 **Detta verktyg är endast avsett att användas med DRM-fria, lagligt förvärvade e-böcker.** <br>
 Författarna ansvarar inte för något missbruk av denna programvara eller för eventuella rättsliga följder. <br>
 Använd detta verktyg ansvarsfullt och i enlighet med alla tillämpliga lagar.
@@ -123,20 +123,20 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - 1 GB VRAM min., 4 GB rekommenderas.
 - Virtualisering aktiverad vid körning på Windows (endast Docker).
 - CPU, XPU (intel, AMD, ARM)*.
-- CUDA, ROCm, JETSON
+- Cuda, ROCm, JETSON
 - MPS (Apple Silicon-CPU)
 
 *<i> Moderna TTS-motorer är mycket långsamma på CPU, så använd TTS av lägre kvalitet som YourTTS, Tacotron2 osv.</i>
 
 ## Språk som stöds
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **Arabiska (ar)**    | **Kinesiska (zh)**    | **Engelska (en)**   | **Spanska (n)**   |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **Franska (fr)**    | **Tyska (de)**     | **Italienska (it)**   | **Portugisiska (pt)** |
+| **Polska (pl)**    | **Turkiska (tr)**    | **Ryska (ru)**   | **Nederländska (nl)**     |
+| **tjeckiska (cs)**     | **japanska (ja)**   | **hindi (hej)**     | **bengaliska (bn)**   |
+| **Ungerska (hu)** | **Koreanska (ko)**     | **Vietnamesiska (vi)**| **Svenska (sv)**   |
+| **Persiska (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesiska (id)**|
+| **Slovakiska (sk)**    | **Kroatiska (tim)**   | **Tamil (ta)**     | **Danska (da)**    |
 - [**+1130 språk och dialekter här**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Innan du rapporterar ett installations- eller buggproblem, sök noggrant i fliken med öppna och stängda ärenden<br>
 för att vara säker på att ditt problem inte redan finns.**
 
->[!NOTE]
+UPPMÄRKSAMMA
 **EPUB-formatet saknar all standardstruktur för vad som är ett kapitel, ett stycke, ett förord osv.<br>
 Du bör därför först manuellt ta bort all text som du inte vill omvandla till ljud.**
 
@@ -200,7 +200,7 @@ Du bör därför först manuellt ta bort all text som du inte vill omvandla till
 2. **För en offentlig länk**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (alla operativsystem)
 
 > [!IMPORTANT]
 **Om skriptet stoppas och körs igen måste du uppdatera ditt Gradio-GUI-gränssnitt<br>
@@ -433,7 +433,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - NOTE: MPS is not exposed in docker so CPU must be used
-- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, OpenVoice etc.)
+- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM etc.)
   across container runs, so they are not reinstalled each time. To reset them: `docker volume rm e2a_venvs`
 
 ## Klonade röster
@@ -474,7 +474,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Vanliga problem:
 - Min NVIDIA/ROCm/XPU/MPS-GPU upptäcks inte?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU:n är långsam (bättre på en server-SMP-CPU) medan GPU:n kan ha nästan realtidskonvertering.
-   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   [Diskussion om detta](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Den har dock inte zero-shot-röstkloning, och rösterna är av Siri-kvalitet, men den är mycket snabbare på CPU).
 - "Jag har problem med beroenden" - Använd bara Docker, den är helt fristående och har ett headless-läge,
    lägg till parametern `--help` i slutet av docker run-kommandot för mer information.
@@ -553,15 +553,15 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] YourTTS (https://github.com/Edresson/YourTTS)[cite: 1]
 - [x] Orpheus-TTS (https://github.com/canopyai/Orpheus-TTS)
 - [x] OpenVoice (https://github.com/myshell-ai/OpenVoice)
-- [ ] ChatTTS (https://github.com/2noise/ChatTTS)
-- [ ] Spark-TTS (https://github.com/sparkaudio/spark-tts)
-- [ ] MeloTTS (https://github.com/myshell-ai/MeloTTS)
-- [ ] CRM (https://github.com/SesameAILabs/csm)
+- [x] ChatTTS (https://github.com/2noise/ChatTTS)
+- [x] Spark-TTS (https://github.com/sparkaudio/spark-tts)
+- [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
+- [x] CSM (https://github.com/SesameAILabs/csm)
 
 #### Readme-översättning
 - [x] Arabiska (ara)
 - [x] Kinesiska (zho)
-- [x] English (eng)
+- [x] Engelska (eng)
 - [x] Spanska (spa)
 - [x] Franska (från)
 - [x] Tyska (DEU)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## Hårdvarudonation för betatester sökes
 Vi tar emot alla typer av hårdvara för att testa vår utveckling, till exempel:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia stödjande cuda >= 11,8
+- XPU-intelkort
+- ROCm AMD-kort som stöder ROCm >=5,7
 
 @DrewThomasson om du vill hjälpa till på något sätt! 😃
 <!--

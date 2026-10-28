@@ -4,7 +4,7 @@
 전자책을 챕터 및 메타데이터가 포함된 오디오북으로 변환하는 CPU/GPU 변환기<br/>
 고급 TTS 엔진 등을 사용합니다.<br/>
 음성 복제 및 1696개 언어 지원!
-> 중요
+> [!IMPORTANT]
 **이 도구는 DRM이 없고 합법적으로 취득한 전자책에만 사용하도록 만들어졌습니다.** <br>
 저작자는 이 소프트웨어의 어떠한 오용이나 그로 인한 법적 결과에 대해 책임지지 않습니다. <br>
 이 도구를 책임감 있게, 그리고 적용 가능한 모든 법률을 준수하여 사용하십시오.
@@ -129,14 +129,14 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 *<i> 최신 TTS 엔진은 CPU에서 매우 느리므로 YourTTS, Tacotron2 등 더 낮은 품질의 TTS를 사용하세요.</i>
 
 ## 지원 언어
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| * * Arabic (ar) * * | * * Chinese (zh) * * | * * English (en) * * | * * Spanish (es) * * |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| * * 프랑스어 (fr) * * | * * 독일어 (de) * * | * * 이탈리아어 (it) * * | * * 포르투갈어 (pt) * * |
+| * * 폴란드어 * * | * * 터키어 (tr) * * | * * 러시아어 (ru) * * | * * 네덜란드어 (nl) * * |
+| * * 체코어 (cs) * * | * * 일본어 (ja) * * | * * 힌디어 (hi) * * | * * 벵골어 (bn) * * |
+| * * 헝가리어 (hu) * * | * * 한국어 (ko) * * | * * 베트남어 (vi) * * | * * 스웨덴어 (sv) * * |
+| * * 페르시아어 (fa) * * | * * 요루바어 (yo) * * | * * 스와힐리어 (sw) * * | * * 인도네시아어 (id) * * |
+| * * 슬로바키아어 (sk) * * | * * 크로아티아어 (hr) * * | * * 타밀어 (ta) * * | * * 덴마크어 (da) * * |
 - [**+1130개 언어 및 방언은 여기에서**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **설치 또는 버그 문제를 게시하기 전에, 열린 문제와 닫힌 문제 탭을 주의 깊게 검색하여<br>
 귀하의 문제가 아직 존재하지 않는지 확인하십시오.**
 
->[!NOTE]
+비 고
 **EPUB 형식에는 챕터, 단락, 서문 등이 무엇인지 정의하는 어떠한 표준 구조도 없습니다.<br>
 따라서 먼저 오디오로 변환하고 싶지 않은 텍스트를 수동으로 제거해야 합니다.**
 
@@ -200,7 +200,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 2. **공개 링크의 경우**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (모든 OS)
 
 > [!IMPORTANT]
 **스크립트를 중지하고 다시 실행하면 Gradio GUI 인터페이스를 새로 고쳐야 합니다<br>
@@ -433,7 +433,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - NOTE: MPS is not exposed in docker so CPU must be used
-- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, OpenVoice etc.)
+- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM etc.)
   across container runs, so they are not reinstalled each time. To reset them: `docker volume rm e2a_venvs`
 
 ## 복제된 음성
@@ -553,10 +553,10 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] YourTTS (https://github.com/Edresson/YourTTS)[cite: 1)
 - [x] Orpheus-TTS (https://github.com/canopyai/Orpheus-TTS)
 - [x] OpenVoice (https://github.com/myshell-ai/OpenVoice)
-- [ ] ChatTTS (https://github.com/2noise/ChatTTS)
-- [ ] Spark-TTS (https://github.com/sparkaudio/spark-tts)
-- [ ] MeloTTS (https://github.com/myshell-ai/MeloTTS)
-- [ ] CRM (https://github.com/SesameAILabs/csm)
+- [x] ChatTTS (https://github.com/2noise/ChatTTS)
+- [x] Spark-TTS (https://github.com/sparkaudio/spark-tts)
+- [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
+- [x] CSM (https://github.com/SesameAILabs/csm)
 
 #### Readme 번역
 - [x] 아랍어 (ara)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## 베타 테스트를 위한 하드웨어 기부를 찾습니다
 다음과 같이 개발 테스트를 위한 모든 종류의 하드웨어를 받습니다:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia supporting cuda > = 11.8
+- XPU INTEL CARDS
+- ROCm > = 5.7을 지원하는 ROCm AMD 카드
 
 @DrewThomasson 어떤 식으로든 돕고 싶으시다면! 😃
 <!--

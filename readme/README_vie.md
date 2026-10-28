@@ -4,7 +4,7 @@
 Bộ chuyển đổi CPU/GPU từ sách điện tử sang sách nói với các chương và siêu dữ liệu<br/>
 sử dụng các engine TTS tiên tiến và nhiều hơn nữa.<br/>
 Hỗ trợ nhân bản giọng nói và 1696 ngôn ngữ!
-> LƯU Ý QUAN TRỌNG
+> [!IMPORTANT]
 **Công cụ này chỉ dành để sử dụng với các sách điện tử không có DRM và được mua hợp pháp.** <br>
 Các tác giả không chịu trách nhiệm cho bất kỳ việc lạm dụng phần mềm này hay bất kỳ hậu quả pháp lý nào phát sinh. <br>
 Hãy sử dụng công cụ này một cách có trách nhiệm và tuân thủ mọi luật hiện hành.
@@ -129,14 +129,14 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 *<i> Các engine TTS hiện đại rất chậm trên CPU, vì vậy hãy dùng TTS chất lượng thấp hơn như YourTTS, Tacotron2, v.v.</i>
 
 ## Ngôn ngữ được hỗ trợ
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **Tiếng Ả Rập (ar)**    | ** Tiếng Trung (zh)**    | **Tiếng Anh (en)* * | * * Tiếng Tây Ban Nha (es)**   |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **Tiếng Pháp (fr)**    | **Tiếng Đức (de)**     | * *Tiếng Ý (it)* * | * * Tiếng Bồ Đào Nha (pt)** |
+| **Tiếng Ba Lan * * | ** Tiếng Thổ Nhĩ Kỳ (tr)**    | **Tiếng Nga (ru)**   | **Tiếng Hà Lan (nl)**     |
+| ** Tiếng Séc (cs)**     | ** Tiếng Nhật (ja)**   | **Tiếng Hindi (hi)**     | ** Tiếng Bengal (bn)**   |
+| **Tiếng Hungary (hu)** | ** Tiếng Hàn (ko)**     | **Tiếng Việt (vi)**| ** Tiếng Thụy Điển (sv)**   |
+| ** Tiếng Ba Tư (fa)**   | ** Tiếng Yoruba (yo)**     | **Tiếng Swahili (sw)**   | ** Tiếng Indonesia (id)**|
+| **Tiếng Slovak (sk)**    | **Tiếng Croatia (hr)**   | ** Tiếng Tamil (ta)**     | ** Tiếng Đan Mạch (da)**    |
 - [**+1130 ngôn ngữ và phương ngữ tại đây**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Trước khi đăng vấn đề cài đặt hoặc lỗi, hãy tìm kiếm cẩn thận trong tab các vấn đề đang mở và đã đóng<br>
 để chắc chắn rằng vấn đề của bạn chưa tồn tại.**
 
->[!NOTE]
+Thuyết minh
 **Định dạng EPUB thiếu bất kỳ cấu trúc chuẩn nào như thế nào là một chương, đoạn văn, lời nói đầu, v.v.<br>
 Vì vậy, trước tiên bạn nên xóa thủ công bất kỳ văn bản nào bạn không muốn chuyển thành âm thanh.**
 
@@ -200,7 +200,7 @@ Vì vậy, trước tiên bạn nên xóa thủ công bất kỳ văn bản nào
 2. **Để có liên kết công khai**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (tất CẢ HĐH)
 
 > [!IMPORTANT]
 **Nếu tập lệnh bị dừng và chạy lại, bạn cần làm mới giao diện GUI Gradio của mình<br>
@@ -433,7 +433,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - NOTE: MPS is not exposed in docker so CPU must be used
-- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, OpenVoice etc.)
+- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM etc.)
   across container runs, so they are not reinstalled each time. To reset them: `docker volume rm e2a_venvs`
 
 ## Giọng nói được nhân bản
@@ -474,7 +474,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Các vấn đề thường gặp:
 - GPU NVIDIA/ROCm/XPU/MPS của tôi không được phát hiện?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU chậm (tốt hơn trên CPU smp máy chủ) trong khi GPU có thể chuyển đổi gần như thời gian thực.
-   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   [Thảo luận về điều này](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Tuy nhiên nó không có nhân bản giọng nói zero-shot, và là giọng chất lượng Siri, nhưng nhanh hơn nhiều trên cpu).
 - "Tôi gặp vấn đề về phụ thuộc" - Chỉ cần dùng docker, nó hoàn toàn độc lập và có chế độ headless,
    thêm tham số `--help` ở cuối lệnh docker run để biết thêm thông tin.
@@ -553,15 +553,15 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] YourTTS (https://github.com/Edresson/YourTTS)[cite: 1]
 - [x] Orpheus-TTS (https://github.com/canopyai/Orpheus-TTS)
 - [x] OpenVoice (https://github.com/myshell-ai/OpenVoice)
-- [ ] ChatTTS (https://github.com/2noise/ChatTTS)
-- [ ] Spark-TTS (https://github.com/sparkaudio/spark-tts)
-- [ ] MeloTTS (https://github.com/myshell-ai/MeloTTS)
-- [ ] CRM (https://github.com/SesameAILabs/csm)
+- [x] ChatTTS (https://github.com/2noise/ChatTTS)
+- [x] Spark-TTS (https://github.com/sparkaudio/spark-tts)
+- [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
+- [x] CSM (https://github.com/SesameAILabs/csm)
 
 #### Dịch Readme
 - [x] Tiếng Ả Rập (ara)
 - [x] Tiếng Trung (zho)
-- [x] English (eng)
+- [x] English (ENG)
 - [x] Tây Ban Nha (spa)
 - [x] Tiếng Pháp (fra)
 - [x] Tiếng Đức (deu)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## Cần quyên góp phần cứng cho việc thử nghiệm beta
 Chúng tôi chấp nhận bất kỳ loại phần cứng nào để thử nghiệm quá trình phát triển của mình, chẳng hạn như:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia hỗ trợ cuda >= 11.8
+- Thẻ Intel XPU
+- Thẻ ROCm AMD hỗ trợ ROCm >=5.7
 
 @DrewThomasson nếu bạn muốn giúp đỡ bằng bất kỳ cách nào! 😃
 <!--

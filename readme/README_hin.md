@@ -4,7 +4,7 @@
 अध्यायों और मेटाडेटा के साथ ई-बुक से ऑडियोबुक में बदलने वाला CPU/GPU कन्वर्टर<br/>
 उन्नत TTS इंजनों आदि का उपयोग करते हुए।<br/>
 वॉयस क्लोनिंग और 1696 भाषाओं का समर्थन करता है!
-> महत्वपूर्ण 
+> [!IMPORTANT] 
 **यह टूल केवल DRM-मुक्त, वैध रूप से प्राप्त ई-बुक्स के साथ उपयोग के लिए है।** <br>
 लेखक इस सॉफ़्टवेयर के किसी भी दुरुपयोग या उससे उत्पन्न किसी भी कानूनी परिणाम के लिए ज़िम्मेदार नहीं हैं। <br>
 इस टूल का उपयोग ज़िम्मेदारी से और सभी लागू कानूनों के अनुपालन में करें।
@@ -124,19 +124,19 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - windows पर चलाने पर वर्चुअलाइज़ेशन सक्षम (केवल Docker)।
 - CPU, XPU (intel, AMD, ARM)*।
 - CUDA, ROCm, JETSON
-- MPS (Apple Silicon CPU)
+- एमपीएस (एप्पल सिलिकॉन सीपीयू)
 
 *<i> आधुनिक TTS इंजन CPU पर बहुत धीमे हैं, इसलिए YourTTS, Tacotron2 आदि जैसे निम्न गुणवत्ता वाले TTS का उपयोग करें।</i>
 
 ## समर्थित भाषाएं
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **अरबी (ar )**| **चीनी (zh )**| **अंग्रेज़ी (en )**| स्पेनिश (es )**|
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **फ़्रेंच (fr )**| **जर्मन (de )**| **इतालवी (it )**| **पुर्तगाली (pt )**|
+| **पोलिश (pl )**| **तुर्की (tr )**| **रूसी (ru )**| **डच (nl )**|
+| **चेक (cs )**| **जापानी (ja )**| **हिंदी (hi )**| **बंगाली (bn )**|
+| **हंगेरियन (hu )**| **कोरियाई (ko )**| **वियतनामी (vi )**| **स्वीडिश (sv )**|
+| **फ़ारसी (fa )**| **योरुबा (yo )**| **स्वाहिली (sw )**| **इंडोनेशियाई (id )**|
+| **स्लोवाक (sk )**| **क्रोएशियाई (hr )**| **तमिल (ta )**| **डेनिश (da )**|
 - [**+1130 भाषाएं और बोलियां यहां**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -159,11 +159,11 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 **आपकी ई-बुक में स्वचालित रूप से SML जोड़ने के लिए समर्पित हमारे दूसरे रेपो को देखें -> [E2A-SML](https://github.com/DrewThomasson/E2A-SML)**
 
-> [!IMPORTANT]
+> [!IMPORTANT] 
 **इंस्टॉलेशन या बग समस्या पोस्ट करने से पहले, खुली और बंद समस्याओं वाले टैब में सावधानी से खोजें<br>
 यह सुनिश्चित करने के लिए कि आपकी समस्या पहले से मौजूद नहीं है।**
 
->[!NOTE]
+नोट
 **EPUB प्रारूप में ऐसी कोई मानक संरचना नहीं है जो परिभाषित करे कि अध्याय, अनुच्छेद, प्रस्तावना आदि क्या हैं।<br>
 इसलिए आपको पहले उस सभी पाठ को मैन्युअल रूप से हटा देना चाहिए जिसे आप ऑडियो में नहीं बदलना चाहते।**
 
@@ -200,9 +200,9 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 2. **सार्वजनिक लिंक के लिए**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (सभी OS)
 
-> [!IMPORTANT]
+> [!IMPORTANT] 
 **यदि स्क्रिप्ट को रोककर फिर से चलाया जाता है, तो आपको अपने Gradio GUI इंटरफ़ेस को रिफ़्रेश करना होगा<br>
 ताकि वेब पेज नए कनेक्शन सॉकेट से फिर से जुड़ सके।**
 
@@ -433,7 +433,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - NOTE: MPS is not exposed in docker so CPU must be used
-- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, OpenVoice etc.)
+- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM etc.)
   across container runs, so they are not reinstalled each time. To reset them: `docker volume rm e2a_venvs`
 
 ## क्लोन की गई आवाज़ें
@@ -553,15 +553,15 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] YourTTS (https://github.com/Edresson/YourTTS)[cite: 1]
 - [x] ऑर्फ़ियस - टीटीएस (https://github.com/canopyai/Orpheus-TTS)
 - [x] OpenVoice (https://github.com/myshell-ai/OpenVoice)
-- [ ] ChatTTS (https://github.com/2noise/ChatTTS)
-- [ ] स्पार्क - टीटीएस (https://github.com/sparkaudio/spark-tts)
-- [ ] MeloTTS (https://github.com/myshell-ai/MeloTTS)
-- [ ] CRM (https://github.com/SesameAILabs/csm)
+- [x] ChatTTS (https://github.com/2noise/ChatTTS)
+- [x] स्पार्क - टीटीएस (https://github.com/sparkaudio/spark-tts)
+- [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
+- [x] CSM (https://github.com/SesameAILabs/csm)
 
 #### Readme अनुवाद
 - [x] अरबी (आरा)
 - [x] चीनी (zho)
-- [x] English (eng)
+- [x] अंग्रेज़ी (ENG)
 - [x] स्पेनिश (SPA)
 - [x] फ़्रेंच (FRA)
 - [x] जर्मन (deu)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## बीटा परीक्षणों के लिए हार्डवेयर दान की तलाश है
 हम अपने विकास का परीक्षण करने के लिए किसी भी प्रकार का हार्डवेयर स्वीकार करते हैं जैसे:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia सपोर्टिंग cuda >= 11.8
+- XPU इंटेल कार्ड
+- ROCm AMD कार्ड ROCm को सपोर्ट करते हैं >=5.7
 
 @DrewThomasson यदि आप किसी भी तरह से मदद करना चाहते हैं! 😃
 <!--

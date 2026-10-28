@@ -4,7 +4,7 @@
 مبدل CPU/GPU از کتاب الکترونیکی به کتاب صوتی همراه با فصل‌ها و فراداده<br/>
 با استفاده از موتورهای پیشرفته TTS و موارد دیگر.<br/>
 پشتیبانی از شبیه‌سازی صدا و ۱۶۹۶ زبان!
-> مهم
+> [!IMPORTANT]
 **این ابزار تنها برای استفاده با کتاب‌های الکترونیکی فاقد DRM که به‌صورت قانونی به دست آمده‌اند، در نظر گرفته شده است.** <br>
 نویسندگان مسئول هیچ‌گونه سوءاستفاده از این نرم‌افزار یا هرگونه پیامد قانونی ناشی از آن نیستند. <br>
 از این ابزار مسئولانه و در چارچوب تمام قوانین قابل اجرا استفاده کنید.
@@ -129,14 +129,14 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 *<i> موتورهای مدرن TTS روی CPU بسیار کند هستند، بنابراین از TTS با کیفیت پایین‌تر مانند YourTTS، Tacotron2 و غیره استفاده کنید.</i>
 
 ## زبان‌های پشتیبانی‌شده
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **عربی (ار)** | **چینی (zh)** | **انگلیسی (en)** | **اسپانیایی (es)** |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **فرانسوی** | **آلمانی** | **ایتالیایی** | **پرتغالی** |
+| **لهستانی (pl)** | **ترکی (tr)** | **روسی (ru)** | **هلندی (nl)** |
+| ** چک (cs)** | **ژاپنی (ja)** | **هندی (سلام)** | **بنگالی (bn)** |
+| **مجارستانی (هو)** | **کره ای (ko)** | **ویتنامی (vi)**| **سوئدی (sv)** |
+| **فارسی (fa)** | **یوروبایی (yo)** | **سواحیلی (sw)** | **اندونزیایی (id)**|
+| **اسلواکی (sk)** | **کرواسی (ساعت)** | **تامیل (ta)** | **دانمارکی (da)** |
 - [**+۱۱۳۰ زبان و گویش در اینجا**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **پیش از ارسال مشکل نصب یا باگ، با دقت در زبانه مسائل باز و بسته جستجو کنید<br>
 تا مطمئن شوید مشکل شما از قبل وجود ندارد.**
 
->[!NOTE]
+یادداشت
 **قالب EPUB فاقد هرگونه ساختار استاندارد برای تعریف اینکه فصل، پاراگراف، مقدمه و غیره چیست، می‌باشد.<br>
 بنابراین ابتدا باید هر متنی را که نمی‌خواهید به صدا تبدیل شود، به‌صورت دستی حذف کنید.**
 
@@ -198,7 +198,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
    
 1. **برنامه وب را باز کنید**: برای دسترسی به برنامه وب و تبدیل کتاب‌های الکترونیکی، روی URL ارائه‌شده در ترمینال کلیک کنید. `http://localhost:7860/`
 2. **برای پیوند عمومی**:
-   `./ebook2audiobook.command --share` (Linux/MacOS)
+   `./ebook2audiobook.command --share` (لینوکس/مک او اس)
    `ebook2audiobook.cmd --share` (Windows)
    `python app.py --share` (all OS)
 
@@ -433,7 +433,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - NOTE: MPS is not exposed in docker so CPU must be used
-- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, OpenVoice etc.)
+- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM etc.)
   across container runs, so they are not reinstalled each time. To reset them: `docker volume rm e2a_venvs`
 
 ## صداهای کلون‌شده
@@ -474,7 +474,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## مشکلات رایج:
 - پردازنده گرافیکی NVIDIA/ROCm/XPU/MPS من شناسایی نمی‌شود؟؟ -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU کند است (روی CPU سرور SMP بهتر است) در حالی که GPU می‌تواند تبدیل تقریباً بلادرنگ داشته باشد.
-   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   [بحث در مورد این](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)]
    (با این حال شبیه‌سازی صدای zero-shot ندارد، و صداها با کیفیت Siri هستند، اما روی cpu بسیار سریع‌تر است).
 - «مشکلاتی با وابستگی‌ها دارم» - کافی است از docker استفاده کنید، کاملاً مستقل است و حالت بدون رابط دارد،
    برای اطلاعات بیشتر پارامتر `--help` را به انتهای دستور docker run اضافه کنید.
@@ -553,15 +553,15 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] YourTTS (https://github.com/Edresson/YourTTS)[cite: 1]
 - [x] اورفئوس-TTS (https://github.com/canopyai/Orpheus-TTS))
 - [x] اوپن ویس (https://github.com/myshell-ai/OpenVoice))
-- [ ] چتTTS (https://github.com/2noise/ChatTTS)
-- [ ] جرقه-TTS (https://github.com/sparkaudio/spark-tts)
-- [ ] MeloTTS (https://github.com/myshell-ai/MeloTTS)
-- [ ] CRM (https://github.com/SesameAILabs/csm)
+- [x] چتTTS (https://github.com/2noise/ChatTTS)
+- [x] جرقه-TTS (https://github.com/sparkaudio/spark-tts)
+- [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
+- [x] CSM (https://github.com/SesameAILabs/csm)
 
 #### ترجمه Readme
 - [x] عربی (عربی)
 - [x] چینی (ژو)
-- [x] English (eng)
+- [x] انگلیسی (eng)
 - [x] اسپانیایی (اسپا)
 - [x] فرانسوی (fra)
 - [x] آلمانی (deu)
@@ -646,11 +646,11 @@ if config['default_role'] in roles:
     print(config['default_role'])
 ```
 
-## به اهدای سخت‌افزار برای آزمایش‌های بتا نیازمندیم
-ما هر نوع سخت‌افزاری را برای آزمایش توسعه خود می‌پذیریم مانند:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+## اهدای سخت‌افزار برای آزمایش‌های بتا مورد نیاز است
+ما هر نوع سخت‌افزاری را برای آزمایش توسعه خود می‌پذیریم، مانند:
+- انویدیا از کودا &gt;= 11.8 پشتیبانی می‌کند
+- کارت‌های اینتل XPU
+- کارت‌های گرافیک ROCm AMD که از ROCm &gt;=5.7 پشتیبانی می‌کنند
 
 @DrewThomasson اگر می‌خواهید به هر شکلی کمک کنید! 😃
 <!--

@@ -4,7 +4,7 @@
 CPU/GPU átalakító e-könyvből hangoskönyvvé fejezetekkel és metaadatokkal<br/>
 fejlett TTS-motorok használatával és még sok mással.<br/>
 Támogatja a hangklónozást és az 1696 nyelvet!
-> FONTOS
+> [!IMPORTANT]
 **Ez az eszköz kizárólag DRM-mentes, legálisan beszerzett e-könyvekhez használható.** <br>
 A szerzők nem felelősek a szoftver bárminemű visszaéléséért, sem az ebből eredő jogi következményekért. <br>
 Használd ezt az eszközt felelősségteljesen, az összes vonatkozó törvénnyel összhangban.
@@ -123,19 +123,19 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - 1 GB VRAM min., 4 GB ajánlott.
 - Engedélyezett virtualizáció, ha Windowson fut (csak Docker).
 - CPU, XPU (intel, AMD, ARM)*.
-- CUDA, ROCm, JETSON
+- Cuda, ROCm, JETSON
 - MPS (Apple Silicon CPU)
 
 *<i> A modern TTS-motorok nagyon lassúak CPU-n, ezért használj alacsonyabb minőségű TTS-t, mint a YourTTS, Tacotron2 stb.</i>
 
 ## Támogatott nyelvek
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **Arab (ar)**    | **Kínai (zh)**    | **Angol (en)**   | **Spanyol (es)**   |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
+| **Francia (fr)**    | **Német (de)**     | **Olasz (it)**   | **Portugál (pt)** |
+| **Lengyel (pl)**    | **Török (tr)**    | **Orosz (ru)**   | **Holland (nl)**     |
+| **Cseh (cs)**     | **Japán (ja)**   | **Hindi (hi)**     | **Bengáli (bn)**   |
+| **Magyar (hu)** | **Koreai (ko)**     | **Vietnami (vi)**| **Svéd (sv)**   |
+| **Perzsa (fa)**   | **Yoruba (yo)**     | **Szuahéli (sw)**   | **Indonéz (id)**|
 | **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
 - [**+1130 nyelv és nyelvjárás itt**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Mielőtt telepítési vagy hibajegyet nyitnál, gondosan keress rá a nyitott és lezárt jegyek fülön<br>
 hogy biztos legyél benne, hogy a problémád még nem létezik.**
 
->[!NOTE]
+Megjegyzés
 **Az EPUB formátum nem rendelkezik semmilyen szabványos struktúrával arra nézve, hogy mi a fejezet, bekezdés, előszó stb.<br>
 Ezért először manuálisan el kell távolítanod minden olyan szöveget, amelyet nem szeretnél hanggá alakítani.**
 
@@ -200,7 +200,7 @@ Ezért először manuálisan el kell távolítanod minden olyan szöveget, amely
 2. **Nyilvános linkhez**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (összes operációs rendszer)
 
 > [!IMPORTANT]
 **Ha a szkriptet leállítják és újra futtatják, frissítened kell a Gradio GUI felületedet<br>
@@ -433,7 +433,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - NOTE: MPS is not exposed in docker so CPU must be used
-- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, OpenVoice etc.)
+- NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM etc.)
   across container runs, so they are not reinstalled each time. To reset them: `docker volume rm e2a_venvs`
 
 ## Klónozott hangok
@@ -474,7 +474,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Gyakori problémák:
 - Az NVIDIA/ROCm/XPU/MPS GPU-mat nem érzékeli?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  A CPU lassú (jobb szerver SMP CPU-n), míg a GPU szinte valós idejű átalakítást tud nyújtani.
-   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   [Megbeszélés erről a](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Nincs azonban zero-shot hangklónozása, és a hangok Siri minőségűek, de CPU-n sokkal gyorsabb).
 - „Függőségi problémáim vannak” - Egyszerűen használd a Dockert, teljesen önálló, és van headless módja,
    adj hozzá `--help` paramétert a docker run parancs végéhez további információkért.
@@ -553,15 +553,15 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] YourTTS (https://github.com/Edresson/YourTTS)[cite: 1]
 - [x] Orpheus-TTS (https://github.com/canopyai/Orpheus-TTS)
 - [x] OpenVoice (https://github.com/myshell-ai/OpenVoice)
-- [ ] ChatTTS (https://github.com/2noise/ChatTTS)
-- [ ] Spark-TTS (https://github.com/sparkaudio/spark-tts)
-- [ ] MeloTTS (https://github.com/myshell-ai/MeloTTS)
-- [ ] CRM (https://github.com/SesameAILabs/csm)
+- [x] ChatTTS (https://github.com/2noise/ChatTTS)
+- [x] Spark-TTS (https://github.com/sparkaudio/spark-tts)
+- [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
+- [x] CSM (https://github.com/SesameAILabs/csm)
 
 #### A Readme fordítása
 - [x] Arab (ara)
 - [x] Kínai (zho)
-- [x] English (eng)
+- [x] Angol (eng)
 - [x] Spanyol (Spa)
 - [x] Francia (fra)
 - [x] Német (deu)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## Hardveradományt keresünk béta tesztekhez
 Bármilyen típusú hardvert elfogadunk a fejlesztésünk teszteléséhez, például:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia cuda tartó >= 11,8
+- XPU intel kártyák
+- ROCm AMD kártyák ROCm >=5,7 támogatással
 
 @DrewThomasson ha bármilyen módon segíteni szeretnél! 😃
 <!--
