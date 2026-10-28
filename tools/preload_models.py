@@ -4,7 +4,7 @@ from typing import Callable
 root_dir = str(Path(__file__).resolve().parents[1])
 os.chdir(root_dir)
 sys.path.insert(0, root_dir)
-categories = ['common', 'xtts', 'bark', 'tortoise', 'vits', 'fairseq', 'glowtts', 'tacotron', 'yourtts', 'piper', 'zonos', 'audiocpp', 'audiocpp_server', 'gptsovits', 'f5tts', 'omnivoice', 'orpheus', 'sparktts', 'chattts', 'openvoice', 'phonon', 'stanza', 'pyannote', 'demucs', 'interlude', 'argos', 'tessdata', 'jieba', 'voices']
+categories = ['common', 'xtts', 'bark', 'tortoise', 'vits', 'fairseq', 'glowtts', 'tacotron', 'yourtts', 'piper', 'zonos', 'audiocpp', 'audiocpp_server', 'gptsovits', 'f5tts', 'omnivoice', 'orpheus', 'sparktts', 'chattts', 'openvoice', 'melotts', 'phonon', 'stanza', 'pyannote', 'demucs', 'interlude', 'argos', 'tessdata', 'jieba', 'voices']
 parser = argparse.ArgumentParser(description='Download every model e2a uses into one folder laid out exactly like ./models (i.e. a USB key for offline installs).')
 parser.add_argument('models_dir', type=str, help='Target folder, i.e. /media/user/KEY/models or E:\\models')
 parser.add_argument('--only', type=str, default='', help=f"Comma list of categories: {','.join(categories)}")
@@ -412,6 +412,20 @@ if ov_repos:
         add('openvoice', f'{repo} tokenizer', lambda repo=repo, bert_path=bert_path: hf_folder(repo, bert_path, ['*.json', '*.txt'], True))
         if melo_lang in (ov['languages'][lang] for lang in ov_languages):
             add('openvoice', f'{repo} weights', lambda repo=repo, bert_path=bert_path: hf_folder(repo, bert_path, ['model.safetensors'] if 'model.safetensors' in HfApi().list_repo_files(repo) else ['pytorch_model.bin']))
+melo = default_engine_settings[TTS_ENGINES['MELOTTS']]
+melo_languages = [lang for lang in melo['languages'] if wanted(lang)]
+melo_repos = list(dict.fromkeys(ckpt['repo'] for cfg in load_presets('melotts').values() for lang, ckpt in cfg['checkpoints'].items() if wanted(lang)))
+for repo in melo_repos:
+    add('melotts', repo, lambda repo=repo: hf_folder(repo, os.path.join(tts_dir, 'melotts', repo.replace('/', '--')), ['config.json', 'checkpoint.pth'], True))
+if melo_repos:
+    from huggingface_hub import HfApi
+    add('melotts', 'nltk_data', lambda: nltk_data(os.path.join(tts_dir, 'melotts', 'nltk_data')))
+    # as for openvoice: every frontend's tokenizer, plus the BERT weights of the wanted languages as their own job
+    for melo_lang, repo in melo['berts'].items():
+        bert_path = os.path.join(tts_dir, 'melotts', repo.replace('/', '--'))
+        add('melotts', f'{repo} tokenizer', lambda repo=repo, bert_path=bert_path: hf_folder(repo, bert_path, ['*.json', '*.txt'], True))
+        if melo_lang in (melo['languages'][lang] for lang in melo_languages):
+            add('melotts', f'{repo} weights', lambda repo=repo, bert_path=bert_path: hf_folder(repo, bert_path, ['model.safetensors'] if 'model.safetensors' in HfApi().list_repo_files(repo) else ['pytorch_model.bin']))
 # phonon: the checkpoint folders and catalog voices the engine reads (same folders, same .e2a_complete marker)
 ph = default_engine_settings[TTS_ENGINES['PHONON']]
 for lang, ckpt in load_presets('phonon')['internal']['checkpoints'].items():

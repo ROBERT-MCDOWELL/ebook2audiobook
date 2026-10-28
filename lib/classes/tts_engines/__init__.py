@@ -17,3 +17,4 @@ from .phonon import Phonon
 from .audiocpp import AudioCpp
 from .sparktts import SparkTTS
 from .chattts import ChatTTS
+from .melotts import MeloTTS
