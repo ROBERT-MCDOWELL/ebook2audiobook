@@ -499,6 +499,7 @@ legends = {
     'error_torch_install_failed': 'نصب بسته torch ناموفق بود: {e}',
     'error_torch_install': 'خطا هنگام نصب بسته torch: {e}',
     'msg_symlink_libgomp': 'در حال ساخت پیوند نمادین به libgomp سیستم.',
+    'error_symlink_libgomp': 'نمی‌توان {file} را به libgomp سیستم‌عامل لینک داد: {error}',
     'error_gpu_detection_warning': 'هشدار شناسایی GPU: {e}',
     'msg_argos_downloading': 'در حال دانلود بسته argos {src} -> {dst}',
     'msg_argos_installed': 'بسته argos نصب شد {src} -> {dst}',

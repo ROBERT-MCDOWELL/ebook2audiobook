@@ -499,6 +499,7 @@ legends = {
     'error_torch_install_failed': 'Nie można zainstalować pakietu torch: {e}',
     'error_torch_install': 'Błąd podczas instalacji pakietu torch: {e}',
     'msg_symlink_libgomp': 'Tworzenie dowiązania symbolicznego do systemowej libgomp.',
+    'error_symlink_libgomp': 'Nie można połączyć {file} z libgomp systemu operacyjnego: {error}',
     'error_gpu_detection_warning': 'Ostrzeżenie wykrywania GPU: {e}',
     'msg_argos_downloading': 'Pobieranie pakietu argos {src} -> {dst}',
     'msg_argos_installed': 'Zainstalowano pakiet argos {src} -> {dst}',

@@ -499,6 +499,7 @@ legends = {
     'error_torch_install_failed': 'A torch csomag telepítése sikertelen: {e}',
     'error_torch_install': 'Hiba a torch csomag telepítésekor: {e}',
     'msg_symlink_libgomp': 'Szimbolikus link létrehozása a rendszer libgomp könyvtárához.',
+    'error_symlink_libgomp': 'Nem lehet a {file}-t az operációs rendszer libgompjához csatolni: {error}',
     'error_gpu_detection_warning': 'GPU-észlelési figyelmeztetés: {e}',
     'msg_argos_downloading': 'Argos-csomag letöltése {src} -> {dst}',
     'msg_argos_installed': 'Argos-csomag telepítve {src} -> {dst}',

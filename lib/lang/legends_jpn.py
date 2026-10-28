@@ -499,6 +499,7 @@ legends = {
     'error_torch_install_failed': 'torch パッケージのインストールに失敗しました: {e}',
     'error_torch_install': 'torch パッケージのインストール中にエラーが発生しました: {e}',
     'msg_symlink_libgomp': 'OS の libgomp へのシンボリックリンクを作成中。',
+    'error_symlink_libgomp': 'OS libgomp に {file} をリンクできません: {error}',
     'error_gpu_detection_warning': 'GPU 検出の警告: {e}',
     'msg_argos_downloading': 'argos パッケージをダウンロード中 {src} -> {dst}',
     'msg_argos_installed': 'argos パッケージをインストールしました {src} -> {dst}',

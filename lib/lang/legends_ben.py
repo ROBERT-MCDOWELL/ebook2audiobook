@@ -499,6 +499,7 @@ legends = {
     'error_torch_install_failed': 'torch প্যাকেজ ইনস্টল ব্যর্থ: {e}',
     'error_torch_install': 'torch প্যাকেজ ইনস্টলের সময় ত্রুটি: {e}',
     'msg_symlink_libgomp': 'OS-এর libgomp-এর জন্য সিমলিংক তৈরি হচ্ছে।',
+    'error_symlink_libgomp': 'ওএস libgomp এর সাথে {file} লিঙ্ক করা যাচ্ছে না: {error}',
     'error_gpu_detection_warning': 'GPU শনাক্তকরণ সতর্কতা: {e}',
     'msg_argos_downloading': 'argos প্যাকেজ ডাউনলোড হচ্ছে {src} -> {dst}',
     'msg_argos_installed': 'argos প্যাকেজ ইনস্টল হয়েছে {src} -> {dst}',

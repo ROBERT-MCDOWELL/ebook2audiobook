@@ -499,6 +499,7 @@ legends = {
     'error_torch_install_failed': 'torch தொகுப்பை நிறுவ முடியவில்லை: {e}',
     'error_torch_install': 'torch தொகுப்பை நிறுவும்போது பிழை: {e}',
     'msg_symlink_libgomp': 'OS இன் libgomp க்கான குறியீட்டு இணைப்பு உருவாக்கப்படுகிறது.',
+    'error_symlink_libgomp': 'இணைக்க முடியவில்லை {file} OS libgomp க்கு: {error}',
     'error_gpu_detection_warning': 'GPU கண்டறிதல் எச்சரிக்கை: {e}',
     'msg_argos_downloading': 'argos தொகுப்பு பதிவிறக்கப்படுகிறது {src} -> {dst}',
     'msg_argos_installed': 'argos தொகுப்பு நிறுவப்பட்டது {src} -> {dst}',

@@ -499,6 +499,7 @@ legends = {
     'error_torch_install_failed': 'Gagal masang paket torch: {e}',
     'error_torch_install': 'Kesalahan nalika masang paket torch: {e}',
     'msg_symlink_libgomp': 'Nggawe symlink menyang libgomp sistem.',
+    'error_symlink_libgomp': 'Ora bisa ngubungake {file} menyang libgomp OS: {error}',
     'error_gpu_detection_warning': 'Pénget deteksi GPU: {e}',
     'msg_argos_downloading': 'Ngundhuh paket argos {src} -> {dst}',
     'msg_argos_installed': 'Paket argos wis dipasang {src} -> {dst}',

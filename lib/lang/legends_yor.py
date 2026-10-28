@@ -499,6 +499,7 @@ legends = {
     'error_torch_install_failed': 'Fífi àpò torch sí i kò ṣiṣẹ́: {e}',
     'error_torch_install': 'Àṣìṣe nígbà tí a ń fi àpò torch sí i: {e}',
     'msg_symlink_libgomp': 'À ń ṣẹ̀dá ìtọ́ka sí libgomp ti OS.',
+    'error_symlink_libgomp': 'Kò le so {file} pọ̀ mọ́ OS libgomp: {error}',
     'error_gpu_detection_warning': 'Ìkìlọ̀ ìwárí GPU: {e}',
     'msg_argos_downloading': 'À ń gba àpò argos {src} -> {dst}',
     'msg_argos_installed': 'A ti fi àpò argos sí i {src} -> {dst}',
