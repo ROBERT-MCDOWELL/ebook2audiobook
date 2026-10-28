@@ -4,7 +4,7 @@
 Ayípadà CPU/GPU láti inú ìwé-kàwé ẹ̀rọ sí ìwé-ohùn pẹ̀lú àwọn orí àti metadata<br/>
 ní lílo àwọn ẹ̀rọ TTS tó ní ìlọsíwájú àti púpọ̀ síi.<br/>
 Ṣe àtìlẹyìn fún ìsopọ̀ ohùn àti àwọn èdè 1696!
-> Pàtàkì
+> [!IMPORTANT]
 **Ọ̀pá-ìṣẹ́ yìí jẹ́ fún lílo pẹ̀lú àwọn ìwé-kàwé ẹ̀rọ tí kò ní DRM, tí a rí gbà ní ọ̀nà òfin nìkan.** <br>
 Àwọn òǹkọ̀wé kò ní jẹ́jọ́ fún ìlòkulò èyíkéyìí ti software yìí tàbí àbájáde òfin èyíkéyìí tí ó bá yọrí sí. <br>
 Lo ọ̀pá-ìṣẹ́ yìí pẹ̀lú ojúṣe àti ní ìbámu pẹ̀lú gbogbo àwọn òfin tó wà ní agbára.
@@ -129,14 +129,14 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 *<i> Àwọn ẹ̀rọ TTS òde-òní lọ́ra gan-an lórí CPU, nítorí náà lo TTS olódodo kékeré bíi YourTTS, Tacotron2 àti bẹ́ẹ̀ bẹ́ẹ̀ lọ.</i>
 
 ## Àwọn Èdè Tí A Ṣe Àtìlẹ́yìn Fún
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+Èdè Lárúbáwá (ar) **Èdè Ṣáínà (zh)** * Èdè Gẹ̀ẹ́sì (en)* * Èdè Sípáníìṣì (es) **Èdè Sípáníìṣì (es)** Èdè Sípáníìṣì (es) **Èdè Sípáníìṣì (es)** Èdè Sípán
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+Èdè Faransé (fr)** Èdè Jẹ́mánì (de)* ** Èdè Ítálì (it)**Èdè Potogí (pt)**.
+**Polish (pl)** * **Turkish (tr)** **Russian (ru)** **Dutch (nl)**.
+**Czech (cs)** **Japanese (ja)** **Hindi (hi)** **Bengali (bn)**
+**Hungarian (hu)** **Korean (ko)** **Vietnamese (vi)** **Swedish (sv)**.
+Èdè Páṣíà (fa)* **Èdè Yorùbá (yo)** *Èdè Swahili (sw)** Èdè Indonéṣíà (id)**.
+**Slovak (sk)** ***Croatian (hr)* **Tamil (ta)** *Danish (da)**.
 - [**+1130 èdè àti èdè-ìbílẹ̀ níbí**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Kí o tó fi ìṣòro ìfìsọ́nà tàbí àṣìṣe sílẹ̀, ṣàwárí dáradára nínú TAB àwọn ìṣòro tó ṣí sílẹ̀ àti èyí tí a ti tì<br>
 láti rí i dájú pé ìṣòro rẹ kò tíì sí.**
 
->[!NOTE]
+Àkíyèsi
 **Ọ̀nà EPUB kò ní ètò àpapọ̀ èyíkéyìí bíi ohun tí orí jẹ́, ìpínrọ̀, ọ̀rọ̀-ìṣáájú àti bẹ́ẹ̀ bẹ́ẹ̀ lọ.<br>
 Nítorí náà o gbọ́dọ̀ kọ́kọ́ yọ ọ̀rọ̀ èyíkéyìí tí o kò fẹ́ yí padà sí ohùn pẹ̀lú ọwọ́.**
 
@@ -200,7 +200,7 @@ Nítorí náà o gbọ́dọ̀ kọ́kọ́ yọ ọ̀rọ̀ èyíkéyìí tí o
 2. **Fún Ọ̀nà Àjọ̀dún**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (gbogbo OS)
 
 > [!IMPORTANT]
 **Tí a bá dúró kọ̀ǹpútà-ìtọ́ni tí a sì tún ṣe é, o nílò láti tún wíwo GUI gradio rẹ ṣe<br>
@@ -474,7 +474,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Àwọn Ìṣòro Tó Wọ́pọ̀:
 - A kò rí GPU NVIDIA/ROCm/XPU/MPS mi?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU lọ́ra (ó dára jù lórí CPU smp sáfà) nígbà tí GPU lè ní ìyípadà tó fẹ́rẹ̀ jẹ́ àkókò gidi.
-   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   [Ìjíròrò nípa èyí](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Bí ó tilẹ̀ jẹ́ pé kò ní ẹ̀dà ohùn zero-shot, tí ó sì jẹ́ àwọn ohùn olódodo Siri, ṣùgbọ́n ó yára púpọ̀ síi lórí cpu).
 - "Mo ní àwọn ìṣòro ìgbẹ́kẹ̀lé" - Kàn lo docker, ó dúró lóró fúnra rẹ̀ pátápátá ó sì ní ìpò headless,
    ṣàfikún àléébù `--help` ní òpin àṣẹ docker run fún ìsọfúnni síi.
@@ -561,7 +561,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 #### Ìtumọ̀ Readme
 - [x] Lárúbáwá (Lárúbáwá)
 - [x] Chinese (zho)
-- [x] English (eng)
+- [x] Èdè Gẹ̀ẹ́sì (eng)
 - [x] Èdè Sípáníìṣì (SPA)
 - [x] Faranse (fra)
 - [x] Jẹmánì (DEU)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## A ń wá ẹ̀bùn ohun-èlò fún àwọn ìdánwò beta
 A gba irú ohun-èlò èyíkéyìí láti dán ìdàgbàsókè wa wò bíi:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia ṣe àtìlẹyìn cuda >= 11.8
+- Àwọn káàdì XPU intel
+- Àwọn káàdì ROCm AMD tí ó ń ṣètìlẹ́yìn fún ROCm >=5.7
 
 @DrewThomasson tí o bá fẹ́ ṣe ìrànlọ́wọ́ ní ọ̀nà èyíkéyìí! 😃
 <!--

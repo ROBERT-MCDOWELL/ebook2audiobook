@@ -4,7 +4,7 @@
 Kibadilishaji cha CPU/GPU kutoka E-Kitabu hadi kitabu cha sauti chenye sura na metadata<br/>
 kwa kutumia injini za hali ya juu za TTS na mengi zaidi.<br/>
 Inasaidia kupiga picha za sauti na lugha 1696!
-> Muhimu
+> [!IMPORTANT]
 **Zana hii imekusudiwa kutumika tu na vitabu pepe visivyo na DRM, vilivyopatikana kihalali.** <br>
 Waandishi hawawajibikii matumizi mabaya yoyote ya programu hii au matokeo yoyote ya kisheria yanayotokana nayo. <br>
 Tumia zana hii kwa uwajibikaji na kwa kufuata sheria zote zinazotumika.
@@ -123,20 +123,20 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - VRAM 1GB chini, 4GB inapendekezwa.
 - Uboreshaji umewezeshwa ikiwa unaendeshwa kwenye windows (Docker pekee).
 - CPU, XPU (intel, AMD, ARM)*.
-- CUDA, ROCm, JETSON
+- CUDA, Rocm, JETSON
 - MPS (CPU ya Apple Silicon)
 
 *<i> Injini za kisasa za TTS ni polepole sana kwenye CPU, kwa hivyo tumia TTS za ubora wa chini kama YourTTS, Tacotron2 n.k.</i>
 
 ## Lugha Zinazoungwa Mkono
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **Kiarabu (ar)**    | **Kichina (zh)**    | **Kiingereza (sw)**   | **Kihispania (es)**   |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **Kifaransa (fr)**    | **Kijerumani (de)**     | **Kiitaliano (it)**   | **Kireno (pt)** |
+| **Kipolishi (pl)**    | **Kituruki (tr)**    | **Kirusi (ru)**   | **Kiholanzi (nl)**     |
+| **Cheki (cs)**     | **Kijapani (ja)**   | **Kihindi (hi)**     | **Kibengali (bn)**   |
+| **Hungarian (hu)** | **Kikorea (ko)**     | **Kivietinamu (vi)**| **Kiswidi (sv)**   |
+| **Kiajemi (fa)**   | **Yoruba (yo)**     | **Kiswahili (sw)**   | **Kiindonesia (id)**|
+| **Kislovakia (sk)**    | **Kikroeshia (hr)**   | **Kitamil (ta)**     | **Kidenmaki (da)**    |
 - [**+1130 lugha na lahaja hapa**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Kabla ya kutuma tatizo la usakinishaji au hitilafu, tafuta kwa makini katika KICHUPO cha matatizo yaliyofunguliwa na yaliyofungwa<br>
 ili kuhakikisha tatizo lako halipo tayari.**
 
->[!NOTE]
+Kidokezo
 **Muundo wa EPUB hauna muundo wowote wa kawaida kama vile sura ni nini, aya, dibaji n.k.<br>
 Kwa hivyo unapaswa kwanza kuondoa kwa mkono maandishi yoyote ambayo hutaki kubadilishwa kuwa sauti.**
 
@@ -200,7 +200,7 @@ Kwa hivyo unapaswa kwanza kuondoa kwa mkono maandishi yoyote ambayo hutaki kubad
 2. **Kwa Kiungo cha Umma**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (OS zote)
 
 > [!IMPORTANT]
 **Ikiwa hati itasimamishwa na kuendeshwa tena, unahitaji kuonyesha upya kiolesura chako cha GUI cha gradio<br>
@@ -474,7 +474,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Matatizo ya Kawaida:
 - GPU yangu ya NVIDIA/ROCm/XPU/MPS haitambuliki?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU ni polepole (bora kwenye CPU smp ya seva) huku GPU ikiweza kuwa na ubadilishaji wa karibu wakati halisi.
-   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   [Majadiliano kuhusu hii](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Hata hivyo haina unakili wa sauti wa zero-shot, na ni sauti za ubora wa Siri, lakini ni haraka zaidi kwenye cpu).
 - "Nina matatizo ya utegemezi" - Tumia tu docker, imejitosheleza kabisa na ina hali ya headless,
    ongeza kigezo `--help` mwishoni mwa amri ya docker run kwa maelezo zaidi.
@@ -561,7 +561,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 #### Tafsiri ya Readme
 - [x] Kiarabu (ara)
 - [x] Kichina (zho)
-- [x] English (eng)
+- [x] Kiingereza (Eng)
 - [x] Kihispania (spa)
 - [x] Kifaransa (fra)
 - [x] Kijerumani (deu)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## Mchango wa maunzi kwa majaribio ya beta unahitajika
 Tunakubali aina yoyote ya maunzi ili kujaribu maendeleo yetu kama vile:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia kusaidia cuda >= 11.8
+- Kadi za intel za XPU
+- Kadi za AMD za Rocm zinazounga mkono Rocm >=5.7
 
 @DrewThomasson ikiwa unataka kusaidia kwa namna yoyote ile! 😃
 <!--

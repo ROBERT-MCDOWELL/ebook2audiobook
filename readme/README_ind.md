@@ -4,7 +4,7 @@
 Konverter CPU/GPU dari E-Book ke buku audio dengan bab dan metadata<br/>
 menggunakan mesin TTS canggih dan banyak lagi.<br/>
 Mendukung kloning suara dan 1696 bahasa!
-> Penting 
+> [!IMPORTANT] 
 **Alat ini ditujukan hanya untuk digunakan dengan eBook tanpa DRM yang diperoleh secara legal.** <br>
 Penulis tidak bertanggung jawab atas penyalahgunaan perangkat lunak ini atau konsekuensi hukum yang timbul. <br>
 Gunakan alat ini secara bertanggung jawab dan sesuai dengan semua hukum yang berlaku.
@@ -122,21 +122,21 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - RAM 2GB min, 8GB direkomendasikan.
 - VRAM 1GB min, 4GB direkomendasikan.
 - Virtualisasi diaktifkan jika berjalan di windows (hanya Docker).
-- CPU, XPU (intel, AMD, ARM)*.
-- CUDA, ROCm, JETSON
+- CPU, XPU (intel, AMD, ARM )*.
+- Cuda, ROCm, JETSON
 - MPS (CPU Apple Silicon)
 
 *<i> Mesin TTS modern sangat lambat di CPU, jadi gunakan TTS berkualitas lebih rendah seperti YourTTS, Tacotron2 dll.</i>
 
 ## Bahasa yang Didukung
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **Arabic (ar )**|**Chinese (zh)**|**English (en )**|** Spanish (es )**|
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
-| **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **French (fr )**|**German (de )**|**Italian (it )**|** Portuguese (pt )**|
+| **Polish (pl )**|**Turkish (tr )**|**Russian (ru )**|** Dutch (nl     )**|
+| ** Bahasa Ceko (cs )**|** Bahasa Jepang (ja )**|** Bahasa Hindi (hi )**|** Bahasa Bengali (bn )**|
+| ** Bahasa Hongaria (hu )**|** Bahasa Korea (ko )**|** Bahasa Vietnam (vi )**|** Bahasa Swedia (sv )**|
+| **Persia (fa )**   | **Yoruba (yo )**     | **Swahili (sw )**   | **Indonesia (id )**|
+| **Bahasa Slowakia (sk )**|**Bahasa Kroasia (hr )**|** Bahasa Tamil (ta )**|** Bahasa Denmark (da )**|
 - [**+1130 bahasa dan dialek di sini**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -159,11 +159,11 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 **Lihat repo kami yang lain yang didedikasikan untuk menambahkan SML secara otomatis di eBook Anda -> [E2A-SML](https://github.com/DrewThomasson/E2A-SML)**
 
-> [!IMPORTANT]
+> [!IMPORTANT] 
 **Sebelum memposting masalah pemasangan atau bug, cari dengan cermat di TAB masalah yang terbuka dan tertutup<br>
 untuk memastikan masalah Anda belum ada.**
 
->[!NOTE]
+Surat Utang
 **Format EPUB tidak memiliki struktur standar apa pun seperti apa itu bab, paragraf, kata pengantar, dll.<br>
 Jadi Anda harus terlebih dahulu menghapus secara manual teks apa pun yang tidak ingin Anda konversi menjadi audio.**
 
@@ -200,9 +200,9 @@ Jadi Anda harus terlebih dahulu menghapus secara manual teks apa pun yang tidak 
 2. **Untuk Tautan Publik**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (semua OS)
 
-> [!IMPORTANT]
+> [!IMPORTANT] 
 **Jika skrip dihentikan dan dijalankan lagi, Anda perlu menyegarkan antarmuka GUI gradio Anda<br>
 agar halaman web dapat terhubung kembali ke soket koneksi yang baru.**
 
@@ -561,7 +561,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 #### Terjemahan Readme
 - [x] Arab (ara)
 - [x] Bahasa Mandarin (zho)
-- [x] English (eng)
+- [x] Bahasa Inggris (Eng)
 - [x] Spanyol (spa)
 - [x] Prancis (fra)
 - [x] Jerman (deu)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## Donasi perangkat keras untuk uji beta dicari
 Kami menerima segala jenis perangkat keras untuk menguji pengembangan kami seperti:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia penunjang cuda >= 11,8
+- Kartu intel XPU
+- Kartu AMD ROCm mendukung ROCm >=5,7
 
 @DrewThomasson jika Anda ingin membantu dengan cara apa pun! 😃
 <!--

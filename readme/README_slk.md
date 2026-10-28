@@ -4,7 +4,7 @@
 CPU/GPU prevodník z e-knihy na audioknihu s kapitolami a metadátami<br/>
 s využitím pokročilých TTS enginov a mnohého ďalšieho.<br/>
 Podporuje klonovanie hlasu a 1696 jazykov!
-> Dôležité
+> [!IMPORTANT]
 **Tento nástroj je určený len na použitie s e-knihami bez DRM, získanými legálne.** <br>
 Autori nenesú zodpovednosť za akékoľvek zneužitie tohto softvéru ani za prípadné právne následky. <br>
 Používajte tento nástroj zodpovedne a v súlade so všetkými platnými zákonmi.
@@ -129,14 +129,14 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 *<i> Moderné TTS enginy sú na CPU veľmi pomalé, používajte teda TTS nižšej kvality ako YourTTS, Tacotron2 atď.</i>
 
 ## Podporované jazyky
-| **Arabic (ar)**    | **Chinese (zh)**    | **English (en)**   | **Spanish (es)**   |
+| **Arabčina (ar)**    | **Čínština (zh)**    | **Angličtina (en)**   | **Španielčina (y)**   |
 |:------------------:|:------------------:|:------------------:|:------------------:|
-| **French (fr)**    | **German (de)**     | **Italian (it)**   | **Portuguese (pt)** |
-| **Polish (pl)**    | **Turkish (tr)**    | **Russian (ru)**   | **Dutch (nl)**     |
+| **Francúzština (fr)**    | **Nemčina (de)**     | **Taliančina (it)**   | **Portugalčina (pt)** |
+| **Poľština (pl)**    | **Turečtina (tr)**    | **Ruština (ru)**   | **Holandčina (nl)**     |
 | **Czech (cs)**     | **Japanese (ja)**   | **Hindi (hi)**     | **Bengali (bn)**   |
-| **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
-| **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
-| **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
+| **Maďarčina (hu)** | **Kórejčina (ko)**     | **Vietnamčina (vi)**| **Švédčina (sv)**   |
+| **Perzština (fa)**   | **Yoruba (yo)**     | **Svahilčina (sw)**   | **Indonézština (id)**|
+| **Slovenčina (sk)**    | **Chorvátčina (hr)**   | **Tamilčina (ta)**     | **Dánčina (da)**    |
 - [**+1130 jazykov a dialektov tu**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
@@ -163,7 +163,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Skôr než nahlásite problém s inštaláciou alebo chybu, dôkladne prehľadajte záložku otvorených a uzavretých issues<br>
 aby ste sa uistili, že váš problém ešte neexistuje.**
 
->[!NOTE]
+Upozornenie
 **Formát EPUB postráda akúkoľvek štandardnú štruktúru definujúcu, čo je kapitola, odsek, predslov atď.<br>
 Preto by ste mali najprv ručne odstrániť všetok text, ktorý nechcete prevádzať na zvuk.**
 
@@ -200,7 +200,7 @@ Preto by ste mali najprv ručne odstrániť všetok text, ktorý nechcete prevá
 2. **Pre verejný odkaz**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (všetky OS)
 
 > [!IMPORTANT]
 **Ak je skript zastavený a znovu spustený, musíte obnoviť svoje grafické rozhranie Gradio<br>
@@ -474,7 +474,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Časté problémy:
 - Moje GPU NVIDIA/ROCm/XPU/MPS nie je detekované?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU je pomalé (lepšie na serverovom SMP CPU), zatiaľ čo GPU môže mať takmer prevod v reálnom čase.
-   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   [Diskusia o tomto](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Nemá však klonovanie hlasu zero-shot a hlasy sú kvality Siri, ale na CPU je oveľa rýchlejšie).
 - „Mám problémy so závislosťami“ - Použite jednoducho Docker, je úplne samostatný a má režim headless,
    pre viac informácií pridajte na koniec príkazu docker run parameter `--help`.
@@ -561,7 +561,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 #### Preklad súboru Readme
 - [x] Arabčina (ara)
 - [x] Čínština (zho)
-- [x] English (eng)
+- [x] Angličtina (ENG)
 - [x] Španielčina (kúpele)
 - [x] Francúzština (fra)
 - [x] Nemčina (deu)
@@ -648,9 +648,9 @@ if config['default_role'] in roles:
 
 ## Hľadáme darovanie hardvéru na beta testy
 Prijímame akýkoľvek druh hardvéru na testovanie nášho vývoja, ako napríklad:
-- Nvidia supporting cuda >= 11.8
-- XPU intel cards
-- ROCm AMD cards supporting ROCm >=5.7
+- Nvidia podporujúca cuda >= 11,8
+- XPU Intel karty
+- Karty ROCm AMD podporujúce ROCm >=5,7
 
 @DrewThomasson, ak chcete akokoľvek pomôcť! 😃
 <!--
