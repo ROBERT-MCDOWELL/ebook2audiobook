@@ -94,6 +94,34 @@ class DeviceInstaller():
             return None
         return device_info if isinstance(device_info, dict) else None
 
+    def link_os_libgomp(self, env_dir:str, device_info:Union[dict, None])->None:
+        # Jetson (aarch64, glibc's small static TLS reserve): a wheel's own libgomp copy (auditwheel renames it, e.g.
+        # scikit_learn.libs/libgomp-947d5fa1.so.1.0.0) is a second libgomp in the process, which cannot load once torch's
+        # took the reserve ("cannot allocate memory in static TLS block"). Every <package>.libs copy in the environment
+        # (python_env or an engine's venv) becomes a link to the OS libgomp torch loads, so the process only ever has that
+        # one. Already linked copies are left alone: cheap enough to run at every engine start, which fixes existing venvs
+        if not device_info or device_info.get('os') != 'linux' or not ('jetpack' in device_info.get('note', '').lower() or device_info.get('name') == devices['JETSON']['proc']):
+            return
+        # libgomp.so.1 is the runtime soname (package libgomp1), libgomp.so only comes with a gcc dev package
+        libgomp_src = next((path for path in ('/usr/lib/aarch64-linux-gnu/libgomp.so.1', '/usr/lib/aarch64-linux-gnu/libgomp.so') if os.path.exists(path)), None)
+        if libgomp_src is None:
+            return
+        for libgomp_dst in glob(os.path.join(env_dir, 'lib', 'python*', 'site-packages', '*.libs', 'libgomp*')):
+            if os.path.islink(libgomp_dst) and os.path.realpath(libgomp_dst) == os.path.realpath(libgomp_src):
+                continue
+            msg = legends['msg_symlink_libgomp']
+            print(msg)
+            try:
+                # the link replaces the copy in one step: a failure never leaves the package without its libgomp
+                link_tmp = f'{libgomp_dst}.e2a'
+                if os.path.lexists(link_tmp):
+                    os.unlink(link_tmp)
+                os.symlink(libgomp_src, link_tmp)
+                os.replace(link_tmp, libgomp_dst)
+            except OSError as e:
+                error = legends['error_symlink_libgomp'].format(file=libgomp_dst, error=e)
+                print(error)
+
     def check_pyvenv(self, tag:str)->list:
         # fixed per device, the same rule the launchers create python_env with: jetson wheels are cp310 only
         # (min_python_version), every other device runs max_python_version, which all other prebuilt wheels (py-pkg
@@ -2022,24 +2050,7 @@ class DeviceInstaller():
                             error = legends['error_torch_install'].format(e=e)
                             print(error)
                             return 1
-                    if device_info['os'] == 'linux' and ('jetpack' in device_info.get('note', '').lower() or device_info['name'] == devices['JETSON']['proc']):
-                        libgomp_src = '/usr/lib/aarch64-linux-gnu/libgomp.so'
-                        if os.path.exists(libgomp_src):
-                            libs_list = ['ctranslate2.libs', 'scikit_learn.libs']
-                            libs_dir = os.path.join('python_env', 'lib', f'python{sys.version_info.major}.{sys.version_info.minor}', 'site-packages')
-                            for lib in libs_list:
-                                lib_path = os.path.join(libs_dir, lib)
-                                if os.path.isdir(lib_path):
-                                    for libgomp_dst in glob(os.path.join(lib_path, 'libgomp*')):
-                                        if os.path.islink(libgomp_dst):
-                                            if os.path.realpath(libgomp_dst) == os.path.realpath(libgomp_src):
-                                                continue
-                                            os.unlink(libgomp_dst)
-                                        else:
-                                            os.unlink(libgomp_dst)
-                                        msg = legends['msg_symlink_libgomp']
-                                        print(msg)
-                                        os.symlink(libgomp_src, libgomp_dst)
+                    self.link_os_libgomp('python_env', device_info)
                     gpu_info = _probe_gpus()
                     device_info_dict['gpu_count'] = gpu_info['count']
                     device_info_dict['gpu_backend'] = gpu_info['backend']

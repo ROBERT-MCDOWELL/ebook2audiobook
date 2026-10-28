@@ -305,6 +305,8 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                         print(f"Warning: sitecustomize.py not found at {sitecustomize_src}")
                 except Exception as e:
                     print(f"Warning: Failed to copy sitecustomize.py: {e}")
+                # jetson: before the probe, which imports what the worker does
+                device_installer.link_os_libgomp(self.venv_dir, device_info)
                 # ----------------------------------------------
                 # same import path as the worker: from the tree root, jieba standing in for jieba_fast
                 probe_script = '\n'.join([
@@ -331,6 +333,9 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                 installed = dict(expected)
                 with open(marker_file, 'w', encoding='utf-8') as f:
                     json.dump(installed, f, indent=2)
+            # jetson: the venv's bundled libgomp copies link to the OS one (DeviceInstaller.link_os_libgomp), checked at
+            # every start so a venv installed before is fixed too
+            device_installer.link_os_libgomp(self.venv_dir, device_info)
             self.engine = self.load_engine()
         except Exception as e:
             error = f'__init__() error: {e}'

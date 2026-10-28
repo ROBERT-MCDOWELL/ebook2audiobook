@@ -334,6 +334,8 @@ class F5TTS(TTSUtils, TTSRegistry, name='f5tts'):
                         print(f"Warning: sitecustomize.py not found at {sitecustomize_src}")
                 except Exception as e:
                     print(f"Warning: Failed to copy sitecustomize.py: {e}")
+                # jetson: before the probe, which imports what the worker does
+                device_installer.link_os_libgomp(self.venv_dir, device_info)
                 # the worker's own import chain: f5_tts.model pulls its Trainer (wandb, datasets, accelerate...)
                 probe_script = '\n'.join([
                     # same torch.distributed stubs as the worker, for torch built without distributed (jetson, macOS vulkan)
@@ -351,6 +353,9 @@ class F5TTS(TTSUtils, TTSRegistry, name='f5tts'):
                 installed = dict(expected)
                 with open(marker_file, 'w', encoding='utf-8') as f:
                     json.dump(installed, f, indent=2)
+            # jetson: the venv's bundled libgomp copies link to the OS one (DeviceInstaller.link_os_libgomp), checked at
+            # every start so a venv installed before is fixed too
+            device_installer.link_os_libgomp(self.venv_dir, device_info)
             self.engine = self.load_engine()
         except Exception as e:
             error = f'__init__() error: {e}'

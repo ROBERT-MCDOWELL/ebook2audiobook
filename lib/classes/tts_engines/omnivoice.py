@@ -324,6 +324,8 @@ class OmniVoice(TTSUtils, TTSRegistry, name='omnivoice'):
                         print(f"Warning: sitecustomize.py not found at {sitecustomize_src}")
                 except Exception as e:
                     print(f"Warning: Failed to copy sitecustomize.py: {e}")
+                # jetson: before the probe, which imports what the worker does
+                device_installer.link_os_libgomp(self.venv_dir, device_info)
                 probe = subprocess.run([self.venv_python, '-c', 'import omnivoice'], env=self.worker_env, capture_output=True, text=True, timeout=600)
                 if probe.returncode != 0:
                     error = legends['error_venv_install_failed'].format(engine=tts_engine, step=f'import omnivoice: {probe.stderr.strip()[-500:]}')
@@ -331,6 +333,9 @@ class OmniVoice(TTSUtils, TTSRegistry, name='omnivoice'):
                 installed = dict(expected)
                 with open(marker_file, 'w', encoding='utf-8') as f:
                     json.dump(installed, f, indent=2)
+            # jetson: the venv's bundled libgomp copies link to the OS one (DeviceInstaller.link_os_libgomp), checked at
+            # every start so a venv installed before is fixed too
+            device_installer.link_os_libgomp(self.venv_dir, device_info)
             self.engine = self.load_engine()
         except Exception as e:
             error = f'__init__() error: {e}'
