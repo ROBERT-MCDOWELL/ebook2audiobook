@@ -225,20 +225,27 @@ def audit_and_repair(out_blocks:list, new_blocks:list, lang:str, cache:dict)->tu
                 notes.append(f'block {idx+1}: frozen content (code/table) restored from English')
                 repaired.append(eng_block)
             else:
-                repaired.append(tr_block)
+                repaired.append(tr_block)  
         elif block_tokens(tr_block) != block_tokens(eng_block):
             notes.append(f'block {idx+1}: inline code/links/tags differ, forcing English tokens locally')
             fixed_block = []
             for tr_line, eng_line in zip(tr_block, eng_block):
-                # Extract the perfect English tokens for this line
+                # Extract prefix and body to match how the cache stores lines
+                m = LINE_PREFIX.match(eng_line)
+                prefix:str = m.group(1) if m else ''
+                eng_body:str = eng_line[len(prefix):]
                 _, eng_tokens = protect(eng_line)
                 fixed_line = tr_line
-                # Force every English token into the translated line
                 for tok in eng_tokens:
                     if tok not in fixed_line:
-                        # If the API mangled or deleted it, append the exact English original
-                        fixed_line = fixed_line.rstrip() + ' ' + tok                  
+                        fixed_line = fixed_line.rstrip() + ' ' + tok
                 fixed_block.append(fixed_line)
+                if fixed_line.startswith(prefix):
+                    tr_body = fixed_line[len(prefix):]
+                else:
+                    tr_body = fixed_line
+                if eng_body.strip():
+                    cache[f'{lang}|{eng_body}'] = tr_body
             repaired.append(fixed_block)
         else:
             repaired.append(tr_block)
