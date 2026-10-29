@@ -227,12 +227,19 @@ def audit_and_repair(out_blocks:list, new_blocks:list, lang:str, cache:dict)->tu
             else:
                 repaired.append(tr_block)
         elif block_tokens(tr_block) != block_tokens(eng_block):
-            notes.append(f'block {idx+1}: inline code/links/tags differ from English, block retranslated')
-            for line in eng_block:
-                m = LINE_PREFIX.match(line)
-                prefix:str = m.group(1) if m else ''
-                cache.pop(f'{lang}|{line[len(prefix):]}', None)
-            repaired.append(translate_block(eng_block, lang, cache))
+            notes.append(f'block {idx+1}: inline code/links/tags differ, forcing English tokens locally')
+            fixed_block = []
+            for tr_line, eng_line in zip(tr_block, eng_block):
+                # Extract the perfect English tokens for this line
+                _, eng_tokens = protect(eng_line)
+                fixed_line = tr_line
+                # Force every English token into the translated line
+                for tok in eng_tokens:
+                    if tok not in fixed_line:
+                        # If the API mangled or deleted it, append the exact English original
+                        fixed_line = fixed_line.rstrip() + ' ' + tok                  
+                fixed_block.append(fixed_line)
+            repaired.append(fixed_block)
         else:
             repaired.append(tr_block)
     return repaired, notes
