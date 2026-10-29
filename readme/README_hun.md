@@ -75,50 +75,50 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## Tartalomjegyzék
 - [ebook2audiobook](#-ebook2audiobook)
-- [Funkciók](#features)
-- [Grafikus felület](#gui-interface)
-- [Demók](#demos)
-- [Támogatott nyelvek](#supported-languages)
-- [Minimális követelmények](#hardware-requirements)
-- [Használat](#instructions)
-  - [Futtatás helyben](#instructions)
-    - [A Gradio webes felület indítása](#instructions)
-    - [Alapvető headless használat](#basic-usage)
-    - [Egyéni XTTS modell használata headless módban](#example-of-custom-model-zip-upload)
-    - [A súgóparancs kimenete](#help-command-output)
-  - [Futtatás távolról](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [Futtatási lépések](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
-  
-- [Klónozott hangok](#cloned-voices)
-- [Finomhangolt TTS modellek](#fine-tuned-tts-models)
-  - [Finomhangolt TTS modellek gyűjteménye](#fine-tuned-tts-collection)
+
+- [Cloned Voices](#cloned-voices)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
   - [Train TTS Model](#fine-tune-your-own-tts-model)
-- [Támogatott e-könyv formátumok](#supported-ebook-formats)
-- [Kimeneti formátumok](#output-and-process-formats)
-- [Visszatérés régebbi verzióhoz](#reverting-to-older-versions)
-- [Gyakori problémák](#common-issues)
-- [Külön köszönet](#special-thanks)
-- [Tartalomjegyzék](#table-of-contents)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## Funkciók
 - 🔧 ** Támogatott TTS-motorok **: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS`
-- 📚 **Több fájlformátum átalakítása**: `.epub`, `.mobi`, `.azw3`, `.fb2`, `.lrf`, `.rb`, `.snb`, `.tcr`, `.pdf`, `.txt`, `.rtf`, `.doc`, `.docx`, `.html`, `.odt`, `.azw`, `.tiff`, `.tif`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.zip`
+- 📚 **Több fájlformátum átalakítása**: , , , , , , , , , , , , , , , , , , , , , , `.epub` `.mobi` `.azw3` `.fb2` `.lrf` `.rb` `.snb` `.tcr` `.pdf` `.txt` `.rtf` `.doc` `.docx` `.html` `.odt` `.azw` `.tiff` `.tif` `.png` `.jpg` `.jpeg` `.bmp` `.zip`
 - 💻 **Szövegmező** rövid szöveg közvetlen hanggá alakításához
 - 🔍 **OCR-beolvasás** képként megjelenő szöveges oldalakat tartalmazó fájlokhoz
 - 🔊 **Kiváló minőségű szövegfelolvasás**, a közel valós időtől a szinte valós hangig
 - 🗣️ **Opcionális hangklónozás** a saját hangfájlod használatával
-- 🌐 ** 1696 nyelvet támogat ** ([támogatott nyelvek listája](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html))
+- 🌐 ** 1696 nyelvet támogat ** () [supported languages list](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 - 💻 **Erőforrás-barát** — fut **2 GB RAM / 1 GB VRAM (minimum)** mellett
-- 🎵 **Hangoskönyv kimeneti formátumok**: mono or stereo `aac`, `flac`, `mp3`, `m4b`, `m4a`, `mp4`, `mov`, `ogg`, `wav`, `webm`
-- 🧠 **SML címkék támogatása** — szünetek, megállások, hangváltás és egyebek finom vezérlése ([see below](#sml-tags-available))
+- 🎵 **Hangoskönyv kimeneti formátumok**: mono or stereo , , , , , , , , , `aac` `flac` `mp3` `m4b` `m4a` `mp4` `mov` `ogg` `wav` `webm`
+- 🧠 **SML címkék támogatása** — szünetek, megállások, hangváltás és egyebek finom vezérlése () [see below](#sml-tags-available)
 - 🧩 **Opcionális egyéni modell** a saját betanított modelled használatával (XTTSv2, VITS, FAIRSEQ, PIPER, others on request)
-- 🎛️ **Finomhangolt előbeállított modellek**, amelyeket az E2A csapata tanított be<br/>
-     <i>(Lépj kapcsolatba velünk, ha további finomhangolt modellekre van szükséged, vagy ha meg szeretnéd osztani a sajátjaidat a hivatalos előbeállítások listáján)</i>
+- 🎛️ **Finomhangolt előbeállított modellek**, amelyeket az E2A csapata tanított be <br/>
+     (Lépj kapcsolatba velünk, ha további finomhangolt modellekre van szükséged, vagy ha meg szeretnéd osztani a sajátjaidat a hivatalos előbeállítások listáján) <i> </i>
 
 
 ##  Hardverkövetelmények
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **Magyar (hu)** | **Koreai (ko)**     | **Vietnami (vi)**| **Svéd (sv)**   |
 | **Perzsa (fa)**   | **Yoruba (yo)**     | **Szuahéli (sw)**   | **Indonéz (id)**|
 | **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
-- [**+1130 nyelv és nyelvjárás itt**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## Támogatott e-könyv formátumok
@@ -617,10 +617,10 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Gyakori problémák:
 - Az NVIDIA/ROCm/XPU/MPS GPU-mat nem érzékeli?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  A CPU lassú (jobb szerver SMP CPU-n), míg a GPU szinte valós idejű átalakítást tud nyújtani.
-   [Megbeszélés erről a](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+ [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Nincs azonban zero-shot hangklónozása, és a hangok Siri minőségűek, de CPU-n sokkal gyorsabb).
 - „Függőségi problémáim vannak” - Egyszerűen használd a Dockert, teljesen önálló, és van headless módja,
-   adj hozzá `--help` paramétert a docker run parancs végéhez további információkért.
+   adj hozzá  paramétert a docker run parancs végéhez további információkért. `--help`
 - „Levágott hang problémám van!” - KÉRJÜK, NYISS ERRŐL EGY ISSUE-T,
    nem beszélünk minden nyelvet, és szükségünk van a felhasználók tanácsaira a mondatfelosztási logika finomhangolásához.😊
 
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Blokkok/fejezetek előnézete az átalakítás megkezdése előtt
 - [x] Szerkesztés átalakított mondatonként a sebészi pontosságú szövegmódosításhoz
 - [x] Zenei intrók, közjátékok és befejezések létrehozása; közjátékok és befejezések szerkesztése
-- [x] SML címkék integrációja hanghoz, szünethez, megszakításhoz és további módosításokhoz 
+- [x] SML címkék integrációja hanghoz, szünethez, megszakításhoz és további módosításokhoz
 - [x] A -h -help paraméterek információi különböző nyelveken
 - [x] OCR-beolvasás PDF / JPG / BMP / PNG / TIFF formátumokhoz
 - [x] Notebookok mappa [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] GPU-eszköz észlelése
 - [x] Bármilyen háttér-referenciahang denoise a hangklónozás feltöltéséhez
 - [x] Egyedi, finomhangolt modellfeltöltés
-- [ ] [iOS alkalmazás készítése](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [Android alkalmazás készítése](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### Felhasználói igények
 - [ ] Európai portugál nyelvi modell hozzáadása legalább xttsv2, fairseq, vits, piper számára (segítség szívesen látott)
@@ -739,9 +739,9 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 
 **********
 
-## Extra túlzás modellek tanításához és hasonlókhoz (az összes támogatott Coqui-tts modell és a piper-tts egyetlen egyszerű paranccsal) 
+## Extra túlzás modellek tanításához és hasonlókhoz (az összes támogatott Coqui-tts modell és a piper-tts egyetlen egyszerű paranccsal)
 - A @ DrewThomasson témájával kapcsolatos információkért jelenleg ennek fejlesztésén dolgozik, [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
-- [x] Készítsen könnyen használható képzési útmutatókat az összes coqui-tts modellhez a [ljspeech formátumú képzési receptekben](https://github.com/coqui-ai/TTS/tree/dev/recipes/ljspeech) Teljesítve itt: [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
+- [x] Készítsen könnyen használható képzési útmutatókat az összes coqui-tts modellhez a  Teljesítve itt: [ljspeech format training recipes](https://github.com/coqui-ai/TTS/tree/dev/recipes/ljspeech) [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
 
 
 ## Python kódnormalizálási információk közreműködőknek

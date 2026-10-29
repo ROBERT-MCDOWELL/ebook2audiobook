@@ -1,10 +1,10 @@
 # 📚 ebook2audiobook (E2A)
 <a href="https://trendshift.io/repositories/12252?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-12252" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/12252" alt="DrewThomasson%2Febook2audiobook | Trendshift" width="250" height="55"/></a>
 
-محول وحدة المعالجة المركزية/وحدة معالجة الرسومات من الكتاب الإلكتروني إلى الكتاب الصوتي مع الفصول والبيانات الوصفية<br/>
-باستخدام محركات TTS المتقدمة وأكثر من ذلك بكثير.<br/>
+محول وحدة المعالجة المركزية/وحدة معالجة الرسومات من الكتاب الإلكتروني إلى الكتاب الصوتي مع الفصول والبيانات الوصفية <br/>
+باستخدام محركات TTS المتقدمة وأكثر من ذلك بكثير. <br/>
 يدعم استنساخ الصوت و 1696 لغة!
-> <g id="Bold">هام:</g>
+> هام:
 **هذه الأداة مخصصة للاستخدام مع الكتب الإلكترونية المكتسبة بشكل قانوني فقط.** <br>
 المؤلفون ليسوا مسؤولين عن أي سوء استخدام لهذا البرنامج أو أي عواقب قانونية ناتجة عنه. <br>
 استخدم هذه الأداة بمسؤولية ووفقًا لجميع القوانين المعمول بها.
@@ -75,34 +75,34 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## جدول المحتويات
 - [ebook2audiobook](#-ebook2audiobook)
-- [الميزات](#features)
-- [الواجهة الرسومية](#gui-interface)
-- [عروض توضيحية](#demos)
-- [اللغات المدعومة](#supported-languages)
-- [الحد الأدنى من المتطلبات](#hardware-requirements)
-- [الاستخدام](#instructions)
-  - [التشغيل محليًا](#instructions)
-    - [تشغيل واجهة الويب Gradio](#instructions)
-    - [الاستخدام الأساسي بدون واجهة](#basic-usage)
-    - [استخدام نموذج XTTS مخصص بدون واجهة](#example-of-custom-model-zip-upload)
-    - [مخرجات أمر المساعدة](#help-command-output)
-  - [التشغيل عن بُعد](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [خطوات التشغيل](#docker)
-- [الأدوات](#tools)
+    - [Steps to Run](#docker)
+- [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
-  - [ترجمة الكتب الإلكترونية من e2a](#translate-ebooks)
+  - [Translate ebooks out of e2a](#translate-ebooks)
   
 - [Cloned Voices](#cloned-voices)
 - [Fine Tuned TTS models](#fine-tuned-tts-models) 
-  - [مجموعة نماذج TTS المضبوطة بدقة](#fine-tuned-tts-collection)
-  - [قطار TTS نموذج](#fine-tune-your-own-tts-model)
-- [صيغ الكتب الإلكترونية المدعومة](#supported-ebook-formats)
-- [صيغ الإخراج](#output-and-process-formats)
-- [العودة إلى إصدار أقدم](#reverting-to-older-versions)
-- [المشكلات الشائعة](#common-issues)
-- [شكر خاص](#special-thanks)
-- [جدول المحتويات](#table-of-contents)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
+  - [Train TTS Model](#fine-tune-your-own-tts-model)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## الميزات
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 |** المجرية (hu )**|** الكورية (ko )**|** الفيتنامية (vi )**|** السويدية (sv )**|
 |** الفارسية (fa )**|** يوروبا (yo )**|** السواحلية (sw )**|** الإندونيسية (id )**|
 |** السلوفاكية (sk )**|** الكرواتية (hr )**|** التاميلية (ta )**|** الدنماركية (da )**|
-- [**+1130 لغة ولهجة هنا**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## صيغ الكتب الإلكترونية المدعومة
@@ -162,8 +162,8 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 **اطّلع على مستودعنا الآخر المخصص لإضافة SML تلقائيًا في كتابك الإلكتروني -> [E2A-SML](https://github.com/DrewThomasson/E2A-SML)**
 
-> <g id="Bold">هام:</g>
-**Before to post an install or bug issue search carefully to the opened and closed issues TAB<br>
+> هام:
+**قبل نشر بحث عن مشكلة في التثبيت أو الخطأ بعناية في علامة التبويب المشكلات المفتوحة والمغلقة <br>
 للتأكد من أن مشكلتك غير موجودة بالفعل.**
 
 ملاحظة
@@ -205,8 +205,8 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
    `ebook2audiobook.cmd --share` (Windows)
    `python app.py --share` (جميع أنظمة التشغيل)
 
-> <g id="Bold">هام:</g>
-**If the script is stopped and run again, you need to refresh your gradio GUI interface<br>
+> هام:
+**إذا تم إيقاف البرنامج النصي وتشغيله مرة أخرى، فستحتاج إلى تحديث واجهة Gradio GUI الخاصة بك <br>
 للسماح لصفحة الويب بإعادة الاتصال بمقبس الاتصال الجديد.**
 
 ### Basic  Usage
@@ -614,42 +614,42 @@ Releases can be found -> [here](https://github.com/DrewThomasson/ebook2audiobook
 git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v25.7.7
 ```
 
-## المشكلات الشائعة:
-- لا يتم اكتشاف بطاقة NVIDIA/ROCm/XPU/MPS الرسومية لدي؟؟ -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
--  المعالج بطيء (أفضل على معالج خادم SMP) بينما يمكن لبطاقة GPU إجراء تحويل شبه فوري.
-   [مناقشة حول هذا](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
-   (لكنه لا يحتوي على استنساخ صوت zero-shot، وهي أصوات بجودة Siri، لكنه أسرع بكثير على cpu).
-- "أواجه مشكلات في التبعيات" - ما عليك سوى استخدام docker، فهو مكتفٍ ذاتيًا تمامًا وله وضع بدون واجهة،
-   أضف المعامل `--help` في نهاية أمر docker run للمزيد من المعلومات.
-- "أواجه مشكلة في انقطاع الصوت!" - يرجى إنشاء ISSUE حول هذا،
-   نحن لا نتحدث كل لغة ونحتاج إلى نصيحة من المستخدمين لضبط منطق تقسيم الجمل بدقة.😊
+## المشاكل الشائعة في VMB
+- لم يتم اكتشاف NVIDIA/ROCM/XPU/MPS GPU الخاص بي ؟ -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
+-  وحدة المعالجة المركزية بطيئة (أفضل في وحدة المعالجة المركزية للخادم smp) بينما يمكن أن يكون لوحدة معالجة الرسومات تحويل في الوقت الفعلي تقريبًا.
+   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   (لا يحتوي على استنساخ صوتي بدون لقطة على الرغم من ذلك، وهو صوت سيري عالي الجودة، لكنه أسرع بكثير على وحدة المعالجة المركزية).
+- "أواجه مشكلات في التبعية" - ما عليك سوى استخدام عامل الرصيف، وهو مكتفي ذاتيًا تمامًا وله وضع مقطوع الرأس،
+   أضف ⟧ معلمة ⟦0 في نهاية أمر تشغيل عامل الإرساء لمزيد من المعلومات. `--help`
+- "أواجه مشكلة صوتية مبتورة! "- يرجى إصدار عدد من هذا،
+   نحن لا نتحدث كل لغة ونحتاج إلى نصيحة من المستخدمين لضبط منطق تقسيم الجملة.😊
 
-## ***** خارطة الطريق *****
+## خريطة الطريق
 - جميع الميزات مفتوحة للمساهمات العامة ⭐
-- أي مساعدة من أشخاص يتحدثون أيًا من اللغات المدعومة لمساعدتنا في تحسين النماذج ⭐
+- أي مساعدة من الأشخاص الذين يتحدثون أيًا من اللغات المدعومة لمساعدتنا في تحسين النماذج ⭐
 - [x] معاينة الكتل/الفصول قبل بدء التحويل
-- [x] التحرير لكل جملة محوّلة لتغيير نصي دقيق
+- [x] تعديل حسب الجملة المحولة لتغيير النص الجراحي
 - [x] إنشاء مقدمات الموسيقى والفواصل والنهايات ؛ تحرير الفواصل والنهايات
-- [x] دمج وسوم SML للصوت والتوقف والفاصل والمزيد من التغييرات 
-- [x] معلومات معاملات -h -help بلغات مختلفة
-- [x] مسح OCR لملفات PDF / JPG / BMP / PNG / TIFF
-- [x] مجلد Notebooks [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
-- [x] جعل تقسيم النص الصيني لا يقسم الكلمات وتحسين توقيت الفواصل [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/18#issuecomment-2401154894)
+- [x] تكامل علامات SML للصوت والإيقاف المؤقت والكسر والمزيد من التغييرات
+- [x] - h - معلومات معلمة المساعدة بلغات مختلفة
+- [x] مسح OCR لـ PDF / JPG / BMP / PNG / TIFF
+- [x] مجلد دفاتر الملاحظات [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
+- [x] جعل النص الصيني مقسمًا وليس مقسمًا للكلمات وتحسين توقيت الإيقاف المؤقت [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/18#issuecomment-2401154894)
 - [x] Dockerfile
 - [x] تركيب عامل الرصيف
 - [x] تأليف بودمان
-- [x] دفتر Kaggle
-- [x] دفتر Google Colab
-- [x] دمج Audiobookshelf
-- [x] خيار ترجمة الكتاب الإلكتروني
-- [x] خيارات صيغة الإخراج
-- [x] تحويل متعدد المعالجة
-- [x] تحويل مجلد كتب إلكترونية دفعي
-- [x] اكتشاف جهاز GPU
+- [x] Kaggle Notebook
+- [x] دفتر ملاحظات Google Colab
+- [x] تكامل رف الكتب الصوتية
+- [x] خيار ترجمة الكتب الإلكترونية
+- [x] خيارات تنسيق الإخراج
+- [x] تحويل متعدد المعالجات
+- [x] تحويل مجلد الكتب الإلكترونية دفعة واحدة
+- [x] اكتشاف جهاز وحدة معالجة الرسومات
 - [x] قم بإزالة الضوضاء من أي صوت مرجعي للخلفية لتحميل الاستنساخ الصوتي
 - [x] تحميل نموذج مضبوط بدقة مخصص
-- [ ] [إنشاء تطبيق iOS](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [إنشاء تطبيق android](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### طلبات المستخدم
 - [ ] إضافة نموذج لغة البرتغالية الأوروبية على الأقل لـ xttsv2 وfairseq وvits وpiper (المساعدة مرحب بها)

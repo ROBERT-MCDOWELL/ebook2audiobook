@@ -75,34 +75,34 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## فهرست مطالب
 - [ebook2audiobook](#-ebook2audiobook)
-- [ویژگی‌ها](#features)
-- [رابط گرافیکی](#gui-interface)
-- [نمونه‌ها](#demos)
-- [زبان‌های پشتیبانی‌شده](#supported-languages)
-- [حداقل نیازمندی‌ها](#hardware-requirements)
-- [استفاده](#instructions)
-  - [اجرای محلی](#instructions)
-    - [راه‌اندازی رابط وب Gradio](#instructions)
-    - [استفاده پایه بدون رابط](#basic-usage)
-    - [استفاده از مدل سفارشی XTTS بدون رابط](#example-of-custom-model-zip-upload)
-    - [خروجی دستور راهنما](#help-command-output)
-  - [اجرای از راه دور](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [مراحل اجرا](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
-  - [برای نصب آفلاین، مدل‌ها را از قبل بارگذاری کنید](#preload-models)]
-  - [ترجمه کتاب‌های الکترونیکی از e2a](#translate-ebooks)]
-  
-- [صداهای کلون شده](#cloned-voices)]
-- [مدل‌های TTS تنظیم‌شده دقیق](#fine-tuned-tts-models)]
-  - [مجموعه مدل‌های TTS تنظیم‌دقیق‌شده](#fine-tuned-tts-collection)
-  - [مدل TTS قطار](#fine-tune-your-own-tts-model)]
-- [قالب‌های کتاب الکترونیکی پشتیبانی‌شده](#supported-ebook-formats)
-- [قالب‌های خروجی](#output-and-process-formats)
-- [بازگشت به نسخه قدیمی‌تر](#reverting-to-older-versions)
-- [مشکلات رایج](#common-issues)
-- [تشکر ویژه](#special-thanks)
-- [فهرست مطالب](#table-of-contents)
+  - ] [Preload models for offline installs](#preload-models)
+  - ] [Translate ebooks out of e2a](#translate-ebooks)
+
+- ] [Cloned Voices](#cloned-voices)
+- ] [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
+  - ] [Train TTS Model](#fine-tune-your-own-tts-model)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## ویژگی‌ها
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **مجارستانی (هو)** | **کره ای (ko)** | **ویتنامی (vi)**| **سوئدی (sv)** |
 | **فارسی (fa)** | **یوروبایی (yo)** | **سواحیلی (sw)** | **اندونزیایی (id)**|
 | **اسلواکی (sk)** | **کرواسی (ساعت)** | **تامیل (ta)** | **دانمارکی (da)** |
-- [**+۱۱۳۰ زبان و گویش در اینجا**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## قالب‌های کتاب الکترونیکی پشتیبانی‌شده
@@ -617,10 +617,10 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## مشکلات رایج:
 - پردازنده گرافیکی NVIDIA/ROCm/XPU/MPS من شناسایی نمی‌شود؟؟ -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU کند است (روی CPU سرور SMP بهتر است) در حالی که GPU می‌تواند تبدیل تقریباً بلادرنگ داشته باشد.
-   [بحث در مورد این](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)]
+   ] [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (با این حال شبیه‌سازی صدای zero-shot ندارد، و صداها با کیفیت Siri هستند، اما روی cpu بسیار سریع‌تر است).
 - «مشکلاتی با وابستگی‌ها دارم» - کافی است از docker استفاده کنید، کاملاً مستقل است و حالت بدون رابط دارد،
-   برای اطلاعات بیشتر پارامتر `--help` را به انتهای دستور docker run اضافه کنید.
+   برای اطلاعات بیشتر پارامتر  را به انتهای دستور docker run اضافه کنید. `--help`
 - «مشکل قطع شدن صدا دارم!» - لطفاً یک ISSUE در این مورد ایجاد کنید،
    ما به همه زبان‌ها صحبت نمی‌کنیم و برای تنظیم دقیق منطق تقسیم جمله به توصیه کاربران نیاز داریم.😊
 
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] پیش‌نمایش بلوک‌ها/فصل‌ها پیش از شروع تبدیل
 - [x] ویرایش به‌ازای هر جمله تبدیل‌شده برای تغییر دقیق متن
 - [x] تولید مقدمه، میان‌پرده و پایان موسیقی؛ ویرایش میان‌پرده‌ها و پایان‌ها
-- [x] یکپارچه‌سازی برچسب‌های SML برای صدا، مکث، وقفه و تغییرات بیشتر 
+- [x] یکپارچه‌سازی برچسب‌های SML برای صدا، مکث، وقفه و تغییرات بیشتر
 - [x] اطلاعات پارامتر -h -help به زبان‌های مختلف
 - [x] اسکن OCR برای PDF / JPG / BMP / PNG / TIFF
 - [x] پوشه Notebooks [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,58 +648,58 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] تشخیص دستگاه GPU
 - [x] حذف نویز هرگونه صدای مرجع پس‌زمینه برای آپلود شبیه‌سازی صدا
 - [x] آپلود مدل سفارشی و تنظیم‌شده
-- [ ] [ساخت یک اپلیکیشن iOS](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [ساخت یک اپلیکیشن android](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### درخواست های کاربر
 - [ ] افزودن مدل زبانی پرتغالی اروپایی حداقل برای xttsv2، fairseq، vits، piper (از کمک استقبال می‌شود)
 - [ ] افزودن مدل زبانی سندی حداقل برای xttsv2، fairseq، vits، piper (از کمک استقبال می‌شود)
 
 #### موتورهای TTS
-- [x] DramaBox (https://github.com/dramabox-ai/dramabox)[cite: 1]
-- [x] FireRed Audio / FireRedTTS3 (https://github.com/FireRedTeam/FireRedTTS)[cite: 1]
-- [x] گفتار ماهی / صدای ماهی (https://github.com/fishaudio/fish-speech)[cite: 1)
-- [x] صدای هیگز TTS (https://github.com/higgs-audio/higgs-audio)[cite: 1)
-- [x] Maya1 (https://github.com/maya-ai/maya1)[cite: 1]
-- [x] OmniVoice (https://github.com/k2-fsa/OmniVoice)[cite: 1]
-- [x] F5-TTS (https://github.com/swivid/f5-tts)[cite: 1)
-- [x] Qwen3-TTS (https://huggingface.co/spaces/Qwen/Qwen3-TTS)[cite: 1)
-- [x] VibeVoice (https://github.com/vibevoice-community/VibeVoice)[cite: 1]
-- [x] VoxCPM2 (https://github.com/voxcpm/voxcpm)[cite: 1)
-- [x] Voxtral TTS (https://github.com/voxtral/voxtral-tts)[cite: 1]
-- [x] چت باکس (https://github.com/resemble-ai/chatterbox)[cite: 1)
-- [x] CosyVoice / CosyVoice3 (https://github.com/FunAudioLLM/CosyVoice)[cite: 1)
-- [x] فهرست-tts / فهرست TTS2 (https://github.com/index-tts/index-tts)[cite: 1)
-- [x] XTTSv2 (https://github.com/coqui-ai/XTTS)[cite: 1)
-- [x] صدای نسیم (https://github.com/FreedomIntelligence/Breeze-TTS)[cite: 1)
-- [x] Confucius4 TTS (https://github.com/confucius-tts/confucius4)[cite: 1)
-- [x] نقطه‌ها TTS (https://github.com/dot-audio/dots-tts)[cite: 1)
-- [x] GPT-SoVITS (https://github.com/RVC-Boss/GPT-SoVITS)[cite: 1)
-- [x] Kokoro-TTS (https://github.com/hexgrad/kokoro)[cite: 1]
-- [x] KugelAudio (https://github.com/kugel-audio/kugelaudio)[cite: 1]
-- [x] TTS زاغی (https://github.com/magpie-tts/magpie-tts)[cite: 1)
-- [x] MioTTS (https://github.com/mio-tts/miotts)[cite: 1]
-- [x] Moss TTS محلی / نانو (https://github.com/OpenBMB/MossTTS)[cite: 1)
-- [x] NewTTS / NeuTTS (https://github.com/neuphonic/neutts)[cite: 1)
-- [x] Pocket TTS (https://github.com/pocket-tts/pocket-tts)[cite: 1]
-- [x] گرادیوم فونون (https://github.com/gradium-ai/xn-ptts)[cite: 1)
-- [x] Supertonic (https://github.com/supertone-inc/supertonic)[cite: 1]
-- [x] Irodori TTS (https://github.com/irodori-tts/irodori-tts)[cite: 1]
-- [x] Piper (https://github.com/rhasspy/piper)[cite: 1]
-- [x] VITS (https://github.com/jaywalnut330/vits)[cite: 1]
-- [x] Fairseq (https://github.com/facebookresearch/fairseq)[cite: 1]
-- [x] GlowTTS (https://github.com/jaywalnut330/glow-tts)[cite: 1)
-- [x] Tacotron2 (https://github.com/NVIDIA/Tacotron2)[cite: 1]
-- [x] Tortoise (https://github.com/neonbjb/tortoise-tts)[cite: 1]
-- [x] Zonos (https://github.com/Zyphra/Zonos)[cite: 1]
-- [x] Bark (https://github.com/suno-ai/bark)[cite: 1]
-- [x] YourTTS (https://github.com/Edresson/YourTTS)[cite: 1]
-- [x] اورفئوس-TTS (https://github.com/canopyai/Orpheus-TTS))
-- [x] اوپن ویس (https://github.com/myshell-ai/OpenVoice))
-- [x] چتTTS (https://github.com/2noise/ChatTTS)
-- [x] جرقه-TTS (https://github.com/sparkaudio/spark-tts)
-- [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
-- [x] CSM (https://github.com/SesameAILabs/csm)
+- [x] DramaBox ( 1] https://github.com/dramabox-ai/dramabox)[cite:
+- [x] FireRed Audio / FireRedTTS3 ( 1] https://github.com/FireRedTeam/FireRedTTS)[cite:
+- [x] گفتار ماهی / صدای ماهی ( 1) https://github.com/fishaudio/fish-speech)[cite:
+- [x] صدای هیگز TTS ( 1) https://github.com/higgs-audio/higgs-audio)[cite:
+- [x] Maya1 ( 1] https://github.com/maya-ai/maya1)[cite:
+- [x] OmniVoice ( 1] https://github.com/k2-fsa/OmniVoice)[cite:
+- [x] F5-TTS ( 1) https://github.com/swivid/f5-tts)[cite:
+- [x] Qwen3-TTS ( 1) https://huggingface.co/spaces/Qwen/Qwen3-TTS)[cite:
+- [x] VibeVoice ( 1] https://github.com/vibevoice-community/VibeVoice)[cite:
+- [x] VoxCPM2 ( 1) https://github.com/voxcpm/voxcpm)[cite:
+- [x] Voxtral TTS ( 1] https://github.com/voxtral/voxtral-tts)[cite:
+- [x] چت باکس ( 1) https://github.com/resemble-ai/chatterbox)[cite:
+- [x] CosyVoice / CosyVoice3 ( 1) https://github.com/FunAudioLLM/CosyVoice)[cite:
+- [x] فهرست-tts / فهرست TTS2 ( 1) https://github.com/index-tts/index-tts)[cite:
+- [x] XTTSv2 ( 1) https://github.com/coqui-ai/XTTS)[cite:
+- [x] صدای نسیم ( 1) https://github.com/FreedomIntelligence/Breeze-TTS)[cite:
+- [x] Confucius4 TTS ( 1) https://github.com/confucius-tts/confucius4)[cite:
+- [x] نقطه‌ها TTS ( 1) https://github.com/dot-audio/dots-tts)[cite:
+- [x] GPT-SoVITS ( 1) https://github.com/RVC-Boss/GPT-SoVITS)[cite:
+- [x] Kokoro-TTS ( 1] https://github.com/hexgrad/kokoro)[cite:
+- [x] KugelAudio ( 1] https://github.com/kugel-audio/kugelaudio)[cite:
+- [x] TTS زاغی ( 1) https://github.com/magpie-tts/magpie-tts)[cite:
+- [x] MioTTS ( 1] https://github.com/mio-tts/miotts)[cite:
+- [x] Moss TTS محلی / نانو ( 1) https://github.com/OpenBMB/MossTTS)[cite:
+- [x] NewTTS / NeuTTS ( 1) https://github.com/neuphonic/neutts)[cite:
+- [x] Pocket TTS ( 1] https://github.com/pocket-tts/pocket-tts)[cite:
+- [x] گرادیوم فونون ( 1) https://github.com/gradium-ai/xn-ptts)[cite:
+- [x] Supertonic ( 1] https://github.com/supertone-inc/supertonic)[cite:
+- [x] Irodori TTS ( 1] https://github.com/irodori-tts/irodori-tts)[cite:
+- [x] Piper ( 1] https://github.com/rhasspy/piper)[cite:
+- [x] VITS ( 1] https://github.com/jaywalnut330/vits)[cite:
+- [x] Fairseq ( 1] https://github.com/facebookresearch/fairseq)[cite:
+- [x] GlowTTS ( 1) https://github.com/jaywalnut330/glow-tts)[cite:
+- [x] Tacotron2 ( 1] https://github.com/NVIDIA/Tacotron2)[cite:
+- [x] Tortoise ( 1] https://github.com/neonbjb/tortoise-tts)[cite:
+- [x] Zonos ( 1] https://github.com/Zyphra/Zonos)[cite:
+- [x] Bark ( 1] https://github.com/suno-ai/bark)[cite:
+- [x] YourTTS ( 1] https://github.com/Edresson/YourTTS)[cite:
+- [x] اورفئوس-TTS ( https://github.com/canopyai/Orpheus-TTS)
+- [x] اوپن ویس ( https://github.com/myshell-ai/OpenVoice)
+- [x] چتTTS ( https://github.com/2noise/ChatTTS)
+- [x] جرقه-TTS ( https://github.com/sparkaudio/spark-tts)
+- [x] MeloTTS ( https://github.com/myshell-ai/MeloTTS)
+- [x] CSM ( https://github.com/SesameAILabs/csm)
 
 #### ترجمه Readme
 - [x] عربی (عربی)
@@ -739,9 +739,9 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 
 **********
 
-## افراط اضافی برای آموزش مدل‌ها و موارد مشابه (تمام مدل‌های پشتیبانی‌شده Coqui-tts و piper-tts در یک دستور ساده) 
-- برای اطلاعات بیشتر در مورد این @DrewThomasson، او در حال حاضر روی توسعه این [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)] کار می‌کند.
-- [x] یک رابط کاربری آموزشی آسان برای همه مدل‌های coqui-tts در دستور العمل‌های آموزشی با فرمت [ljspeech](https://github.com/coqui-ai/TTS/tree/dev/recipes/ljspeech)] بسازید که در [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)] تکمیل شده است.
+## افراط اضافی برای آموزش مدل‌ها و موارد مشابه (تمام مدل‌های پشتیبانی‌شده Coqui-tts و piper-tts در یک دستور ساده)
+- برای اطلاعات بیشتر در مورد این @DrewThomasson، او در حال حاضر روی توسعه این ] کار می‌کند. [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
+- [x] یک رابط کاربری آموزشی آسان برای همه مدل‌های coqui-tts در دستور العمل‌های آموزشی با فرمت ] بسازید که در ] تکمیل شده است. [ljspeech format training recipes](https://github.com/coqui-ai/TTS/tree/dev/recipes/ljspeech) [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
 
 
 ## اطلاعات نرمال‌سازی کد Python برای مشارکت‌کنندگان
@@ -791,9 +791,9 @@ if config['default_role'] in roles:
 
 ## اهدای سخت‌افزار برای آزمایش‌های بتا مورد نیاز است
 ما هر نوع سخت‌افزاری را برای آزمایش توسعه خود می‌پذیریم، مانند:
-- انویدیا از کودا &gt;= 11.8 پشتیبانی می‌کند
+- انویدیا از کودا = 11.8 پشتیبانی می‌کند
 - کارت‌های اینتل XPU
-- کارت‌های گرافیک ROCm AMD که از ROCm &gt;=5.7 پشتیبانی می‌کنند
+- کارت‌های گرافیک ROCm AMD که از ROCm =5.7 پشتیبانی می‌کنند
 
 @DrewThomasson اگر می‌خواهید به هر شکلی کمک کنید! 😃
 <!--

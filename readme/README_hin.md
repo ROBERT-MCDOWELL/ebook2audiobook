@@ -75,50 +75,50 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## विषय-सूची
 - [ebook2audiobook](#-ebook2audiobook)
-- [विशेषताएं](#features)
-- [ग्राफ़िकल इंटरफ़ेस](#gui-interface)
-- [डेमो](#demos)
-- [समर्थित भाषाएं](#supported-languages)
-- [न्यूनतम आवश्यकताएं](#hardware-requirements)
-- [उपयोग](#instructions)
-  - [स्थानीय रूप से चलाएं](#instructions)
-    - [Gradio वेब इंटरफ़ेस लॉन्च करना](#instructions)
-    - [बुनियादी Headless उपयोग](#basic-usage)
-    - [Headless कस्टम XTTS मॉडल उपयोग](#example-of-custom-model-zip-upload)
-    - [सहायता कमांड आउटपुट](#help-command-output)
-  - [दूरस्थ रूप से चलाएं](#run-remotely)
-  - [डॉकर](#docker)
-    - [चलाने के चरण](#docker)
-- [टूल्स](#tools)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
+  - [Docker](#docker)
+    - [Steps to Run](#docker)
+- [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
-  
-- [क्लोन की गई आवाज़ें](#cloned-voices)
-- [फाइन ट्यून किए गए टीटीएस मॉडल](#fine-tuned-tts-models)
-  - [फ़ाइन-ट्यून किए गए TTS मॉडल का संग्रह](#fine-tuned-tts-collection)
-  - [ट्रेन टीटीएस मॉडल](#fine-tune-your-own-tts-model)
-- [समर्थित ई-बुक प्रारूप](#supported-ebook-formats)
-- [आउटपुट प्रारूप](#output-and-process-formats)
-- [पुराने संस्करण पर वापस लौटना](#reverting-to-older-versions)
-- [सामान्य समस्याएं](#common-issues)
-- [विशेष धन्यवाद](#special-thanks)
-- [विषय-सूची](#table-of-contents)
+
+- [Cloned Voices](#cloned-voices)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
+  - [Train TTS Model](#fine-tune-your-own-tts-model)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## विशेषताएं
 - 🔧 **टीटीएस इंजन समर्थित**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS`
-- 📚 **अनेक फ़ाइल प्रारूप परिवर्तित करें**: `.epub`, `.mobi`, `.azw3`, `.fb2`, `.lrf`, `.rb`, `.snb`, `.tcr`, `.pdf`, `.txt`, `.rtf`, `.doc`, `.docx`, `.html`, `.odt`, `.azw`, `.tiff`, `.tif`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.zip`
+- 📚 **अनेक फ़ाइल प्रारूप परिवर्तित करें**: , , , , , , , , , , , , , , , , , , , , , , `.epub` `.mobi` `.azw3` `.fb2` `.lrf` `.rb` `.snb` `.tcr` `.pdf` `.txt` `.rtf` `.doc` `.docx` `.html` `.odt` `.azw` `.tiff` `.tif` `.png` `.jpg` `.jpeg` `.bmp` `.zip`
 - 💻 छोटे पाठ को सीधे ऑडियो में बदलने के लिए **पाठ क्षेत्र**
 - 🔍 छवियों के रूप में पाठ पृष्ठों वाली फ़ाइलों के लिए **OCR स्कैनिंग**
 - 🔊 **उच्च गुणवत्ता वाला टेक्स्ट-टू-स्पीच**, लगभग वास्तविक समय से लेकर लगभग वास्तविक आवाज़ तक
 - 🗣️ अपनी स्वयं की आवाज़ फ़ाइल का उपयोग करके **वैकल्पिक वॉयस क्लोनिंग**
-- 🌐 ** 1696 भाषाओं को सपोर्ट करता है ** ([समर्थित भाषाओं की सूची](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html))
+- 🌐 ** 1696 भाषाओं को सपोर्ट करता है ** () [supported languages list](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 - 💻 **कम संसाधन अनुकूल** — **2 GB RAM / 1 GB VRAM (न्यूनतम)** पर चलता है
-- 🎵 **ऑडियोबुक आउटपुट प्रारूप**: mono or stereo `aac`, `flac`, `mp3`, `m4b`, `m4a`, `mp4`, `mov`, `ogg`, `wav`, `webm`
-- 🧠 **SML टैग समर्थित** — रुकावटों, विरामों, आवाज़ बदलने आदि पर सूक्ष्म नियंत्रण ([see below](#sml-tags-available))
+- 🎵 **ऑडियोबुक आउटपुट प्रारूप**: mono or stereo , , , , , , , , , `aac` `flac` `mp3` `m4b` `m4a` `mp4` `mov` `ogg` `wav` `webm`
+- 🧠 **SML टैग समर्थित** — रुकावटों, विरामों, आवाज़ बदलने आदि पर सूक्ष्म नियंत्रण () [see below](#sml-tags-available)
 - 🧩 अपने स्वयं के प्रशिक्षित मॉडल का उपयोग करके **वैकल्पिक कस्टम मॉडल** (XTTSv2, VITS, FAIRSEQ, PIPER, others on request)
-- 🎛️ E2A टीम द्वारा प्रशिक्षित **फ़ाइन-ट्यून किए गए प्रीसेट मॉडल**<br/>
-     <i>(यदि आपको अतिरिक्त फ़ाइन-ट्यून किए गए मॉडलों की आवश्यकता है, या यदि आप आधिकारिक प्रीसेट सूची में अपने मॉडल साझा करना चाहते हैं, तो हमसे संपर्क करें)</i>
+- 🎛️ E2A टीम द्वारा प्रशिक्षित **फ़ाइन-ट्यून किए गए प्रीसेट मॉडल** <br/>
+     (यदि आपको अतिरिक्त फ़ाइन-ट्यून किए गए मॉडलों की आवश्यकता है, या यदि आप आधिकारिक प्रीसेट सूची में अपने मॉडल साझा करना चाहते हैं, तो हमसे संपर्क करें) <i> </i>
 
 
 ##  हार्डवेयर आवश्यकताएं
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **हंगेरियन (hu )**| **कोरियाई (ko )**| **वियतनामी (vi )**| **स्वीडिश (sv )**|
 | **फ़ारसी (fa )**| **योरुबा (yo )**| **स्वाहिली (sw )**| **इंडोनेशियाई (id )**|
 | **स्लोवाक (sk )**| **क्रोएशियाई (hr )**| **तमिल (ta )**| **डेनिश (da )**|
-- [**+1130 भाषाएं और बोलियां यहां**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## समर्थित ई-बुक प्रारूप
@@ -439,8 +439,8 @@ Podman Compose (i.e. cuda 12.8:
 - NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM etc.)
   across container runs, so they are not reinstalled each time. To reset them: `docker volume rm e2a_venvs`
 
-## उपकरण&amp;nbsp;
-स्टैंडअलोन टूल, e2a के अपने पायथन (`python_env`, e2a के पहले लॉन्च द्वारा बनाए गए) के साथ चलते हैं।
+## उपकरणnbsp;
+स्टैंडअलोन टूल, e2a के अपने पायथन (, e2a के पहले लॉन्च द्वारा बनाए गए) के साथ चलते हैं। `python_env`
 
 <a id="preload-models"></a>
 ### Preload models for offline installs: `tools/preload_models.py`
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] रूपांतरण शुरू करने से पहले ब्लॉक/अध्यायों का पूर्वावलोकन
 - [x] सूक्ष्म पाठ परिवर्तन के लिए रूपांतरित वाक्य के अनुसार संपादन
 - [x] म्यूज़िक इंट्रो, इंटरल्यूड और एंडिंग जनरेट करें; इंटरल्यूड और एंडिंग में बदलाव करें
-- [x] आवाज़, विराम, रुकावट और अधिक परिवर्तनों के लिए SML टैग एकीकरण 
+- [x] आवाज़, विराम, रुकावट और अधिक परिवर्तनों के लिए SML टैग एकीकरण
 - [x] विभिन्न भाषाओं में -h -help पैरामीटर जानकारी
 - [x] PDF / JPG / BMP / PNG / TIFF के लिए OCR स्कैनिंग
 - [x] Notebooks फ़ोल्डर [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] GPU डिवाइस पहचान
 - [x] वॉयस क्लोनिंग अपलोड के लिए किसी भी बैकग्राउंड रेफ़रेंस ऑडियो को डीनोइज़ करें
 - [x] कस्टम फ़ाइन - ट्यून मॉडल अपलोड
-- [ ] [एक iOS ऐप बनाना](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [एक android ऐप बनाना](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### यूज़र के अनुरोध
 - [ ] कम से कम xttsv2, fairseq, vits, piper के लिए यूरोपीय पुर्तगाली भाषा मॉडल जोड़ें (सहायता का स्वागत है)

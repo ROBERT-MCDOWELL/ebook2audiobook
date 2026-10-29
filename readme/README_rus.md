@@ -75,34 +75,34 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## Содержание
 - [ebook2audiobook](#-ebook2audiobook)
-- [Возможности](#features)
-- [Графический интерфейс](#gui-interface)
-- [Демо](#demos)
-- [Поддерживаемые языки](#supported-languages)
-- [Минимальные требования](#hardware-requirements)
-- [Использование](#instructions)
-  - [Запуск локально](#instructions)
-    - [Запуск веб-интерфейса Gradio](#instructions)
-    - [Базовое использование в режиме headless](#basic-usage)
-    - [Использование пользовательской модели XTTS в режиме headless](#example-of-custom-model-zip-upload)
-    - [Вывод команды справки](#help-command-output)
-  - [Запуск удалённо](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [Шаги для запуска](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
-  - [Предварительная загрузка моделей для автономных установок](#preload-models)
-  - [Перевести электронные книги из e2a](#translate-ebooks)
-  
-- [Клонированные голоса](#cloned-voices)
-- [Fine Tuned TTS models](#fine-tuned-tts-models) 
-  - [Коллекция дообученных моделей TTS](#fine-tuned-tts-collection)
+  - [Preload models for offline installs](#preload-models)
+  - [Translate ebooks out of e2a](#translate-ebooks)
+
+- [Cloned Voices](#cloned-voices)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
   - [Train TTS Model](#fine-tune-your-own-tts-model)
-- [Поддерживаемые форматы электронных книг](#supported-ebook-formats)
-- [Форматы вывода](#output-and-process-formats)
-- [Возврат к более старой версии](#reverting-to-older-versions)
-- [Распространённые проблемы](#common-issues)
-- [Особая благодарность](#special-thanks)
-- [Содержание](#table-of-contents)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## Возможности
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **Венгерский (hu)** | **Корейский (ko)**     | **Вьетнамский (vi)**| **Шведский (sv)**   |
 | **Персидский (fa)**   | **Йоруба (yo)**     | **Суахили (sw)**   | **Индонезийский (id)**|
 | **Словацкий (sk)**    | **Хорватский (hr)**   | **Тамильский (ta)**     | **Датский (da)**    |
-- [**+1130 языков и диалектов здесь**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## Поддерживаемые форматы электронных книг
@@ -617,10 +617,10 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Распространённые проблемы:
 - Мой графический процессор NVIDIA/ROCm/XPU/MPS не обнаружен?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU медленный (лучше на серверном SMP CPU), тогда как GPU может обеспечить почти преобразование в реальном времени.
-   [Обсуждение этого](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+ [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Однако у него нет клонирования голоса zero-shot, и это голоса качества Siri, но он намного быстрее на cpu).
 - «У меня проблемы с зависимостями» - Просто используйте docker, он полностью автономен и имеет режим headless,
-   добавьте параметр `--help` в конец команды docker run для получения дополнительной информации.
+   добавьте параметр  в конец команды docker run для получения дополнительной информации. `--help`
 - «У меня проблема с обрезанным звуком!» - ПОЖАЛУЙСТА, СОЗДАЙТЕ ОБ ЭТОМ ISSUE,
    мы не говорим на каждом языке и нуждаемся в советах пользователей, чтобы доработать логику разбиения предложений.😊
 
@@ -633,10 +633,10 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Интеграция тегов SML для голоса, паузы, перерыва и других изменений
 - [x] -h -help информация о параметрах на разных языках
 - [x] Сканирование OCR для PDF / JPG / BMP / PNG / tiff
-- [x] Папка записных книжек [Обсуждалось здесь](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
-- [x] Сделать так, чтобы разделение текста на китайском языке не разделяло слова, и улучшить время паузы [Обсуждалось здесь](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/18#issuecomment-2401154894)
+- [x] Папка записных книжек [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
+- [x] Сделать так, чтобы разделение текста на китайском языке не разделяло слова, и улучшить время паузы [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/18#issuecomment-2401154894)
 - [x] Dockerfile
-- [x] <bpt i="1" type="283" x="1"/>Docker Compose<ept i="1"/>;
+- [x] Docker Compose;
 - [x] Подман сочиняет
 - [x] Ноутбук Kaggle
 - [x] Записная книжка Google Colab

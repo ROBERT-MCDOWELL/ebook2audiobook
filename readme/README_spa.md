@@ -73,36 +73,36 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## README.md
 
-## Tabla de contenidos
+## Tabla de Contenidos
 - [ebook2audiobook](#-ebook2audiobook)
-- [Características](#features)
-- [Interfaz gráfica](#gui-interface)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
 - [Demos](#demos)
-- [Idiomas admitidos](#supported-languages)
-- [Requisitos mínimos](#hardware-requirements)
-- [Uso](#instructions)
-  - [Ejecución local](#instructions)
-    - [Lanzar la interfaz web de Gradio](#instructions)
-    - [Uso básico sin interfaz (headless)](#basic-usage)
-    - [Uso de modelo XTTS personalizado sin interfaz](#example-of-custom-model-zip-upload)
-    - [Salida del comando de ayuda](#help-command-output)
-  - [Ejecución remota](#run-remotely)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [Pasos para ejecutar](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
-  - [Traducir libros electrónicos de e2a](#translate-ebooks)
+  - [Translate ebooks out of e2a](#translate-ebooks)
   
 - [Cloned Voices](#cloned-voices)
 - [Fine Tuned TTS models](#fine-tuned-tts-models) 
-  - [Colección de modelos TTS ajustados](#fine-tuned-tts-collection)
-  - [Tren TTS Modelo](#fine-tune-your-own-tts-model)
-- [Formatos de libro electrónico admitidos](#supported-ebook-formats)
-- [Formatos de salida](#output-and-process-formats)
-- [Volver a una versión anterior](#reverting-to-older-versions)
-- [Problemas habituales](#common-issues)
-- [Agradecimientos especiales](#special-thanks)
-- [Tabla de contenidos](#table-of-contents)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
+  - [Train TTS Model](#fine-tune-your-own-tts-model)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## Características
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **Húngaro (hu)** | **Coreano (ko)**     | **Vietnamita (vi)**| **Sueco (sv)**   |
 | **Persa (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesio (id)**|
 | **Eslovaco (sk)**    | **Croata (hr)**   | **Tamil (ta)**     | **Danés (da)**    |
-- [**+1130 idiomas y dialectos aquí**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## Formatos de libro electrónico admitidos
@@ -614,42 +614,42 @@ Releases can be found -> [here](https://github.com/DrewThomasson/ebook2audiobook
 git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v25.7.7
 ```
 
-## Problemas habituales:
-- ¿Mi GPU NVIDIA/ROCm/XPU/MPS no se detecta?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
--  La CPU es lenta (mejor en una CPU SMP de servidor) mientras que la GPU puede lograr una conversión casi en tiempo real.
-   [Discusión sobre esto](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
-   (Sin embargo, no tiene clonación de voz zero-shot, y las voces son de calidad Siri, pero es mucho más rápido en CPU).
-- «Tengo problemas de dependencias» - Simplemente usa Docker, es totalmente autónomo y tiene un modo headless,
-   añade el parámetro `--help` al final del comando docker run para más información.
-- «¡Tengo un problema de audio truncado!» - POR FAVOR, ABRE UN ISSUE SOBRE ESTO,
-   no hablamos todos los idiomas y necesitamos el consejo de los usuarios para ajustar la lógica de división de frases.😊
+## Probleme frecvente:
+- Mi GPU NVIDIA/ROCm/XPU/MPS no se está detectando?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
+-  La CPU es lenta (mejor en la CPU smp del servidor), mientras que la GPU puede tener una conversión casi en tiempo real.
+   [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+   (Sin embargo, no tiene clonación de voz de disparo cero, y tiene voces de calidad Siri, pero es mucho más rápido en la CPU).
+- "Tengo problemas de dependencia" - Solo usa el docker, es totalmente autónomo y tiene un modo sin cabeza,
+   añada el⟧ parámetro ⟦0 al final del comando Docker Run para obtener más información. `--help`
+- "¡Tengo un problema de audio truncado!" - POR FAVOR, HAGA UN PROBLEMA con ESTO,
+   no hablamos todos los idiomas y necesitamos consejos de los usuarios para afinar la lógica de división de oraciones.😊
 
-## ***** HOJA DE RUTA *****
-- Todas las características abiertas a contribuciones públicas ⭐
-- Cualquier ayuda de personas que hablen alguno de los idiomas admitidos para ayudarnos a mejorar los modelos ⭐
-- [x] Previsualizar bloques/capítulos antes de iniciar la conversión
-- [x] Edición por frase convertida para un cambio quirúrgico del texto
+## Hoja de ruta
+- Todas las funciones están abiertas al público Contribuciones ⭐
+- Cualquier ayuda de personas que hablen cualquiera de los idiomas admitidos para ayudarnos a mejorar los modelos ⭐
+- [x] Vista previa de bloques/capítulos antes de iniciar la conversión
+- [x] Editar por oración convertida para cambio de texto quirúrgico
 - [x] Generar introducciones, interludios y finales de música; editar interludios y finales
-- [x] Integración de etiquetas SML para voz, pausa, corte y más cambios 
-- [x] Información de los parámetros -h -help en distintos idiomas
+- [x] Integración de etiquetas SML para voz, pausa, descanso y más cambios
+- [x] -h -help información de parámetros en diferentes idiomas
 - [x] Escaneo OCR para PDF / JPG / BMP / PNG / TIFF
-- [x] Carpeta de notebooks [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
-- [x] Hacer que la división de texto en chino no parta las palabras y mejorar la sincronización de las pausas [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/18#issuecomment-2401154894)
+- [x] Carpeta de blocs de notas [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
+- [x] Hacer que la división del texto chino no divida las palabras y mejorar el tiempo de pausa [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/18#issuecomment-2401154894)
 - [x] Dockerfile
 - [x] Docker- Compose
 - [x] Podman componer
-- [x] Notebook de Kaggle
-- [x] Notebook de Google Colab
-- [x] Integración con Audiobookshelf
-- [x] Opción de traducción del libro electrónico
+- [x] Cuaderno Kaggle
+- [x] Google Colab Notebook
+- [x] Integración de estantes de audiolibros
+- [x] Opción de traducción de libros electrónicos
 - [x] Opciones de formato de salida
-- [x] Conversión con multiprocesamiento
-- [x] Conversión por lotes de una carpeta de libros electrónicos
-- [x] Detección del dispositivo GPU
+- [x] Conversión multiprocesamiento
+- [x] Conversión de carpetas de libros electrónicos por lotes
+- [x] Detección del dispositivo
 - [x] Denoise cualquier audio de referencia de fondo para la carga de clonación de voz
 - [x] Carga de modelo personalizada y ajustada
-- [ ] [Crear una app para iOS](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [Crear una app para Android](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### Peticiones de usuario
 - [ ] Añadir un modelo de idioma portugués europeo para xttsv2, fairseq, vits, piper como mínimo (ayuda bienvenida)

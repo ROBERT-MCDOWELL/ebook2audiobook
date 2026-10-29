@@ -75,34 +75,34 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## Mục lục
 - [ebook2audiobook](#-ebook2audiobook)
-- [Tính năng](#features)
-- [Giao diện đồ họa](#gui-interface)
-- [Bản demo](#demos)
-- [Ngôn ngữ được hỗ trợ](#supported-languages)
-- [Yêu cầu tối thiểu](#hardware-requirements)
-- [Cách dùng](#instructions)
-  - [Chạy cục bộ](#instructions)
-    - [Khởi chạy giao diện web Gradio](#instructions)
-    - [Cách dùng Headless cơ bản](#basic-usage)
-    - [Cách dùng mô hình XTTS tùy chỉnh ở chế độ Headless](#example-of-custom-model-zip-upload)
-    - [Đầu ra lệnh trợ giúp](#help-command-output)
-  - [Chạy từ xa](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [Các bước để chạy](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
-  - [Dịch sách điện tử ra khỏi e2a](#translate-ebooks)
-  
+  - [Translate ebooks out of e2a](#translate-ebooks)
+
 - [Cloned Voices](#cloned-voices)
-- [Fine Tuned TTS models](#fine-tuned-tts-models) 
-  - [Bộ sưu tập các mô hình TTS đã tinh chỉnh](#fine-tuned-tts-collection)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
   - [Train TTS Model](#fine-tune-your-own-tts-model)
-- [Định dạng sách điện tử được hỗ trợ](#supported-ebook-formats)
-- [Định dạng đầu ra](#output-and-process-formats)
-- [Quay lại phiên bản cũ hơn](#reverting-to-older-versions)
-- [Các vấn đề thường gặp](#common-issues)
-- [Lời cảm ơn đặc biệt](#special-thanks)
-- [Mục lục](#table-of-contents)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## Tính năng
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **Tiếng Hungary (hu)** | ** Tiếng Hàn (ko)**     | **Tiếng Việt (vi)**| ** Tiếng Thụy Điển (sv)**   |
 | ** Tiếng Ba Tư (fa)**   | ** Tiếng Yoruba (yo)**     | **Tiếng Swahili (sw)**   | ** Tiếng Indonesia (id)**|
 | **Tiếng Slovak (sk)**    | **Tiếng Croatia (hr)**   | ** Tiếng Tamil (ta)**     | ** Tiếng Đan Mạch (da)**    |
-- [**+1130 ngôn ngữ và phương ngữ tại đây**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## Định dạng sách điện tử được hỗ trợ
@@ -617,10 +617,10 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Các vấn đề thường gặp:
 - GPU NVIDIA/ROCm/XPU/MPS của tôi không được phát hiện?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU chậm (tốt hơn trên CPU smp máy chủ) trong khi GPU có thể chuyển đổi gần như thời gian thực.
-   [Thảo luận về điều này](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+ [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Tuy nhiên nó không có nhân bản giọng nói zero-shot, và là giọng chất lượng Siri, nhưng nhanh hơn nhiều trên cpu).
 - "Tôi gặp vấn đề về phụ thuộc" - Chỉ cần dùng docker, nó hoàn toàn độc lập và có chế độ headless,
-   thêm tham số `--help` ở cuối lệnh docker run để biết thêm thông tin.
+   thêm tham số  ở cuối lệnh docker run để biết thêm thông tin. `--help`
 - "Tôi gặp vấn đề âm thanh bị cắt cụt!" - VUI LÒNG TẠO MỘT ISSUE VỀ VIỆC NÀY,
    chúng tôi không nói được mọi ngôn ngữ và cần lời khuyên từ người dùng để tinh chỉnh logic chia câu.😊
 
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Xem trước các Khối/Chương trước khi bắt đầu chuyển đổi
 - [x] Chỉnh sửa theo từng câu đã chuyển đổi để thay đổi văn bản chính xác
 - [x] Tạo phần giới thiệu âm nhạc, đoạn ngắt và kết thúc; chỉnh sửa đoạn ngắt và kết thúc
-- [x] Tích hợp thẻ SML cho giọng nói, khoảng dừng, điểm ngắt và nhiều thay đổi hơn 
+- [x] Tích hợp thẻ SML cho giọng nói, khoảng dừng, điểm ngắt và nhiều thay đổi hơn
 - [x] Thông tin tham số -h -help bằng các ngôn ngữ khác nhau
 - [x] Quét OCR cho PDF / JPG / BMP / PNG / TIFF
 - [x] Thư mục Notebooks [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Phát hiện thiết bị GPU
 - [x] Làm nhiễu bất kỳ âm thanh tham chiếu nền nào để tải lên nhân bản giọng nói
 - [x] Tải lên mô hình tinh chỉnh tùy chỉnh
-- [ ] [Tạo một ứng dụng IOS](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [Tạo một ứng dụng android](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### Yêu cầu người dùng
 - [ ] Thêm mô hình ngôn ngữ tiếng Bồ Đào Nha châu Âu cho ít nhất xttsv2, fairseq, vits, piper (hoan nghênh sự giúp đỡ)
@@ -739,9 +739,9 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 
 **********
 
-## Phần thừa thãi để huấn luyện mô hình và những thứ tương tự (tất cả các mô hình Coqui-tts được hỗ trợ và piper-tts trong một lệnh đơn giản) 
+## Phần thừa thãi để huấn luyện mô hình và những thứ tương tự (tất cả các mô hình Coqui-tts được hỗ trợ và piper-tts trong một lệnh đơn giản)
 - Để biết thông tin về @DrewThomasson này, anh ấy hiện đang làm việc để phát triển điều này, [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
-- [x] Tạo gui đào tạo dễ sử dụng cho tất cả các mô hình coqui-tts trong [công thức đào tạo định dạng ljspeech](https://github.com/coqui-ai/TTS/tree/dev/recipes/ljspeech) Đã hoàn thành tại [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
+- [x] Tạo gui đào tạo dễ sử dụng cho tất cả các mô hình coqui-tts trong  Đã hoàn thành tại [ljspeech format training recipes](https://github.com/coqui-ai/TTS/tree/dev/recipes/ljspeech) [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
 
 
 ## Thông tin chuẩn hóa mã Python cho người đóng góp

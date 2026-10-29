@@ -75,34 +75,34 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## Obsah
 - [ebook2audiobook](#-ebook2audiobook)
-- [Funkcie](#features)
-- [Grafické rozhranie](#gui-interface)
-- [Ukážky](#demos)
-- [Podporované jazyky](#supported-languages)
-- [Minimálne požiadavky](#hardware-requirements)
-- [Použitie](#instructions)
-  - [Spustenie lokálne](#instructions)
-    - [Spustenie webového rozhrania Gradio](#instructions)
-    - [Základné použitie v režime headless](#basic-usage)
-    - [Použitie vlastného modelu XTTS v režime headless](#example-of-custom-model-zip-upload)
-    - [Výstup príkazu pomocníka](#help-command-output)
-  - [Spustenie vzdialene](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [Kroky na spustenie](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
-  - [Predbežné načítanie modelov pre offline inštalácie](#preload-models)
-  - [Preložiť e-knihy z e2a](#translate-ebooks)
-  
+  - [Preload models for offline installs](#preload-models)
+  - [Translate ebooks out of e2a](#translate-ebooks)
+
 - [Cloned Voices](#cloned-voices)
-- [Fine Tuned TTS models](#fine-tuned-tts-models) 
-  - [Kolekcia doladených TTS modelov](#fine-tuned-tts-collection)
-  - [Vlak TTS Model](#fine-tune-your-own-tts-model)
-- [Podporované formáty e-kníh](#supported-ebook-formats)
-- [Výstupné formáty](#output-and-process-formats)
-- [Návrat k staršej verzii](#reverting-to-older-versions)
-- [Časté problémy](#common-issues)
-- [Osobitné poďakovanie](#special-thanks)
-- [Obsah](#table-of-contents)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
+  - [Train TTS Model](#fine-tune-your-own-tts-model)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## Funkcie
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **Maďarčina (hu)** | **Kórejčina (ko)**     | **Vietnamčina (vi)**| **Švédčina (sv)**   |
 | **Perzština (fa)**   | **Yoruba (yo)**     | **Svahilčina (sw)**   | **Indonézština (id)**|
 | **Slovenčina (sk)**    | **Chorvátčina (hr)**   | **Tamilčina (ta)**     | **Dánčina (da)**    |
-- [**+1130 jazykov a dialektov tu**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## Podporované formáty e-kníh
@@ -617,10 +617,10 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Časté problémy:
 - Moje GPU NVIDIA/ROCm/XPU/MPS nie je detekované?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU je pomalé (lepšie na serverovom SMP CPU), zatiaľ čo GPU môže mať takmer prevod v reálnom čase.
-   [Diskusia o tomto](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+ [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Nemá však klonovanie hlasu zero-shot a hlasy sú kvality Siri, ale na CPU je oveľa rýchlejšie).
 - „Mám problémy so závislosťami“ - Použite jednoducho Docker, je úplne samostatný a má režim headless,
-   pre viac informácií pridajte na koniec príkazu docker run parameter `--help`.
+   pre viac informácií pridajte na koniec príkazu docker run parameter . `--help`
 - „Mám problém s oREZaným zvukom!“ - PROSÍM, NAHLÁSTE TO AKO ISSUE,
    nehovoríme každým jazykom a potrebujeme rady používateľov, aby sme doladili logiku delenia viet.😊
 
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Náhľad blokov/kapitol pred začatím prevodu
 - [x] Úprava po prevedenej vete pre chirurgickú zmenu textu
 - [x] Generovanie hudobných úvodov, medzihier a koncov; úprava medzihier a koncov
-- [x] Integrácia SML tagov pre hlas, pauzu, prerušenie a ďalšie zmeny 
+- [x] Integrácia SML tagov pre hlas, pauzu, prerušenie a ďalšie zmeny
 - [x] Informácie o parametroch -h -help v rôznych jazykoch
 - [x] OCR skenovanie pre PDF / JPG / BMP / PNG / TIFF
 - [x] Priečinok notebookov [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Detekcia zariadenia GPU
 - [x] Znížiť šum akéhokoľvek referenčného zvuku na pozadí pre nahrávanie hlasového klonovania
 - [x] Vlastné doladené nahrávanie modelu
-- [ ] [Vytvoriť aplikáciu pre iOS](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [Vytvoriť aplikáciu pre Android](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### Žiadosti používateľov
 - [ ] Pridať jazykový model európskej portugalčiny aspoň pre xttsv2, fairseq, vits, piper (pomoc vítaná)

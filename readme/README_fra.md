@@ -75,34 +75,34 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## Table des matières
 - [ebook2audiobook](#-ebook2audiobook)
-- [Fonctionnalités](#features)
-- [Interface graphique](#gui-interface)
-- [Démos](#demos)
-- [Langues prises en charge](#supported-languages)
-- [Configuration minimale requise](#hardware-requirements)
-- [Utilisation](#instructions)
-  - [Exécution locale](#instructions)
-    - [Lancement de l'interface web Gradio](#instructions)
-    - [Utilisation de base en mode headless](#basic-usage)
-    - [Utilisation d'un modèle XTTS personnalisé en mode headless](#example-of-custom-model-zip-upload)
-    - [Sortie de la commande d'aide](#help-command-output)
-  - [Exécution à distance](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [Étapes d'exécution](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
-  - [Traduire les ebooks sur e2a](#translate-ebooks)
-  
+  - [Translate ebooks out of e2a](#translate-ebooks)
+
 - [Cloned Voices](#cloned-voices)
-- [Modèles TTS affinés](#fine-tuned-tts-models)
-  - [Collection de modèles TTS affinés](#fine-tuned-tts-collection)
-  - [Train TTS Modèle](#fine-tune-your-own-tts-model)
-- [Formats d'e-book pris en charge](#supported-ebook-formats)
-- [Formats de sortie](#output-and-process-formats)
-- [Revenir à une version antérieure](#reverting-to-older-versions)
-- [Problèmes courants](#common-issues)
-- [Remerciements particuliers](#special-thanks)
-- [Table des matières](#table-of-contents)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
+  - [Train TTS Model](#fine-tune-your-own-tts-model)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## Fonctionnalités
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **Hongrois (hu)** | **Coréen (ko)**     | **Vietnamien (vi)**| **Suédois (sv)**   |
 | **Persan (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonésien (id)**|
 | **Slovaque (sk)**    | **Croate (h)**   | **Tamoul (ta)**     | **Danois (da)**    |
-- [**+1130 langues et dialectes ici**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## Formats d'e-book pris en charge
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Prévisualiser les blocs/chapitres avant de démarrer la conversion
 - [x] Édition par phrase convertie pour une modification chirurgicale du texte
 - [x] Générer des intros de musique, des intermèdes et des fins ; éditer les intermèdes et les fins
-- [x] Intégration des balises SML pour la voix, la pause, la coupure et d'autres changements 
+- [x] Intégration des balises SML pour la voix, la pause, la coupure et d'autres changements
 - [x] Infos des paramètres -h -help dans différentes langues
 - [x] Reconnaissance OCR pour PDF / JPG / BMP / PNG / TIFF
 - [x] Dossier de notebooks [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Détection du périphérique GPU
 - [x] Dénoisez tout son de référence d'arrière-plan pour le téléchargement de clonage vocal
 - [x] Téléchargement personnalisé du modèle affiné
-- [ ] [Créer une application iOS](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [Créer une application Android](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### Demandes utilisateur
 - [ ] Ajouter un modèle de langue portugais européen pour xttsv2, fairseq, vits, piper au minimum (aide bienvenue)

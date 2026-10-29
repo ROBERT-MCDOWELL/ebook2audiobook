@@ -75,34 +75,34 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## 目录
 - [ebook2audiobook](#-ebook2audiobook)
-- [功能](#features)
-- [图形界面](#gui-interface)
-- [演示](#demos)
-- [支持的语言](#supported-languages)
-- [最低要求](#hardware-requirements)
-- [用法](#instructions)
-  - [本地运行](#instructions)
-    - [启动 Gradio Web 界面](#instructions)
-    - [基本 Headless 用法](#basic-usage)
-    - [Headless 自定义 XTTS 模型用法](#example-of-custom-model-zip-upload)
-    - [帮助命令输出](#help-command-output)
-  - [远程运行](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [运行步骤](#docker)
-- [工具](#tools)
-  - [预加载离线安装的模型](#preload-models)
+    - [Steps to Run](#docker)
+- [Tools](#tools)
+  - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
   
-- [克隆声音](#cloned-voices)
-- [微调TTS型号](#fine-tuned-tts-models)
-  - [微调 TTS 模型集合](#fine-tuned-tts-collection)
+- [Cloned Voices](#cloned-voices)
+- [Fine Tuned TTS models](#fine-tuned-tts-models) 
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
   - [Train TTS Model](#fine-tune-your-own-tts-model)
-- [支持的电子书格式](#supported-ebook-formats)
-- [输出格式](#output-and-process-formats)
-- [还原到较旧版本](#reverting-to-older-versions)
-- [常见问题](#common-issues)
-- [特别鸣谢](#special-thanks)
-- [目录](#table-of-contents)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## 功能
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | * *匈牙利语(hu) * * | * *韩语(ko) * * | * *越南语(vi) * * | * *瑞典语(sv) * * |
 | * *波斯语(fa) * * | * *约鲁巴语(yo) * * | * *斯瓦希里语(sw) * * | * *印度尼西亚语(id) * * |
 | * *斯洛伐克语(sk) * * | * *克罗地亚语(hr) * * | * *泰米尔语(ta) * * | * *丹麦语(da) * * |
-- [**此处有 +1130 种语言和方言**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## 支持的电子书格式
@@ -624,32 +624,32 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - “我遇到音频被截断的问题！” - 请就此创建一个 ISSUE，
    我们不会说每种语言，需要用户的建议来微调句子拆分逻辑。😊
 
-## ***** 路线图 *****
-- 所有功能均向公众贡献开放 ⭐
-- 来自任何说支持语言的人的任何帮助，以帮助我们改进模型 ⭐
-- [x] 在开始转换之前预览块/章节
-- [x] 按转换后的句子进行编辑，以进行精准的文本更改
+## 路线图
+- 所有功能均向公众开放 ⭐
+- 使用任何支持语言的人员提供的任何帮助，以帮助我们改进模型 ⭐
+- [x] 在开始转换之前预览模块/章节
+- [x] 按为手术文本更改转换的句子编辑
 - [x] 生成音乐插曲、插曲和结尾；编辑插曲和结尾
-- [x] 用于语音、停顿、中断及更多更改的 SML 标签集成 
-- [x] 不同语言的 -h -help 参数信息
-- [x] 针对 PDF / JPG / BMP / PNG / TIFF 的 OCR 扫描
-- [x] Notebooks 文件夹 [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
-- [x] 使中文文本拆分不拆分单词并改善停顿时间 [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/18#issuecomment-2401154894)
+- [x] SML标记语音、暂停、中断和更多更改的集成
+- [x] -h -help不同语言的参数信息
+- [x] PDF/JPG/BMP/PNG/TIFF的OCR扫描
+- [x] 笔记本文件夹[Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
+- [x] 使中文文本拆分不拆分单词，提高暂停时间[Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/18#issuecomment-2401154894)
 - [x] Dockerfile
 - [x] Docker撰写
 - [x] Podman撰写
 - [x] Kaggle笔记本
 - [x] Google Colab笔记本
-- [x] Audiobookshelf 集成
+- [x] 有声书架集成
 - [x] 电子书翻译选项
 - [x] 输出格式选择
-- [x] 多进程转换
+- [x] 多处理转换
 - [x] 批量电子书文件夹转换
-- [x] GPU 设备检测
+- [x] 设备检测
 - [x] 对语音克隆上传的任何背景参考音频进行降噪
 - [x] 自定义微调模型上传
-- [ ] [制作 iOS 应用](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [制作 android 应用](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### 用户请求
 - [ ] 至少为 xttsv2、fairseq、vits、piper 添加欧洲葡萄牙语语言模型（欢迎帮助）

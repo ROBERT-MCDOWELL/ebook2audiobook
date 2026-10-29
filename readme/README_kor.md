@@ -75,34 +75,34 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## 목차
 - [ebook2audiobook](#-ebook2audiobook)
-- [기능](#features)
-- [그래픽 인터페이스](#gui-interface)
-- [데모](#demos)
-- [지원 언어](#supported-languages)
-- [최소 요구 사항](#hardware-requirements)
-- [사용법](#instructions)
-  - [로컬에서 실행](#instructions)
-    - [Gradio 웹 인터페이스 실행](#instructions)
-    - [기본 Headless 사용법](#basic-usage)
-    - [Headless 커스텀 XTTS 모델 사용법](#example-of-custom-model-zip-upload)
-    - [도움말 명령 출력](#help-command-output)
-  - [원격으로 실행](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [실행 단계](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
-  
+
 - [Cloned Voices](#cloned-voices)
-- [Fine Tuned TTS models](#fine-tuned-tts-models) 
-  - [미세 조정된 TTS 모델 모음](#fine-tuned-tts-collection)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
   - [Train TTS Model](#fine-tune-your-own-tts-model)
-- [지원되는 전자책 형식](#supported-ebook-formats)
-- [출력 형식](#output-and-process-formats)
-- [이전 버전으로 되돌리기](#reverting-to-older-versions)
-- [일반적인 문제](#common-issues)
-- [특별히 감사드립니다](#special-thanks)
-- [목차](#table-of-contents)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## 기능
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | * * 헝가리어 (hu) * * | * * 한국어 (ko) * * | * * 베트남어 (vi) * * | * * 스웨덴어 (sv) * * |
 | * * 페르시아어 (fa) * * | * * 요루바어 (yo) * * | * * 스와힐리어 (sw) * * | * * 인도네시아어 (id) * * |
 | * * 슬로바키아어 (sk) * * | * * 크로아티아어 (hr) * * | * * 타밀어 (ta) * * | * * 덴마크어 (da) * * |
-- [**+1130개 언어 및 방언은 여기에서**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## 지원되는 전자책 형식
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] 변환을 시작하기 전에 블록/챕터 미리 보기
 - [x] 정밀한 텍스트 변경을 위해 변환된 문장 단위로 편집
 - [x] 음악 인트로, 인터루드 및 엔딩 생성, 인터루드 및 엔딩 편집
-- [x] 음성, 멈춤, 중단 및 추가 변경을 위한 SML 태그 통합 
+- [x] 음성, 멈춤, 중단 및 추가 변경을 위한 SML 태그 통합
 - [x] 다양한 언어로 된 -h -help 매개변수 정보
 - [x] PDF / JPG / BMP / PNG / TIFF용 OCR 스캔
 - [x] 노트북 폴더 [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] GPU 장치 감지
 - [x] 음성 복제 업로드를 위한 모든 배경 참조 오디오 잡음 제거
 - [x] 맞춤형 미세 조정 모델 업로드
-- [ ] [iOS 앱 만들기](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [android 앱 만들기](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### 사용자 요청
 - [ ] 최소한 xttsv2, fairseq, vits, piper용 유럽 포르투갈어 언어 모델 추가(도움 환영)

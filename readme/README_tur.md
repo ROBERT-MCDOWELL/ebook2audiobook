@@ -75,50 +75,50 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## İçindekiler
 - [ebook2audiobook](#-ebook2audiobook)
-- [Özellikler](#features)
-- [Grafik Arayüz](#gui-interface)
-- [Demolar](#demos)
-- [Desteklenen Diller](#supported-languages)
-- [Minimum Gereksinimler](#hardware-requirements)
-- [Kullanım](#instructions)
-  - [Yerel Olarak Çalıştırma](#instructions)
-    - [Gradio Web Arayüzünü Başlatma](#instructions)
-    - [Temel Headless Kullanımı](#basic-usage)
-    - [Headless Özel XTTS Model Kullanımı](#example-of-custom-model-zip-upload)
-    - [Yardım komutu çıktısı](#help-command-output)
-  - [Uzaktan Çalıştırma](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [Çalıştırma Adımları](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
-  
-- [Klonlanmış Sesler](#cloned-voices)
-- [İnce Ayarlı TTS modelleri](#fine-tuned-tts-models)
-  - [İnce Ayarlı TTS Modelleri Koleksiyonu](#fine-tuned-tts-collection)
-  - [Tren TTS Model](#fine-tune-your-own-tts-model)
-- [Desteklenen E-Kitap Biçimleri](#supported-ebook-formats)
-- [Çıktı Biçimleri](#output-and-process-formats)
-- [Eski Sürüme Geri Dönme](#reverting-to-older-versions)
-- [Yaygın Sorunlar](#common-issues)
-- [Özel Teşekkürler](#special-thanks)
-- [İçindekiler](#table-of-contents)
+
+- [Cloned Voices](#cloned-voices)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
+  - [Train TTS Model](#fine-tune-your-own-tts-model)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## Özellikler
 - 🔧 **TTS Motorları desteklenir **: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS`
-- 📚 **Birden fazla dosya biçimini dönüştürme**: `.epub`, `.mobi`, `.azw3`, `.fb2`, `.lrf`, `.rb`, `.snb`, `.tcr`, `.pdf`, `.txt`, `.rtf`, `.doc`, `.docx`, `.html`, `.odt`, `.azw`, `.tiff`, `.tif`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.zip`
+- 📚 **Birden fazla dosya biçimini dönüştürme**: , , , , , , , , , , , , , , , , , , , , , , `.epub` `.mobi` `.azw3` `.fb2` `.lrf` `.rb` `.snb` `.tcr` `.pdf` `.txt` `.rtf` `.doc` `.docx` `.html` `.odt` `.azw` `.tiff` `.tif` `.png` `.jpg` `.jpeg` `.bmp` `.zip`
 - 💻 **Metin Alanı** kısa bir metni doğrudan sese dönüştürmek için
 - 🔍 **OCR taraması** metin sayfaları görüntü olan dosyalar için
 - 🔊 **Yüksek kaliteli metinden konuşmaya**, neredeyse gerçek zamanlıdan neredeyse gerçek sese kadar
 - 🗣️ **İsteğe bağlı ses klonlama** kendi ses dosyanızı kullanarak
-- 🌐 ** 1696 dili destekler ** ([desteklenen diller listesi](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html))
+- 🌐 ** 1696 dili destekler ** () [supported languages list](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 - 💻 **Düşük kaynak dostu** — **2 GB RAM / 1 GB VRAM (minimum)** ile çalışır
-- 🎵 **Sesli kitap çıktı biçimleri**: mono or stereo `aac`, `flac`, `mp3`, `m4b`, `m4a`, `mp4`, `mov`, `ogg`, `wav`, `webm`
-- 🧠 **SML etiketleri desteklenir** — kesintiler, duraklamalar, ses değiştirme ve daha fazlasının ince ayarlı kontrolü ([see below](#sml-tags-available))
+- 🎵 **Sesli kitap çıktı biçimleri**: mono or stereo , , , , , , , , , `aac` `flac` `mp3` `m4b` `m4a` `mp4` `mov` `ogg` `wav` `webm`
+- 🧠 **SML etiketleri desteklenir** — kesintiler, duraklamalar, ses değiştirme ve daha fazlasının ince ayarlı kontrolü () [see below](#sml-tags-available)
 - 🧩 **İsteğe bağlı özel model** kendi eğittiğiniz modeli kullanarak (XTTSv2, VITS, FAIRSEQ, PIPER, others on request)
-- 🎛️ **E2A Ekibi tarafından eğitilmiş ince ayarlı ön ayar modelleri**<br/>
-     <i>(Ek ince ayarlı modellere ihtiyacınız olursa veya kendinizinkileri resmi ön ayar listesinde paylaşmak isterseniz bizimle iletişime geçin)</i>
+- 🎛️ **E2A Ekibi tarafından eğitilmiş ince ayarlı ön ayar modelleri** <br/>
+     (Ek ince ayarlı modellere ihtiyacınız olursa veya kendinizinkileri resmi ön ayar listesinde paylaşmak isterseniz bizimle iletişime geçin) <i> </i>
 
 
 ##  Donanım Gereksinimleri
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **Macarca (hu )**| **Korece (ko )**| **Vietnamca (vi )**| **İsveççe (sv )**|
 | **Farsça (fa )**| **Yoruba (yo )**| **Svahili (sw )**| **Endonezce (id )**|
 | **Slovakça (sk )**| **Hırvatça (hr )**| **Tamilce (ta )**| **Danca (da )**|
-- [**+1130 dil ve lehçe burada**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## Desteklenen E-Kitap Biçimleri
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Dönüştürmeyi başlatmadan önce Blokları/Bölümleri önizleme
 - [x] Cerrahi metin değişikliği için dönüştürülen cümleye göre düzenleme
 - [x] Müzik tanıtımları, aralıkları ve sonları oluşturun; aralıkları ve sonları düzenleyin
-- [x] Ses, duraklama, kesinti ve daha fazla değişiklik için SML etiketi entegrasyonu 
+- [x] Ses, duraklama, kesinti ve daha fazla değişiklik için SML etiketi entegrasyonu
 - [x] Farklı dillerde -h -help parametre bilgisi
 - [x] PDF / JPG / BMP / PNG / TIFF için OCR taraması
 - [x] Notebooklar Klasörü [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] GPU Aygıt algılama
 - [x] Ses klonlama yüklemesi için herhangi bir arka plan referans sesini gürültüden arındırın
 - [x] Özel ince ayarlı model yükleme
-- [ ] [Bir iOS uygulaması yapmak](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [Bir android uygulaması yapmak](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### Kullanıcı İstekleri
 - [ ] En azından xttsv2, fairseq, vits, piper için Avrupa Portekizcesi dil modeli ekleme (yardım memnuniyetle karşılanır)

@@ -75,50 +75,50 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## সূচিপত্র
 - [ebook2audiobook](#-ebook2audiobook)
-- [বৈশিষ্ট্য](#features)
-- [গ্রাফিকাল ইন্টারফেস](#gui-interface)
-- [ডেমো](#demos)
-- [সমর্থিত ভাষা](#supported-languages)
-- [ন্যূনতম প্রয়োজনীয়তা](#hardware-requirements)
-- [ব্যবহার](#instructions)
-  - [স্থানীয়ভাবে চালান](#instructions)
-    - [Gradio ওয়েব ইন্টারফেস চালু করা](#instructions)
-    - [মৌলিক Headless ব্যবহার](#basic-usage)
-    - [Headless কাস্টম XTTS মডেল ব্যবহার](#example-of-custom-model-zip-upload)
-    - [সহায়তা কমান্ড আউটপুট](#help-command-output)
-  - [দূরবর্তীভাবে চালান](#run-remotely)
-  - [ডকার](#docker)
-    - [চালানোর ধাপ](#docker)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
+  - [Docker](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
-  
-- [ক্লোনড ভয়েসেস](#cloned-voices)
-- [ফাইন টিউনড টিটিএস মডেল](#fine-tuned-tts-models)
-  - [ফাইন-টিউন করা TTS মডেলের সংগ্রহ](#fine-tuned-tts-collection)
-  - [ট্রেন টিটিএস মডেল](#fine-tune-your-own-tts-model)
-- [সমর্থিত ই-বুক ফরম্যাট](#supported-ebook-formats)
-- [আউটপুট ফরম্যাট](#output-and-process-formats)
-- [পুরনো সংস্করণে ফিরে যাওয়া](#reverting-to-older-versions)
-- [সাধারণ সমস্যা](#common-issues)
-- [বিশেষ ধন্যবাদ](#special-thanks)
-- [সূচিপত্র](#table-of-contents)
+
+- [Cloned Voices](#cloned-voices)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
+  - [Train TTS Model](#fine-tune-your-own-tts-model)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## বৈশিষ্ট্য
 - 🔧 **TTS ইঞ্জিন সমর্থিত**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS`
-- 📚 **একাধিক ফাইল ফরম্যাট রূপান্তর করুন**: `.epub`, `.mobi`, `.azw3`, `.fb2`, `.lrf`, `.rb`, `.snb`, `.tcr`, `.pdf`, `.txt`, `.rtf`, `.doc`, `.docx`, `.html`, `.odt`, `.azw`, `.tiff`, `.tif`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.zip`
+- 📚 **একাধিক ফাইল ফরম্যাট রূপান্তর করুন**: , , , , , , , , , , , , , , , , , , , , , , `.epub` `.mobi` `.azw3` `.fb2` `.lrf` `.rb` `.snb` `.tcr` `.pdf` `.txt` `.rtf` `.doc` `.docx` `.html` `.odt` `.azw` `.tiff` `.tif` `.png` `.jpg` `.jpeg` `.bmp` `.zip`
 - 💻 সংক্ষিপ্ত টেক্সট সরাসরি অডিওতে রূপান্তর করার জন্য **টেক্সট এরিয়া**
 - 🔍 ছবি হিসেবে টেক্সট পৃষ্ঠা সহ ফাইলের জন্য **OCR স্ক্যানিং**
 - 🔊 **উচ্চমানের টেক্সট-টু-স্পিচ**, প্রায় রিয়েল-টাইম থেকে প্রায় বাস্তব ভয়েস পর্যন্ত
 - 🗣️ আপনার নিজের ভয়েস ফাইল ব্যবহার করে **ঐচ্ছিক ভয়েস ক্লোনিং**
-- 🌐 ** 1696 টি ভাষা সমর্থন করে ** ([সমর্থিত ভাষার তালিকা](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html))
+- 🌐 ** 1696 টি ভাষা সমর্থন করে ** () [supported languages list](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 - 💻 **কম সম্পদ-বান্ধব** — **2 GB RAM / 1 GB VRAM (ন্যূনতম)**-এ চলে
-- 🎵 **অডিওবুক আউটপুট ফরম্যাট**: mono or stereo `aac`, `flac`, `mp3`, `m4b`, `m4a`, `mp4`, `mov`, `ogg`, `wav`, `webm`
-- 🧠 **SML ট্যাগ সমর্থিত** — বিরতি, থামা, ভয়েস পরিবর্তন ইত্যাদির সূক্ষ্ম নিয়ন্ত্রণ ([see below](#sml-tags-available))
+- 🎵 **অডিওবুক আউটপুট ফরম্যাট**: mono or stereo , , , , , , , , , `aac` `flac` `mp3` `m4b` `m4a` `mp4` `mov` `ogg` `wav` `webm`
+- 🧠 **SML ট্যাগ সমর্থিত** — বিরতি, থামা, ভয়েস পরিবর্তন ইত্যাদির সূক্ষ্ম নিয়ন্ত্রণ () [see below](#sml-tags-available)
 - 🧩 আপনার নিজের প্রশিক্ষিত মডেল ব্যবহার করে **ঐচ্ছিক কাস্টম মডেল** (XTTSv2, VITS, FAIRSEQ, PIPER, others on request)
-- 🎛️ E2A টিম দ্বারা প্রশিক্ষিত **ফাইন-টিউন করা প্রিসেট মডেল**<br/>
-     <i>(আপনার অতিরিক্ত ফাইন-টিউন করা মডেলের প্রয়োজন হলে, অথবা অফিসিয়াল প্রিসেট তালিকায় আপনার মডেল শেয়ার করতে চাইলে আমাদের সাথে যোগাযোগ করুন)</i>
+- 🎛️ E2A টিম দ্বারা প্রশিক্ষিত **ফাইন-টিউন করা প্রিসেট মডেল** <br/>
+     (আপনার অতিরিক্ত ফাইন-টিউন করা মডেলের প্রয়োজন হলে, অথবা অফিসিয়াল প্রিসেট তালিকায় আপনার মডেল শেয়ার করতে চাইলে আমাদের সাথে যোগাযোগ করুন) <i> </i>
 
 
 ##  হার্ডওয়্যার প্রয়োজনীয়তা
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **হাঙ্গেরীয় (hu)** | **কোরিয়ান (ko)**     | **ভিয়েতনামী (vi)**| **সুইডিশ (sv)**   |
 | **Persian (fa)**   | ** *Yoruba (yo)**     | **Swahili (sw)** * **ইন্দোনেশিয়ান (id)**|
 | **স্লোভাক (sk)**    | **ক্রোয়েশিয়ান (hr)**   | **তামিল (ta)**     | **ডেনিশ (da)**    |
-- [**+১১৩০টি ভাষা ও উপভাষা এখানে**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## সমর্থিত ই-বুক ফরম্যাট
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] রূপান্তর শুরু করার আগে ব্লক/অধ্যায় প্রিভিউ
 - [x] সূক্ষ্ম টেক্সট পরিবর্তনের জন্য রূপান্তরিত বাক্য অনুযায়ী সম্পাদনা
 - [x] মিউজিক ইন্ট্রো, ইন্টারলুড এবং এন্ডিং জেনারেট করুন; ইন্টারলুড এবং এন্ডিং এডিট করুন
-- [x] ভয়েস, বিরতি, থামা এবং আরও পরিবর্তনের জন্য SML ট্যাগ ইন্টিগ্রেশন 
+- [x] ভয়েস, বিরতি, থামা এবং আরও পরিবর্তনের জন্য SML ট্যাগ ইন্টিগ্রেশন
 - [x] বিভিন্ন ভাষায় -h -help প্যারামিটার তথ্য
 - [x] PDF / JPG / BMP / PNG / TIFF-এর জন্য OCR স্ক্যানিং
 - [x] Notebooks ফোল্ডার [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] GPU ডিভাইস শনাক্তকরণ
 - [x] ভয়েস ক্লোনিং আপলোডের জন্য কোনও ব্যাকগ্রাউন্ড রেফারেন্স অডিওকে অস্বীকার করুন
 - [x] কাস্টম সূক্ষ্ম সুরযুক্ত মডেল আপলোড
-- [ ] [একটি iOS অ্যাপ তৈরি করা](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [একটি android অ্যাপ তৈরি করা](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### ব্যবহারকারীর অনুরোধ
 - [ ] অন্তত xttsv2, fairseq, vits, piper-এর জন্য ইউরোপীয় পর্তুগিজ ভাষা মডেল যোগ করা (সাহায্য স্বাগত)
@@ -802,10 +802,10 @@ if config['default_role'] in roles:
 -->
 
 ## ক্রেডিট
-- [Coqui-tts](https://github.com/idiap/coqui-ai-TTS) - টেক্সট-টু-স্পীচের জন্য একটি গভীর শেখার টুলকিট, গবেষণা এবং উত্পাদনে যুদ্ধ-পরীক্ষিত ।
-- [পাইপার-টিটি](https://github.com/OHF-Voice/piper1-gpl) - দ্রুত এবং স্থানীয় নিউরাল টেক্সট-টু-স্পিচ ইঞ্জিন ।
-- [Zonos2.cpp](https://github.com/Zyphra/zonos2.cpp) -- Zonos2 এর জন্য ggml ইনফারেন্স কোড ।
-- [Audio.cpp](https://github.com/0xShug0/audio.cpp) - ggml দ্বারা চালিত অডিও মডেলের জন্য একটি অল-ইন-ওয়ান, খাঁটি C++ ইনফারেন্স ইঞ্জিন ।
+-  - টেক্সট-টু-স্পীচের জন্য একটি গভীর শেখার টুলকিট, গবেষণা এবং উত্পাদনে যুদ্ধ-পরীক্ষিত । [Coqui-tts](https://github.com/idiap/coqui-ai-TTS)
+-  - দ্রুত এবং স্থানীয় নিউরাল টেক্সট-টু-স্পিচ ইঞ্জিন । [Piper-tts](https://github.com/OHF-Voice/piper1-gpl)
+-  -- Zonos2 এর জন্য ggml ইনফারেন্স কোড । [Zonos2.cpp](https://github.com/Zyphra/zonos2.cpp)
+-  - ggml দ্বারা চালিত অডিও মডেলের জন্য একটি অল-ইন-ওয়ান, খাঁটি C++ ইনফারেন্স ইঞ্জিন । [Audio.cpp](https://github.com/0xShug0/audio.cpp)
 
 ## বিশেষ ধন্যবাদ
 সমস্ত আর্থিক এবং কোড অবদানকারীদের জন্য, প্রতিটি অবদান এবং পরামর্শ E2A এর গুণমান উন্নত করতে সহায়তা করে ।

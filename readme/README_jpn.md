@@ -75,50 +75,50 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## 目次
 - [ebook2audiobook](#-ebook2audiobook)
-- [機能](#features)
-- [グラフィカルインターフェース](#gui-interface)
-- [デモ](#demos)
-- [対応言語](#supported-languages)
-- [最小要件](#hardware-requirements)
-- [使い方](#instructions)
-  - [ローカルで実行](#instructions)
-    - [Gradio Webインターフェースの起動](#instructions)
-    - [基本的なHeadlessの使い方](#basic-usage)
-    - [HeadlessでのカスタムXTTSモデルの使い方](#example-of-custom-model-zip-upload)
-    - [ヘルプコマンドの出力](#help-command-output)
-  - [リモートで実行](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [実行手順](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
-  - [オフラインインストール用のプリロードモデル](#preload-models)
+  - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
-  
-- [クローン音声](#cloned-voices)
-- [微調整されたTTSモデル](#fine-tuned-tts-models)
-  - [ファインチューニング済みTTSモデルのコレクション](#fine-tuned-tts-collection)
+
+- [Cloned Voices](#cloned-voices)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
   - [Train TTS Model](#fine-tune-your-own-tts-model)
-- [対応する電子書籍形式](#supported-ebook-formats)
-- [出力形式](#output-and-process-formats)
-- [古いバージョンに戻す](#reverting-to-older-versions)
-- [よくある問題](#common-issues)
-- [特別な感謝](#special-thanks)
-- [目次](#table-of-contents)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## 機能
 - 🔧 **サポートされているTTSエンジン**： `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS`
-- 📚 **複数のファイル形式を変換**: `.epub`, `.mobi`, `.azw3`, `.fb2`, `.lrf`, `.rb`, `.snb`, `.tcr`, `.pdf`, `.txt`, `.rtf`, `.doc`, `.docx`, `.html`, `.odt`, `.azw`, `.tiff`, `.tif`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.zip`
+- 📚 **複数のファイル形式を変換**: , , , , , , , , , , , , , , , , , , , , , , `.epub` `.mobi` `.azw3` `.fb2` `.lrf` `.rb` `.snb` `.tcr` `.pdf` `.txt` `.rtf` `.doc` `.docx` `.html` `.odt` `.azw` `.tiff` `.tif` `.png` `.jpg` `.jpeg` `.bmp` `.zip`
 - 💻 短いテキストを直接音声に変換する**テキストエリア**
 - 🔍 画像としてのテキストページを含むファイル向けの**OCRスキャン**
 - 🔊 **高品質なテキスト読み上げ**、ほぼリアルタイムからほぼ本物の音声まで
 - 🗣️ 独自の音声ファイルを使用した**任意の音声クローン**
-- 🌐 ** 1696言語をサポート** ([サポート言語リスト](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html))
+- 🌐 ** 1696言語をサポート** () [supported languages list](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 - 💻 **低リソースに優しい** — **2 GB RAM / 1 GB VRAM（最小）**で動作
-- 🎵 **オーディオブックの出力形式**: mono or stereo `aac`, `flac`, `mp3`, `m4b`, `m4a`, `mp4`, `mov`, `ogg`, `wav`, `webm`
-- 🧠 **SMLタグ対応** — 中断、一時停止、音声切り替えなどのきめ細かな制御 ([see below](#sml-tags-available))
+- 🎵 **オーディオブックの出力形式**: mono or stereo , , , , , , , , , `aac` `flac` `mp3` `m4b` `m4a` `mp4` `mov` `ogg` `wav` `webm`
+- 🧠 **SMLタグ対応** — 中断、一時停止、音声切り替えなどのきめ細かな制御 () [see below](#sml-tags-available)
 - 🧩 独自の学習済みモデルを使用した**任意のカスタムモデル** (XTTSv2, VITS, FAIRSEQ, PIPER, others on request)
-- 🎛️ E2Aチームによって学習された**ファインチューニング済みプリセットモデル**<br/>
-     <i>（追加のファインチューニング済みモデルが必要な場合、または公式プリセットリストにご自身のものを共有したい場合はご連絡ください）</i>
+- 🎛️ E2Aチームによって学習された**ファインチューニング済みプリセットモデル** <br/>
+     （追加のファインチューニング済みモデルが必要な場合、または公式プリセットリストにご自身のものを共有したい場合はご連絡ください） <i> </i>
 
 
 ##  ハードウェア要件
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **ハンガリー語(hu )**|**韓国語(ko )**|**ベトナム語(vi )**|**スウェーデン語(sv )**|
 | **ペルシャ語(fa )** | **ヨルバ語(yo )** | **スワヒリ語(sw )** | **インドネシア語(id )** |
 | **スロバキア語(sk )**|**クロアチア語(hr )**|**タミル語(ta )**|**デンマーク語(da )**|
-- [**+1130の言語と方言はこちら**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## 対応する電子書籍形式
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] 変換を開始する前にブロック／章をプレビュー
 - [x] 外科的なテキスト変更のために変換された文ごとに編集
 - [x] 音楽のイントロ、インタールーデス、エンディングを生成し、インタールーデスとエンディングを編集
-- [x] 音声、一時停止、中断、その他の変更のためのSMLタグ統合 
+- [x] 音声、一時停止、中断、その他の変更のためのSMLタグ統合
 - [x] さまざまな言語での-h -helpパラメータ情報
 - [x] PDF / JPG / BMP / PNG / TIFF向けのOCRスキャン
 - [x] ノートブックフォルダ [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] GPUデバイス検出
 - [x] 音声クローンアップロードのバックグラウンドリファレンス音声をノイズ除去する
 - [x] カスタム微調整されたモデルのアップロード
-- [ ] [iOSアプリを作成](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [androidアプリを作成](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### ユーザーリクエスト
 - [ ] 少なくともxttsv2、fairseq、vits、piper向けにヨーロッパポルトガル語の言語モデルを追加（支援歓迎）
@@ -739,9 +739,9 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 
 **********
 
-## モデルの学習などのための追加のオーバーキル（対応するすべてのCoqui-ttsモデルとpiper-ttsを1つの簡単なコマンドで） 
-- この@ DrewThomassonに関する情報については、彼は現在これの開発に取り組んでいます、[ユニバーサルTTSファインチューン](https://github.com/DrewThomasson/Universal_TTS_Finetune)
-- [x] Make a easy to use training gui for all coqui-tts models in the [ljspeech format training recipes](https://github.com/coqui-ai/TTS/tree/dev/recipes/ljspeech) Completed at [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
+## モデルの学習などのための追加のオーバーキル（対応するすべてのCoqui-ttsモデルとpiper-ttsを1つの簡単なコマンドで）
+- この@ DrewThomassonに関する情報については、彼は現在これの開発に取り組んでいます、 [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
+- [x] Make a easy to use training gui for all coqui-tts models in the  Completed at [ljspeech format training recipes](https://github.com/coqui-ai/TTS/tree/dev/recipes/ljspeech) [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
 
 
 ## 貢献者向けPythonコード正規化情報

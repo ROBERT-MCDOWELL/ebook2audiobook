@@ -75,34 +75,34 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## Sadržaj
 - [ebook2audiobook](#-ebook2audiobook)
-- [Značajke](#features)
-- [Grafičko sučelje](#gui-interface)
-- [Demoi](#demos)
-- [Podržani jezici](#supported-languages)
-- [Minimalni zahtjevi](#hardware-requirements)
-- [Upotreba](#instructions)
-  - [Pokretanje lokalno](#instructions)
-    - [Pokretanje Gradio web sučelja](#instructions)
-    - [Osnovna upotreba u headless načinu](#basic-usage)
-    - [Upotreba prilagođenog XTTS modela u headless načinu](#example-of-custom-model-zip-upload)
-    - [Izlaz naredbe za pomoć](#help-command-output)
-  - [Pokretanje na daljinu](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [Koraci za pokretanje](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
-  - [Predučitavanje modela za izvanmrežne instalacije](#preload-models)
-  - [Prevedi e-knjige iz e2a](#translate-ebooks)
-  
-- [Klonirani glasovi](#cloned-voices)
-- [Fine Tuned TTS modeli](#fine-tuned-tts-models)
-  - [Zbirka fino podešenih TTS modela](#fine-tuned-tts-collection)
-  - [Vlak TTS Model](#fine-tune-your-own-tts-model)
-- [Podržani formati e-knjiga](#supported-ebook-formats)
-- [Izlazni formati](#output-and-process-formats)
-- [Vraćanje na stariju verziju](#reverting-to-older-versions)
-- [Česti problemi](#common-issues)
-- [Posebna zahvala](#special-thanks)
-- [Sadržaj](#table-of-contents)
+  - [Preload models for offline installs](#preload-models)
+  - [Translate ebooks out of e2a](#translate-ebooks)
+
+- [Cloned Voices](#cloned-voices)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
+  - [Train TTS Model](#fine-tune-your-own-tts-model)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## Značajke
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **Hungarian (hu)** | **Korean (ko)**     | **Vietnamese (vi)**| **Swedish (sv)**   |
 | **Persian (fa)**   | **Yoruba (yo)**     | **Swahili (sw)**   | **Indonesian (id)**|
 | **Slovak (sk)**    | **Croatian (hr)**   | **Tamil (ta)**     | **Danish (da)**    |
-- [**+1130 jezika i dijalekata ovdje**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## Podržani formati e-knjiga
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Pregled blokova/poglavlja prije početka pretvaranja
 - [x] Uređivanje po pretvorenoj rečenici za kiruršku izmjenu teksta
 - [x] Generiranje glazbenih uvoda, interludija i završetaka; uređivanje interludija i završetaka
-- [x] Integracija SML oznaka za glas, pauzu, prekid i druge promjene 
+- [x] Integracija SML oznaka za glas, pauzu, prekid i druge promjene
 - [x] Informacije o parametrima -h -help na različitim jezicima
 - [x] OCR skeniranje za PDF / JPG / BMP / PNG / TIFF
 - [x] Mapa bilježnica [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Otkrivanje GPU uređaja
 - [x] Denoizirati bilo koji pozadinski referentni zvuk za prijenos glasovnog kloniranja
 - [x] Prijenos prilagođenog precizno podešenog modela
-- [ ] [Napraviti iOS aplikaciju](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [Napraviti Android aplikaciju](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### Korisnički zahtjevi
 - [ ] Dodati jezični model europskog portugalskog barem za xttsv2, fairseq, vits, piper (pomoć dobrodošla)

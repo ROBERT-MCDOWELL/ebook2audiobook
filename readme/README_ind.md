@@ -75,34 +75,34 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## Daftar Isi
 - [ebook2audiobook](#-ebook2audiobook)
-- [Fitur](#features)
-- [Antarmuka GUI](#gui-interface)
-- [Demo](#demos)
-- [Bahasa yang Didukung](#supported-languages)
-- [Persyaratan Minimum](#hardware-requirements)
-- [Penggunaan](#instructions)
-  - [Jalankan secara Lokal](#instructions)
-    - [Meluncurkan Antarmuka Web Gradio](#instructions)
-    - [Penggunaan Headless Dasar](#basic-usage)
-    - [Penggunaan Model XTTS Kustom Headless](#example-of-custom-model-zip-upload)
-    - [Keluaran perintah bantuan](#help-command-output)
-  - [Jalankan dari Jarak Jauh](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [Langkah-langkah Menjalankan](#docker)
-- [Alat](#tools)
+    - [Steps to Run](#docker)
+- [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
-  - [Terjemahkan ebook dari e2a](#translate-ebooks)
-  
+  - [Translate ebooks out of e2a](#translate-ebooks)
+
 - [Cloned Voices](#cloned-voices)
-- [Fine Tuned TTS models](#fine-tuned-tts-models) 
-  - [Koleksi Model TTS yang Disetel Halus](#fine-tuned-tts-collection)
-  - [Train tts Model](#fine-tune-your-own-tts-model)
-- [Format eBook yang Didukung](#supported-ebook-formats)
-- [Format Keluaran](#output-and-process-formats)
-- [Mengembalikan ke Versi lebih lama](#reverting-to-older-versions)
-- [Masalah Umum](#common-issues)
-- [Terima Kasih Khusus](#special-thanks)
-- [Daftar Isi](#table-of-contents)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
+  - [Train TTS Model](#fine-tune-your-own-tts-model)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## Fitur
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | ** Bahasa Hongaria (hu )**|** Bahasa Korea (ko )**|** Bahasa Vietnam (vi )**|** Bahasa Swedia (sv )**|
 | **Persia (fa )**   | **Yoruba (yo )**     | **Swahili (sw )**   | **Indonesia (id )**|
 | **Bahasa Slowakia (sk )**|**Bahasa Kroasia (hr )**|** Bahasa Tamil (ta )**|** Bahasa Denmark (da )**|
-- [**+1130 bahasa dan dialek di sini**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## Format eBook yang Didukung
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Pratinjau Blok/Bab sebelum memulai konversi
 - [x] Edit per kalimat yang dikonversi untuk perubahan teks yang presisi
 - [x] Hasilkan intro, selingan, dan akhiran musik; edit selingan dan akhiran
-- [x] Integrasi tag SML untuk suara, jeda, hentian, dan lebih banyak perubahan 
+- [x] Integrasi tag SML untuk suara, jeda, hentian, dan lebih banyak perubahan
 - [x] Info parameter -h -help dalam berbagai bahasa
 - [x] Pemindaian OCR untuk PDF / JPG / BMP / PNG / TIFF
 - [x] Folder Notebook [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Deteksi Perangkat GPU
 - [x] Denoise audio referensi latar belakang apa pun untuk unggahan kloning suara
 - [x] Unggahan model fine - tuned kustom
-- [ ] [Membuat aplikasi IOS](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [Membuat aplikasi android](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### Permintaan Pengguna
 - [ ] Menambahkan model bahasa Portugis Eropa setidaknya untuk xttsv2, fairseq, vits, piper (bantuan dipersilakan)
@@ -739,9 +739,9 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 
 **********
 
-## Ekstra Berlebihan untuk melatih model dan semacamnya (Semua model Coqui-tts yang didukung dan piper-tts dalam satu perintah mudah) 
-- Untuk info tentang @DrewThomasson ini, dia saat ini sedang mengerjakan pengembangan ini, [Universal tts Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
-- [x] Buat gui pelatihan yang mudah digunakan untuk semua model coqui - tts di [resep pelatihan format ljspeech](https://github.com/coqui-ai/TTS/tree/dev/recipes/ljspeech) Diselesaikan di [Universal tts Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
+## Ekstra Berlebihan untuk melatih model dan semacamnya (Semua model Coqui-tts yang didukung dan piper-tts dalam satu perintah mudah)
+- Untuk info tentang @DrewThomasson ini, dia saat ini sedang mengerjakan pengembangan ini, [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
+- [x] Buat gui pelatihan yang mudah digunakan untuk semua model coqui - tts di  Diselesaikan di [ljspeech format training recipes](https://github.com/coqui-ai/TTS/tree/dev/recipes/ljspeech) [Universal TTS Finetune](https://github.com/DrewThomasson/Universal_TTS_Finetune)
 
 
 ## Informasi normalisasi Kode Python untuk kontributor

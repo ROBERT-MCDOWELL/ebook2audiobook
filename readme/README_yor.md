@@ -75,34 +75,34 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## Àkójọ Àwọn Àkóónú
 - [ebook2audiobook](#-ebook2audiobook)
-- [Àwọn Ẹ̀yà](#features)
-- [Wíwo GUI](#gui-interface)
-- [Àwọn Àfihàn](#demos)
-- [Àwọn Èdè Tí A Ṣe Àtìlẹ́yìn Fún](#supported-languages)
-- [Àwọn Ìbéèrè Tó Kéré Jù](#hardware-requirements)
-- [Ìlò](#instructions)
-  - [Ṣíṣe ní Agbègbè](#instructions)
-    - [Ṣíṣí Wíwo Wẹ́ẹ̀bù Gradio](#instructions)
-    - [Ìlò Headless Ìpilẹ̀](#basic-usage)
-    - [Ìlò Àwòṣe XTTS Àdáni Headless](#example-of-custom-model-zip-upload)
-    - [Ìjáde àṣẹ ìrànlọ́wọ́](#help-command-output)
-  - [Ṣíṣe ní Òkèèrè](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [Àwọn Ìgbésẹ̀ láti Ṣe](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
-  - [Túmọ̀ ebooks kúrò nínú e2a](#translate-ebooks)
-  
+  - [Translate ebooks out of e2a](#translate-ebooks)
+
 - [Cloned Voices](#cloned-voices)
-- [Àwọn àwòṣe TTS Fine Tuned](#fine-tuned-tts-models)
-  - [Àkójọ Àwọn Àwòṣe TTS Tí A Ti Ṣàtúnṣe](#fine-tuned-tts-collection)
-  - [Reluwe TTS Awoṣe](#fine-tune-your-own-tts-model)
-- [Àwọn Ọ̀nà eBook Tí A Ṣe Àtìlẹ́yìn Fún](#supported-ebook-formats)
-- [Àwọn Ọ̀nà Ìjáde](#output-and-process-formats)
-- [Padà sí Ẹ̀dà àtijọ́](#reverting-to-older-versions)
-- [Àwọn Ìṣòro Tó Wọ́pọ̀](#common-issues)
-- [Ọpẹ́ Pàtàkì](#special-thanks)
-- [Àkójọ Àwọn Àkóónú](#table-of-contents)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
+  - [Train TTS Model](#fine-tune-your-own-tts-model)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## Àwọn Ẹ̀yà
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 **Hungarian (hu)** **Korean (ko)** **Vietnamese (vi)** **Swedish (sv)**.
 Èdè Páṣíà (fa)* **Èdè Yorùbá (yo)** *Èdè Swahili (sw)** Èdè Indonéṣíà (id)**.
 **Slovak (sk)** ***Croatian (hr)* **Tamil (ta)** *Danish (da)**.
-- [**+1130 èdè àti èdè-ìbílẹ̀ níbí**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## Àwọn Ọ̀nà eBook Tí A Ṣe Àtìlẹ́yìn Fún
@@ -617,10 +617,10 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Àwọn Ìṣòro Tó Wọ́pọ̀:
 - A kò rí GPU NVIDIA/ROCm/XPU/MPS mi?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU lọ́ra (ó dára jù lórí CPU smp sáfà) nígbà tí GPU lè ní ìyípadà tó fẹ́rẹ̀ jẹ́ àkókò gidi.
-   [Ìjíròrò nípa èyí](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+ [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Bí ó tilẹ̀ jẹ́ pé kò ní ẹ̀dà ohùn zero-shot, tí ó sì jẹ́ àwọn ohùn olódodo Siri, ṣùgbọ́n ó yára púpọ̀ síi lórí cpu).
 - "Mo ní àwọn ìṣòro ìgbẹ́kẹ̀lé" - Kàn lo docker, ó dúró lóró fúnra rẹ̀ pátápátá ó sì ní ìpò headless,
-   ṣàfikún àléébù `--help` ní òpin àṣẹ docker run fún ìsọfúnni síi.
+   ṣàfikún àléébù  ní òpin àṣẹ docker run fún ìsọfúnni síi. `--help`
 - "Mo ní ìṣòro ohùn tí a gé kúrú!" - JỌ̀WỌ́ ṢÍ ISSUE NÍPA ÈYÍ,
    a kò sọ gbogbo èdè a sì nílò ìmọ̀ràn láti ọ̀dọ̀ àwọn olùmúlò láti ṣàtúnṣe ọgbọ́n pípín gbólóhùn.😊
 
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Àwòkọ́ Àwọn Àkójọpọ̀/Orí kí a tó bẹ̀rẹ̀ ìyípadà
 - [x] Ṣàtúnṣe ní gbólóhùn tí a yí padà fún ìyípadà ọ̀rọ̀ tó pé
 - [x] Ṣẹda orin intros, interludes, àti ìparí; ṣatunkọ interludes àti ìparí
-- [x] Ìṣọ̀kan àmì SML fún ohùn, ìdúró, ìdáwọ́dúró, àti àwọn ìyípadà síi 
+- [x] Ìṣọ̀kan àmì SML fún ohùn, ìdúró, ìdáwọ́dúró, àti àwọn ìyípadà síi
 - [x] Ìsọfúnni àléébù -h -help ní àwọn èdè ọ̀tọ̀ọ̀tọ̀
 - [x] Àyẹ̀wò OCR fún PDF / JPG / BMP / PNG / TIFF
 - [x] Fódà Notebooks [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Ìdánimọ̀ Ẹ̀rọ GPU
 - [x] Yọ eyikeyi ohun afetigbọ itọkasi abẹlẹ fun gbigbasilẹ ohun afetigbọ
 - [x] Awoṣe aṣa ti o dara-tuned gbe soke
-- [ ] [Ṣe ohun-èlò IOS](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [Ṣe ohun-èlò android](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### Àwọn ìbéèrè oníṣe
 - [ ] Ṣàfikún àwòṣe èdè Portuguese Yúróòpù fún ó kéré tán xttsv2, fairseq, vits, piper (a kí ìrànlọ́wọ́ káàbọ̀)

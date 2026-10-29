@@ -75,34 +75,34 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 ## Jedwali la Yaliyomo
 - [ebook2audiobook](#-ebook2audiobook)
-- [Vipengele](#features)
-- [Kiolesura cha GUI](#gui-interface)
-- [Onyesho](#demos)
-- [Lugha Zinazoungwa Mkono](#supported-languages)
-- [Mahitaji ya Chini](#hardware-requirements)
-- [Matumizi](#instructions)
-  - [Endesha kwa Ndani](#instructions)
-    - [Kuzindua Kiolesura cha Wavuti cha Gradio](#instructions)
-    - [Matumizi ya Msingi ya Headless](#basic-usage)
-    - [Matumizi ya Modeli Maalum ya XTTS ya Headless](#example-of-custom-model-zip-upload)
-    - [Matokeo ya amri ya usaidizi](#help-command-output)
-  - [Endesha kwa Mbali](#run-remotely)
+- [Features](#features)
+- [GUI Interface](#gui-interface)
+- [Demos](#demos)
+- [Supported Languages](#supported-languages)
+- [Minimum Requirements](#hardware-requirements)
+- [Usage](#instructions)
+  - [Run Locally](#instructions)
+    - [Launching Gradio Web Interface](#instructions)
+    - [Basic Headless Usage](#basic-usage)
+    - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
+    - [Help command output](#help-command-output)
+  - [Run Remotely](#run-remotely)
   - [Docker](#docker)
-    - [Hatua za Kuendesha](#docker)
+    - [Steps to Run](#docker)
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
-  - [Tafsiri vitabu vya kielektroniki kati ya e2a](#translate-ebooks)
-  
-- [Sauti Zilizopambwa](#cloned-voices)
-- [Miundo ya TTS Iliyorekebishwa](#fine-tuned-tts-models)
-  - [Mkusanyiko wa Modeli za TTS Zilizoboreshwa](#fine-tuned-tts-collection)
+  - [Translate ebooks out of e2a](#translate-ebooks)
+
+- [Cloned Voices](#cloned-voices)
+- [Fine Tuned TTS models](#fine-tuned-tts-models)
+  - [Collection of Fine-Tuned TTS Models](#fine-tuned-tts-collection)
   - [Train TTS Model](#fine-tune-your-own-tts-model)
-- [Miundo ya eBook Inayoungwa Mkono](#supported-ebook-formats)
-- [Miundo ya Matokeo](#output-and-process-formats)
-- [Rudi kwa Toleo la zamani](#reverting-to-older-versions)
-- [Matatizo ya Kawaida](#common-issues)
-- [Shukrani za Pekee](#special-thanks)
-- [Jedwali la Yaliyomo](#table-of-contents)
+- [Supported eBook Formats](#supported-ebook-formats)
+- [Output Formats](#output-and-process-formats)
+- [Revert to older Version](#reverting-to-older-versions)
+- [Common Issues](#common-issues)
+- [Special Thanks](#special-thanks)
+- [Table of Contents](#table-of-contents)
 
 
 ## Vipengele
@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 | **Hungarian (hu)** | **Kikorea (ko)**     | **Kivietinamu (vi)**| **Kiswidi (sv)**   |
 | **Kiajemi (fa)**   | **Yoruba (yo)**     | **Kiswahili (sw)**   | **Kiindonesia (id)**|
 | **Kislovakia (sk)**    | **Kikroeshia (hr)**   | **Kitamil (ta)**     | **Kidenmaki (da)**    |
-- [**+1130 lugha na lahaja hapa**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
+- [**+1130 languages and dialects here**](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
 
 
 ## Miundo ya eBook Inayoungwa Mkono
@@ -617,10 +617,10 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 ## Matatizo ya Kawaida:
 - GPU yangu ya NVIDIA/ROCm/XPU/MPS haitambuliki?? -> [GPU ISSUES Wiki Page](https://github.com/DrewThomasson/ebook2audiobook/wiki/GPU-ISSUES)
 -  CPU ni polepole (bora kwenye CPU smp ya seva) huku GPU ikiweza kuwa na ubadilishaji wa karibu wakati halisi.
-   [Majadiliano kuhusu hii](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
+ [Discussion about this](https://github.com/DrewThomasson/ebook2audiobook/discussions/19#discussioncomment-10879846)
    (Hata hivyo haina unakili wa sauti wa zero-shot, na ni sauti za ubora wa Siri, lakini ni haraka zaidi kwenye cpu).
 - "Nina matatizo ya utegemezi" - Tumia tu docker, imejitosheleza kabisa na ina hali ya headless,
-   ongeza kigezo `--help` mwishoni mwa amri ya docker run kwa maelezo zaidi.
+   ongeza kigezo  mwishoni mwa amri ya docker run kwa maelezo zaidi. `--help`
 - "Ninapata tatizo la sauti iliyokatwa!" - TAFADHALI FUNGUA ISSUE KUHUSU HILI,
    hatuzungumzi kila lugha na tunahitaji ushauri kutoka kwa watumiaji ili kuboresha mantiki ya kugawanya sentensi.😊
 
@@ -630,7 +630,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Hakiki Vizuizi/Sura kabla ya kuanza ubadilishaji
 - [x] Hariri kwa sentensi iliyobadilishwa kwa mabadiliko ya maandishi ya kina
 - [x] Tengeneza intros za muziki, maingiliano, na miisho; hariri miingiliano na miisho
-- [x] Ujumuishaji wa lebo za SML kwa sauti, pumziko, mapumziko, na mabadiliko zaidi 
+- [x] Ujumuishaji wa lebo za SML kwa sauti, pumziko, mapumziko, na mabadiliko zaidi
 - [x] Taarifa za vigezo -h -help katika lugha tofauti
 - [x] Uchanganuzi wa OCR kwa PDF / JPG / BMP / PNG / TIFF
 - [x] Folda ya Notebooks [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
@@ -648,8 +648,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Utambuzi wa Kifaa cha GPU
 - [x] Zuia sauti yoyote ya kumbukumbu ya mandharinyuma kwa ajili ya upakiaji wa sauti
 - [x] Upakiaji wa modeli mahususi iliyotengenezwa vizuri
-- [ ] [Tengeneza programu ya IOS](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
-- [ ] [Tengeneza programu ya android](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make a IOS app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
+- [ ] [Make an android app](https://github.com/DrewThomasson/ebook2audiobook/pull/35#issuecomment-2496495212)
 
 #### Maombi ya Mtumiaji
 - [ ] Ongeza modeli ya lugha ya Kireno cha Ulaya kwa angalau xttsv2, fairseq, vits, piper (msaada unakaribishwa)
