@@ -499,6 +499,8 @@ It needs calibre (already required by e2a) and runs on e2a's `python_env` and ar
 a language pair e2a already uses is not downloaded again, a missing one is downloaded on first use.
 The plugin is installed on first use into e2a's own calibre profile (`./run`), your calibre is left untouched.
 `--to fra,ara,spa` translates into several languages at once, one ebook per language.
+`--list --from eng` lists the languages English translates into (installed, downloadable, or through English for
+another source).
 Without `-o` or `--output-dir`, each translation is saved beside its book as `<name>.<lang>.<ext>`,
 and a book whose translation already exists is skipped (`--overwrite` to translate it again).
 The launchers in e2a's folder run `tools/translate_ebook.py` with `python_env`, nothing to activate,
@@ -561,7 +563,8 @@ options:
   --no-download         Never download a missing argos-translate package, fail instead
   --allow-changes       Only when argostranslate is missing from python_env: install it even if packages
                         already there would change version
-  --list                List the installed and the downloadable language pairs, then exit
+  --list                List the installed and the downloadable language pairs, then exit. With --from
+                        and/or --to: only their pairs, plus the targets a source reaches through English
 
 examples:
   translate_ebook.py book.epub --to fr
@@ -570,6 +573,7 @@ examples:
   translate_ebook.py /path/to/books -r --to es,it --output-dir /path/to/books_translated
   translate_ebook.py @books.txt --to ita --mode bilingual
   translate_ebook.py --list
+  translate_ebook.py --list --from eng
 ```
 
 ## Cloned Voices

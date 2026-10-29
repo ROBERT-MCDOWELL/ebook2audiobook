@@ -1,4 +1,4 @@
-import os, sys, glob, shutil, filecmp, argparse, tempfile, subprocess
+import os, re, sys, glob, shutil, filecmp, argparse, tempfile, subprocess
 from pathlib import Path
 root_dir = str(Path(__file__).resolve().parents[1])
 python_env_dir = os.path.join(root_dir, 'python_env')
@@ -15,7 +15,8 @@ examples = '''examples:
   translate_ebook.py book.azw3 --from en --to deu -o /path/to/book_deu.azw3
   translate_ebook.py /path/to/books -r --to es,it --output-dir /path/to/books_translated
   translate_ebook.py @books.txt --to ita --mode bilingual
-  translate_ebook.py --list'''
+  translate_ebook.py --list
+  translate_ebook.py --list --from eng'''
 description = '''Translate EPUB/AZW3 ebooks offline, out of e2a, with the Argos Translate calibre plugin
 (tools/argostranslate-calibre-plugin.zip). It runs on e2a's python_env and argos-translate packages
 (models/argos-translate): a language pair e2a already uses is not downloaded again, a missing one is
@@ -36,7 +37,7 @@ parser.add_argument('--batch-size', type=int, help='Segments sent to the transla
 parser.add_argument('--no-cache', action='store_true', help='Neither read nor write the translation cache (run/argos_translate/cache.sqlite), the one that makes a second run of the same book near instant')
 parser.add_argument('--no-download', action='store_true', help='Never download a missing argos-translate package, fail instead')
 parser.add_argument('--allow-changes', action='store_true', help='Only when argostranslate is missing from python_env: install it even if packages already there would change version')
-parser.add_argument('--list', action='store_true', help='List the installed and the downloadable language pairs, then exit')
+parser.add_argument('--list', action='store_true', help='List the installed and the downloadable language pairs, then exit. With --from and/or --to: only their pairs, plus the targets a source reaches through English')
 args = parser.parse_args()
 
 def to_iso1(code:str)->str:
@@ -182,6 +183,35 @@ def ensure_plugin(env:dict)->str|None:
         return f'calibre-customize could not install {plugin_zip} (exit code {result.returncode}):\n{result.stdout.strip()}'
     return None
 
+def show_pairs(listing:str)->None:
+    # the plugin lists every pair: --from and --to keep theirs, and a source other than English gets the targets
+    # it reaches through English, fetched on first use like the direct ones
+    source = to_iso1(args.src.strip().lower()) if args.src else ''
+    if not source and not targets:
+        print(listing, end='')
+        return
+    sections:list = []
+    names:dict = {}
+    for line in listing.splitlines():
+        match = re.match(r'^\s+(\S+) -> (\S+)\t(.*) -> (.*)$', line)
+        if match and sections:
+            names[match.group(1)], names[match.group(2)] = match.group(3), match.group(4)
+            sections[-1][1].append((match.group(1), match.group(2)))
+        elif line.strip() and line.strip() != '(none)':
+            sections.append((line.rstrip(), []))
+    known = [pair for _, pairs in sections for pair in pairs]
+    if source and source != 'en' and (source, 'en') in known:
+        sections.append((f'Reachable through English ({source} -> en -> ...), fetched automatically on first use:', sorted({(source, dst) for src, dst in known if src == 'en' and dst != source}, key=lambda pair: pair[1])))
+    shown:set = set()
+    for title, pairs in sections:
+        kept = [pair for pair in pairs if (not source or pair[0] == source) and (not targets or pair[1] in targets) and pair not in shown]
+        shown.update(kept)
+        print(title)
+        for src, dst in kept:
+            print(f'  {src} -> {dst}\t{names.get(src, src)} -> {names.get(dst, dst)}')
+        if not kept:
+            print('  (none)')
+
 env = calibre_env()
 error = ensure_plugin(env)
 if error is not None:
@@ -198,10 +228,16 @@ failed:list = []
 code = 0
 try:
     for dst, plugin_args in runs:
-        if len(targets) > 1:
+        if dst is not None and len(targets) > 1:
             print(f'=== {dst} ({targets.index(dst) + 1}/{len(targets)})', file=sys.stderr, flush=True)
         # from the folder holding models/: the plugin takes ./models/argos-translate, e2a's packages folder
-        if subprocess.run(cmd + ['-r', plugin_name, '--'] + plugin_args, cwd=os.path.dirname(conf.models_dir), env={**env, 'CALIBRE_TEMP_DIR': run_tmp}).returncode != 0:
+        result = subprocess.run(cmd + ['-r', plugin_name, '--'] + plugin_args, cwd=os.path.dirname(conf.models_dir), env={**env, 'CALIBRE_TEMP_DIR': run_tmp}, stdout=subprocess.PIPE if args.list else None, text=True, encoding='utf-8', errors='replace')
+        if args.list:
+            if result.returncode == 0:
+                show_pairs(result.stdout)
+            else:
+                print(result.stdout, end='')
+        if result.returncode != 0:
             code = 1
             if dst not in failed:
                 failed.append(dst)
@@ -209,6 +245,6 @@ except KeyboardInterrupt:
     code = 130
 finally:
     shutil.rmtree(run_tmp, ignore_errors=True)
-if len(targets) > 1 and code != 130:
+if not args.list and len(targets) > 1 and code != 130:
     print(f"Languages done: {', '.join(f'{dst} failed' if dst in failed else f'{dst} ok' for dst in targets)}", file=sys.stderr)
 sys.exit(code)
