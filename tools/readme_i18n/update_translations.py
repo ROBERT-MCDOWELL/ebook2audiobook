@@ -26,11 +26,11 @@ LANGS = {
 }
 PROTECT = re.compile(
     r'(`[^`\n]+`'
-    r'|!\[[^\]]*\]\([^)]+\)'
-    r'|\]\([^)]+\)'
+    r'|!\[[^\]]+\]\([^)]+\)'
+    r'|\[[^\]]+\]\([^)]+\)'
     r'|https?://\S+'
     r'|<[^>\n]+>'
-    r'|\{[^}\n]*\}'
+    r'|{[^}\n]+}'
     r'|\[pause:\d+\]'
     r'|&\w+;)'
 )
@@ -95,6 +95,16 @@ def restore(text:str, tokens:list)->Optional[str]:
         text = text.replace(ph, tok)
     return text
 
+def force_restore(text:str, tokens:list)->str:
+    for i, tok in enumerate(tokens):
+        ph:str = f'\u27e6{i}\u27e7'
+        pattern = re.compile(r'\u27e6\s*' + str(i) + r'\s*\u27e7')
+        if pattern.search(text):
+            text = pattern.sub(tok, text)
+        elif ph not in text:
+            text = text.rstrip() + ' ' + tok
+    return text
+
 def mymemory(text:str, lang:str)->str:
     params = {
         "q": text,
@@ -137,7 +147,10 @@ def translate_text(text:str, lang:str, cache:dict)->str:
         return text
     translated:str = ' '.join(mymemory(chunk, lang) for chunk in chunk_text(protected))
     restored:Optional[str] = restore(translated, tokens)
-    result:str = restored if restored is not None else text
+    if restored is None:
+        result = force_restore(translated, tokens)
+    else:
+        result = restored
     result = result.replace('\n', ' ')
     cache[key] = result
     time.sleep(THROTTLE)
