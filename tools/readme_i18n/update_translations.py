@@ -97,11 +97,10 @@ def restore(text:str, tokens:list)->Optional[str]:
 
 def force_restore(text:str, tokens:list)->str:
     for i, tok in enumerate(tokens):
-        ph:str = f'\u27e6{i}\u27e7'
         pattern = re.compile(r'\u27e6\s*' + str(i) + r'\s*\u27e7')
         if pattern.search(text):
             text = pattern.sub(tok, text)
-        elif ph not in text:
+        elif tok not in text:
             text = text.rstrip() + ' ' + tok
     return text
 
@@ -147,10 +146,10 @@ def translate_text(text:str, lang:str, cache:dict)->str:
         return text
     translated:str = ' '.join(mymemory(chunk, lang) for chunk in chunk_text(protected))
     restored:Optional[str] = restore(translated, tokens)
-    if restored is None:
-        result = force_restore(translated, tokens)
-    else:
+    if restored is not None:
         result = restored
+    else:
+        result = force_restore(translated, tokens)
     result = result.replace('\n', ' ')
     cache[key] = result
     time.sleep(THROTTLE)
@@ -225,27 +224,27 @@ def audit_and_repair(out_blocks:list, new_blocks:list, lang:str, cache:dict)->tu
                 notes.append(f'block {idx+1}: frozen content (code/table) restored from English')
                 repaired.append(eng_block)
             else:
-                repaired.append(tr_block)  
+                repaired.append(tr_block)
         elif block_tokens(tr_block) != block_tokens(eng_block):
             notes.append(f'block {idx+1}: inline code/links/tags differ, forcing English tokens locally')
             fixed_block = []
             for tr_line, eng_line in zip(tr_block, eng_block):
-                # Extract prefix and body to match how the cache stores lines
                 m = LINE_PREFIX.match(eng_line)
                 prefix:str = m.group(1) if m else ''
                 eng_body:str = eng_line[len(prefix):]
                 _, eng_tokens = protect(eng_line)
-                fixed_line = tr_line
+                clean_line = PROTECT.sub('', tr_line).rstrip()
                 for tok in eng_tokens:
-                    if tok not in fixed_line:
-                        fixed_line = fixed_line.rstrip() + ' ' + tok
+                    clean_line = clean_line + ' ' + tok
+                fixed_line = clean_line
                 fixed_block.append(fixed_line)
                 if fixed_line.startswith(prefix):
                     tr_body = fixed_line[len(prefix):]
                 else:
                     tr_body = fixed_line
+                    
                 if eng_body.strip():
-                    cache[f'{lang}|{eng_body}'] = tr_body
+                    cache[f'{lang}|{eng_body}'] = tr_body  
             repaired.append(fixed_block)
         else:
             repaired.append(tr_block)
