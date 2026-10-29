@@ -1,4 +1,4 @@
-import os, sys, shutil, filecmp, argparse, tempfile, subprocess
+import os, sys, glob, shutil, filecmp, argparse, tempfile, subprocess
 from pathlib import Path
 root_dir = str(Path(__file__).resolve().parents[1])
 python_env_dir = os.path.join(root_dir, 'python_env')
@@ -11,8 +11,9 @@ if os.path.isfile(python_env_exec) and os.path.normcase(os.path.realpath(sys.pre
         sys.exit(130)
 examples = '''examples:
   translate_ebook.py book.epub --to fr
+  translate_ebook.py book.epub --to fra,ara,spa
   translate_ebook.py book.azw3 --from en --to deu -o /path/to/book_deu.azw3
-  translate_ebook.py /path/to/books -r --to es --output-dir /path/to/books_es
+  translate_ebook.py /path/to/books -r --to es,it --output-dir /path/to/books_translated
   translate_ebook.py @books.txt --to ita --mode bilingual
   translate_ebook.py --list'''
 description = '''Translate EPUB/AZW3 ebooks offline, out of e2a, with the Argos Translate calibre plugin
@@ -23,7 +24,7 @@ profile (run/) on first use, your calibre setup is left untouched.
 Translated paths are printed on stdout, progress and logs on stderr.'''
 parser = argparse.ArgumentParser(prog='translate_ebook.py', fromfile_prefix_chars='@', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples, description=description)
 parser.add_argument('books', nargs='*', help='EPUB/AZW3 files or folders to translate; @list.txt reads paths from a file, one per line')
-parser.add_argument('-t', '--to', dest='dst', metavar='LANG', help='Target language, ISO-639-1 or ISO-639-3 code (fr or fra)')
+parser.add_argument('-t', '--to', dest='dst', metavar='LANG[,LANG...]', help='Target language(s), ISO-639-1 or ISO-639-3 codes, comma separated for several (fr, fra or fra,ara,spa): one translated ebook per language')
 parser.add_argument('-f', '--from', dest='src', default='', metavar='LANG', help='Source language, ISO-639-1 or ISO-639-3 code (default: read from each book)')
 parser.add_argument('-r', '--recursive', action='store_true', help='Also look for books in the subfolders of the given folders')
 parser.add_argument('-o', '--output', help='Output file, single input only, same extension as the input (default: <name>.<lang>.<ext> next to the input)')
@@ -37,10 +38,6 @@ parser.add_argument('--no-download', action='store_true', help='Never download a
 parser.add_argument('--allow-changes', action='store_true', help='Only when argostranslate is missing from python_env: install it even if packages already there would change version')
 parser.add_argument('--list', action='store_true', help='List the installed and the downloadable language pairs, then exit')
 args = parser.parse_args()
-if not args.list and (not args.books or not args.dst):
-    parser.error('give at least one book or folder and --to')
-if args.output and len(args.books) > 1:
-    parser.error('--output needs exactly one input book')
 
 def to_iso1(code:str)->str:
     # argos-translate speaks ISO-639-1, e2a ISO-639-3: both are accepted
@@ -55,33 +52,67 @@ def to_iso1(code:str)->str:
 def to_abs(path:str)->str:
     return os.path.abspath(os.path.expanduser(path))
 
+def is_translation(path:str)->bool:
+    # named after one of the target languages, or <name>.<lang>[.bilingual].<ext> beside its <name>.epub/.azw3 (an earlier run)
+    folder, name = os.path.split(path)
+    stem = os.path.splitext(name)[0]
+    if any(stem.endswith(f'.{dst}') or stem.endswith(f'.{dst}.bilingual') for dst in targets):
+        return True
+    base, dot, code = stem.removesuffix('.bilingual').rpartition('.')
+    return bool(dot) and 2 <= len(code) <= 3 and code.isalpha() and code.islower() and any(os.path.isfile(os.path.join(folder, base + ext)) for ext in book_formats)
+
+def list_books(items:list[str], output_dir:str)->dict[str, list[str]]:
+    # folders are listed once, before the first language: the plugin then gets files only, so the translations
+    # of a language never become books to translate for the next one. books are grouped by output folder,
+    # mirrored from their folder with -r, as the plugin's own --output-dir does
+    groups:dict[str, list[str]] = {}
+    seen:set = set()
+    for item in (entry.strip() for entry in items):
+        if not item:
+            continue
+        path = to_abs(item)
+        if os.path.isdir(path):
+            pattern = os.path.join(glob.escape(path), '**', '*') if args.recursive else os.path.join(glob.escape(path), '*')
+            # nothing under the output folder is a book, even when it sits inside a scanned folder
+            found = [(book, os.path.join(output_dir, os.path.dirname(os.path.relpath(book, path))) if output_dir else '') for book in sorted(glob.glob(pattern, recursive=args.recursive)) if os.path.isfile(book) and os.path.splitext(book)[1].lower() in book_formats and not is_translation(book) and not (output_dir and book.startswith(output_dir + os.sep))]
+        else:
+            found = [(path, output_dir)]
+        for book, out_dir in found:
+            if book not in seen:
+                seen.add(book)
+                groups.setdefault(out_dir, []).append(book)
+    return groups
+
+book_formats = ('.epub', '.azw3')
+targets = list(dict.fromkeys(to_iso1(code.strip().lower()) for code in (args.dst or '').split(',') if code.strip()))
+if not args.list and (not args.books or not targets):
+    parser.error('give at least one book or folder and --to')
+if args.output and (len(args.books) > 1 or len(targets) > 1):
+    parser.error('--output needs exactly one input book and one --to language')
 # paths are taken from where the script was started, the plugin then runs from e2a's root
-plugin_args = [to_abs(book) for book in args.books]
-if args.dst:
-    plugin_args += ['--to', to_iso1(args.dst.strip().lower())]
+groups = list_books(args.books, to_abs(args.output_dir) if args.output_dir else '') if not args.list else {}
+if not args.list and not groups:
+    parser.error('no EPUB/AZW3 books found in the given paths')
+common_args = []
 if args.src:
-    plugin_args += ['--from', to_iso1(args.src.strip().lower())]
-if args.recursive:
-    plugin_args.append('--recursive')
+    common_args += ['--from', to_iso1(args.src.strip().lower())]
 if args.output:
-    plugin_args += ['--output', to_abs(args.output)]
-if args.output_dir:
-    plugin_args += ['--output-dir', to_abs(args.output_dir)]
+    common_args += ['--output', to_abs(args.output)]
 if args.overwrite:
-    plugin_args.append('--overwrite')
-plugin_args += ['--mode', args.mode]
+    common_args.append('--overwrite')
+common_args += ['--mode', args.mode]
 if args.device:
-    plugin_args += ['--device', args.device]
+    common_args += ['--device', args.device]
 if args.batch_size:
-    plugin_args += ['--batch-size', str(args.batch_size)]
+    common_args += ['--batch-size', str(args.batch_size)]
 if args.no_cache:
-    plugin_args.append('--no-cache')
+    common_args.append('--no-cache')
 if args.no_download:
-    plugin_args.append('--no-download')
+    common_args.append('--no-download')
 if args.allow_changes:
-    plugin_args.append('--allow-changes')
-if args.list:
-    plugin_args.append('--list')
+    common_args.append('--allow-changes')
+# one plugin run per language (and output folder): it translates into one language at a time
+runs = [(None, ['--list'] + common_args)] if args.list else [(dst, books + ['--to', dst] + (['--output-dir', out_dir] if out_dir else []) + common_args) for dst in targets for out_dir, books in groups.items()]
 os.chdir(root_dir)
 sys.path.insert(0, root_dir)
 # lib.conf pins argostranslate to 1 thread in float32 for e2a: kept only when set by the user, before lib.conf
@@ -163,11 +194,21 @@ if cmd is None:
 # a calibre temp folder of its own, removed even when ctrl-c leaves calibre no time to clean it
 os.makedirs(env.get('CALIBRE_TEMP_DIR') or conf.run_dir, exist_ok=True)
 run_tmp = tempfile.mkdtemp(prefix='e2a_calibre_', dir=env.get('CALIBRE_TEMP_DIR') or conf.run_dir)
+failed:list = []
+code = 0
 try:
-    # from the folder holding models/: the plugin takes ./models/argos-translate, e2a's packages folder
-    code = subprocess.run(cmd + ['-r', plugin_name, '--'] + plugin_args, cwd=os.path.dirname(conf.models_dir), env={**env, 'CALIBRE_TEMP_DIR': run_tmp}).returncode
+    for dst, plugin_args in runs:
+        if len(targets) > 1:
+            print(f'=== {dst} ({targets.index(dst) + 1}/{len(targets)})', file=sys.stderr, flush=True)
+        # from the folder holding models/: the plugin takes ./models/argos-translate, e2a's packages folder
+        if subprocess.run(cmd + ['-r', plugin_name, '--'] + plugin_args, cwd=os.path.dirname(conf.models_dir), env={**env, 'CALIBRE_TEMP_DIR': run_tmp}).returncode != 0:
+            code = 1
+            if dst not in failed:
+                failed.append(dst)
 except KeyboardInterrupt:
     code = 130
 finally:
     shutil.rmtree(run_tmp, ignore_errors=True)
+if len(targets) > 1 and code != 130:
+    print(f"Languages done: {', '.join(f'{dst} failed' if dst in failed else f'{dst} ok' for dst in targets)}", file=sys.stderr)
 sys.exit(code)

@@ -498,17 +498,18 @@ into translated ebooks, offline, with the Argos Translate calibre plugin shipped
 It needs calibre (already required by e2a) and runs on e2a's `python_env` and argos-translate packages:
 a language pair e2a already uses is not downloaded again, a missing one is downloaded on first use.
 The plugin is installed on first use into e2a's own calibre profile (`./run`), your calibre is left untouched.
+`--to fra,ara,spa` translates into several languages at once, one ebook per language.
 Without `-o` or `--output-dir`, each translation is saved beside its book as `<name>.<lang>.<ext>`,
 and a book whose translation already exists is skipped (`--overwrite` to translate it again).
 The launchers in e2a's folder run `tools/translate_ebook.py` with `python_env`, nothing to activate,
 from any folder (relative paths are taken from where it is started):
    - **Linux/MacOS**
      ```bash
-     ./translate_ebook.sh /path/to/books -r --to fra --output-dir /path/to/books_fra
+     ./translate_ebook.sh /path/to/books -r --to fra,spa --output-dir /path/to/books_translated
      ```
    - **Windows**
      ```bash
-     translate_ebook.cmd C:\books -r --to fra --output-dir C:\books_fra
+     translate_ebook.cmd C:\books -r --to fra,spa --output-dir C:\books_translated
      ```
    - Or directly with `python_env`'s Python: `./python_env/bin/python tools/translate_ebook.py ...`
      (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Started with any other Python,
@@ -519,9 +520,9 @@ from any folder (relative paths are taken from where it is started):
      int8 on CPU), not on e2a's 1 thread in float32. Set `ARGOS_INTRA_THREADS` or `ARGOS_COMPUTE_TYPE` to override them.
 
 ```bash
-usage: translate_ebook.py [-h] [-t LANG] [-f LANG] [-r] [-o OUTPUT] [--output-dir OUTPUT_DIR] [--overwrite]
-                          [-m {replace,bilingual}] [--device {cpu,cuda,auto}] [--batch-size BATCH_SIZE]
-                          [--no-cache] [--no-download] [--allow-changes] [--list]
+usage: translate_ebook.py [-h] [-t LANG[,LANG...]] [-f LANG] [-r] [-o OUTPUT] [--output-dir OUTPUT_DIR]
+                          [--overwrite] [-m {replace,bilingual}] [--device {cpu,cuda,auto}]
+                          [--batch-size BATCH_SIZE] [--no-cache] [--no-download] [--allow-changes] [--list]
                           [books ...]
 
 Translate EPUB/AZW3 ebooks offline, out of e2a, with the Argos Translate calibre plugin
@@ -537,7 +538,9 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -t, --to LANG         Target language, ISO-639-1 or ISO-639-3 code (fr or fra)
+  -t, --to LANG[,LANG...]
+                        Target language(s), ISO-639-1 or ISO-639-3 codes, comma separated for several (fr,
+                        fra or fra,ara,spa): one translated ebook per language
   -f, --from LANG       Source language, ISO-639-1 or ISO-639-3 code (default: read from each book)
   -r, --recursive       Also look for books in the subfolders of the given folders
   -o, --output OUTPUT   Output file, single input only, same extension as the input (default:
@@ -562,8 +565,9 @@ options:
 
 examples:
   translate_ebook.py book.epub --to fr
+  translate_ebook.py book.epub --to fra,ara,spa
   translate_ebook.py book.azw3 --from en --to deu -o /path/to/book_deu.azw3
-  translate_ebook.py /path/to/books -r --to es --output-dir /path/to/books_es
+  translate_ebook.py /path/to/books -r --to es,it --output-dir /path/to/books_translated
   translate_ebook.py @books.txt --to ita --mode bilingual
   translate_ebook.py --list
 ```
