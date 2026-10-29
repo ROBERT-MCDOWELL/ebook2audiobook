@@ -14,6 +14,7 @@ examples = '''examples:
   translate_ebook.py book.epub --to fra,ara,spa
   translate_ebook.py book.azw3 --from en --to deu -o /path/to/book_deu.azw3
   translate_ebook.py /path/to/books -r --to es,it --output-dir /path/to/books_translated
+  translate_ebook.py book.epub --from eng --to all
   translate_ebook.py @books.txt --to ita --mode bilingual
   translate_ebook.py --list
   translate_ebook.py --list --from eng'''
@@ -25,7 +26,7 @@ profile (run/) on first use, your calibre setup is left untouched.
 Translated paths are printed on stdout, progress and logs on stderr.'''
 parser = argparse.ArgumentParser(prog='translate_ebook.py', fromfile_prefix_chars='@', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples, description=description)
 parser.add_argument('books', nargs='*', help='EPUB/AZW3 files or folders to translate; @list.txt reads paths from a file, one per line')
-parser.add_argument('-t', '--to', dest='dst', metavar='LANG[,LANG...]', help='Target language(s), ISO-639-1 or ISO-639-3 codes, comma separated for several (fr, fra or fra,ara,spa): one translated ebook per language')
+parser.add_argument('-t', '--to', dest='dst', metavar='LANG[,LANG...]', help='Target language(s), ISO-639-1 or ISO-639-3 codes, comma separated for several (fr, fra or fra,ara,spa): one translated ebook per language. all: every language the source reaches (see --list --from), installed ones only with --no-download')
 parser.add_argument('-f', '--from', dest='src', default='', metavar='LANG', help='Source language, ISO-639-1 or ISO-639-3 code (default: read from each book)')
 parser.add_argument('-r', '--recursive', action='store_true', help='Also look for books in the subfolders of the given folders')
 parser.add_argument('-o', '--output', help='Output file, single input only, same extension as the input (default: <name>.<lang>.<ext> next to the input)')
@@ -39,6 +40,7 @@ parser.add_argument('--no-download', action='store_true', help='Never download a
 parser.add_argument('--allow-changes', action='store_true', help='Only when argostranslate is missing from python_env: install it even if packages already there would change version')
 parser.add_argument('--list', action='store_true', help='List the installed and the downloadable language pairs, then exit. With --from and/or --to: only their pairs, plus the targets a source reaches through English')
 args = parser.parse_args()
+start_dir = os.getcwd()
 
 def to_iso1(code:str)->str:
     # argos-translate speaks ISO-639-1, e2a ISO-639-3: both are accepted
@@ -51,22 +53,23 @@ def to_iso1(code:str)->str:
         return code
 
 def to_abs(path:str)->str:
-    return os.path.abspath(os.path.expanduser(path))
+    # from where the script was started, also once it runs from e2a's root
+    return os.path.abspath(os.path.join(start_dir, os.path.expanduser(path)))
 
-def is_translation(path:str)->bool:
-    # named after one of the target languages, or <name>.<lang>[.bilingual].<ext> beside its <name>.epub/.azw3 (an earlier run)
+def is_translation(path:str, langs:set)->bool:
+    # named after a language of this run, or <name>.<lang>[.bilingual].<ext> beside its <name>.epub/.azw3 (an earlier run)
     folder, name = os.path.split(path)
     stem = os.path.splitext(name)[0]
-    if any(stem.endswith(f'.{dst}') or stem.endswith(f'.{dst}.bilingual') for dst in targets):
+    if any(stem.endswith(f'.{lang}') or stem.endswith(f'.{lang}.bilingual') for lang in langs):
         return True
     base, dot, code = stem.removesuffix('.bilingual').rpartition('.')
     return bool(dot) and 2 <= len(code) <= 3 and code.isalpha() and code.islower() and any(os.path.isfile(os.path.join(folder, base + ext)) for ext in book_formats)
 
-def list_books(items:list[str], output_dir:str)->dict[str, list[str]]:
+def list_books(items:list[str], output_dir:str, langs:set)->list[tuple[str, str]]:
     # folders are listed once, before the first language: the plugin then gets files only, so the translations
-    # of a language never become books to translate for the next one. books are grouped by output folder,
-    # mirrored from their folder with -r, as the plugin's own --output-dir does
-    groups:dict[str, list[str]] = {}
+    # of a language never become books to translate for the next one. each book comes with its output folder,
+    # mirrored from its folder with -r, as the plugin's own --output-dir does
+    books:list = []
     seen:set = set()
     for item in (entry.strip() for entry in items):
         if not item:
@@ -75,28 +78,28 @@ def list_books(items:list[str], output_dir:str)->dict[str, list[str]]:
         if os.path.isdir(path):
             pattern = os.path.join(glob.escape(path), '**', '*') if args.recursive else os.path.join(glob.escape(path), '*')
             # nothing under the output folder is a book, even when it sits inside a scanned folder
-            found = [(book, os.path.join(output_dir, os.path.dirname(os.path.relpath(book, path))) if output_dir else '') for book in sorted(glob.glob(pattern, recursive=args.recursive)) if os.path.isfile(book) and os.path.splitext(book)[1].lower() in book_formats and not is_translation(book) and not (output_dir and book.startswith(output_dir + os.sep))]
+            found = [(book, os.path.join(output_dir, os.path.dirname(os.path.relpath(book, path))) if output_dir else '') for book in sorted(glob.glob(pattern, recursive=args.recursive)) if os.path.isfile(book) and os.path.splitext(book)[1].lower() in book_formats and not is_translation(book, langs) and not (output_dir and book.startswith(output_dir + os.sep))]
         else:
             found = [(path, output_dir)]
         for book, out_dir in found:
             if book not in seen:
                 seen.add(book)
-                groups.setdefault(out_dir, []).append(book)
-    return groups
+                books.append((book, out_dir))
+    return books
 
 book_formats = ('.epub', '.azw3')
-targets = list(dict.fromkeys(to_iso1(code.strip().lower()) for code in (args.dst or '').split(',') if code.strip()))
-if not args.list and (not args.books or not targets):
+codes = [code.strip().lower() for code in (args.dst or '').split(',') if code.strip()]
+to_all = 'all' in codes
+if to_all and len(codes) > 1:
+    parser.error('--to all cannot be combined with other languages')
+targets = [] if to_all else list(dict.fromkeys(to_iso1(code) for code in codes))
+source = to_iso1(args.src.strip().lower()) if args.src else ''
+if not args.list and (not args.books or not codes):
     parser.error('give at least one book or folder and --to')
-if args.output and (len(args.books) > 1 or len(targets) > 1):
+if args.output and not args.list and (len(args.books) > 1 or len(targets) != 1):
     parser.error('--output needs exactly one input book and one --to language')
 # paths are taken from where the script was started, the plugin then runs from e2a's root
-groups = list_books(args.books, to_abs(args.output_dir) if args.output_dir else '') if not args.list else {}
-if not args.list and not groups:
-    parser.error('no EPUB/AZW3 books found in the given paths')
 common_args = []
-if args.src:
-    common_args += ['--from', to_iso1(args.src.strip().lower())]
 if args.output:
     common_args += ['--output', to_abs(args.output)]
 if args.overwrite:
@@ -112,8 +115,6 @@ if args.no_download:
     common_args.append('--no-download')
 if args.allow_changes:
     common_args.append('--allow-changes')
-# one plugin run per language (and output folder): it translates into one language at a time
-runs = [(None, ['--list'] + common_args)] if args.list else [(dst, books + ['--to', dst] + (['--output-dir', out_dir] if out_dir else []) + common_args) for dst in targets for out_dir, books in groups.items()]
 os.chdir(root_dir)
 sys.path.insert(0, root_dir)
 # lib.conf pins argostranslate to 1 thread in float32 for e2a: kept only when set by the user, before lib.conf
@@ -183,13 +184,8 @@ def ensure_plugin(env:dict)->str|None:
         return f'calibre-customize could not install {plugin_zip} (exit code {result.returncode}):\n{result.stdout.strip()}'
     return None
 
-def show_pairs(listing:str)->None:
-    # the plugin lists every pair: --from and --to keep theirs, and a source other than English gets the targets
-    # it reaches through English, fetched on first use like the direct ones
-    source = to_iso1(args.src.strip().lower()) if args.src else ''
-    if not source and not targets:
-        print(listing, end='')
-        return
+def parse_pairs(listing:str)->tuple[list, dict]:
+    # the plugin's --list: its sections (title, [(src, dst), ...]) and the language names
     sections:list = []
     names:dict = {}
     for line in listing.splitlines():
@@ -199,6 +195,23 @@ def show_pairs(listing:str)->None:
             sections[-1][1].append((match.group(1), match.group(2)))
         elif line.strip() and line.strip() != '(none)':
             sections.append((line.rstrip(), []))
+    return sections, names
+
+def reachable(sections:list, src:str)->list[str]:
+    # every target of a source: its pairs (installed ones only with --no-download), and through English when it reaches English
+    known = [pair for _, pairs in (sections[:1] if args.no_download else sections) for pair in pairs]
+    dsts = {dst for pair_src, dst in known if pair_src == src}
+    if src != 'en' and 'en' in dsts:
+        dsts |= {dst for pair_src, dst in known if pair_src == 'en' and dst != src}
+    return sorted(dsts)
+
+def show_pairs(listing:str)->None:
+    # the plugin lists every pair: --from and --to keep theirs, and a source other than English gets the targets
+    # it reaches through English, fetched on first use like the direct ones
+    if not source and not targets:
+        print(listing, end='')
+        return
+    sections, names = parse_pairs(listing)
     known = [pair for _, pairs in sections for pair in pairs]
     if source and source != 'en' and (source, 'en') in known:
         sections.append((f'Reachable through English ({source} -> en -> ...), fetched automatically on first use:', sorted({(source, dst) for src, dst in known if src == 'en' and dst != source}, key=lambda pair: pair[1])))
@@ -212,6 +225,19 @@ def show_pairs(listing:str)->None:
         if not kept:
             print('  (none)')
 
+def run_plugin(plugin_args:list[str], capture:bool=False)->subprocess.CompletedProcess:
+    # from the folder holding models/: the plugin takes ./models/argos-translate, e2a's packages folder
+    return subprocess.run(cmd + ['-r', plugin_name, '--'] + plugin_args, cwd=os.path.dirname(conf.models_dir), env={**env, 'CALIBRE_TEMP_DIR': run_tmp}, stdout=subprocess.PIPE if capture else None, text=True, encoding='utf-8', errors='replace')
+
+def book_language(path:str)->str:
+    # as the plugin does without --from: the book's own language, read here by calibre's ebook-meta
+    meta = calibre_cmd('ebook-meta', env)
+    if meta is None or not os.path.isfile(path):
+        return ''
+    result = subprocess.run(meta + [path], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, text=True, encoding='utf-8', errors='replace', env=env)
+    match = re.search(r'^Languages\s*:\s*([^,\s]+)', result.stdout, re.M)
+    return to_iso1(match.group(1).lower()) if match else ''
+
 env = calibre_env()
 error = ensure_plugin(env)
 if error is not None:
@@ -224,27 +250,51 @@ if cmd is None:
 # a calibre temp folder of its own, removed even when ctrl-c leaves calibre no time to clean it
 os.makedirs(env.get('CALIBRE_TEMP_DIR') or conf.run_dir, exist_ok=True)
 run_tmp = tempfile.mkdtemp(prefix='e2a_calibre_', dir=env.get('CALIBRE_TEMP_DIR') or conf.run_dir)
-failed:list = []
+runs:dict[str, list] = {}
+failed:set = set()
 code = 0
 try:
-    for dst, plugin_args in runs:
-        if dst is not None and len(targets) > 1:
-            print(f'=== {dst} ({targets.index(dst) + 1}/{len(targets)})', file=sys.stderr, flush=True)
-        # from the folder holding models/: the plugin takes ./models/argos-translate, e2a's packages folder
-        result = subprocess.run(cmd + ['-r', plugin_name, '--'] + plugin_args, cwd=os.path.dirname(conf.models_dir), env={**env, 'CALIBRE_TEMP_DIR': run_tmp}, stdout=subprocess.PIPE if args.list else None, text=True, encoding='utf-8', errors='replace')
+    sections:list = []
+    if args.list or to_all:
+        listing = run_plugin(['--list'] + common_args, capture=True)
+        if listing.returncode != 0:
+            print(listing.stdout, end='')
+            sys.exit(1)
         if args.list:
-            if result.returncode == 0:
-                show_pairs(result.stdout)
-            else:
-                print(result.stdout, end='')
-        if result.returncode != 0:
+            show_pairs(listing.stdout)
+            sys.exit(0)
+        sections, _ = parse_pairs(listing.stdout)
+    books = list_books(args.books, to_abs(args.output_dir) if args.output_dir else '', {lang for _, pairs in sections for pair in pairs for lang in pair} if to_all else set(targets))
+    if not books:
+        parser.error('no EPUB/AZW3 books found in the given paths')
+    # --to all: the targets depend on the source, given by --from or read from each book
+    groups:dict = {}
+    for book, out_dir in books:
+        src = source or (book_language(book) if to_all else '')
+        if to_all and not src:
+            print(f'{book}: book language unknown, set it with --from', file=sys.stderr)
             code = 1
-            if dst not in failed:
-                failed.append(dst)
+            continue
+        groups.setdefault((src, out_dir), []).append(book)
+    # one plugin run per language (and source, output folder): it translates into one language at a time
+    for (src, out_dir), group in groups.items():
+        dsts = reachable(sections, src) if to_all else targets
+        if not dsts:
+            print(f"{', '.join(group)}: no language pair from {src}", file=sys.stderr)
+            code = 1
+        for dst in dsts:
+            runs.setdefault(f'{src} -> {dst}' if src else dst, []).append(group + (['--from', src] if src else []) + ['--to', dst] + (['--output-dir', out_dir] if out_dir else []) + common_args)
+    for index, (label, label_runs) in enumerate(runs.items(), 1):
+        if len(runs) > 1:
+            print(f'=== {label} ({index}/{len(runs)})', file=sys.stderr, flush=True)
+        for plugin_args in label_runs:
+            if run_plugin(plugin_args).returncode != 0:
+                code = 1
+                failed.add(label)
 except KeyboardInterrupt:
     code = 130
 finally:
     shutil.rmtree(run_tmp, ignore_errors=True)
-if not args.list and len(targets) > 1 and code != 130:
-    print(f"Languages done: {', '.join(f'{dst} failed' if dst in failed else f'{dst} ok' for dst in targets)}", file=sys.stderr)
+if len(runs) > 1 and code != 130:
+    print(f"Languages done: {', '.join(f'{label} failed' if label in failed else f'{label} ok' for label in runs)}", file=sys.stderr)
 sys.exit(code)

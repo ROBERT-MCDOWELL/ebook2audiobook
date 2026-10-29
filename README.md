@@ -498,7 +498,8 @@ into translated ebooks, offline, with the Argos Translate calibre plugin shipped
 It needs calibre (already required by e2a) and runs on e2a's `python_env` and argos-translate packages:
 a language pair e2a already uses is not downloaded again, a missing one is downloaded on first use.
 The plugin is installed on first use into e2a's own calibre profile (`./run`), your calibre is left untouched.
-`--to fra,ara,spa` translates into several languages at once, one ebook per language.
+`--to fra,ara,spa` translates into several languages at once, one ebook per language, and `--to all` into every
+language the source reaches (`--from`, else each book's own language; installed ones only with `--no-download`).
 `--list --from eng` lists the languages English translates into (installed, downloadable, or through English for
 another source).
 Without `-o` or `--output-dir`, each translation is saved beside its book as `<name>.<lang>.<ext>`,
@@ -542,7 +543,8 @@ options:
   -h, --help            show this help message and exit
   -t, --to LANG[,LANG...]
                         Target language(s), ISO-639-1 or ISO-639-3 codes, comma separated for several (fr,
-                        fra or fra,ara,spa): one translated ebook per language
+                        fra or fra,ara,spa): one translated ebook per language. all: every language the
+                        source reaches (see --list --from), installed ones only with --no-download
   -f, --from LANG       Source language, ISO-639-1 or ISO-639-3 code (default: read from each book)
   -r, --recursive       Also look for books in the subfolders of the given folders
   -o, --output OUTPUT   Output file, single input only, same extension as the input (default:
@@ -571,6 +573,7 @@ examples:
   translate_ebook.py book.epub --to fra,ara,spa
   translate_ebook.py book.azw3 --from en --to deu -o /path/to/book_deu.azw3
   translate_ebook.py /path/to/books -r --to es,it --output-dir /path/to/books_translated
+  translate_ebook.py book.epub --from eng --to all
   translate_ebook.py @books.txt --to ita --mode bilingual
   translate_ebook.py --list
   translate_ebook.py --list --from eng
