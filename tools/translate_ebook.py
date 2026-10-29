@@ -13,7 +13,7 @@ examples = '''examples:
   translate_ebook.py book.epub --to fr
   translate_ebook.py book.epub --to fra,ara,spa
   translate_ebook.py book.azw3 --from en --to deu -o /path/to/book_deu.azw3
-  translate_ebook.py /path/to/books -r --to es,it --output-dir /path/to/books_translated
+  translate_ebook.py /path/to/books -r --to es,it --output_dir /path/to/books_translated
   translate_ebook.py book.epub --from eng --to all
   translate_ebook.py @books.txt --to ita --mode bilingual
   translate_ebook.py --list
@@ -26,18 +26,18 @@ profile (run/) on first use, your calibre setup is left untouched.
 Translated paths are printed on stdout, progress and logs on stderr.'''
 parser = argparse.ArgumentParser(prog='translate_ebook.py', fromfile_prefix_chars='@', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples, description=description)
 parser.add_argument('books', nargs='*', help='EPUB/AZW3 files or folders to translate; @list.txt reads paths from a file, one per line')
-parser.add_argument('-t', '--to', dest='dst', metavar='LANG[,LANG...]', help='Target language(s), ISO-639-1 or ISO-639-3 codes, comma separated for several (fr, fra or fra,ara,spa): one translated ebook per language. all: every language the source reaches (see --list --from), installed ones only with --no-download')
+parser.add_argument('-t', '--to', dest='dst', metavar='LANG[,LANG...]', help='Target language(s), ISO-639-1 or ISO-639-3 codes, comma separated for several (fr, fra or fra,ara,spa): one translated ebook per language. all: every language the source reaches (see --list --from), installed ones only with --no_download')
 parser.add_argument('-f', '--from', dest='src', default='', metavar='LANG', help='Source language, ISO-639-1 or ISO-639-3 code (default: read from each book)')
 parser.add_argument('-r', '--recursive', action='store_true', help='Also look for books in the subfolders of the given folders')
 parser.add_argument('-o', '--output', help='Output file, single input only, same extension as the input (default: <name>.<lang>.<ext> next to the input)')
-parser.add_argument('--output-dir', help='Write the translations into this folder (subfolders are mirrored with -r) instead of next to each book')
+parser.add_argument('--output_dir', help='Write the translations into this folder (subfolders are mirrored with -r) instead of next to each book')
 parser.add_argument('--overwrite', action='store_true', help='Translate again even if the output file already exists (skipped otherwise)')
 parser.add_argument('-m', '--mode', choices=['replace', 'bilingual'], default='replace', help='replace: the translation replaces the text. bilingual: each paragraph is followed by its translation, saved as <name>.<lang>.bilingual.<ext> (default: replace)')
 parser.add_argument('--device', choices=['cpu', 'cuda', 'auto'], help='Device argostranslate runs on (default: cpu)')
-parser.add_argument('--batch-size', type=int, help='Segments sent to the translation worker per request (default: 16)')
-parser.add_argument('--no-cache', action='store_true', help='Neither read nor write the translation cache (run/argos_translate/cache.sqlite), the one that makes a second run of the same book near instant')
-parser.add_argument('--no-download', action='store_true', help='Never download a missing argos-translate package, fail instead')
-parser.add_argument('--allow-changes', action='store_true', help='Only when argostranslate is missing from python_env: install it even if packages already there would change version')
+parser.add_argument('--batch_size', type=int, help='Segments sent to the translation worker per request (default: 16)')
+parser.add_argument('--no_cache', action='store_true', help='Neither read nor write the translation cache (run/argos_translate/cache.sqlite), the one that makes a second run of the same book near instant')
+parser.add_argument('--no_download', action='store_true', help='Never download a missing argos-translate package, fail instead')
+parser.add_argument('--allow_changes', action='store_true', help='Only when argostranslate is missing from python_env: install it even if packages already there would change version')
 parser.add_argument('--list', action='store_true', help='List the installed and the downloadable language pairs, then exit. With --from and/or --to: only their pairs, plus the targets a source reaches through English')
 args = parser.parse_args()
 start_dir = os.getcwd()
@@ -198,7 +198,7 @@ def parse_pairs(listing:str)->tuple[list, dict]:
     return sections, names
 
 def reachable(sections:list, src:str)->list[str]:
-    # every target of a source: its pairs (installed ones only with --no-download), and through English when it reaches English
+    # every target of a source: its pairs (installed ones only with --no_download), and through English when it reaches English
     known = [pair for _, pairs in (sections[:1] if args.no_download else sections) for pair in pairs]
     dsts = {dst for pair_src, dst in known if pair_src == src}
     if src != 'en' and 'en' in dsts:
