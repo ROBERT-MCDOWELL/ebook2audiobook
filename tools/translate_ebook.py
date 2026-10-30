@@ -18,18 +18,20 @@ examples = '''examples:
   translate_ebook.py @books.txt --to ita --mode bilingual
   translate_ebook.py --list
   translate_ebook.py --list --from eng'''
-description = '''Translate EPUB/AZW3 ebooks offline, out of e2a, with the Argos Translate calibre plugin
-(tools/argostranslate-calibre-plugin.zip). It runs on e2a's python_env and argos-translate packages
+description = '''Translate ebooks offline, out of e2a, with the Argos Translate calibre plugin
+(tools/argostranslate-calibre-plugin.zip). EPUB/AZW3 are translated as they are, the other formats
+calibre's ebook-convert reads (PDF, DOCX, MOBI, ...) are converted to EPUB once, before the first
+language, and their translations saved as EPUB. It runs on e2a's python_env and argos-translate packages
 (models/argos-translate): a language pair e2a already uses is not downloaded again, a missing one is
 downloaded on first use (direct or through English). The plugin is installed into e2a's own calibre
 profile (run/) on first use, your calibre setup is left untouched.
 Translated paths are printed on stdout, progress and logs on stderr.'''
 parser = argparse.ArgumentParser(prog='translate_ebook.py', fromfile_prefix_chars='@', formatter_class=argparse.RawDescriptionHelpFormatter, epilog=examples, description=description)
-parser.add_argument('books', nargs='*', help='EPUB/AZW3 files or folders to translate; @list.txt reads paths from a file, one per line')
+parser.add_argument('books', nargs='*', help='Ebook files (EPUB, AZW3, or PDF, DOCX, MOBI... converted to EPUB first) or folders to translate; @list.txt reads paths from a file, one per line')
 parser.add_argument('-t', '--to', dest='dst', metavar='LANG[,LANG...]', help='Target language(s), ISO-639-1 or ISO-639-3 codes, comma separated for several (fr, fra or fra,ara,spa): one translated ebook per language. all: every language the source reaches (see --list --from), installed ones only with --no_download')
 parser.add_argument('-f', '--from', dest='src', default='', metavar='LANG', help='Source language, ISO-639-1 or ISO-639-3 code (default: read from each book)')
 parser.add_argument('-r', '--recursive', action='store_true', help='Also look for books in the subfolders of the given folders')
-parser.add_argument('-o', '--output', help='Output file, single input only, same extension as the input (default: <name>.<lang>.<ext> next to the input)')
+parser.add_argument('-o', '--output', help='Output file, single input only, same extension as the input, .epub for a converted one (default: <name>.<lang>.<ext> next to the input)')
 parser.add_argument('--output_dir', help='Write the translations into this folder (subfolders are mirrored with -r) instead of next to each book')
 parser.add_argument('--overwrite', action='store_true', help='Translate again even if the output file already exists (skipped otherwise)')
 parser.add_argument('-m', '--mode', choices=['replace', 'bilingual'], default='replace', help='replace: the translation replaces the text. bilingual: each paragraph is followed by its translation, saved as <name>.<lang>.bilingual.<ext> (default: replace)')
@@ -57,13 +59,21 @@ def to_abs(path:str)->str:
     return os.path.abspath(os.path.join(start_dir, os.path.expanduser(path)))
 
 def is_translation(path:str, langs:set)->bool:
-    # named after a language of this run, or <name>.<lang>[.bilingual].<ext> beside its <name>.epub/.azw3 (an earlier run)
+    # named after a language of this run, or an earlier run's: <name>.<lang>.bilingual.<ext>, <name>.<lang>.<ext> beside
+    # its <name>.<ebook ext>, or <name>.<lang>.<ext> written in <lang> (the plugin sets it), i.e. in another output folder
     folder, name = os.path.split(path)
     stem = os.path.splitext(name)[0]
     if any(stem.endswith(f'.{lang}') or stem.endswith(f'.{lang}.bilingual') for lang in langs):
         return True
     base, dot, code = stem.removesuffix('.bilingual').rpartition('.')
-    return bool(dot) and 2 <= len(code) <= 3 and code.isalpha() and code.islower() and any(os.path.isfile(os.path.join(folder, base + ext)) for ext in book_formats)
+    if not (dot and 2 <= len(code) <= 3 and code.isalpha() and code.islower()):
+        return False
+    return stem.endswith('.bilingual') or any(os.path.isfile(os.path.join(folder, base + ext)) for ext in book_formats + convert_formats) or book_language(path) == code
+
+def has_epub(path:str)->bool:
+    # a book to convert beside its own EPUB/AZW3: the EPUB/AZW3 is the one translated
+    base = os.path.splitext(path)[0]
+    return os.path.splitext(path)[1].lower() in convert_formats and any(os.path.isfile(base + ext) for ext in book_formats)
 
 def list_books(items:list[str], output_dir:str, langs:set)->list[tuple[str, str]]:
     # folders are listed once, before the first language: the plugin then gets files only, so the translations
@@ -78,7 +88,7 @@ def list_books(items:list[str], output_dir:str, langs:set)->list[tuple[str, str]
         if os.path.isdir(path):
             pattern = os.path.join(glob.escape(path), '**', '*') if args.recursive else os.path.join(glob.escape(path), '*')
             # nothing under the output folder is a book, even when it sits inside a scanned folder
-            found = [(book, os.path.join(output_dir, os.path.dirname(os.path.relpath(book, path))) if output_dir else '') for book in sorted(glob.glob(pattern, recursive=args.recursive)) if os.path.isfile(book) and os.path.splitext(book)[1].lower() in book_formats and not is_translation(book, langs) and not (output_dir and book.startswith(output_dir + os.sep))]
+            found = [(book, os.path.join(output_dir, os.path.dirname(os.path.relpath(book, path))) if output_dir else '') for book in sorted(glob.glob(pattern, recursive=args.recursive)) if os.path.isfile(book) and os.path.splitext(book)[1].lower() in book_formats + convert_formats and not is_translation(book, langs) and not has_epub(book) and not (output_dir and book.startswith(output_dir + os.sep))]
         else:
             found = [(path, output_dir)]
         for book, out_dir in found:
@@ -88,6 +98,8 @@ def list_books(items:list[str], output_dir:str, langs:set)->list[tuple[str, str]
     return books
 
 book_formats = ('.epub', '.azw3')
+# e2a's ebook formats ebook-convert reads (images, .doc, .pptx and .zip need e2a's own handling)
+convert_formats = ('.mobi', '.azw', '.fb2', '.lrf', '.rb', '.snb', '.tcr', '.pdf', '.txt', '.rtf', '.docx', '.html', '.odt')
 codes = [code.strip().lower() for code in (args.dst or '').split(',') if code.strip()]
 to_all = 'all' in codes
 if to_all and len(codes) > 1:
@@ -238,6 +250,21 @@ def book_language(path:str)->str:
     match = re.search(r'^Languages\s*:\s*([^,\s]+)', result.stdout, re.M)
     return to_iso1(match.group(1).lower()) if match else ''
 
+def convert_book(path:str)->str|None:
+    # once per book, with calibre's ebook-convert, into an EPUB named as the book: its translations are <name>.<lang>.epub
+    convert = calibre_cmd('ebook-convert', env)
+    if convert is None:
+        print('ebook-convert not found, install calibre (ebook2audiobook installs it)', file=sys.stderr)
+        return None
+    epub = os.path.join(tempfile.mkdtemp(prefix='convert_', dir=run_tmp), f'{os.path.splitext(os.path.basename(path))[0]}.epub')
+    print(f'{path}: converting to EPUB', file=sys.stderr, flush=True)
+    # PDF, TXT... seldom carry a language: --from becomes the EPUB's, the one the plugin reads
+    result = subprocess.run(convert + [path, epub] + (['--language', source] if source else []), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, text=True, encoding='utf-8', errors='replace', env={**env, 'CALIBRE_TEMP_DIR': run_tmp})
+    if result.returncode != 0 or not os.path.isfile(epub):
+        print(f'{path}: ebook-convert failed (exit code {result.returncode}):\n{result.stdout.strip()[-2000:]}', file=sys.stderr)
+        return None
+    return epub
+
 env = calibre_env()
 error = ensure_plugin(env)
 if error is not None:
@@ -266,16 +293,42 @@ try:
         sections, _ = parse_pairs(listing.stdout)
     books = list_books(args.books, to_abs(args.output_dir) if args.output_dir else '', {lang for _, pairs in sections for pair in pairs for lang in pair} if to_all else set(targets))
     if not books:
-        parser.error('no EPUB/AZW3 books found in the given paths')
-    # --to all: the targets depend on the source, given by --from or read from each book
+        parser.error('no ebook found in the given paths')
+    # checked, and converted when needed, once before the first language: the plugin reads EPUB/AZW3 only.
+    # --to all and a converted book need the source now: --from, else the book's own language
     groups:dict = {}
     for book, out_dir in books:
-        src = source or (book_language(book) if to_all else '')
-        if to_all and not src:
+        ext = os.path.splitext(book)[1].lower()
+        if not os.path.isfile(book):
+            print(f'{book}: not found', file=sys.stderr)
+            code = 1
+            continue
+        if ext in convert_formats:
+            # every translation already there (and no --overwrite): skipped, not converted for nothing
+            dsts = (reachable(sections, source) if to_all else targets) if source or not to_all else []
+            suffix = '.bilingual' if args.mode == 'bilingual' else ''
+            if dsts and not args.overwrite and all(os.path.exists(to_abs(args.output) if args.output else os.path.join(out_dir or os.path.dirname(book), f'{os.path.splitext(os.path.basename(book))[0]}.{dst}{suffix}.epub')) for dst in dsts):
+                print(f'{book}: skipped, its translations already exist (use --overwrite)', file=sys.stderr)
+                continue
+            epub = convert_book(book)
+            if epub is None:
+                code = 1
+                continue
+            src = source or book_language(epub)
+            # its translations go beside the book (or into --output_dir), not beside the converted EPUB
+            out_dir = out_dir or os.path.dirname(book)
+        elif ext in book_formats:
+            epub = book
+            src = source or (book_language(book) if to_all else '')
+        else:
+            print(f"{book}: {ext or 'no extension'} not supported (EPUB, AZW3, {', '.join(fmt[1:].upper() for fmt in convert_formats)})", file=sys.stderr)
+            code = 1
+            continue
+        if not src and (to_all or ext in convert_formats):
             print(f'{book}: book language unknown, set it with --from', file=sys.stderr)
             code = 1
             continue
-        groups.setdefault((src, out_dir), []).append(book)
+        groups.setdefault((src, out_dir), []).append(epub)
     # one plugin run per language (and source, output folder): it translates into one language at a time
     for (src, out_dir), group in groups.items():
         dsts = reachable(sections, src) if to_all else targets
@@ -283,7 +336,7 @@ try:
             print(f"{', '.join(group)}: no language pair from {src}", file=sys.stderr)
             code = 1
         for dst in dsts:
-            runs.setdefault(f'{src} -> {dst}' if src else dst, []).append(group + (['--from', src] if src else []) + ['--to', dst] + (['--output-dir', out_dir] if out_dir else []) + common_args)
+            runs.setdefault(f'{src} -> {dst}' if to_all else dst, []).append(group + (['--from', src] if src else []) + ['--to', dst] + (['--output-dir', out_dir] if out_dir else []) + common_args)
     for index, (label, label_runs) in enumerate(runs.items(), 1):
         if len(runs) > 1:
             print(f'=== {label} ({index}/{len(runs)})', file=sys.stderr, flush=True)
