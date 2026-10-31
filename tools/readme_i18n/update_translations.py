@@ -68,14 +68,20 @@ def join_blocks(blocks:list)->str:
 def block_key(block:list)->str:
     return '\n'.join(block)
 
-def is_frozen_block(block:list)->bool:
-    text:str = block_key(block)
-    if '```' in text:
-        return True
+def frozen_lines(block:list)->list:
+    # the lines kept from English: a whole table, else the code fences and their content only, so the
+    # headings, prose and list items of a block holding a fence are translated too
     stripped:list = [l for l in (line.strip() for line in block) if l]
     if stripped and all(l.startswith('|') for l in stripped):
-        return True
-    return False
+        return [True] * len(block)
+    mask:list = []
+    in_fence:bool = False
+    for line in block:
+        fence:bool = line.lstrip().startswith('```')
+        mask.append(in_fence or fence)
+        if fence:
+            in_fence = not in_fence
+    return mask
 
 def block_tokens(block:list)->list:
     return sorted(tok for line in block for tok in PROTECT.findall(line))
@@ -164,9 +170,7 @@ def translate_line(line:str, lang:str, cache:dict)->str:
     return prefix + translate_text(body, lang, cache)
 
 def translate_block(block:list, lang:str, cache:dict)->list:
-    if is_frozen_block(block):
-        return block
-    return [translate_line(line, lang, cache) for line in block]
+    return [line if frozen else translate_line(line, lang, cache) for line, frozen in zip(block, frozen_lines(block))]
 
 def patch_line(old_line:str, new_line:str, tr_line:str)->Optional[str]:
     old_protected, old_tokens = protect(old_line)
@@ -183,12 +187,16 @@ def patch_line(old_line:str, new_line:str, tr_line:str)->Optional[str]:
     return patched
 
 def patch_block(old_block:list, new_block:list, tr_block:list, lang:str, cache:dict)->list:
-    if is_frozen_block(new_block):
+    mask:list = frozen_lines(new_block)
+    if all(mask):
         return new_block
     if len(old_block) != len(new_block) or len(tr_block) != len(old_block):
         return translate_block(new_block, lang, cache)
     out:list = []
-    for old_line, new_line, tr_line in zip(old_block, new_block, tr_block):
+    for old_line, new_line, tr_line, frozen in zip(old_block, new_block, tr_block, mask):
+        if frozen:
+            out.append(new_line)
+            continue
         if old_line == new_line:
             out.append(tr_line)
             continue
@@ -200,9 +208,11 @@ def patch_block(old_block:list, new_block:list, tr_block:list, lang:str, cache:d
     return out
 
 def harvest_block(eng_block:list, tr_block:list, lang:str, cache:dict)->None:
-    if is_frozen_block(eng_block) or len(eng_block) != len(tr_block):
+    if len(eng_block) != len(tr_block):
         return
-    for eng_line, tr_line in zip(eng_block, tr_block):
+    for eng_line, tr_line, frozen in zip(eng_block, tr_block, frozen_lines(eng_block)):
+        if frozen:
+            continue
         m = LINE_PREFIX.match(eng_line)
         prefix:str = m.group(1) if m else ''
         eng_body:str = eng_line[len(prefix):]
@@ -219,35 +229,47 @@ def audit_and_repair(out_blocks:list, new_blocks:list, lang:str, cache:dict)->tu
     repaired:list = []
     notes:list = []
     for idx, (tr_block, eng_block) in enumerate(zip(out_blocks, new_blocks)):
-        if is_frozen_block(eng_block):
+        mask:list = frozen_lines(eng_block)
+        if all(mask):
             if block_key(tr_block) != block_key(eng_block):
                 notes.append(f'block {idx+1}: frozen content (code/table) restored from English')
-                repaired.append(eng_block)
-            else:
-                repaired.append(tr_block)
-        elif block_tokens(tr_block) != block_tokens(eng_block):
-            notes.append(f'block {idx+1}: inline code/links/tags differ, forcing English tokens locally')
-            fixed_block = []
-            for tr_line, eng_line in zip(tr_block, eng_block):
-                m = LINE_PREFIX.match(eng_line)
-                prefix:str = m.group(1) if m else ''
-                eng_body:str = eng_line[len(prefix):]
-                _, eng_tokens = protect(eng_line)
-                clean_line = PROTECT.sub('', tr_line).rstrip()
-                for tok in eng_tokens:
-                    clean_line = clean_line + ' ' + tok
-                fixed_line = clean_line
-                fixed_block.append(fixed_line)
-                if fixed_line.startswith(prefix):
-                    tr_body = fixed_line[len(prefix):]
-                else:
-                    tr_body = fixed_line
-                    
-                if eng_body.strip():
-                    cache[f'{lang}|{eng_body}'] = tr_body  
-            repaired.append(fixed_block)
-        else:
-            repaired.append(tr_block)
+            repaired.append(eng_block)
+            continue
+        if len(tr_block) != len(eng_block):
+            notes.append(f'block {idx+1}: line count differs from English, block retranslated')
+            repaired.append(translate_block(eng_block, lang, cache))
+            continue
+        if any(tr_line != eng_line for tr_line, eng_line, frozen in zip(tr_block, eng_block, mask) if frozen):
+            notes.append(f'block {idx+1}: code restored from English')
+            tr_block = [eng_line if frozen else tr_line for tr_line, eng_line, frozen in zip(tr_block, eng_block, mask)]
+        if any(mask):
+            # prose beside code, kept in English when a block holding a fence was frozen whole: translated now
+            translated:list = [translate_line(eng_line, lang, cache) if not frozen and tr_line == eng_line else tr_line for tr_line, eng_line, frozen in zip(tr_block, eng_block, mask)]
+            changed:int = sum(1 for before, after in zip(tr_block, translated) if before != after)
+            if changed:
+                notes.append(f'block {idx+1}: {changed} line(s) beside code translated')
+            tr_block = translated
+        fixed_block:list = []
+        forced:int = 0
+        for tr_line, eng_line, frozen in zip(tr_block, eng_block, mask):
+            _, eng_tokens = protect(eng_line)
+            if frozen or sorted(PROTECT.findall(tr_line)) == sorted(eng_tokens):
+                fixed_block.append(tr_line)
+                continue
+            forced += 1
+            m = LINE_PREFIX.match(eng_line)
+            prefix:str = m.group(1) if m else ''
+            eng_body:str = eng_line[len(prefix):]
+            fixed_line:str = PROTECT.sub('', tr_line).rstrip()
+            for tok in eng_tokens:
+                fixed_line = fixed_line + ' ' + tok
+            fixed_block.append(fixed_line)
+            tr_body:str = fixed_line[len(prefix):] if fixed_line.startswith(prefix) else fixed_line
+            if eng_body.strip():
+                cache[f'{lang}|{eng_body}'] = tr_body
+        if forced:
+            notes.append(f'block {idx+1}: inline code/links/tags differ on {forced} line(s), forcing English tokens locally')
+        repaired.append(fixed_block)
     return repaired, notes
 
 def verify(lang_text:str, eng_text:str)->list:
