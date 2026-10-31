@@ -502,6 +502,8 @@ The plugin is installed on first use into e2a's own calibre profile (`./run`), y
 language the source reaches (`--from`, else each book's own language; installed ones only with `--no_download`).
 `--list --from eng` lists the languages English translates into (installed, downloadable, or through English for
 another source).
+Other formats calibre's `ebook-convert` reads (PDF, DOCX, MOBI, TXT, ...) are converted to EPUB once, before the
+first language, and translated as EPUB: `--from` is needed when they carry no language, as PDF and TXT often do.
 Without `-o` or `--output_dir`, each translation is saved beside its book as `<name>.<lang>.<ext>`,
 and a book whose translation already exists is skipped (`--overwrite` to translate it again).
 The launchers in e2a's folder run `tools/translate_ebook.py` with `python_env`, nothing to activate,
@@ -528,16 +530,18 @@ usage: translate_ebook.py [-h] [-t LANG[,LANG...]] [-f LANG] [-r] [-o OUTPUT] [-
                           [--batch_size BATCH_SIZE] [--no_cache] [--no_download] [--allow_changes] [--list]
                           [books ...]
 
-Translate EPUB/AZW3 ebooks offline, out of e2a, with the Argos Translate calibre plugin
-(tools/argostranslate-calibre-plugin.zip). It runs on e2a's python_env and argos-translate packages
+Translate ebooks offline, out of e2a, with the Argos Translate calibre plugin
+(tools/argostranslate-calibre-plugin.zip). EPUB/AZW3 are translated as they are, the other formats
+calibre's ebook-convert reads (PDF, DOCX, MOBI, ...) are converted to EPUB once, before the first
+language, and their translations saved as EPUB. It runs on e2a's python_env and argos-translate packages
 (models/argos-translate): a language pair e2a already uses is not downloaded again, a missing one is
 downloaded on first use (direct or through English). The plugin is installed into e2a's own calibre
 profile (run/) on first use, your calibre setup is left untouched.
 Translated paths are printed on stdout, progress and logs on stderr.
 
 positional arguments:
-  books                 EPUB/AZW3 files or folders to translate; @list.txt reads paths from a file, one per
-                        line
+  books                 Ebook files (EPUB, AZW3, or PDF, DOCX, MOBI... converted to EPUB first) or folders
+                        to translate; @list.txt reads paths from a file, one per line
 
 options:
   -h, --help            show this help message and exit
@@ -547,8 +551,8 @@ options:
                         source reaches (see --list --from), installed ones only with --no_download
   -f, --from LANG       Source language, ISO-639-1 or ISO-639-3 code (default: read from each book)
   -r, --recursive       Also look for books in the subfolders of the given folders
-  -o, --output OUTPUT   Output file, single input only, same extension as the input (default:
-                        <name>.<lang>.<ext> next to the input)
+  -o, --output OUTPUT   Output file, single input only, same extension as the input, .epub for a converted
+                        one (default: <name>.<lang>.<ext> next to the input)
   --output_dir OUTPUT_DIR
                         Write the translations into this folder (subfolders are mirrored with -r) instead of
                         next to each book
