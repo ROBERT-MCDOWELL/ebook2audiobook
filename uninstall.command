@@ -102,7 +102,7 @@ if [[ "${OSTYPE:-}" == darwin* ]]; then
 		UNINSTALL_CMD="brew uninstall"
 	fi
 else
-	[[ "${OSTYPE:-}" != darwin* ]] && SUDO="sudo" || SUDO=""
+	[[ "${OSTYPE:-}" != darwin* && "${EUID:-$(id -u)}" -ne 0 ]] && SUDO="sudo" || SUDO=""
 
 	if command -v apt-get &>/dev/null; then
 		UNINSTALL_CMD="$SUDO apt-get remove -y"

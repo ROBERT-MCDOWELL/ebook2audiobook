@@ -145,7 +145,8 @@ if [[ "$SCRIPT_MODE" == "$BUILD_DOCKER" ]]; then
 	fi
 fi
 
-[[ "${OSTYPE-}" != darwin* && "$SCRIPT_MODE" != "$BUILD_DOCKER" ]] && SUDO="sudo" || SUDO=""
+# already root (proot-distro on Android, LXC, WSL as root): no sudo, often not even installed
+[[ "${OSTYPE-}" != darwin* && "$SCRIPT_MODE" != "$BUILD_DOCKER" && "${EUID:-$(id -u)}" -ne 0 ]] && SUDO="sudo" || SUDO=""
 [[ "${OSTYPE-}" == darwin* ]] && SHELL_NAME="zsh" || SHELL_NAME="bash"
 cd "$SCRIPT_DIR"
 if [[ "$SCRIPT_MODE" == "$FULL_DOCKER" ]]; then USER="${USER:-root}"; HOME="${HOME:-/root}"; SUDO=""; fi
