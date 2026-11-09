@@ -172,6 +172,7 @@ class E2aService : Service() {
             watchServer(proc)
             readOutput(proc.inputStream, log)
             val code = proc.waitFor()
+            log("ebook2audiobook exited with code $code")
             if (stopRequested) {
                 E2aState.setPhase(Phase.STOPPED)
             } else {

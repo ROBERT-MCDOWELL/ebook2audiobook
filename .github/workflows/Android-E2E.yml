@@ -1,0 +1,132 @@
+# .github/workflows/Android-E2E.yml
+# End-to-end test of the Android app on an x86_64 emulator (KVM): installs the debug apk, opens it and waits until
+# the app has installed Ubuntu, e2a and its packages and the gradio UI answers on the device's 127.0.0.1:7860.
+# Same code paths as a phone (proot from nativeLibraryDir, rootfs, launcher), only the ABI differs.
+# The device clones the branch under test, so launcher changes are tested with the app.
+# No marketplace actions used (repo policy restricts to owner-only actions).
+
+name: Android app end-to-end
+
+on:
+  push:
+    paths:
+      - 'android/**'
+      - '.github/workflows/Android-E2E.yml'
+  workflow_dispatch:
+    inputs:
+      timeout_minutes:
+        description: 'Minutes to wait for the e2a UI'
+        type: string
+        default: '200'
+      api_level:
+        description: 'Android API level of the emulator'
+        type: string
+        default: '34'
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      API_LEVEL: ${{ inputs.api_level || '34' }}
+      WAIT_MINUTES: ${{ inputs.timeout_minutes || '200' }}
+      APP_ID: com.ebook2audiobook.app
+    steps:
+      - name: Checkout (manual, no actions)
+        run: |
+          git init .
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --force --detach FETCH_HEAD
+
+      - name: Free disk space (the emulator holds the full e2a install)
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL /usr/local/share/boost /usr/share/swift /usr/local/julia* || true
+          sudo docker image prune --all --force >/dev/null 2>&1 || true
+          df -h /
+
+      - name: Toolchain and KVM
+        run: |
+          echo "JAVA_HOME=${JAVA_HOME_17_X64}" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=${ANDROID_HOME:-$ANDROID_SDK_ROOT}" >> "$GITHUB_ENV"
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -la /dev/kvm
+
+      - name: Build the debug apk (clones this branch on the device)
+        working-directory: android
+        run: |
+          bash tools/fetch_proot.sh
+          ./gradlew --no-daemon assembleDebug -Pe2aRepo="https://github.com/${GITHUB_REPOSITORY}.git" -Pe2aBranch="${GITHUB_REF_NAME}"
+
+      - name: Create and boot the emulator
+        run: |
+          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          avdmanager="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
+          image="system-images;android-${API_LEVEL};google_apis;x86_64"
+          yes | "$sdkmanager" --licenses >/dev/null || true
+          "$sdkmanager" --install "platform-tools" "emulator" "$image" >/dev/null
+          echo no | "$avdmanager" create avd --force -n e2a -k "$image" -d pixel_6
+          printf 'hw.ramSize=8192\nhw.cpu.ncore=4\ndisk.dataPartition.size=48G\n' >> "$HOME/.android/avd/e2a.avd/config.ini"
+          nohup "$ANDROID_HOME/emulator/emulator" -avd e2a -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect -accel on -memory 8192 -partition-size 49152 > "$RUNNER_TEMP/emulator.log" 2>&1 &
+          adb="$ANDROID_HOME/platform-tools/adb"
+          "$adb" wait-for-device
+          for i in $(seq 1 120); do
+            if [[ "$("$adb" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]]; then break; fi
+            sleep 5
+          done
+          "$adb" shell getprop ro.build.version.release
+          "$adb" shell df -h /data | tail -1
+
+      - name: Install and open the app
+        run: |
+          adb="$ANDROID_HOME/platform-tools/adb"
+          "$adb" install -r -g android/app/build/outputs/apk/debug/app-debug.apk
+          # what the app asks the user to do on Android 12+ (phantom process killer) and battery optimizations
+          "$adb" shell settings put global settings_enable_monitor_phantom_procs false || true
+          "$adb" shell /system/bin/device_config put activity_manager max_phantom_processes 2147483647 || true
+          "$adb" shell dumpsys deviceidle whitelist +"$APP_ID" || true
+          "$adb" shell am start -n "$APP_ID/.MainActivity"
+
+      - name: Wait for the e2a UI on the device
+        run: |
+          adb="$ANDROID_HOME/platform-tools/adb"
+          "$adb" forward tcp:7860 tcp:7860
+          deadline=$(( $(date +%s) + WAIT_MINUTES * 60 ))
+          last=""
+          while (( $(date +%s) < deadline )); do
+            log="$("$adb" shell run-as "$APP_ID" tail -n 400 files/logs/e2a.log 2>/dev/null | tr -d '\r' || true)"
+            line="$(printf '%s\n' "$log" | tail -n 1)"
+            if [[ "$line" != "$last" ]]; then echo "[$(date +%H:%M:%S)] $line"; last="$line"; fi
+            if curl -fsS -m 10 -o "$RUNNER_TEMP/index.html" http://127.0.0.1:7860/; then
+              echo "e2a UI answered on the device:"
+              grep -o -m 1 -i "<title>[^<]*" "$RUNNER_TEMP/index.html" || head -c 300 "$RUNNER_TEMP/index.html"
+              exit 0
+            fi
+            if printf '%s\n' "$log" | grep -qE "^ERROR: |exited with code"; then
+              echo "::error::the app reported a failure"
+              exit 1
+            fi
+            sleep 30
+          done
+          echo "::error::no e2a UI after ${WAIT_MINUTES} minutes"
+          exit 1
+
+      - name: Logs
+        if: always()
+        run: |
+          adb="$ANDROID_HOME/platform-tools/adb"
+          echo "===== e2a.log (last 300 lines)"
+          "$adb" shell run-as "$APP_ID" tail -n 300 files/logs/e2a.log 2>/dev/null || true
+          echo "===== app storage"
+          "$adb" shell run-as "$APP_ID" du -sh files/rootfs 2>/dev/null || true
+          "$adb" shell df -h /data | tail -1 || true
+          echo "===== logcat (app, proot, crashes)"
+          "$adb" logcat -d -t 400 2>/dev/null | grep -iE "ebook2audiobook|e2a|proot|AndroidRuntime|FATAL|avc: denied" | tail -n 150 || true
+          echo "===== emulator"
+          tail -n 30 "$RUNNER_TEMP/emulator.log" || true
