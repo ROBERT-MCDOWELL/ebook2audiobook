@@ -120,13 +120,13 @@ jobs:
       - name: Logs
         if: always()
         run: |
-          adb="$ANDROID_HOME/platform-tools/adb"
+          adb="timeout 30 $ANDROID_HOME/platform-tools/adb"
           echo "===== e2a.log (last 300 lines)"
-          "$adb" shell run-as "$APP_ID" tail -n 300 files/logs/e2a.log 2>/dev/null || true
+          $adb shell run-as "$APP_ID" tail -n 300 files/logs/e2a.log 2>/dev/null || true
           echo "===== app storage"
-          "$adb" shell run-as "$APP_ID" du -sh files/rootfs 2>/dev/null || true
-          "$adb" shell df -h /data | tail -1 || true
+          $adb shell run-as "$APP_ID" du -sh files/rootfs 2>/dev/null || true
+          $adb shell df -h /data 2>/dev/null | tail -1 || true
           echo "===== logcat (app, proot, crashes)"
-          "$adb" logcat -d -t 400 2>/dev/null | grep -iE "ebook2audiobook|e2a|proot|AndroidRuntime|FATAL|avc: denied" | tail -n 150 || true
+          $adb logcat -d -t 400 2>/dev/null | grep -iE "ebook2audiobook|e2a|proot|AndroidRuntime|FATAL|avc: denied" | tail -n 150 || true
           echo "===== emulator"
-          tail -n 30 "$RUNNER_TEMP/emulator.log" || true
+          tail -n 40 "$RUNNER_TEMP/emulator.log" 2>/dev/null || true
