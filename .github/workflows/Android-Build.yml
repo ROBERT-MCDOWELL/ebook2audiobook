@@ -1,0 +1,91 @@
+# .github/workflows/Android-Build.yml
+# Builds the Android app: ebook2audiobook-<version>-android.apk (arm64-v8a + x86_64).
+# push on android/**: build only (check). release published: build and attach the apk to that release.
+# workflow_dispatch: build, and with publish=true attach it to the prerelease android-v<version> (created if needed).
+# Stable signing (needed for in-place updates) comes from the repository secrets ANDROID_KEYSTORE_BASE64,
+# ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD; without them the apk is debug signed.
+# No marketplace actions used (repo policy restricts to owner-only actions): JDK and Android SDK of the runner image.
+
+name: Build Android app
+
+on:
+  push:
+    paths:
+      - 'android/**'
+      - '.github/workflows/Android-Build.yml'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      e2a_branch:
+        description: 'e2a branch the app clones on the device'
+        type: string
+        default: 'main'
+      publish:
+        description: 'Attach the apk to the prerelease android-v<version>'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      E2A_BRANCH: ${{ inputs.e2a_branch || 'main' }}
+    steps:
+      - name: Checkout (manual, no actions)
+        run: |
+          git init .
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --force --detach FETCH_HEAD
+
+      - name: Toolchain
+        run: |
+          echo "JAVA_HOME=${JAVA_HOME_17_X64}" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=${ANDROID_HOME:-$ANDROID_SDK_ROOT}" >> "$GITHUB_ENV"
+          echo "E2A_VERSION=$(cat VERSION.txt)" >> "$GITHUB_ENV"
+
+      - name: Fetch the proot runtime (Termux packages)
+        run: bash android/tools/fetch_proot.sh
+
+      - name: Decode the signing key
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/e2a.keystore"
+          echo "E2A_KEYSTORE=$RUNNER_TEMP/e2a.keystore" >> "$GITHUB_ENV"
+
+      - name: Build the apk
+        working-directory: android
+        env:
+          E2A_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          E2A_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          E2A_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ./gradlew --no-daemon --stacktrace assembleRelease -Pe2aBranch="$E2A_BRANCH"
+          mkdir -p dist
+          cp app/build/outputs/apk/release/app-release.apk "dist/ebook2audiobook-${E2A_VERSION}-android.apk"
+          if [[ -z "${E2A_KEYSTORE:-}" ]]; then echo "::warning::no signing secrets: the apk is debug signed and cannot update a previous install in place"; fi
+          ls -la dist
+          unzip -l "dist/ebook2audiobook-${E2A_VERSION}-android.apk" | grep -E "lib/|assets/"
+
+      - name: Attach to the release
+        if: github.event_name == 'release'
+        run: gh release upload "${{ github.event.release.tag_name }}" android/dist/*.apk --clobber --repo "$GITHUB_REPOSITORY"
+
+      - name: Publish the prerelease
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        run: |
+          tag="android-v${E2A_VERSION}"
+          if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$tag" --repo "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" \
+              --title "ebook2audiobook ${E2A_VERSION} for Android" \
+              --notes "Install the apk on a 64-bit Android 8+ phone; the first start downloads and installs everything (several GB)."
+          fi
+          gh release upload "$tag" android/dist/*.apk --clobber --repo "$GITHUB_REPOSITORY"

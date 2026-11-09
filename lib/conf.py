@@ -229,7 +229,7 @@ bug_reports_dir = os.path.join(tmp_dir, 'bug_reports')
 # ---------------------------------------------------------------------
 # Interface configuration
 # ---------------------------------------------------------------------
-interface_host = '0.0.0.0'
+interface_host = os.environ.get('E2A_INTERFACE_HOST', '0.0.0.0') # the Android app binds the loopback only
 interface_port = 7860
 interface_shared_tmp_expire = 3 # in days
 interface_concurrency_limit = 1 # or None for unlimited multiple parallele user conversion

@@ -5171,7 +5171,12 @@ def exception_alert(session_id:str|None, error:str|None)->None:
 
 def get_all_ip_addresses()->list:
     ip_addresses = []
-    for interface, addresses in psutil.net_if_addrs().items():
+    try:
+        interfaces = psutil.net_if_addrs()
+    except OSError:
+        # sandboxes denying netlink (Android apps, some containers): no list, the GUI still starts
+        return ip_addresses
+    for interface, addresses in interfaces.items():
         for address in addresses:
             if address.family in [socket.AF_INET, socket.AF_INET6]:
                 ip_addresses.append(address.address)

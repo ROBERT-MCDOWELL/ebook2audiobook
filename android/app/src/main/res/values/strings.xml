@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ebook2audiobook</string>
+    <string name="channel_name">ebook2audiobook server</string>
+
+    <string name="phase_idle">Not running</string>
+    <string name="phase_preparing">Preparing…</string>
+    <string name="phase_installing">Installing the Linux environment…</string>
+    <string name="phase_starting">Starting ebook2audiobook…</string>
+    <string name="phase_starting_detail">The first start installs everything (several GB): keep the phone charging and on Wi-Fi, it can take an hour or more.</string>
+    <string name="phase_ready">Running</string>
+    <string name="phase_stopping">Stopping…</string>
+    <string name="phase_stopped">Stopped</string>
+    <string name="phase_failed">Failed</string>
+
+    <string name="action_retry">Start</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_restart">Restart</string>
+    <string name="action_update">Update ebook2audiobook</string>
+    <string name="action_show_log">Show log</string>
+    <string name="action_show_ui">Show interface</string>
+    <string name="action_copy_log">Copy log</string>
+    <string name="action_battery">Background settings</string>
+    <string name="action_reset">Reinstall everything</string>
+
+    <string name="error_arch">Unsupported CPU architecture: %1$s (64-bit ARM or x86 required)</string>
+    <string name="error_exit">ebook2audiobook exited with code %1$d, see the log</string>
+    <string name="warn_storage">Warning: only %1$d GB free, the full install needs about 15 GB.</string>
+    <string name="warn_ram">Warning: %1$d GB of RAM, 8 GB or more is recommended (use light engines such as piper or vits).</string>
+    <string name="log_installing_rootfs">Installing the Linux environment (Ubuntu 24.04 %1$s)…</string>
+    <string name="log_copied">Log copied</string>
+    <string name="download_saved">Saved %1$s</string>
+    <string name="download_failed">Download failed: %1$s</string>
+    <string name="download_unsupported">This link cannot be downloaded from the app</string>
+
+    <string name="dialog_battery_title">Keep running in the background</string>
+    <string name="dialog_battery_msg">A conversion can run for hours. Allow ebook2audiobook to ignore battery optimizations so Android does not stop it when the screen is off.</string>
+    <string name="dialog_phantom_title">Android child process limit</string>
+    <string name="dialog_phantom_msg">Android 12 and newer may kill the processes ebook2audiobook starts (\"phantom process killer\"), which stops conversions with no error.\n\nAndroid 14+: Settings → Developer options → enable \"Disable child process restrictions\".\n\nAndroid 12/13: from a computer run\nadb shell \"/system/bin/device_config put activity_manager max_phantom_processes 2147483647\"</string>
+    <string name="dialog_reset_title">Reinstall everything?</string>
+    <string name="dialog_reset_msg">This deletes the Linux environment, ebook2audiobook, the downloaded models and every audiobook stored in the app, then installs again from scratch.</string>
+    <string name="dialog_open_settings">Open settings</string>
+    <string name="dialog_later">Later</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+</resources>

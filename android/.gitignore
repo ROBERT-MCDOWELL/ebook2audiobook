@@ -1,0 +1,9 @@
+.gradle/
+.kotlin/
+build/
+dist/
+local.properties
+*.keystore
+*.jks
+# fetched by tools/fetch_proot.sh
+app/src/main/jniLibs/

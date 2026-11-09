@@ -98,6 +98,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
   - [Run Remotely](#run-remotely)
   - [Docker](#docker)
     - [Steps to Run](#docker)
+  - [Android](#android)
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
@@ -449,6 +450,19 @@ Podman Compose (i.e. cuda 12.8:
 - NOTE: MPS is not exposed in docker so CPU must be used
 - NOTE: the named volume `e2a_venvs` keeps the TTS engines installed in their own venv (GPT-SoVITS, Zonos, OmniVoice, F5-TTS, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM etc.)
   across container runs, so they are not reinstalled each time. To reset them: `docker volume rm e2a_venvs`
+
+<a id="android"></a>
+### Android
+The Android app runs the regular e2a inside its own Ubuntu 24.04 environment (proot, the same technique as Termux / proot-distro) and shows the web interface in the app. Nothing else to install: the app sets everything up on its first start.
+
+1. Download `ebook2audiobook-<version>-android.apk` from the [releases](https://github.com/DrewThomasson/ebook2audiobook/releases) and install it (allow installing apps from your browser or file manager).
+2. Open **ebook2audiobook**. The first start installs the Linux environment, then e2a and its Python packages: several GB, often an hour or more. Keep the phone charging and on Wi-Fi.
+3. When it is ready the interface opens in the app. Ebooks and voices are picked with the Android file picker, audiobooks are saved where you choose.
+
+- Requirements: 64-bit Android 8 or newer, 8 GB RAM recommended, about 15 GB free. CPU only (Android GPU drivers cannot be used from Linux), so prefer light engines such as piper or vits.
+- Android 12 and newer can kill long conversions: enable Developer options → "Disable child process restrictions" (Android 14+), or on Android 12/13 run `adb shell "/system/bin/device_config put activity_manager max_phantom_processes 2147483647"`. Also let the app ignore battery optimizations (it asks on first start).
+- App menu: Update ebook2audiobook, Restart, Stop, Copy log, Reinstall everything.
+- Build it yourself: see [android/README.md](android/README.md).
 
 <a id="tools"></a>
 ## Tools
