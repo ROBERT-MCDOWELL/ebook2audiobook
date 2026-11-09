@@ -189,7 +189,9 @@ class E2aService : Service() {
             process = null
             pid = -1
             logFile.close()
-            ui.post { onWorkerDone() }
+            // skipped when a newer run already started (restart right after the end): it owns the locks and the service
+            val self = Thread.currentThread()
+            ui.post { if (worker === self) onWorkerDone() }
         }
     }
 
