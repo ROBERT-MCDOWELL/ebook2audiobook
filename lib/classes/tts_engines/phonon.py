@@ -163,7 +163,7 @@ class Phonon(TTSUtils, TTSRegistry, name='phonon'):
                         # re-read per part: an inline [voice:…] tag can switch the voice in the middle of the sentence.
                         # No voice file: the preset's voice. A voice file: a built-in voice converted to it
                         # (default_vc_model), the same-gender catalog voice for the internal preset
-                        trim_audio_buffer = 0.03
+                        trim_audio_buffer = 0.01
                         current_voice = self.params['current_voice']
                         use_zs = current_voice is not None
                         speaker = self.speaker
