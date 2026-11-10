@@ -22,6 +22,12 @@ nothing else.
 `targetSdk` stays at 28, as Termux, because newer target levels restrict what a Linux userland needs (exec of
 app files, netlink, …). That rules out the Play Store, so the apk ships with the GitHub releases.
 
+## Tested
+
+The **Android app end-to-end** workflow installs the debug apk on an Android 14 x86_64 emulator and waits for the
+e2a UI: fresh install to gradio answering on the device in 55 minutes, 13 GB of app storage. Same code paths as an
+arm64 phone except the ABI; not yet run on a physical device.
+
 ## Build
 
 ```bash
@@ -36,9 +42,10 @@ package repository and puts them in `app/src/main/jniLibs/<abi>/` as `lib*.so`: 
 its native library directory, which Android fills from jniLibs at install time. They are not committed.
 
 CI: the **Build Android app** workflow builds on every push touching `android/`, attaches the apk to published
-releases, and can publish a prerelease (`workflow_dispatch`, `publish`). For stable signing (updates in place)
-add the repository secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and
-`ANDROID_KEY_PASSWORD`; without them the apk is signed with a throwaway debug key.
+releases, and can publish a prerelease (`workflow_dispatch`, `publish`). **Android app end-to-end** is run by hand.
+For stable signing (updates in place) add the repository secrets `ANDROID_KEYSTORE_BASE64`,
+`ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`; without them the apk is signed with a
+throwaway debug key.
 
 ## Licenses
 

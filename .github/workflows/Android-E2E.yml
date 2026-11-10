@@ -3,6 +3,7 @@
 # the app has installed Ubuntu, e2a and its packages and the gradio UI answers on the device's 127.0.0.1:7860.
 # Same code paths as a phone (proot from nativeLibraryDir, rootfs, launcher), only the ABI differs.
 # The device clones the branch under test, so launcher changes are tested with the app.
+# About one hour on a standard runner (first run: 55 min, 13 GB on the device). Run it by hand (workflow_dispatch).
 # No marketplace actions used (repo policy restricts to owner-only actions).
 
 name: Android app end-to-end
@@ -10,7 +11,6 @@ name: Android app end-to-end
 on:
   push:
     paths:
-      - 'android/**'
       - '.github/workflows/Android-E2E.yml'
   workflow_dispatch:
     inputs:
