@@ -507,7 +507,7 @@ class Orpheus(TTSUtils, TTSRegistry, name='orpheus'):
                             os.unlink(vc_file)
                             if audio_part.ndim > 1:
                                 audio_part = audio_part.mean(axis=1)
-                            audio_part = self._resample_audiodata(audio_part, int(zs_samplerate), int(samplerate))
+                            samplerate = zs_samplerate
                         if os.path.exists(part_file):
                             os.unlink(part_file)
                         if not is_audio_data_valid(audio_part):

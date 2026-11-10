@@ -237,7 +237,7 @@ class Vits(TTSUtils, TTSRegistry, name='vits'):
                                 os.remove(vc_wav)
                                 if audio_part.ndim > 1:
                                     audio_part = audio_part.mean(axis=1)
-                                audio_part = self._resample_audiodata(audio_part, int(samplerate), self.params['samplerate'])
+                                self.params['samplerate'] = int(samplerate)
                             else:
                                 with torch.inference_mode():
                                     with torch.autocast(self.device, dtype=self.amp_dtype, enabled=(self.amp_dtype != torch.float32)):

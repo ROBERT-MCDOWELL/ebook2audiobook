@@ -216,7 +216,7 @@ class Phonon(TTSUtils, TTSRegistry, name='phonon'):
                             os.unlink(vc_file)
                             if audio_part.ndim > 1:
                                 audio_part = audio_part.mean(axis=1)
-                            audio_part = self._resample_audiodata(audio_part, int(zs_samplerate), samplerate)
+                            samplerate = zs_samplerate
                         else:
                             # copied: the array comes from the Rust side, torch.from_numpy wants a writable one
                             audio_part = np.array(self.engine.synth(part, voice=speaker), dtype=np.float32)
