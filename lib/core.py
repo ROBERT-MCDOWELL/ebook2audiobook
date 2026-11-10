@@ -2485,7 +2485,6 @@ def currency2words(text:str, lang:str, lang_iso1:str, is_num2words_compat:bool)-
 def year2words(year_str:str, lang:str, lang_iso1:str, is_num2words_compat:bool)->str:
     try:
         year = int(year_str)
-<<<<<<< HEAD
         first_two = int(year_str[:2])
         last_two = int(year_str[2:])
         lang_iso1 = ((lang_iso1 or 'en') if lang in language_math_phonemes.keys() else default_language_code).replace('zh', 'zh_CN')
@@ -2495,8 +2494,6 @@ def year2words(year_str:str, lang:str, lang_iso1:str, is_num2words_compat:bool)-
                 return num2words(year, lang=lang_iso1)
             else:
                 return ' '.join(language_math_phonemes[lang].get(ch, ch) for ch in year_str)
-=======
->>>>>>> 7a75c7e27fa43606dc7d6684d7d88274f93eddfa
         if is_num2words_compat:
             lang_iso1 = lang_iso1.replace('zh', 'zh_CN')
             try:
