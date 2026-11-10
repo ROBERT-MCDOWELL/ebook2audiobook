@@ -2368,7 +2368,7 @@ def set_formatted_number(text:str, lang:str, lang_iso1:str, is_num2words_compat:
         tok = _normalize_commas(tok)
 
         if is_num2words_compat:
-            new_lang_iso1 = lang_iso1.replace('zh', 'zh_CN')
+            new_lang_iso1 = (lang_iso1 or 'en').replace('zh', 'zh_CN')
             return num2words(num, lang=new_lang_iso1)
         else:
             phoneme_map = language_math_phonemes.get(
@@ -2394,7 +2394,7 @@ def year2words(year_str:str, lang:str, lang_iso1:str, is_num2words_compat:bool)-
         year = int(year_str)
         first_two = int(year_str[:2])
         last_two = int(year_str[2:])
-        lang_iso1 = lang_iso1 if lang in language_math_phonemes.keys() else default_language_code
+        lang_iso1 = ((lang_iso1 or 'en') if lang in language_math_phonemes.keys() else default_language_code).replace('zh', 'zh_CN')
         lang_iso1 = lang_iso1.replace('zh', 'zh_CN')
         if not year_str.isdigit() or len(year_str) != 4 or last_two < 10:
             if is_num2words_compat:
@@ -4417,7 +4417,7 @@ def convert_ebook(args:dict)->tuple:
             session['interlude_enabled'] = bool(args.get('interlude_enabled', False))
             session['device'] = str(args['device'])
             session['language'] = str(args['language'])
-            session['language_iso1'] = str(args['language_iso1'])
+            session['language_iso1'] = args.get('language_iso1') or Lang(str(args['language'])).pt1
             session['translate_enabled'] = bool(args.get('translate_enabled', False))
             session['translate'] = args.get('translate')
             session['translate_iso1'] = args.get('translate_iso1')
