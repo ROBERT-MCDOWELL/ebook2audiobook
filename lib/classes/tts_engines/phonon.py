@@ -136,7 +136,7 @@ class Phonon(TTSUtils, TTSRegistry, name='phonon'):
             import torch
             import numpy as np
             import soundfile as sf
-            from lib.classes.tts_engines.common.audio import is_audio_data_valid, detect_gender
+            from lib.classes.tts_engines.common.audio import trim_audio, is_audio_data_valid, detect_gender
             if self.engine:
                 settings = default_engine_settings[self.session['tts_engine']]
                 sentence_parts = self._split_sentence_on_sml(sentence)
