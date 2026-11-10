@@ -295,6 +295,14 @@ class DeviceInstaller():
             except Exception:
                 return ''
 
+        def list_pci_devices()->list:
+            # sandboxes (Android apps, some containers) deny the PCI bus: no device, lspci then decides
+            sysfs = '/sys/bus/pci/devices'
+            try:
+                return [os.path.join(sysfs, d) for d in os.listdir(sysfs)]
+            except OSError:
+                return []
+
         def lib_version_parse(text:str)->Union[str, None]:
             if not text:
                 return None
@@ -387,20 +395,17 @@ class DeviceInstaller():
             if self.system == systems['MACOS']:
                 return False
             if os.name == 'posix':
-                sysfs = '/sys/bus/pci/devices'
-                if os.path.isdir(sysfs):
-                    for d in os.listdir(sysfs):
-                        dev = os.path.join(sysfs, d)
-                        try:
-                            with open(f'{dev}/vendor') as f:
-                                if f.read().strip() not in ('0x1002', '0x1022'):
-                                    continue
-                            with open(f'{dev}/class') as f:
-                                cls = f.read().strip()
-                                if cls.startswith('0x0300') or cls.startswith('0x0302'):
-                                    return True
-                        except Exception:
-                            pass
+                for dev in list_pci_devices():
+                    try:
+                        with open(f'{dev}/vendor') as f:
+                            if f.read().strip() not in ('0x1002', '0x1022'):
+                                continue
+                        with open(f'{dev}/class') as f:
+                            cls = f.read().strip()
+                            if cls.startswith('0x0300') or cls.startswith('0x0302'):
+                                return True
+                    except Exception:
+                        pass
                 if has_cmd('lspci'):
                     out = try_cmd('lspci -nn').lower()
                     return (
@@ -438,20 +443,17 @@ class DeviceInstaller():
             if self.system == systems['MACOS']:
                 return False
             if os.name == 'posix':
-                sysfs = '/sys/bus/pci/devices'
-                if os.path.isdir(sysfs):
-                    for d in os.listdir(sysfs):
-                        dev = os.path.join(sysfs, d)
-                        try:
-                            with open(f'{dev}/vendor') as f:
-                                if f.read().strip() != '0x10de':
-                                    continue
-                            with open(f'{dev}/class') as f:
-                                cls = f.read().strip()
-                                if cls.startswith('0x0300') or cls.startswith('0x0302'):
-                                    return True
-                        except Exception:
-                            pass
+                for dev in list_pci_devices():
+                    try:
+                        with open(f'{dev}/vendor') as f:
+                            if f.read().strip() != '0x10de':
+                                continue
+                        with open(f'{dev}/class') as f:
+                            cls = f.read().strip()
+                            if cls.startswith('0x0300') or cls.startswith('0x0302'):
+                                return True
+                    except Exception:
+                        pass
                 if has_cmd('lspci'):
                     out = try_cmd('lspci -nn').lower()
                     return '10de:' in out and (' vga ' in out or ' 3d ' in out)
@@ -496,20 +498,17 @@ class DeviceInstaller():
             if self.system == systems['MACOS']:
                 return False
             if os.name == 'posix':
-                sysfs = '/sys/bus/pci/devices'
-                if os.path.isdir(sysfs):
-                    for d in os.listdir(sysfs):
-                        dev = os.path.join(sysfs, d)
-                        try:
-                            with open(f'{dev}/vendor') as f:
-                                if f.read().strip() != '0x8086':
-                                    continue
-                            with open(f'{dev}/class') as f:
-                                cls = f.read().strip()
-                                if cls.startswith('0x0300') or cls.startswith('0x0302'):
-                                    return True
-                        except Exception:
-                            pass
+                for dev in list_pci_devices():
+                    try:
+                        with open(f'{dev}/vendor') as f:
+                            if f.read().strip() != '0x8086':
+                                continue
+                        with open(f'{dev}/class') as f:
+                            cls = f.read().strip()
+                            if cls.startswith('0x0300') or cls.startswith('0x0302'):
+                                return True
+                    except Exception:
+                        pass
                 if has_cmd('lspci'):
                     out = try_cmd('lspci -nn').lower()
                     return '8086:' in out and (' vga ' in out or ' 3d ' in out)
