@@ -578,8 +578,10 @@ class TTSUtils:
                             if not vocab_path or not os.path.exists(vocab_path):
                                 error = legends['error_missing_or_invalid'].format(name='vocab_path', path=vocab_path)
                                 raise FileNotFoundError(error)
-                            custom_dir = os.path.dirname(checkpoint_path)
-                            syn = Synthesizer(model_dir=custom_dir, use_cuda=is_accel)
+                            # coqui 0.28 dropped model_dir: the checkpoint is given and read the fairseq way because its
+                            # path holds "fairseq" (custom models live in <custom_model_dir>/fairseq/<name>/), with
+                            # config.json and vocab.txt beside it. use_cuda=True asserts cuda, the walk below moves the weights
+                            syn = Synthesizer(tts_checkpoint=checkpoint_path, use_cuda=False)
                             class _FairseqEngine(nn.Module):
                                 def __init__(self, synthesizer:'Synthesizer'):
                                     super().__init__()
