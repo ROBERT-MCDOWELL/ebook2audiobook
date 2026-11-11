@@ -433,7 +433,9 @@ class TTSUtils:
                 import torch.nn as nn
                 engine = loaded_tts.get(key)
                 target_dev = torch.device(device)
-                is_accel = target_dev.type != 'cpu'
+                # coqui Synthesizer.tts() sends a separate vocoder's input (tacotron, glowtts) to "cuda" when use_cuda is
+                # set: true on cuda only (rocm and jetson are cuda to torch), elsewhere it follows the vocoder's device
+                is_cuda = target_dev.type == 'cuda'
                 progress_bar = None
                 if not engine:
                     progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
@@ -474,7 +476,7 @@ class TTSUtils:
                     syn = getattr(engine, syn_attr, None)
                     if syn is None:
                         continue
-                    syn.use_cuda = is_accel
+                    syn.use_cuda = is_cuda
                     for _, m in syn.named_modules():
                         m.to(device)
                         m.eval()
@@ -545,7 +547,8 @@ class TTSUtils:
                     import torch.nn as nn
                     engine = loaded_tts.get(key, False)
                     target_dev = torch.device(device)
-                    is_accel = target_dev.type != 'cpu'
+                    # see _load_api(): use_cuda routes a separate vocoder's input to "cuda", so it is set on cuda only
+                    is_cuda = target_dev.type == 'cuda'
                     if not engine:
                         if not checkpoint_path or not os.path.exists(checkpoint_path):
                             error = legends['error_missing_or_invalid'].format(name='checkpoint_path', path=checkpoint_path)
@@ -612,7 +615,7 @@ class TTSUtils:
                         walk_targets = []
                         syn = getattr(engine, 'synthesizer', None)
                         if syn is not None:
-                            syn.use_cuda = is_accel
+                            syn.use_cuda = is_cuda
                             walk_targets.append(syn)
                         else:
                             walk_targets.append(engine)
