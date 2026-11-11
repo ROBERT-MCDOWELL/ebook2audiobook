@@ -332,9 +332,13 @@ default_engine_settings = {
         # f5_tts.model imports its Trainer. Names normalized as pip does. onnxruntime (cpu) runs the Arabic
         # diacritizer below. transformers 5.0.0 left out: its ASR pipeline pops the num_frames its own Whisper feature
         # extractor no longer returns (KeyError on every reference transcription; 4.57 and 5.1+ are consistent), and
-        # the <5.1 cap for torch < 2.4 (jetson5) lands exactly on it: those devices get 4.57 instead.
+        # the <5.1 cap for torch < 2.4 (jetson5) lands exactly on it: those devices get 4.57 instead. datasets and
+        # transformers get floors, upstream leaves them open and the resolver backtracks to releases that break:
+        # datasets < 2.14.7 subclasses pa.PyExtensionType (gone since pyarrow 21), the pick on jetson where the fsspec
+        # DeviceInstaller put in the venv rules out every newer datasets; with the <5.1 cap, datasets 5.2+
+        # (huggingface-hub >= 1.31) drags transformers back to 2.x.
         "requirements_exclude": ["gradio", "bitsandbytes", "cached-path", "hydra-core", "transformers-stream-generator", "torchcodec"],
-        "requirements_extra": ["onnxruntime", "transformers!=5.0.0"],
+        "requirements_extra": ["onnxruntime", "datasets>=2.14.7", "transformers>=4.57,!=5.0.0"],
         # every package installs as a wheel, so no platform ever needs a compiler; encodec (vocos' dependency)
         # only exists as a pure-python source
         "packages_sdist": ["encodec"],
