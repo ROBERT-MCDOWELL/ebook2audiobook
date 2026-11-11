@@ -229,10 +229,12 @@ class TTSUtils:
     def _load_xtts_builtin_list(self)->dict:
         try:
             import torch
-            from huggingface_hub import hf_hub_download
             if len(xtts_builtin_speakers_list) > 0:
                 return xtts_builtin_speakers_list
-            speakers_path = hf_hub_download(repo_id=default_engine_settings[TTS_ENGINES['XTTS']]['repo'], filename='speakers_xtts.pth', cache_dir=tts_dir)
+            # byte progress in the terminal and the GUI while it downloads (once, the GUI message only then)
+            progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
+            msg = legends['msg_zonos2_models'].format(engine=TTS_ENGINES['XTTS'], files='speakers_xtts.pth')
+            speakers_path = hf_download(progress_bar, msg, repo_id=default_engine_settings[TTS_ENGINES['XTTS']]['repo'], filename='speakers_xtts.pth', cache_dir=tts_dir)
             loaded = torch.load(speakers_path, weights_only=False)
             if not isinstance(loaded, dict):
                 error = legends['error_xtts_speakers_format'].format(type=type(loaded))

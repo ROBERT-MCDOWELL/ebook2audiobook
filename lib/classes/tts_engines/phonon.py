@@ -1,5 +1,6 @@
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
+from lib.classes.tts_engines.common.hf_download import hf_download
 from lib.conf import systems
 from lib.lang import legends
 
@@ -101,10 +102,12 @@ class Phonon(TTSUtils, TTSRegistry, name='phonon'):
                 # one): ptts gets a local path, so it never touches the network
                 marker_file = os.path.join(self.model_dir, '.e2a_complete')
                 if not os.path.exists(marker_file):
-                    from huggingface_hub import snapshot_download
                     from huggingface_hub.errors import GatedRepoError
                     try:
-                        snapshot_download(self.checkpoint['repo'], local_dir=self.model_dir, allow_patterns=settings['checkpoint_files'])
+                        # one file at a time (every Phonon repo has all of them): byte progress in the terminal and the GUI, which
+                        # snapshot_download's aggregated bars (8 download threads, totals growing from 0) cannot give
+                        for f in settings['checkpoint_files']:
+                            hf_download(progress_bar, msg, repo_id=self.checkpoint['repo'], filename=f, local_dir=self.model_dir)
                     except GatedRepoError:
                         # Phonon 40m: the account of e2a's HF_TOKEN has to accept its (auto-approved) conditions
                         error = legends['error_orpheus_gated'].format(repo=self.checkpoint['repo'])
