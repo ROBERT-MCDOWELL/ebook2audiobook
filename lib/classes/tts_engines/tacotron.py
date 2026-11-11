@@ -147,6 +147,7 @@ class Tacotron2(TTSUtils, TTSRegistry, name='tacotron'):
                     if not any(c.isalnum() for c in part):
                         continue
                     else:
+                        trim_audio_buffer = 0.002
                         if part.endswith("'"):
                             part = part[:-1]
                         part = re.sub(not_supported_punc_pattern, ' ', part).strip()
@@ -243,6 +244,8 @@ class Tacotron2(TTSUtils, TTSRegistry, name='tacotron'):
                                 if part_tensor.numel() == 0:
                                     error = 'part_tensor not valid'
                                     return False, error
+                                if part[-1].isalnum() or part[-1] == '—':
+                                    part_tensor = trim_audio(part_tensor.squeeze(0), self.params['samplerate'], 0.001, trim_audio_buffer).unsqueeze(0)
                                 self.audio_segments.append(part_tensor)
                             else:
                                 error = 'audio_part not valid'
@@ -252,8 +255,6 @@ class Tacotron2(TTSUtils, TTSRegistry, name='tacotron'):
                             error = f'convert() error at {e} segment: {part}'
                             return False, error
                         except Exception as e:
-                            # free the failed part's tensors before returning False;
-                            # core.py then unloads the engine via unload_tts_manager().
                             self.cleanup_memory()
                             return False, self.log_exception(f'{self.__class__.__name__}.convert() part loop', e)
                 if self.audio_segments:
