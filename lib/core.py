@@ -16,7 +16,7 @@ from PIL import Image, ImageSequence
 from tqdm import tqdm
 from bs4 import BeautifulSoup, NavigableString, Tag
 from collections import Counter
-from collections.abc import Mapping, MutableMapping
+from collections.abc import MutableMapping
 from datetime import datetime
 from ebooklib import epub
 from ebooklib.epub import EpubBook
@@ -595,26 +595,6 @@ def compare_checksums(session_id:str)->tuple[bool, str|None]:
     except Exception as e:
         error = f'compare_checksums() error: {e}'
         return False, error
-
-def compare_dict_keys(d1:Any, d2:Any)->dict|None:
-    # None when d1 and d2 hold the same keys at every depth, else the first difference found, nested under its key path.
-    # values are not compared: a non-mapping counts as no keys, so a dict facing a plain value reports all its keys missing
-    if not isinstance(d1, Mapping) and not isinstance(d2, Mapping):
-        return None
-    d1_keys = set(d1.keys()) if isinstance(d1, Mapping) else set()
-    d2_keys = set(d2.keys()) if isinstance(d2, Mapping) else set()
-    missing_in_d2 = d1_keys - d2_keys
-    missing_in_d1 = d2_keys - d1_keys
-    if missing_in_d2 or missing_in_d1:
-        return {
-            "missing_in_d2": missing_in_d2,
-            "missing_in_d1": missing_in_d1,
-        }
-    for key in d1_keys.intersection(d2_keys):
-        nested_result = compare_dict_keys(d1[key], d2[key])
-        if nested_result:
-            return {key: nested_result}
-    return None
 
 def ocr2xhtml(img: Image.Image, lang:str)->tuple[str|bool, str|None]:
     try:
