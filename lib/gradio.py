@@ -2410,7 +2410,6 @@ def build_interface(args:dict)->gr.Blocks:
                                 elif method == 'confirm_audiobook_del':
                                     selected_name = Path(audiobook).stem
                                     base_selected_name = re.sub(r'_part\d+$', '', selected_name)
-                                    count_files = sum(1 for f, _ in audiobook_options if re.sub(r'_part\d+$', '', Path(f).stem) == base_selected_name)
                                     if os.path.isdir(audiobook):
                                         shutil.rmtree(audiobook, ignore_errors=True)
                                     else:
@@ -2418,12 +2417,18 @@ def build_interface(args:dict)->gr.Blocks:
                                             os.remove(audiobook)
                                         except FileNotFoundError:
                                             pass
-                                    if count_files <= 1:
+                                    # what is left on disk, not audiobook_options: that list is shared by all the sessions
+                                    audiobook_dir = os.path.dirname(audiobook)
+                                    remaining_stems = [Path(f).stem for f in os.listdir(audiobook_dir) if not f.lower().endswith('.vtt')] if os.path.isdir(audiobook_dir) else []
+                                    # the subtitles belong to the stem: each part has its own, the formats of a same part share it
+                                    if selected_name not in remaining_stems:
                                         vtt_path = Path(audiobook).with_suffix('.vtt')
                                         if os.path.exists(vtt_path):
                                             os.remove(vtt_path)
-                                        language = session['translate'] if session['translate_enabled'] and session['translate'] is not None else session['language']
-                                        process_dir = os.path.join(session['session_dir'], hashlib.md5((selected_name).encode()).hexdigest())
+                                    # the conversion data belongs to the book (part-less name it was created with):
+                                    # it goes with the last part/format of it
+                                    if not any(re.sub(r'_part\d+$', '', stem) == base_selected_name for stem in remaining_stems):
+                                        process_dir = os.path.join(session['session_dir'], hashlib.md5(base_selected_name.encode()).hexdigest())
                                         shutil.rmtree(process_dir, ignore_errors=True)
                                     msg = legends['msg_audiobook_deleted'].format(name=selected_name)
                                     session['audiobook'] = None
@@ -3095,10 +3100,15 @@ def build_interface(args:dict)->gr.Blocks:
                                                     "type": "warning",
                                                     "msg": legends['msg_unsupported_format_skipping'].format(name=Path(skipped).name)
                                                 })
+                                            # skipped files leave the batch too: finalize_audiobook() counts what is left in
+                                            # session['ebook_list'], they would keep the session CONVERTING after the last book
+                                            session['ebook_list'] = list(clean_list)
                                             ebook_list_full = copy.deepcopy(clean_list)
                                             args['ebook_list'] = ebook_list_full
                                             queue = list(ebook_list_full)
-                                            if args['blocks_preview']:
+                                            if not queue:
+                                                error = legends['error_directory_required']
+                                            elif args['blocks_preview']:
                                                 selected = session.get('ebook_selected')
                                                 ebook_map = {os.path.abspath(p): p for p in ebook_list_full}
                                                 if selected and selected in ebook_map:
@@ -3126,7 +3136,7 @@ def build_interface(args:dict)->gr.Blocks:
                                                 args['voice'] = override
                                                 progress_status, passed = convert_ebook(args)
                                                 if not passed:
-                                                    error = progress_status or legends['error_conversion_failed'].format(name=ebook_name)
+                                                    error = progress_status or legends['error_conversion_failed'].format(name=Path(file).name)
                                                     break
                                                 last_progress_status = progress_status
                                                 if args['blocks_preview']:
@@ -3229,10 +3239,14 @@ def build_interface(args:dict)->gr.Blocks:
                                         source = session['ebook_src']
                                 else:
                                     if ebook_mode == ebook_modes['DIRECTORY']:
-                                        if not ebook_data:
+                                        # same filter, order and preview pick as _start_conversion(): the resume check is for the book converted first
+                                        supported = sorted([f for f in (ebook_data or []) if any(f.endswith(ext) for ext in ebook_formats)], key=natural_sort_key)
+                                        if not supported:
                                             error = legends['error_directory_required']
                                         else:
-                                            source = ebook_data[0]
+                                            supported_map = {os.path.abspath(f): f for f in supported}
+                                            selected = session.get('ebook_selected')
+                                            source = supported_map[selected] if blocks_preview and selected in supported_map else supported[0]
                                     elif ebook_mode == ebook_modes['SINGLE']:
                                         if not ebook_data:
                                             error = legends['error_ebook_required']
