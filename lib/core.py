@@ -3685,7 +3685,6 @@ def combine_audio_chapters(session_id:str)->list[str]|None:
                     '-y', final_file
                 ]
             progress_desc = f'Export Part {part_num}' if part_num is not None else 'Export'
-            print(cmd)
             proc_pipe = SubprocessPipe(cmd, is_gui_process=is_gui_process, total_duration=get_audio_duration(combined_audio), msg=legends['msg_export'], on_progress=lambda p: _on_progress(p, progress_desc))
             if not proc_pipe.result:
                 error = legends['error_ffmpeg_export_failed'].format(file=final_file)
