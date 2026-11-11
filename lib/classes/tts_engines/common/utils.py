@@ -400,7 +400,8 @@ class TTSUtils:
     def _fill_coqui_languages(self)->Iterator[None]:
         from TTS.tts.utils.languages import LanguageManager
         init_from_config = LanguageManager.init_from_config
-        language = getattr(self, 'language_iso1', None) or getattr(self, 'language', None)
+        engine_langs = default_engine_settings.get(self.session.get('tts_engine'), {}).get('languages', {})
+        language = next((code for code in (self.language_iso1, engine_langs.get(self.language)) if code and len(code) == 2), self.language)
         def init_with_languages(config:'BaseTTSConfig')->'LanguageManager':
             if not config.languages:
                 dataset_languages = sorted({dataset.get('language') for dataset in config.datasets if dataset.get('language')})
