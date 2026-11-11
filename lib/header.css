@@ -440,8 +440,7 @@ span[data-testid="block-info"] {
 	align-items: center !important;
 }
 #gr_interlude_enabled {
-	text-align: right !important;
-	align-self: center !important; 
+	align-self: right !important; 
 	overflow: visible !important;
 	padding: 20px 0 20px 0 !important;
 }
