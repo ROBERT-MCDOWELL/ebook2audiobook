@@ -7,6 +7,7 @@ from lib.classes.bug_reporter import bug_reporter
 from lib.classes.tts_engines.common.audio import normalize_audio, get_audiolist_duration, is_audio_data_valid
 from lib.classes.subprocess_pipe import SubprocessPipe
 from lib.classes.tts_engines.common.voice_conversion import VoiceConversion
+from lib.classes.tts_engines.common.hf_download import hf_download
 from lib import *
 from lib.lang import legends
 
@@ -712,7 +713,6 @@ class TTSUtils:
             import torch
             import torchaudio
             import numpy as np
-            from huggingface_hub import hf_hub_download
             voice_parts = Path(current_voice).parts
             if (self.language in voice_parts or speaker in default_engine_settings[TTS_ENGINES['BARK']]['voices'] or self.language == 'eng'):
                 if os.path.exists(current_voice):
@@ -742,9 +742,9 @@ class TTSUtils:
                             cached = None
                         hf_repo = default_engine_settings[xtts]['repo']
                         hf_sub = ''
-                        config_path = hf_hub_download(repo_id=hf_repo, filename=f"{hf_sub}{default_engine_settings[xtts]['files'][0]}", cache_dir=self.cache_dir)
-                        checkpoint_path = hf_hub_download(repo_id=hf_repo, filename=f"{hf_sub}{default_engine_settings[xtts]['files'][1]}", cache_dir=self.cache_dir)
-                        vocab_path = hf_hub_download(repo_id=hf_repo, filename=f"{hf_sub}{default_engine_settings[xtts]['files'][2]}", cache_dir=self.cache_dir)
+                        config_path = hf_download(progress_bar, msg, repo_id=hf_repo, filename=f"{hf_sub}{default_engine_settings[xtts]['files'][0]}", cache_dir=self.cache_dir)
+                        checkpoint_path = hf_download(progress_bar, msg, repo_id=hf_repo, filename=f"{hf_sub}{default_engine_settings[xtts]['files'][1]}", cache_dir=self.cache_dir)
+                        vocab_path = hf_download(progress_bar, msg, repo_id=hf_repo, filename=f"{hf_sub}{default_engine_settings[xtts]['files'][2]}", cache_dir=self.cache_dir)
                         engine = self._load_checkpoint(tts_engine=xtts, key=key, checkpoint_path=checkpoint_path, config_path=config_path, vocab_path=vocab_path)
                     if engine:
                         device = devices['CUDA']['proc'] if self.session['device'] in [devices['CUDA']['proc'], devices['ROCM']['proc'], devices['JETSON']['proc']] else self.session['device']

@@ -2,6 +2,7 @@ import json
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
+from lib.classes.tts_engines.common.hf_download import hf_download
 from lib.conf import systems
 from lib.lang import legends
 
@@ -152,13 +153,12 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                   show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
                else:
                   print(msg)
-            # --- GGUF weights through e2a's Hugging Face cache (tts_dir) ---
-            from huggingface_hub import hf_hub_download
+            # --- GGUF weights through e2a's Hugging Face cache (tts_dir), byte progress in the terminal and the GUI ---
             msg = legends['msg_zonos2_models'].format(engine=tts_engine, files=', '.join(model_cfg['files']))
             print(msg)
             if progress_bar is not None:
                progress_bar(0.0, desc=msg)
-            self.model_path, self.dac_path, self.spk_path = (hf_hub_download(repo_id=self.model_repo, filename=f, cache_dir=self.cache_dir) for f in (model_cfg['file'], settings['dac'], settings['spk']))
+            self.model_path, self.dac_path, self.spk_path = (hf_download(progress_bar, msg, repo_id=self.model_repo, filename=f, cache_dir=self.cache_dir) for f in (model_cfg['file'], settings['dac'], settings['spk']))
             # the worker is stdlib only: e2a's own interpreter runs it, nothing from python_env is imported
             engine_dir = os.path.dirname(os.path.abspath(__file__))
             self.worker_script = os.path.join(engine_dir, 'workers', f'{tts_engine}_worker.py')

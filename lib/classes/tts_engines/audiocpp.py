@@ -3,6 +3,7 @@ from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.subprocess_pipe import SubprocessPipe
 from lib.classes.tts_engines.common.voice_conversion import VoiceConversion
+from lib.classes.tts_engines.common.hf_download import hf_download
 from lib.conf_models import TTS_VOICE_CONVERSION, default_vc_model, audiocpp_packages, audiocpp_asr, audiocpp_engines, audiocpp_repo
 from lib.lang import legends
 
@@ -67,8 +68,7 @@ class AudioCpp(TTSUtils):
             self.device = devices['CUDA']['proc'] if self.session['device'] in [devices['CUDA']['proc'], devices['ROCM']['proc'], devices['JETSON']['proc']] else self.session['device']
             # --- the audiocpp_server package for this machine (VoiceConversion: shared with the VC stage of the built-in voice engines) ---
             attempts, gpu_wanted = VoiceConversion.packages(self.session, tts_engine)
-            # --- GGUF weights through e2a's Hugging Face cache (tts_dir) ---
-            from huggingface_hub import hf_hub_download
+            # --- GGUF weights through e2a's Hugging Face cache (tts_dir), byte progress in the terminal and the GUI ---
             # cloning engines taking a reference transcript also get the ASR model, loaded by the worker only for a voice it
             # has never transcribed, then unloaded. Built-in voice engines get default_vc_model for a picked voice file, run in
             # the same server; one that speaks the text again (task "tts") would only replace this engine, so they take its
@@ -87,9 +87,9 @@ class AudioCpp(TTSUtils):
             # resolves symlinks (weakly_canonical) then picks the tensor format from the file extension, so it rejects the
             # blob ("unsupported tensor source format"). local_dir keeps the repo layout, so sidecars (pocket_tts
             # embeddings/) land beside the model file, and a file already in the cache is copied instead of downloaded
-            self.model_path = [hf_hub_download(repo_id=self.model_repo, filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', self.model_repo.replace('/', '--'))) for f in model_files][0]
-            self.asr_path = [hf_hub_download(repo_id=audiocpp_repo, filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))) for f in asr_files][0] if asr_files else ''
-            self.vc_path = [hf_hub_download(repo_id=vc_preset['repo'], filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', vc_preset['repo'].replace('/', '--'))) for f in vc_files][0] if vc_files else ''
+            self.model_path = [hf_download(progress_bar, msg, repo_id=self.model_repo, filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', self.model_repo.replace('/', '--'))) for f in model_files][0]
+            self.asr_path = [hf_download(progress_bar, msg, repo_id=audiocpp_repo, filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))) for f in asr_files][0] if asr_files else ''
+            self.vc_path = [hf_download(progress_bar, msg, repo_id=vc_preset['repo'], filename=f, cache_dir=self.cache_dir, local_dir=os.path.join(self.cache_dir, 'audiocpp', vc_preset['repo'].replace('/', '--'))) for f in vc_files][0] if vc_files else ''
             engine_dir = os.path.dirname(os.path.abspath(__file__))
             self.worker_script = os.path.join(engine_dir, 'workers', 'audiocpp_worker.py')
             # the worker is stdlib only. conf.py's OMP_NUM_THREADS=1 is for e2a's torch: the server (OpenMP build) sizes its own pool

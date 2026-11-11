@@ -1,6 +1,7 @@
 import os, sys, re, json, shutil, platform, tarfile, zipfile, urllib.request
 from multiprocessing.managers import DictProxy
 from lib.classes.subprocess_pipe import SubprocessPipe
+from lib.classes.tts_engines.common.hf_download import hf_download
 from lib.conf import systems, devices, tts_dir
 from lib.conf_models import TTS_VOICE_CONVERSION, default_vc_model, default_engine_settings, audiocpp_packages, audiocpp_asr, audiocpp_repo
 from lib.lang import legends
@@ -22,7 +23,6 @@ class VoiceConversion(SubprocessPipe):
 
     def __init__(self, session:DictProxy)->None:
         try:
-            from huggingface_hub import hf_hub_download
             from lib.classes.tts_engines.common.preset_loader import load_engine_presets
             self.session = session
             show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
@@ -56,8 +56,8 @@ class VoiceConversion(SubprocessPipe):
             print(msg)
             if progress_bar is not None:
                 progress_bar(0.0, desc=msg)
-            self.model_path = [hf_hub_download(repo_id=preset['repo'], filename=f, cache_dir=tts_dir, local_dir=os.path.join(tts_dir, 'audiocpp', preset['repo'].replace('/', '--'))) for f in preset['files']][0]
-            asr_path = [hf_hub_download(repo_id=audiocpp_repo, filename=f, cache_dir=tts_dir, local_dir=os.path.join(tts_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))) for f in asr_files][0] if asr_files else ''
+            self.model_path = [hf_download(progress_bar, msg, repo_id=preset['repo'], filename=f, cache_dir=tts_dir, local_dir=os.path.join(tts_dir, 'audiocpp', preset['repo'].replace('/', '--'))) for f in preset['files']][0]
+            asr_path = [hf_download(progress_bar, msg, repo_id=audiocpp_repo, filename=f, cache_dir=tts_dir, local_dir=os.path.join(tts_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))) for f in asr_files][0] if asr_files else ''
             worker_script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workers', 'audiocpp_worker.py')
             for attempt, self.package_name in enumerate(attempts):
                 package = audiocpp_packages[self.package_name]
