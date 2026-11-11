@@ -46,7 +46,7 @@ __all__ = [
     "audiobooks_host_dir", "debug_mode", "default_audio_proc_samplerate", "max_upload_size",
     "default_audio_proc_format", "default_device", "default_gpu_wiki",
     "default_output_format", "default_output_channel", "systems", "archs", "cli_options", "devices", "device_info_json", "device_info_dict", "ebook_formats",
-    "ebooks_dir", "interface_component_options", "interface_concurrency_limit",
+    "ebooks_dir", "interface_component_options", "interface_concurrency_limit", "interface_progress_interval",
     "interface_host", "interface_port", "interface_shared_tmp_expire",
     "max_python_version", "min_python_version", "models_dir",
     "output_formats", "prog_version", "python_env_dir", "python_exec",
