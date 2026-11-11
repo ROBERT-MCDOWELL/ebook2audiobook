@@ -267,74 +267,74 @@ def build_interface(args:dict)->gr.Blocks:
                             )
                         # ZONOS2: every slider at 0 is the plain cloned voice, each one moves away from it
                         with gr.Group(elem_id='gr_group_zonos_emotion_sliders', elem_classes=['gr-group'], visible=bool(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_enabled'])) as gr_group_zonos_emotion_sliders:
-                                    gr_zonos_emotion_happy = gr.Slider(
-                                        label=legends['gr_zonos_emotion_happy'],
-                                        minimum=0.0,
-                                        maximum=1.0,
-                                        step=0.01,
-                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['happy']),
-                                        elem_id='gr_zonos_emotion_happy'
-                                    )
-                                    gr_zonos_emotion_sad = gr.Slider(
-                                        label=legends['gr_zonos_emotion_sad'],
-                                        minimum=0.0,
-                                        maximum=1.0,
-                                        step=0.01,
-                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['sad']),
-                                        elem_id='gr_zonos_emotion_sad'
-                                    )
-                                    gr_zonos_emotion_angry = gr.Slider(
-                                        label=legends['gr_zonos_emotion_angry'],
-                                        minimum=0.0,
-                                        maximum=1.0,
-                                        step=0.01,
-                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['angry']),
-                                        elem_id='gr_zonos_emotion_angry'
-                                    )
-                                    gr_zonos_emotion_surprised = gr.Slider(
-                                        label=legends['gr_zonos_emotion_surprised'],
-                                        minimum=0.0,
-                                        maximum=1.0,
-                                        step=0.01,
-                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['surprised']),
-                                        elem_id='gr_zonos_emotion_surprised'
-                                    )
-                                    gr_zonos_emotion_valence = gr.Slider(
-                                        label=legends['gr_zonos_emotion_valence'],
-                                        minimum=-1.0,
-                                        maximum=1.0,
-                                        step=0.01,
-                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['valence']),
-                                        elem_id='gr_zonos_emotion_valence',
-                                        info=legends['gr_zonos_emotion_valence_info']
-                                    )
-                                    gr_zonos_emotion_arousal = gr.Slider(
-                                        label=legends['gr_zonos_emotion_arousal'],
-                                        minimum=-1.0,
-                                        maximum=1.0,
-                                        step=0.01,
-                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['arousal']),
-                                        elem_id='gr_zonos_emotion_arousal',
-                                        info=legends['gr_zonos_emotion_arousal_info']
-                                    )
-                                    gr_zonos_emotion_strength = gr.Slider(
-                                        label=legends['gr_zonos_emotion_strength'],
-                                        minimum=0.0,
-                                        maximum=2.0,
-                                        step=0.05,
-                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_strength']),
-                                        elem_id='gr_zonos_emotion_strength',
-                                        info=legends['gr_zonos_emotion_strength_info']
-                                    )
-                                    gr_zonos_emotion_cfg_scale = gr.Slider(
-                                        label=legends['gr_zonos_emotion_cfg_scale'],
-                                        minimum=1.0,
-                                        maximum=3.0,
-                                        step=0.05,
-                                        value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_cfg_scale']),
-                                        elem_id='gr_zonos_emotion_cfg_scale',
-                                        info=legends['gr_zonos_emotion_cfg_scale_info']
-                                    )
+                            gr_zonos_emotion_happy = gr.Slider(
+                                label=legends['gr_zonos_emotion_happy'],
+                                minimum=0.0,
+                                maximum=1.0,
+                                step=0.01,
+                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['happy']),
+                                elem_id='gr_zonos_emotion_happy'
+                            )
+                            gr_zonos_emotion_sad = gr.Slider(
+                                label=legends['gr_zonos_emotion_sad'],
+                                minimum=0.0,
+                                maximum=1.0,
+                                step=0.01,
+                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['sad']),
+                                elem_id='gr_zonos_emotion_sad'
+                            )
+                            gr_zonos_emotion_angry = gr.Slider(
+                                label=legends['gr_zonos_emotion_angry'],
+                                minimum=0.0,
+                                maximum=1.0,
+                                step=0.01,
+                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['angry']),
+                                elem_id='gr_zonos_emotion_angry'
+                            )
+                            gr_zonos_emotion_surprised = gr.Slider(
+                                label=legends['gr_zonos_emotion_surprised'],
+                                minimum=0.0,
+                                maximum=1.0,
+                                step=0.01,
+                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['surprised']),
+                                elem_id='gr_zonos_emotion_surprised'
+                            )
+                            gr_zonos_emotion_valence = gr.Slider(
+                                label=legends['gr_zonos_emotion_valence'],
+                                minimum=-1.0,
+                                maximum=1.0,
+                                step=0.01,
+                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['valence']),
+                                elem_id='gr_zonos_emotion_valence',
+                                info=legends['gr_zonos_emotion_valence_info']
+                            )
+                            gr_zonos_emotion_arousal = gr.Slider(
+                                label=legends['gr_zonos_emotion_arousal'],
+                                minimum=-1.0,
+                                maximum=1.0,
+                                step=0.01,
+                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion']['arousal']),
+                                elem_id='gr_zonos_emotion_arousal',
+                                info=legends['gr_zonos_emotion_arousal_info']
+                            )
+                            gr_zonos_emotion_strength = gr.Slider(
+                                label=legends['gr_zonos_emotion_strength'],
+                                minimum=0.0,
+                                maximum=2.0,
+                                step=0.05,
+                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_strength']),
+                                elem_id='gr_zonos_emotion_strength',
+                                info=legends['gr_zonos_emotion_strength_info']
+                            )
+                            gr_zonos_emotion_cfg_scale = gr.Slider(
+                                label=legends['gr_zonos_emotion_cfg_scale'],
+                                minimum=1.0,
+                                maximum=3.0,
+                                step=0.05,
+                                value=float(default_engine_settings[TTS_ENGINES['ZONOS']]['emotion_cfg_scale']),
+                                elem_id='gr_zonos_emotion_cfg_scale',
+                                info=legends['gr_zonos_emotion_cfg_scale_info']
+                            )
                     with gr.Tab(legends['gr_tab_gptsovits_params'], elem_id='gr_tab_gptsovits_params', elem_classes='gr-tab', visible=False) as gr_tab_gptsovits_params:
                         gr_markdown_tab_gptsovits_params = gr.Markdown(
                             elem_id='gr_markdown_tab_gptsovits_params',
@@ -4044,7 +4044,7 @@ def build_interface(args:dict)->gr.Blocks:
                         {js_show_elements}
                     }}
                 '''
-)
+            )
             gr_progress.change(
                 fn=None,
                 inputs=[gr_progress],

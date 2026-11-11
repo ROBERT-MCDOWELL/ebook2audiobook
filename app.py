@@ -300,10 +300,10 @@ valence, arousal (-1 to 1).""")
     internal_group.add_argument(cli_options[35], type=str, default=None, help=argparse.SUPPRESS)
 
     for arg in sys.argv:
-         if arg.startswith('--') and arg not in cli_options:
-             error = legends['error_unrecognized_option'].format(arg=arg)
-             print(error)
-             sys.exit(1)
+        if arg.startswith('--') and arg not in cli_options:
+            error = legends['error_unrecognized_option'].format(arg=arg)
+            print(error)
+            sys.exit(1)
 
     args = vars(parser.parse_args())
 
