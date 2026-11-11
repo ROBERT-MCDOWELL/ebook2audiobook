@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': '새 세션을 시작하기 전에 현재 세션 ID를 백업하세요!',
     'msg_session_id_empty': '세션 ID는 비워 둘 수 없습니다',
     'msg_session_not_found': '세션을 찾을 수 없습니다!',
+    'error_session_switch_pending': '세션 스위치가 보류 중입니다. 로드할 세션 ID를 입력하거나 현재 ID로 🔑 다시 클릭하여 취소합니다.',
     'error_audio_not_found': '오디오를 찾을 수 없습니다: {file}',
     'error_length_penalty_rule': '길이 페널티는 1.0보다 크면 항상 빔 수보다 작아야 하고, 1.0이면 같아야 합니다',
     'error_num_beams_rule': '빔 수는 항상 길이 페널티보다 커야 하며, 그 값이 1.0이면 같아야 합니다',

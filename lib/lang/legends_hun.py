@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': 'Mentse el a jelenlegi munkamenet-azonosítót, mielőtt újat kezd!',
     'msg_session_id_empty': 'A munkamenet-azonosító nem lehet üres',
     'msg_session_not_found': 'A munkamenet nem található!',
+    'error_session_switch_pending': 'Egy munkamenetváltás függőben van: add meg a betölteni kívánt munkamenet-azonosítót, vagy kattints 🔑 újra az aktuális azonosítóval a törléshez.',
     'error_audio_not_found': 'Hang nem található: {file}',
     'error_length_penalty_rule': 'A hosszbüntetésnek mindig kisebbnek kell lennie a nyalábok számánál, ha nagyobb 1.0-nál, vagy egyenlőnek, ha 1.0',
     'error_num_beams_rule': 'A nyalábok számának mindig nagyobbnak kell lennie a hosszbüntetésnél, vagy egyenlőnek, ha annak értéke 1.0',

@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': '新しいセッションを始める前に、現在のセッション ID を控えておいてください！',
     'msg_session_id_empty': 'セッション ID を空にすることはできません',
     'msg_session_not_found': 'セッションが見つかりません！',
+    'error_session_switch_pending': 'セッションの切り替えが保留中です：読み込むセッションIDを入力するか、現在のIDを使用して🔑もう一度クリックしてキャンセルします。',
     'error_audio_not_found': '音声が見つかりません: {file}',
     'error_length_penalty_rule': '長さペナルティは、1.0 より大きい場合は常にビーム数より小さく、1.0 の場合は等しくする必要があります',
     'error_num_beams_rule': 'ビーム数は常に長さペナルティより大きく、その値が 1.0 の場合は等しくする必要があります',

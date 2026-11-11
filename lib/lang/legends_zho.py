@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': '开始新会话前，请先备份当前会话 ID！',
     'msg_session_id_empty': '会话 ID 不能为空',
     'msg_session_not_found': '未找到会话！',
+    'error_session_switch_pending': '会话切换处于挂起状态：输入要加载的会话ID ，或使用当前ID🔑再次单击以取消。',
     'error_audio_not_found': '未找到音频：{file}',
     'error_length_penalty_rule': '长度惩罚大于 1.0 时必须始终小于束数量，等于 1.0 时则须相等',
     'error_num_beams_rule': '束数量必须始终大于长度惩罚，若其值为 1.0 则须相等',

@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': 'Yeni bir oturum başlatmadan önce mevcut oturum kimliğinizi yedekleyin!',
     'msg_session_id_empty': 'Oturum kimliği boş olamaz',
     'msg_session_not_found': 'Oturum bulunamadı!',
+    'error_session_switch_pending': 'Bir oturum değişikliği beklemede: yüklenecek oturum kimliğini girin veya iptal etmek için mevcut kimliğinizle 🔑 tekrar tıklayın.',
     'error_audio_not_found': 'Ses bulunamadı: {file}',
     'error_length_penalty_rule': 'Uzunluk cezası 1.0\'dan büyükse her zaman ışın sayısından küçük, 1.0 ise eşit olmalıdır',
     'error_num_beams_rule': 'Işın sayısı her zaman uzunluk cezasından büyük olmalı, değeri 1.0 ise eşit olmalıdır',

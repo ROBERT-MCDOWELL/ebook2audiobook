@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': 'Back up your current session ID before starting a new one!',
     'msg_session_id_empty': 'Session ID cannot be empty',
     'msg_session_not_found': 'Session not found!',
+    'error_session_switch_pending': 'A session switch is pending: enter the session ID to load, or click 🔑 again with your current ID to cancel it.',
     'error_audio_not_found': 'Audio not found: {file}',
     'error_length_penalty_rule': 'Length penalty must always be lower than num beams if greater than 1.0, or equal if 1.0',
     'error_num_beams_rule': 'Num beams must always be higher than length penalty, or equal if its value is 1.0',

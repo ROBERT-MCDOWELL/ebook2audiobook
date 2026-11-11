@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': '¡Guarde su ID de sesión actual antes de empezar una nueva!',
     'msg_session_id_empty': 'El ID de sesión no puede estar vacío',
     'msg_session_not_found': '¡Sesión no encontrada!',
+    'error_session_switch_pending': 'Hay un cambio de sesión pendiente: introduce el ID de sesión que quieres cargar o 🔑 vuelve a hacer clic con tu ID actual para cancelarlo.',
     'error_audio_not_found': 'Audio no encontrado: {file}',
     'error_length_penalty_rule': 'La penalización por longitud debe ser siempre menor que el número de haces si es mayor que 1.0, o igual si es 1.0',
     'error_num_beams_rule': 'El número de haces debe ser siempre mayor que la penalización por longitud, o igual si su valor es 1.0',

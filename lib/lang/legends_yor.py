@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': 'Ẹ ṣe ẹ̀dà ìdánimọ̀ ìgbà ìlò yín lọ́wọ́lọ́wọ́ kí ẹ tó bẹ̀rẹ̀ tuntun!',
     'msg_session_id_empty': 'Ìdánimọ̀ ìgbà ìlò kò lè ṣófo',
     'msg_session_not_found': 'A kò rí ìgbà ìlò náà!',
+    'error_session_switch_pending': 'Ìyípadà ìtòlẹ́sẹẹsẹ ń dúró dè é: tẹ ID ìtòlẹ́sẹẹsẹ láti gbé, tàbí tẹ 🔑 lẹ́ẹ̀kan síi pẹ̀lú ID ìsinsìnyí rẹ láti fagilé rẹ̀.',
     'error_audio_not_found': 'A kò rí ohùn: {file}',
     'error_length_penalty_rule': 'Ìjìyà gígùn gbọdọ̀ máa kéré ju iye beam lọ tí ó bá ju 1.0 lọ, tàbí kí ó dọ́gba tí ó bá jẹ́ 1.0',
     'error_num_beams_rule': 'Iye beam gbọdọ̀ máa ju ìjìyà gígùn lọ, tàbí kí ó dọ́gba tí iye rẹ̀ bá jẹ́ 1.0',

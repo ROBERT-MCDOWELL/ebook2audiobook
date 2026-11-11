@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': 'Sauvegardez votre ID de session actuel avant d\'en commencer un nouveau !',
     'msg_session_id_empty': 'L\'ID de session ne peut pas être vide',
     'msg_session_not_found': 'Session introuvable !',
+    'error_session_switch_pending': 'Un changement de session est en attente : entrez l\'ID de session à charger ou cliquez 🔑 à nouveau avec votre ID actuel pour l\'annuler.',
     'error_audio_not_found': 'Audio introuvable : {file}',
     'error_length_penalty_rule': 'La pénalité de longueur doit toujours être inférieure au nombre de faisceaux si elle dépasse 1.0, ou égale si elle vaut 1.0',
     'error_num_beams_rule': 'Le nombre de faisceaux doit toujours être supérieur à la pénalité de longueur, ou égal si sa valeur est 1.0',

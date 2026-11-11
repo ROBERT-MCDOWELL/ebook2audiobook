@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': 'Salve o ID da sua sessão atual antes de iniciar uma nova!',
     'msg_session_id_empty': 'O ID da sessão não pode ficar vazio',
     'msg_session_not_found': 'Sessão não encontrada!',
+    'error_session_switch_pending': 'Uma opção de sessão está pendente: insira o ID da sessão para carregar ou clique 🔑 novamente com o seu ID atual para cancelá-la.',
     'error_audio_not_found': 'Áudio não encontrado: {file}',
     'error_length_penalty_rule': 'A penalidade de comprimento deve ser sempre menor que o número de feixes se for maior que 1.0, ou igual se for 1.0',
     'error_num_beams_rule': 'O número de feixes deve ser sempre maior que a penalidade de comprimento, ou igual se o valor dela for 1.0',

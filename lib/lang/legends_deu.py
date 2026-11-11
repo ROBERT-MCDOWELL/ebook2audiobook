@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': 'Sichere deine aktuelle Sitzungs-ID, bevor du eine neue beginnst!',
     'msg_session_id_empty': 'Die Sitzungs-ID darf nicht leer sein',
     'msg_session_not_found': 'Sitzung nicht gefunden!',
+    'error_session_switch_pending': 'Ein Sitzungswechsel steht noch aus: Geben Sie die zu ladende Sitzungs-ID ein oder klicken Sie 🔑 erneut mit Ihrer aktuellen ID, um sie abzubrechen.',
     'error_audio_not_found': 'Audio nicht gefunden: {file}',
     'error_length_penalty_rule': 'Die Längenstrafe muss immer kleiner als die Anzahl Beams sein, wenn sie größer als 1.0 ist, oder gleich, wenn sie 1.0 ist',
     'error_num_beams_rule': 'Die Anzahl Beams muss immer größer als die Längenstrafe sein, oder gleich, wenn deren Wert 1.0 ist',

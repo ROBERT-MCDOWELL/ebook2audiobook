@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': 'Cadangkan ID sesi Anda saat ini sebelum memulai sesi baru!',
     'msg_session_id_empty': 'ID sesi tidak boleh kosong',
     'msg_session_not_found': 'Sesi tidak ditemukan!',
+    'error_session_switch_pending': 'Sakelar sesi berstatus tunggu: masukkan ID sesi untuk dimuat, atau klik 🔑 lagi dengan ID Anda saat ini untuk membatalkannya.',
     'error_audio_not_found': 'Audio tidak ditemukan: {file}',
     'error_length_penalty_rule': 'Penalti panjang harus selalu lebih kecil dari jumlah beam jika lebih dari 1.0, atau sama jika 1.0',
     'error_num_beams_rule': 'Jumlah beam harus selalu lebih besar dari penalti panjang, atau sama jika nilainya 1.0',

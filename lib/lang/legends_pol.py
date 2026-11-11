@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': 'Zapisz obecny identyfikator sesji, zanim rozpoczniesz nową!',
     'msg_session_id_empty': 'Identyfikator sesji nie może być pusty',
     'msg_session_not_found': 'Nie znaleziono sesji!',
+    'error_session_switch_pending': 'Przełącznik sesji jest w toku: wprowadź identyfikator sesji do załadowania lub kliknij 🔑 ponownie z bieżącym identyfikatorem, aby go anulować.',
     'error_audio_not_found': 'Nie znaleziono audio: {file}',
     'error_length_penalty_rule': 'Kara za długość musi być zawsze mniejsza od liczby wiązek, jeśli przekracza 1.0, lub równa, jeśli wynosi 1.0',
     'error_num_beams_rule': 'Liczba wiązek musi być zawsze większa od kary za długość lub równa, jeśli jej wartość wynosi 1.0',

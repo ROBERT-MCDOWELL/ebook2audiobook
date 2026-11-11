@@ -198,6 +198,7 @@ legends = {
     'msg_backup_session_id': 'Simpen ID sesi saiki sadurunge miwiti sing anyar!',
     'msg_session_id_empty': 'ID sesi ora oleh kosong',
     'msg_session_not_found': 'Sesi ora ditemokake!',
+    'error_session_switch_pending': 'Saklar sesi lagi diterusake: ketik ID sesi kanggo mbukak, utawa klik 🔑 maneh karo ID saiki kanggo mbatalake.',
     'error_audio_not_found': 'Audio ora ditemokake: {file}',
     'error_length_penalty_rule': 'Penalti dawa kudu tansah luwih cilik tinimbang cacahe beam yen luwih saka 1.0, utawa padha yen 1.0',
     'error_num_beams_rule': 'Cacahe beam kudu tansah luwih gedhe tinimbang penalti dawa, utawa padha yen nilaine 1.0',
