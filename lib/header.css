@@ -440,9 +440,10 @@ span[data-testid="block-info"] {
 	align-items: center !important;
 }
 #gr_interlude_enabled {
-	align-self: right !important; 
+	margin-left: auto !important;
+	align-self: center !important; 
 	overflow: visible !important;
-	padding: 20px 0 20px 10px !important;
+	padding: 20px 0 20px 20px !important;
 }
 #gr_blocks_preview {
 	align-self: center !important; 
