@@ -8,6 +8,10 @@ from lib.lang import legends
 
 class DeviceInstaller():
     device_pkgs = ['onnxruntime', 'transformers']
+    # 2.11 is the final torchaudio line: it works with torch 2.11 and every later torch,
+    # so above it torchaudio is clamped instead of tracking torch. its patch releases
+    # are not on every index (cu132: no 2.11.0 at all, only 2.11.1+cu132 on nightly),
+    # so the PyTorch index path accepts any 2.11.x >= this, see torchaudio_spec().
     torchaudio_max = '2.11.0'
     # installed torch below the key -> transformers must stay below the value.
     # 2.4: 5.1+ declares torch>=2.4 and silently disables PyTorch below it.
@@ -1353,6 +1357,23 @@ class DeviceInstaller():
             return self.torchaudio_max
         return torch_version
 
+    def torchaudio_spec(self, torch_version:str)->str:
+        # requirement for the PyTorch index path (CUDA, CPU, XPU, ROCm linux). from the
+        # ceiling on, any 2.11.x patch is valid and uv takes the highest one the stable or
+        # nightly index carries for this tag. explicit wheel URLs (jetson, vulkan, windows
+        # rocm) keep torchaudio_version(): their filenames are exact.
+        if self.version_tuple(torch_version, 3) >= self.version_tuple(self.torchaudio_max, 3):
+            return f'torchaudio~={self.torchaudio_max}'
+        return f'torchaudio=={torch_version}'
+
+    def torchaudio_ok(self, installed_version:str, torch_version:str)->bool:
+        # does the installed torchaudio base version satisfy torchaudio_spec(torch_version)
+        if self.version_tuple(torch_version, 3) >= self.version_tuple(self.torchaudio_max, 3):
+            installed = self.version_tuple(installed_version, 3)
+            ceiling = self.version_tuple(self.torchaudio_max, 3)
+            return installed[:2] == ceiling[:2] and installed >= ceiling
+        return installed_version == torch_version
+
     def eval_marker(self, marker_part:str)->tuple|bool:
         env = {
             'python_version': '.'.join(map(str, sys.version_info[:2])),
@@ -1892,14 +1913,15 @@ class DeviceInstaller():
             if not _tag_ok(current_tag):
                 return True
             # torchaudio: base version + local tag must match what we'd install for this device.
-            # Compare against the CAPPED version, not torch_version_matrix — above the
-            # ceiling the two differ by design, and comparing to torch would report
-            # "needs reinstall" on every single run and reinstall torch with it.
+            # Compare against torchaudio_spec, not torch_version_matrix — above the
+            # ceiling the two differ by design, and any 2.11.x patch is accepted there:
+            # an exact compare would report "needs reinstall" on every single run and
+            # reinstall torch with it.
             torchaudio_full = self.get_package_version('torchaudio')
             if not torchaudio_full:
                 return True
             torchaudio_base = torchaudio_full.split('+', 1)[0]
-            if torchaudio_base != self.torchaudio_version(torch_version_matrix):
+            if not self.torchaudio_ok(torchaudio_base, torch_version_matrix):
                 return True
             m_ta = re.search(r'\+(.+)$', torchaudio_full)
             torchaudio_tag = m_ta.group(1) if m_ta else None
@@ -2008,7 +2030,7 @@ class DeviceInstaller():
                                 if self.system == systems['WINDOWS'] and tag.startswith('win-cu'):
                                     torch_url_tag = tag.replace('win-', '')
                                 subprocess.check_call(self._uv_pip('install', '--reinstall-package', 'torch', '--no-cache', f'torch=={torch_version_matrix}', '--index-url', f'{url}/{torch_url_tag}', '--extra-index-url', f'{url_nightly}/{torch_url_tag}', '--index-strategy', 'unsafe-best-match'))
-                                subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', f'torchaudio=={torchaudio_version_matrix}', '--index-url', f'{url}/{torchaudio_url_tag}', '--extra-index-url', f'{url_nightly}/{torchaudio_url_tag}', '--index-strategy', 'unsafe-best-match'))
+                                subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', self.torchaudio_spec(torch_version_matrix), '--index-url', f'{url}/{torchaudio_url_tag}', '--extra-index-url', f'{url_nightly}/{torchaudio_url_tag}', '--index-strategy', 'unsafe-best-match'))
                             if not self.check_numpy():
                                 return 1
                             #### torchcodec installation

@@ -349,6 +349,23 @@ class TTSUtils:
             return torch.float32
         return amp_dtype
 
+    def _route_speaker_encoder_input(self, model:Any)->None:
+        # coqui builds TTS(model_path) with gpu=False, so SpeakerManager.use_cuda stays False while
+        # .to(device) moves the registered speaker encoder (YourTTS d-vector) onto the accelerator.
+        # compute_embedding_from_clip() then feeds the reference clip from CPU into a GPU encoder.
+        # use_cuda cannot express mps/xpu anyway, so send the input to wherever the encoder lives.
+        def _on_encoder_device(encoder:'Module')->Any:
+            compute_embedding = encoder.compute_embedding
+            def compute_embedding_on_device(x:'Tensor', *args:Any, **kwargs:Any)->'Tensor':
+                return compute_embedding(x.to(next(encoder.parameters()).device), *args, **kwargs)
+            return compute_embedding_on_device
+        for _, m in model.named_modules():
+            encoder = getattr(getattr(m, 'speaker_manager', None), 'encoder', None)
+            if encoder is None or getattr(encoder, '_input_device_routed', False):
+                continue
+            encoder.compute_embedding = _on_encoder_device(encoder)
+            encoder._input_device_routed = True
+
     def _load_api(self, key:str, model_path:str, device:str)->Any:
         try:
             with _lock:
@@ -407,6 +424,7 @@ class TTSUtils:
                             if b.device != target_dev:
                                 persistent = bname not in m._non_persistent_buffers_set
                                 m.register_buffer(bname, b.to(device), persistent=persistent)
+                    self._route_speaker_encoder_input(syn)
                 # --- UNIVERSAL XPU WORKAROUND ---
                 # Automatically finds and patches any Coqui HiFi-GAN vocoder 
                 # (XTTS, VITS, YourTTS, etc.) to run on CPU and bypass oneDNN JIT bugs.
@@ -546,6 +564,7 @@ class TTSUtils:
                                     if b.device != target_dev:
                                         persistent = bname not in m._non_persistent_buffers_set
                                         m.register_buffer(bname, b.to(device), persistent=persistent)
+                            self._route_speaker_encoder_input(tgt)
                     # --- UNIVERSAL XPU WORKAROUND ---
                     # Automatically finds and patches any Coqui HiFi-GAN vocoder 
                     # (XTTS, VITS, YourTTS, etc.) to run on CPU and bypass oneDNN JIT bugs.
