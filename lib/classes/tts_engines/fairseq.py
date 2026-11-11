@@ -135,6 +135,7 @@ class Fairseq(TTSUtils, TTSRegistry, name='fairseq'):
                     if not any(c.isalnum() for c in part):
                         continue
                     else:
+                        trim_audio_buffer = 0.002
                         if part.endswith("'"):
                             part = part[:-1]
                         part = re.sub(not_supported_punc_pattern, ' ', part).strip()
@@ -154,37 +155,6 @@ class Fairseq(TTSUtils, TTSRegistry, name='fairseq'):
                                                 text=part,
                                                 file_path=tmp_in_wav
                                             )
-                                # gender pitch pre-shift (sox), off: the voice conversion takes the pitch from the target voice
-                                #if self.params['current_voice'] in self.params['semitones'].keys():
-                                #    semitones = self.params['semitones'][self.params['current_voice']]
-                                #else:
-                                #    current_voice_gender = detect_gender(self.params['current_voice'])
-                                #    voice_builtin_gender = detect_gender(tmp_in_wav)
-                                #    if voice_builtin_gender != current_voice_gender:
-                                #        semitones = -4 if current_voice_gender == 'male' else 4
-                                #        msg = legends['msg_voice_gender_adapt'].format(cloned=current_voice_gender, builtin=voice_builtin_gender)
-                                #        print(msg)
-                                #    else:
-                                #        semitones = 0
-                                #    self.params['semitones'][self.params['current_voice']] = semitones
-                                #if semitones > 0:
-                                #    try:
-                                #        cmd = [
-                                #            shutil.which('sox'), tmp_in_wav,
-                                #            '-r', str(self.params['samplerate']), tmp_out_wav,
-                                #            'pitch', str(semitones * 100)
-                                #        ]
-                                #        subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                                #    except subprocess.CalledProcessError as e:
-                                #        error = legends['error_subprocess'].format(e=e.stderr)
-                                #        DependencyError(error)
-                                #        return False, error
-                                #    except FileNotFoundError as e:
-                                #        error = legends['error_file_not_found_detail'].format(e=e)
-                                #        DependencyError(error)
-                                #        return False, error
-                                #else:
-                                #    tmp_out_wav = tmp_in_wav
                                 tmp_out_wav = tmp_in_wav
                                 # voice conversion worker (VoiceConversion, default_vc_model): only paths and the text cross the pipe, the
                                 # worker cuts and keeps one reference clip per voice file and the server resamples both sides itself
@@ -232,6 +202,8 @@ class Fairseq(TTSUtils, TTSRegistry, name='fairseq'):
                                 if part_tensor.numel() == 0:
                                     error = 'part_tensor not valid'
                                     return False, error
+                                if part[-1].isalnum() or part[-1] == '—':
+                                    part_tensor = trim_audio(part_tensor.squeeze(0), self.params['samplerate'], 0.001, trim_audio_buffer).unsqueeze(0)
                                 self.audio_segments.append(part_tensor)
                             else:
                                 error = 'audio_part not valid'
