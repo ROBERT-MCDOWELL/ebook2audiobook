@@ -2125,7 +2125,7 @@ def get_sentences(session_id:str, text:str)->list|None:
         assert not SML_TAG_PATTERN.search(text)
         if session['is_gui_process']:
             msg = legends['msg_segment'].format(n=1)
-            progress_bar(0, desc='')
+            progress_bar(0, desc=msg)
         # Tokenize into content and SML runs
         segments = []
         idx = 0

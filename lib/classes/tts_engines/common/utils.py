@@ -1,4 +1,4 @@
-import os, sys, threading, gc, ctypes, tempfile, trainer.io, regex as re
+import os, sys, time, threading, gc, ctypes, tempfile, trainer.io, regex as re
 
 from typing import Any, TYPE_CHECKING
 from pathlib import Path
@@ -107,6 +107,32 @@ def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None, offs
     except Exception as e:
         error = f'build_vtt_file(): {e}'
         return False, error
+
+def tqdm_progress(label:str)->Any:
+    # gr.Progress(track_tqdm=True) for a model load. The bars a library draws there (coqui's downloads: no desc, one update
+    # per KiB) showed as a bare percentage, and each update queued one more progress message that the browser replayed in
+    # order: a background tab kept crawling through the load long after the conversion had started. Bars with no desc
+    # show label instead, and reach gradio at most every interface_progress_interval seconds, or when one completes
+    import gradio as gr
+    class TqdmProgress(gr.Progress):
+        def __init__(self)->None:
+            super().__init__(track_tqdm=True)
+            self.pushed = 0.0
+        def tqdm(self, iterable:Any, desc:str|None=None, total:int|float|None=None, unit:str='steps', _tqdm:Any=None)->Any:
+            return super().tqdm(iterable, desc or label, total, unit, _tqdm)
+        def _progress_callback(self)->Any:
+            callback = gr.Progress._progress_callback()
+            if callback is None:
+                return None
+            def throttled(iterables:list)->None:
+                now = time.monotonic()
+                last = iterables[-1] if iterables else None
+                done = last is not None and bool(last.length) and last.index is not None and last.index >= last.length
+                if done or now - self.pushed >= interface_progress_interval:
+                    self.pushed = now
+                    callback(iterables)
+            return throttled
+    return TqdmProgress()
 
 class TTSUtils:
 
@@ -380,11 +406,10 @@ class TTSUtils:
                     progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
                     tqdm_token = None
                     if progress_bar is not None:
-                        import gradio as gr
                         from gradio.context import LocalContext
                         msg = legends['msg_loading_model'].format(model=key)
                         progress_bar((0, 3), desc=msg)
-                        tqdm_token = LocalContext.progress.set(gr.Progress(track_tqdm=True))
+                        tqdm_token = LocalContext.progress.set(tqdm_progress(msg))
                     try:
                         engine = TTSEngine(model_path)
                     finally:

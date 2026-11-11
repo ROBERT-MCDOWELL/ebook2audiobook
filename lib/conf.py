@@ -233,6 +233,7 @@ interface_host = '0.0.0.0'
 interface_port = 7860
 interface_shared_tmp_expire = 3 # in days
 interface_concurrency_limit = 1 # or None for unlimited multiple parallele user conversion
+interface_progress_interval = 0.2 # in seconds, min delay between two progress bar updates sent to the browser
 
 interface_component_options = {
     "gr_tab_xtts_params": True,

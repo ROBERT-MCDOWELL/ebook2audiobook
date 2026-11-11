@@ -595,7 +595,12 @@ valence, arousal (-1 to 1).""")
                             "css_paths": header_css,
                             "footer_links": ["settings"]
                         }
-                        app.queue(default_concurrency_limit=interface_concurrency_limit).launch(**gr_blocks_kwargs)
+                        app.queue(default_concurrency_limit=interface_concurrency_limit)
+                        # gradio sends the latest progress of a running event every 10ms (100ms on Windows) and the browser
+                        # replays each one in order: a background tab (throttled or frozen by the browser) piled them up and
+                        # kept showing an old step long after the server had moved on. Set after queue(), which builds the queue
+                        app._queue.progress_update_sleep_when_free = interface_progress_interval
+                        app.launch(**gr_blocks_kwargs)
                 except OSError as e:
                     error = legends['error_connection'].format(e=e)
                     c.exception_alert(None, error)
