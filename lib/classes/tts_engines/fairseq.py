@@ -54,9 +54,34 @@ class Fairseq(TTSUtils, TTSRegistry, name='fairseq'):
             self.xtts_speakers = self._load_xtts_builtin_list()
             self.device = devices['CUDA']['proc'] if self.session['device'] in [devices['CUDA']['proc'], devices['ROCM']['proc'], devices['JETSON']['proc']] else self.session['device']
             self.engine = self.load_engine()
+            self.model_vocab = self._load_model_vocab()
         except Exception as e:
             error = f'__init__() error: {e}'
             raise ValueError(error)
+
+    def _load_model_vocab(self)->set|None:
+        # the characters the model was trained on (its vocab.txt). None for a uroman model: its cleaner romanizes
+        # the native script itself, so its input must reach coqui untouched
+        tokenizer = getattr(getattr(getattr(self.engine, 'synthesizer', None), 'tts_model', None), 'tokenizer', None)
+        if tokenizer is None or getattr(tokenizer.text_cleaner, '__name__', '') == 'uroman_cleaners':
+            return None
+        return set(tokenizer.characters.vocab)
+
+    def _fold_to_model_vocab(self, text:str)->str:
+        # coqui drops every character missing from the vocab, so an accented letter the model never saw (javanese
+        # é, è) became a missing vowel: "sèket" read as "sket". It becomes its base letter when that one is in the
+        # vocab, the spelling the model was trained on. Letters the vocab holds are kept as they are
+        if not self.model_vocab:
+            return text
+        import unicodedata
+        folded = []
+        for char in unicodedata.normalize('NFC', text).lower():
+            if char not in self.model_vocab:
+                base = ''.join(c for c in unicodedata.normalize('NFKD', char) if not unicodedata.combining(c))
+                if base and all(c in self.model_vocab for c in base):
+                    char = base
+            folded.append(char)
+        return ''.join(folded)
 
     def load_engine(self)->Any:
         try:
@@ -139,6 +164,7 @@ class Fairseq(TTSUtils, TTSRegistry, name='fairseq'):
                         if part.endswith("'"):
                             part = part[:-1]
                         part = re.sub(not_supported_punc_pattern, ' ', part).strip()
+                        part = self._fold_to_model_vocab(part)
                         try:
                             if use_zs:
                                 if not self.engine_zs:
