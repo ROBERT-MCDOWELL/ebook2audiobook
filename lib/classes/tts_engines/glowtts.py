@@ -125,6 +125,7 @@ class GlowTTS(TTSUtils, TTSRegistry, name='glowtts'):
                     if not any(c.isalnum() for c in part):
                         continue
                     else:
+                        trim_audio_buffer = 0.002
                         if part.endswith("'"):
                             part = part[:-1]
                         #part = re.sub(not_supported_punc_pattern, ' ', part).strip()
@@ -231,6 +232,8 @@ class GlowTTS(TTSUtils, TTSRegistry, name='glowtts'):
                                 if part_tensor.numel() == 0:
                                     error = 'part_tensor not valid'
                                     return False, error
+                                if part[-1].isalnum() or part[-1] == '—':
+                                    part_tensor = trim_audio(part_tensor.squeeze(0), self.params['samplerate'], 0.001, trim_audio_buffer).unsqueeze(0)
                                 self.audio_segments.append(part_tensor)
                             else:
                                 error = 'audio_part not valid'
