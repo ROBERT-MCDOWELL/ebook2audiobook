@@ -675,6 +675,25 @@ def build_interface(args:dict)->gr.Blocks:
             
             ############## End of Gradio Components creation
 
+            def _lock_error(session_id:str, legend_key:str='error_conversion_running')->str:
+                # message for a task refused because the session status (the lock) is not READY/END
+                session = context.get_session(session_id)
+                if session and session.get('status') == status_tags['SWITCH']:
+                    return legends['error_session_switch_pending']
+                return legends[legend_key]
+
+            def _release_lock(session_id:str)->bool:
+                # end of a task: back to READY, or end the session if its tab was closed meanwhile
+                # (on_unload() only flags a CONVERTING session, the task is the one to end it)
+                session = context.get_session(session_id)
+                if session and session.get('id', False):
+                    if session['status'] == status_tags['DISCONNECTED']:
+                        context_tracker.end_session(session_id, session['socket_hash'])
+                        return False
+                    session['status'] = status_tags['READY']
+                    return True
+                return False
+
             def _disable_components(session_id:str, exceptions:list|None=None)->tuple:
                 if session_id is None:
                     outputs = tuple([gr.update() for _ in range(len(outputs_disable_components))])
@@ -1313,9 +1332,11 @@ def build_interface(args:dict)->gr.Blocks:
                     if session and session.get('id', False):
                         if session['audiobook'] is not None: 
                             vtt = Path(session['audiobook']).with_suffix('.vtt')
+                            # a warning, not exception_alert(): the list stays usable during a conversion and
+                            # exception_alert() would put the session back to READY, releasing the lock it holds
                             if not os.path.exists(session['audiobook']) or not os.path.exists(vtt):
                                 error = legends['error_file_not_found'].format(name=Path(session['audiobook']).name)
-                                exception_alert(session_id, error)
+                                show_alert(session_id, {"type": "warning", "msg": error})
                                 return gr.update(value=0.0), gr.update(value=None), gr.update(value=None)
                             audio_info = mediainfo(session['audiobook'])
                             duration = audio_info.get('duration', False)
@@ -1326,7 +1347,7 @@ def build_interface(args:dict)->gr.Blocks:
                                 return gr.update(value=0.0), gr.update(value=session['audiobook']), gr.update(value=vtt_content)
                             else:
                                 error = legends['error_audiobook_corrupted'].format(name=Path(session['audiobook']).name)
-                                exception_alert(session_id, error)
+                                show_alert(session_id, {"type": "warning", "msg": error})
                 except Exception as e:
                     error = f'_update_gr_audiobook_player(): {e}'
                     exception_alert(session_id, error)
@@ -1505,7 +1526,7 @@ def build_interface(args:dict)->gr.Blocks:
                         else:                  
                             session = context.get_session(session_id)
                             if session and session.get('id', False) and session['status'] not in [status_tags['READY'], status_tags['END']]:
-                                error = legends['error_conversion_running']
+                                error = _lock_error(session_id)
                                 state['type'] = 'warning'
                                 state['msg'] = error
                             elif session and session.get('id', False):
@@ -1518,7 +1539,7 @@ def build_interface(args:dict)->gr.Blocks:
                                     extractor = VoiceExtractor(session, f, voice_name)
                                     status, msg = extractor.extract_voice()
                                 finally:
-                                    session['status'] = status_tags['READY']
+                                    _release_lock(session_id)
                                 if status:
                                     session['voice'] = final_voice_file
                                     if session.get('ebook_mode') == ebook_modes['DIRECTORY'] and session.get('ebook_selected'):
@@ -1571,7 +1592,7 @@ def build_interface(args:dict)->gr.Blocks:
                         session = context.get_session(session_id)
                         if session and session.get('id', False):
                             if session['status'] not in [status_tags['READY'], status_tags['END']]:
-                                error = legends['error_conversion_running']
+                                error = _lock_error(session_id)
                                 show_alert(session_id, {"type": "warning", "msg": error})
                                 return gr.update(visible=False), gr.update()
                             speaker_path = os.path.abspath(selected)
@@ -1621,7 +1642,7 @@ def build_interface(args:dict)->gr.Blocks:
                         session = context.get_session(session_id)
                         if session and session.get('id', False):
                             if session['status'] not in [status_tags['READY'], status_tags['END']]:
-                                error = legends['error_conversion_running']
+                                error = _lock_error(session_id)
                                 show_alert(session_id, {"type": "warning", "msg": error})
                             elif _is_custom_model(session['custom_model_dir'], selected):
                                 selected_name = os.path.basename(selected)
@@ -1640,7 +1661,7 @@ def build_interface(args:dict)->gr.Blocks:
                         if session and session.get('id', False):
                             selected_name = Path(selected).stem
                             if session['status'] not in [status_tags['READY'], status_tags['END']]:
-                                error = legends['error_conversion_running']
+                                error = _lock_error(session_id)
                                 show_alert(session_id, {"type": "warning", "msg": error})
                                 return gr.update(visible=False), gr.update()
                             session['status'] = status_tags['DELETION']
@@ -1710,7 +1731,7 @@ def build_interface(args:dict)->gr.Blocks:
                     if session and session.get('id', False):
                         error = None
                         if session['status'] not in [status_tags['READY'], status_tags['END']]:
-                            error = legends['error_editor_unavailable']
+                            error = _lock_error(session_id, 'error_editor_unavailable')
                         elif not audiobook or not os.path.exists(audiobook):
                             error = legends['error_no_audiobook_selected']
                         else:
@@ -1878,7 +1899,7 @@ def build_interface(args:dict)->gr.Blocks:
                         interlude = session['audiobook_edit_interlude']
                         interlude_file = os.path.join(session['chapters_dir'], 'interludes', f'{interlude}-{interlude + 1}.{default_audio_proc_format}') if session.get('chapters_dir') else ''
                         if session['status'] not in [status_tags['READY'], status_tags['END']]:
-                            error = legends['error_conversion_running']
+                            error = _lock_error(session_id)
                         elif not session.get('process_dir') or not os.path.exists(interlude_file):
                             error = legends['error_edit_context_lost']
                         elif len(prompt) > 500:
@@ -1923,7 +1944,7 @@ def build_interface(args:dict)->gr.Blocks:
                                         torch.cuda.empty_cache()
                                 except Exception:
                                     pass
-                                session['status'] = status_tags['READY']
+                                _release_lock(session_id)
                         show_alert(session_id, {"type": "warning", "msg": error})
                         return gr.update(), gr.update(interactive=True), gr.update(interactive=bool(session.get('audiobook_edit_preview'))), gr.update(interactive=True)
                     if session and session.get('id', False):
@@ -1939,7 +1960,7 @@ def build_interface(args:dict)->gr.Blocks:
                         max_chars = int(language_mapping[lang]['max_chars'] / 1.5)
                         sentence_len = len(' '.join(SML_TAG_PATTERN.sub('', text).split()))
                         if session['status'] not in [status_tags['READY'], status_tags['END']]:
-                            error = legends['error_conversion_running']
+                            error = _lock_error(session_id)
                         elif block is None or not session.get('process_dir'):
                             error = legends['error_edit_context_lost']
                         elif len(raw_text) > 500:
@@ -1993,7 +2014,7 @@ def build_interface(args:dict)->gr.Blocks:
                                 if not converted:
                                     unload_tts_manager(tts_manager)
                                 session['tts_engine'], session['fine_tuned'], session['model_cache'] = engine_backup
-                                session['status'] = status_tags['READY']
+                                _release_lock(session_id)
                         if error is not None:
                             show_alert(session_id, {"type": "warning", "msg": error})
                         return gr.update(), gr.update(interactive=True), gr.update(interactive=bool(session.get('audiobook_edit_preview'))), gr.update(interactive=True)
@@ -2012,7 +2033,7 @@ def build_interface(args:dict)->gr.Blocks:
                         preview_file = session.get('audiobook_edit_preview')
                         interlude_file = os.path.join(session['chapters_dir'], 'interludes', f'{interlude}-{interlude + 1}.{default_audio_proc_format}') if session.get('chapters_dir') else ''
                         if session['status'] not in [status_tags['READY'], status_tags['END']]:
-                            error = legends['error_conversion_running']
+                            error = _lock_error(session_id)
                         elif not os.path.exists(interlude_file):
                             error = legends['error_edit_context_lost']
                         elif not preview_file or not os.path.exists(preview_file):
@@ -2080,7 +2101,7 @@ def build_interface(args:dict)->gr.Blocks:
                         blocks_saved = session.get('blocks_saved') or {}
                         block = next((b for b in blocks_saved.get('blocks', []) if b['id'] == block_id), None)
                         if session['status'] not in [status_tags['READY'], status_tags['END']]:
-                            error = legends['error_conversion_running']
+                            error = _lock_error(session_id)
                         elif block is None or sentence_idx is None or sentence_idx >= len(block.get('sentences', [])):
                             error = legends['error_edit_context_lost']
                         elif not preview_file or not os.path.exists(preview_file):
@@ -2126,7 +2147,7 @@ def build_interface(args:dict)->gr.Blocks:
                                     combine_audio_sentences(session_id, chapter_file, block_id, sentence_count)
                                     error = 'combine_audio_sentences() failed! original sentence restored.'
                             finally:
-                                session['status'] = status_tags['READY']
+                                _release_lock(session_id)
                             if error is None:
                                 Path(os.path.join(session['process_dir'], f"__edit_pending_{session['final_name']}")).touch()
                                 session['audiobook_edit_pending'] = True
@@ -2226,7 +2247,7 @@ def build_interface(args:dict)->gr.Blocks:
                         error = None
                         target = audiobook
                         if session['status'] not in [status_tags['READY'], status_tags['END']]:
-                            error = legends['error_conversion_running']
+                            error = _lock_error(session_id)
                         elif not target or not os.path.exists(target):
                             error = legends['error_no_audiobook_selected']
                         elif Path(target).suffix.lstrip('.').lower() not in output_formats:
@@ -2314,7 +2335,7 @@ def build_interface(args:dict)->gr.Blocks:
                                     exported_files = combine_audio_chapters(session_id)
                                 finally:
                                     session['output_format'], session['output_channel'], session['output_split'], session['interlude_enabled'] = output_backup
-                                    session['status'] = status_tags['READY']
+                                    _release_lock(session_id)
                                 if not exported_files:
                                     error = 'combine_audio_chapters() failed!'
                                 else:
@@ -2740,7 +2761,7 @@ def build_interface(args:dict)->gr.Blocks:
                             custom_model_tts_dir = _check_custom_model_tts(session['custom_model_dir'], tts_engine)
                             custom_model_count = sum(1 for dir in os.listdir(custom_model_tts_dir) if os.path.isdir(os.path.join(custom_model_tts_dir, dir)))
                             if session['status'] not in [status_tags['READY'], status_tags['END']]:
-                                error = legends['error_conversion_running']
+                                error = _lock_error(session_id)
                                 state['type'] = 'warning'
                                 state['msg'] = error
                             elif custom_model_count >= max_custom_model:
@@ -2757,7 +2778,7 @@ def build_interface(args:dict)->gr.Blocks:
                                     try:
                                         model = extract_custom_model(session_id)
                                     finally:
-                                        session['status'] = status_tags['READY']
+                                        _release_lock(session_id)
                                     if model is not None:
                                         session['custom_model'] = model
                                         session['fine_tuned'] = default_fine_tuned
@@ -3216,7 +3237,7 @@ def build_interface(args:dict)->gr.Blocks:
                 # the CONVERTING branch of _check_override_ebook() continues a directory batch: a click must never reach it
                 session = context.get_session(session_id)
                 if session and session.get('id', False) and session['status'] not in [status_tags['READY'], status_tags['END']]:
-                    show_alert(session_id, {"type": "warning", "msg": legends['error_conversion_running']})
+                    show_alert(session_id, {"type": "warning", "msg": _lock_error(session_id)})
                     return gr.update(), event
                 return _check_override_ebook(session_id, ebook_mode, ebook_data, ebook_textarea, blocks_preview, event, translate_enabled, translate_target)
 
