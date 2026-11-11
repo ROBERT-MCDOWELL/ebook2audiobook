@@ -441,8 +441,10 @@ span[data-testid="block-info"] {
 }
 #gr_interlude_enabled {
 	margin-left: auto !important;
+	overflow: visible !important;
+	padding: 20px 0 20px 10px !important;
 }
-#gr_blocks_preview, #gr_interlude_enabled {
+#gr_blocks_preview {
 	align-self: center !important; 
 	overflow: visible !important;
 	padding: 20px 0 20px 10px !important;
