@@ -394,6 +394,7 @@ legends = {
     'msg_moving_model': '正在将 {model} 模型移至 {device}…',
     'msg_checking_weights': '正在检查 {model} 在 {device} 上的权重…',
     'msg_model_loaded': '{model} 模型已加载',
+    'msg_partial_model_removed': '已删除不完整的 {model} 模型文件，将重新下载：{path}',
     'msg_downloading_voice': '正在下载 {model} 语音…',
     'msg_loading_voice': '正在加载 {model} 语音…',
     'msg_voice_loaded': '{model} 语音已加载',

@@ -394,6 +394,7 @@ legends = {
     'msg_moving_model': 'جارٍ نقل نموذج {model} إلى {device}…',
     'msg_checking_weights': 'جارٍ التحقق من أوزان {model} على {device}…',
     'msg_model_loaded': 'تم تحميل نموذج {model}',
+    'msg_partial_model_removed': 'تمت إزالة ملفات نموذج {model} غير المكتملة، وسيتم تنزيلها مرة أخرى: {path}',
     'msg_downloading_voice': 'جارٍ تنزيل صوت {model}…',
     'msg_loading_voice': 'جارٍ تحميل صوت {model}…',
     'msg_voice_loaded': 'تم تحميل صوت {model}',

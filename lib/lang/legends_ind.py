@@ -394,6 +394,7 @@ legends = {
     'msg_moving_model': 'Memindahkan model {model} ke {device}…',
     'msg_checking_weights': 'Memeriksa bobot {model} di {device}…',
     'msg_model_loaded': 'Model {model} dimuat',
+    'msg_partial_model_removed': 'File model {model} yang tidak lengkap dihapus, akan diunduh ulang: {path}',
     'msg_downloading_voice': 'Mengunduh suara {model}…',
     'msg_loading_voice': 'Memuat suara {model}…',
     'msg_voice_loaded': 'Suara {model} dimuat',

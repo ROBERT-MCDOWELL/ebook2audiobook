@@ -394,6 +394,7 @@ legends = {
     'msg_moving_model': '{model} modeli {device} cihazına taşınıyor…',
     'msg_checking_weights': '{model} ağırlıkları {device} üzerinde denetleniyor…',
     'msg_model_loaded': '{model} modeli yüklendi',
+    'msg_partial_model_removed': 'Eksik {model} model dosyaları silindi, yeniden indirilecek: {path}',
     'msg_downloading_voice': '{model} sesi indiriliyor…',
     'msg_loading_voice': '{model} sesi yükleniyor…',
     'msg_voice_loaded': '{model} sesi yüklendi',

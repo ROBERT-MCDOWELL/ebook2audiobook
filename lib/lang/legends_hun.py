@@ -394,6 +394,7 @@ legends = {
     'msg_moving_model': 'A(z) {model} modell áthelyezése ide: {device}…',
     'msg_checking_weights': 'A(z) {model} súlyainak ellenőrzése itt: {device}…',
     'msg_model_loaded': 'A(z) {model} modell betöltve',
+    'msg_partial_model_removed': 'A(z) {model} modell hiányos fájljai törölve, újra letöltődnek: {path}',
     'msg_downloading_voice': 'A(z) {model} hang letöltése…',
     'msg_loading_voice': 'A(z) {model} hang betöltése…',
     'msg_voice_loaded': 'A(z) {model} hang betöltve',

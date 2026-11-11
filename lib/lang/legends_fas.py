@@ -394,6 +394,7 @@ legends = {
     'msg_moving_model': 'در حال انتقال مدل {model} به {device}…',
     'msg_checking_weights': 'در حال بررسی وزن‌های {model} روی {device}…',
     'msg_model_loaded': 'مدل {model} بارگیری شد',
+    'msg_partial_model_removed': 'فایل‌های ناقص مدل {model} حذف شدند و دوباره دانلود خواهند شد: {path}',
     'msg_downloading_voice': 'در حال دانلود صدای {model}…',
     'msg_loading_voice': 'در حال بارگیری صدای {model}…',
     'msg_voice_loaded': 'صدای {model} بارگیری شد',

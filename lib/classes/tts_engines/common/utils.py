@@ -1,4 +1,4 @@
-import os, sys, time, threading, gc, ctypes, tempfile, trainer.io, regex as re
+import os, sys, time, shutil, threading, gc, ctypes, tempfile, trainer.io, regex as re
 
 from typing import Any, TYPE_CHECKING
 from pathlib import Path
@@ -395,6 +395,36 @@ class TTSUtils:
             encoder.compute_embedding = _on_encoder_device(encoder)
             encoder._input_device_routed = True
 
+    def _purge_partial_coqui_model(self, model_name:str)->None:
+        # coqui ModelManager.download_model() takes any existing model folder as downloaded. A download cut by ctrl-c,
+        # a crash or a full disk, or an error page saved as the archive (tarfile.ReadError / BadZipFile skip coqui's own
+        # rmtree), leaves a folder without checkpoint: every later run then fails on "Model file not found in the output
+        # path". The folder is checked with coqui's own lookup and removed when unusable, so TTS() downloads it again.
+        try:
+            from TTS.utils.manage import ModelManager
+            manager = ModelManager(progress_bar=False)
+            items = [(model_name, *manager._set_model_item(model_name))]
+            vocoder_name = items[0][1].get('default_vocoder')
+            if vocoder_name:
+                items.append((vocoder_name, *manager._set_model_item(vocoder_name)))
+        except Exception:
+            # not a coqui hub name: nothing coqui would download, nothing to check
+            return
+        for name, model_item, model_full_name, model in items:
+            # repo_id models live in the Hugging Face cache, which resumes by itself.
+            # tortoise-v2, bark and knnvc are not looked up with _find_files() by coqui either.
+            if 'repo_id' in model_item or model in ['tortoise-v2', 'bark', 'knnvc']:
+                continue
+            output_path = manager.output_prefix / model_full_name
+            if not output_path.is_dir():
+                continue
+            try:
+                manager._find_files(output_path)
+            except ValueError:
+                msg = legends['msg_partial_model_removed'].format(model=name, path=output_path)
+                print(msg)
+                shutil.rmtree(output_path, ignore_errors=True)
+
     def _load_api(self, key:str, model_path:str, device:str)->Any:
         try:
             with _lock:
@@ -413,8 +443,13 @@ class TTSUtils:
                         msg = legends['msg_loading_model'].format(model=key)
                         progress_bar((0, 3), desc=msg)
                         tqdm_token = LocalContext.progress.set(tqdm_progress(msg))
+                    self._purge_partial_coqui_model(model_path)
                     try:
                         engine = TTSEngine(model_path)
+                    except BaseException:
+                        # a download cut or failed right now leaves the same unusable folder: drop it now, not next run
+                        self._purge_partial_coqui_model(model_path)
+                        raise
                     finally:
                         if tqdm_token is not None:
                             LocalContext.progress.reset(tqdm_token)

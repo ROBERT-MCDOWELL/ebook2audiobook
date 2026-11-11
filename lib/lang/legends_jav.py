@@ -394,6 +394,7 @@ legends = {
     'msg_moving_model': 'Mindhah model {model} menyang {device}…',
     'msg_checking_weights': 'Mriksa bobot {model} ing {device}…',
     'msg_model_loaded': 'Model {model} wis dimuat',
+    'msg_partial_model_removed': 'Berkas model {model} sing ora lengkap wis dibusak, bakal diundhuh maneh: {path}',
     'msg_downloading_voice': 'Ngundhuh swara {model}…',
     'msg_loading_voice': 'Muat swara {model}…',
     'msg_voice_loaded': 'Swara {model} wis dimuat',

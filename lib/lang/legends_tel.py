@@ -394,6 +394,7 @@ legends = {
     'msg_moving_model': '{model} మోడల్ {device}కి తరలించబడుతోంది…',
     'msg_checking_weights': '{device}పై {model} వెయిట్‌లు తనిఖీ చేయబడుతున్నాయి…',
     'msg_model_loaded': '{model} మోడల్ లోడ్ అయింది',
+    'msg_partial_model_removed': 'అసంపూర్ణ {model} మోడల్ ఫైళ్లు తొలగించబడ్డాయి, అవి మళ్లీ డౌన్‌లోడ్ చేయబడతాయి: {path}',
     'msg_downloading_voice': '{model} స్వరం డౌన్‌లోడ్ అవుతోంది…',
     'msg_loading_voice': '{model} స్వరం లోడ్ అవుతోంది…',
     'msg_voice_loaded': '{model} స్వరం లోడ్ అయింది',

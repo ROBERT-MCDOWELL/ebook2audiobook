@@ -394,6 +394,7 @@ legends = {
     'msg_moving_model': 'À ń gbé àwòṣe {model} lọ sí {device}…',
     'msg_checking_weights': 'À ń ṣàyẹ̀wò ìwọ̀n {model} lórí {device}…',
     'msg_model_loaded': 'A ti ṣí àwòṣe {model}',
+    'msg_partial_model_removed': 'A ti yọ àwọn fáìlì àwòṣe {model} tí kò pé kúrò, a ó tún wọ́n gbà wálẹ̀: {path}',
     'msg_downloading_voice': 'À ń gba ohùn {model}…',
     'msg_loading_voice': 'À ń ṣí ohùn {model}…',
     'msg_voice_loaded': 'A ti ṣí ohùn {model}',

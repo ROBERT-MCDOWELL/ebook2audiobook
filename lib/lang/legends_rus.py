@@ -394,6 +394,7 @@ legends = {
     'msg_moving_model': 'Перенос модели {model} на {device}…',
     'msg_checking_weights': 'Проверка весов {model} на {device}…',
     'msg_model_loaded': 'Модель {model} загружена',
+    'msg_partial_model_removed': 'Неполные файлы модели {model} удалены, они будут загружены заново: {path}',
     'msg_downloading_voice': 'Загрузка голоса {model}…',
     'msg_loading_voice': 'Загрузка голоса {model} в память…',
     'msg_voice_loaded': 'Голос {model} загружен',
