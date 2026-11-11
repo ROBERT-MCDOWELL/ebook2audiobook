@@ -60,17 +60,12 @@ class Fairseq(TTSUtils, TTSRegistry, name='fairseq'):
             raise ValueError(error)
 
     def _load_model_vocab(self)->set|None:
-        # the characters the model was trained on (its vocab.txt). None for a uroman model: its cleaner romanizes
-        # the native script itself, so its input must reach coqui untouched
         tokenizer = getattr(getattr(getattr(self.engine, 'synthesizer', None), 'tts_model', None), 'tokenizer', None)
         if tokenizer is None or getattr(tokenizer.text_cleaner, '__name__', '') == 'uroman_cleaners':
             return None
         return set(tokenizer.characters.vocab)
 
     def _fold_to_model_vocab(self, text:str)->str:
-        # coqui drops every character missing from the vocab, so an accented letter the model never saw (javanese
-        # é, è) became a missing vowel: "sèket" read as "sket". It becomes its base letter when that one is in the
-        # vocab, the spelling the model was trained on. Letters the vocab holds are kept as they are
         if not self.model_vocab:
             return text
         import unicodedata

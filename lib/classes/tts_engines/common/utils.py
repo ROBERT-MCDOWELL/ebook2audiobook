@@ -396,10 +396,6 @@ class TTSUtils:
             encoder._input_device_routed = True
 
     def _purge_partial_coqui_model(self, model_name:str)->None:
-        # coqui ModelManager.download_model() takes any existing model folder as downloaded. A download cut by ctrl-c,
-        # a crash or a full disk, or an error page saved as the archive (tarfile.ReadError / BadZipFile skip coqui's own
-        # rmtree), leaves a folder without checkpoint: every later run then fails on "Model file not found in the output
-        # path". The folder is checked with coqui's own lookup and removed when unusable, so TTS() downloads it again.
         try:
             from TTS.utils.manage import ModelManager
             manager = ModelManager(progress_bar=False)
@@ -408,11 +404,8 @@ class TTSUtils:
             if vocoder_name:
                 items.append((vocoder_name, *manager._set_model_item(vocoder_name)))
         except Exception:
-            # not a coqui hub name: nothing coqui would download, nothing to check
             return
         for name, model_item, model_full_name, model in items:
-            # repo_id models live in the Hugging Face cache, which resumes by itself.
-            # tortoise-v2, bark and knnvc are not looked up with _find_files() by coqui either.
             if 'repo_id' in model_item or model in ['tortoise-v2', 'bark', 'knnvc']:
                 continue
             output_path = manager.output_prefix / model_full_name
@@ -433,8 +426,6 @@ class TTSUtils:
                 import torch.nn as nn
                 engine = loaded_tts.get(key)
                 target_dev = torch.device(device)
-                # coqui Synthesizer.tts() sends a separate vocoder's input (tacotron, glowtts) to "cuda" when use_cuda is
-                # set: true on cuda only (rocm and jetson are cuda to torch), elsewhere it follows the vocoder's device
                 is_cuda = target_dev.type == 'cuda'
                 progress_bar = None
                 if not engine:
@@ -449,7 +440,6 @@ class TTSUtils:
                     try:
                         engine = TTSEngine(model_path)
                     except BaseException:
-                        # a download cut or failed right now leaves the same unusable folder: drop it now, not next run
                         self._purge_partial_coqui_model(model_path)
                         raise
                     finally:
@@ -547,7 +537,6 @@ class TTSUtils:
                     import torch.nn as nn
                     engine = loaded_tts.get(key, False)
                     target_dev = torch.device(device)
-                    # see _load_api(): use_cuda routes a separate vocoder's input to "cuda", so it is set on cuda only
                     is_cuda = target_dev.type == 'cuda'
                     if not engine:
                         if not checkpoint_path or not os.path.exists(checkpoint_path):
@@ -581,9 +570,6 @@ class TTSUtils:
                             if not vocab_path or not os.path.exists(vocab_path):
                                 error = legends['error_missing_or_invalid'].format(name='vocab_path', path=vocab_path)
                                 raise FileNotFoundError(error)
-                            # coqui 0.28 dropped model_dir: the checkpoint is given and read the fairseq way because its
-                            # path holds "fairseq" (custom models live in <custom_model_dir>/fairseq/<name>/), with
-                            # config.json and vocab.txt beside it. use_cuda=True asserts cuda, the walk below moves the weights
                             syn = Synthesizer(tts_checkpoint=checkpoint_path, use_cuda=False)
                             class _FairseqEngine(nn.Module):
                                 def __init__(self, synthesizer:'Synthesizer'):
