@@ -423,7 +423,7 @@ class Orpheus(TTSUtils, TTSRegistry, name='orpheus'):
             import torch
             import numpy as np
             import soundfile as sf
-            from lib.classes.tts_engines.common.audio import is_audio_data_valid, detect_gender
+            from lib.classes.tts_engines.common.audio import trim_audio, is_audio_data_valid, detect_gender
             if self.engine:
                 sentence_parts = self._split_sentence_on_sml(sentence)
                 self.params['block_voice'] = kwargs.get('block_voice', self.session['voice'])
@@ -446,6 +446,7 @@ class Orpheus(TTSUtils, TTSRegistry, name='orpheus'):
                     if not any(c.isalnum() for c in part):
                         continue
                     else:
+                        trim_audio_buffer = 0.002
                         # re-read per part: an inline [voice:…] tag can switch the voice in the middle of the sentence.
                         # No voice file, or the custom model's own one: the model's own voice. Any other voice file:
                         # a built-in speaker converted to it (default_vc_model), the same-gender one for the
@@ -518,6 +519,8 @@ class Orpheus(TTSUtils, TTSRegistry, name='orpheus'):
                         if part_tensor.numel() == 0:
                             error = 'part_tensor not valid'
                             return False, error
+                        if part[-1].isalnum() or part[-1] == '—':
+                            part_tensor = trim_audio(part_tensor.squeeze(0), self.params['samplerate'], 0.001, trim_audio_buffer).unsqueeze(0)
                         self.audio_segments.append(part_tensor)
                         if not re.search(r'\w$', part, flags=re.UNICODE) and part[-1] != '—':
                             silence_time = int(np.random.uniform(0.3, 0.6) * 100) / 100
