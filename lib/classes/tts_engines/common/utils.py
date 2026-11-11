@@ -1,6 +1,7 @@
 import os, sys, time, shutil, threading, gc, ctypes, tempfile, trainer.io, regex as re
 
-from typing import Any, TYPE_CHECKING
+from typing import Any, Iterator, TYPE_CHECKING
+from contextlib import contextmanager
 from pathlib import Path
 from lib.classes.vram_detector import VRAMDetector
 from lib.classes.bug_reporter import bug_reporter
@@ -395,6 +396,23 @@ class TTSUtils:
             encoder.compute_embedding = _on_encoder_device(encoder)
             encoder._input_device_routed = True
 
+    @contextmanager
+    def _fill_coqui_languages(self)->Iterator[None]:
+        from TTS.tts.utils.languages import LanguageManager
+        init_from_config = LanguageManager.init_from_config
+        language = getattr(self, 'language_iso1', None) or getattr(self, 'language', None)
+        def init_with_languages(config:'BaseTTSConfig')->'LanguageManager':
+            if not config.languages:
+                dataset_languages = sorted({dataset.get('language') for dataset in config.datasets if dataset.get('language')})
+                fallback = config.phoneme_language or language
+                config.languages = dataset_languages or ([fallback] if fallback else [])
+            return init_from_config(config)
+        LanguageManager.init_from_config = staticmethod(init_with_languages)
+        try:
+            yield
+        finally:
+            LanguageManager.init_from_config = staticmethod(init_from_config)
+
     def _purge_partial_coqui_model(self, model_name:str)->None:
         try:
             from TTS.utils.manage import ModelManager
@@ -438,7 +456,8 @@ class TTSUtils:
                         tqdm_token = LocalContext.progress.set(tqdm_progress(msg))
                     self._purge_partial_coqui_model(model_path)
                     try:
-                        engine = TTSEngine(model_path)
+                        with self._fill_coqui_languages():
+                            engine = TTSEngine(model_path)
                     except BaseException:
                         self._purge_partial_coqui_model(model_path)
                         raise
@@ -564,13 +583,15 @@ class TTSUtils:
                             )
                         elif engine_name == TTS_ENGINES['VITS']:
                             from TTS.api import TTS as TTSEngine
-                            engine = TTSEngine(model_path=checkpoint_path, config_path=config_path, progress_bar=False)
+                            with self._fill_coqui_languages():
+                                engine = TTSEngine(model_path=checkpoint_path, config_path=config_path, progress_bar=False)
                         elif engine_name == TTS_ENGINES['FAIRSEQ']:
                             from TTS.utils.synthesizer import Synthesizer
                             if not vocab_path or not os.path.exists(vocab_path):
                                 error = legends['error_missing_or_invalid'].format(name='vocab_path', path=vocab_path)
                                 raise FileNotFoundError(error)
-                            syn = Synthesizer(tts_checkpoint=checkpoint_path, use_cuda=False)
+                            with self._fill_coqui_languages():
+                                syn = Synthesizer(tts_checkpoint=checkpoint_path, use_cuda=False)
                             class _FairseqEngine(nn.Module):
                                 def __init__(self, synthesizer:'Synthesizer'):
                                     super().__init__()
