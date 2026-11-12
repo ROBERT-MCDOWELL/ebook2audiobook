@@ -355,7 +355,7 @@ default_engine_settings = {
         # the speech, as F5-TTS derives the generated duration from the reference's seconds per character
         "ref_max": 12.0,
         # languages a checkpoint exists for (presets/f5tts_presets.py: v1 base for eng/zho, community models)
-        "languages": {"eng": "en", "zho": "zh", "fra": "fr", "deu": "de", "ita": "it", "rus": "ru", "spa": "es", "fin": "fi", "hin": "hi", "lav": "lv", "jpn": "ja", "ara": "ar"},
+        "languages": {"eng": "en", "zho": "zh", "fra": "fr", "deu": "de", "ita": "it", "rus": "ru", "spa": "es", "fin": "fi", "hin": "hi", "lav": "lv", "jpn": "ja", "ara": "ar", "srp": "sr"},
         "samplerate": 24000,
         # upstream defaults (utils_infer.py)
         "nfe_step": 32,
@@ -369,7 +369,7 @@ default_engine_settings = {
         "files": ["config.json", "model.safetensors", "vocab.txt", "ref.wav"],
         "voice": default_speaker,
         "voices": {},
-        "rating": {"VRAM": 3, "CPU": 2, "RAM": 4, "Realism": 4}
+        "rating": {"VRAM": 3, "CPU": 1, "RAM": 4, "Realism": 4}
     },
     TTS_ENGINES['ORPHEUS']: {
         # runs in its own uv venv (lib/classes/tts_engines/venvs/orpheus) behind a persistent worker. Upstream's own
