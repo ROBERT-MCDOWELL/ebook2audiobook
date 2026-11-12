@@ -524,6 +524,22 @@ class DeviceInstaller():
                 return m.group(3)
             return None
 
+        def cuda_tag(version_str:str)->str:
+            # the torch_matrix CUDA row for this CUDA version: the newest one at or below it among the rows built for the
+            # target OS and arch (a Docker image is Linux whatever the host), e.g. 13.1 -> cu130, 12.8 on Windows ->
+            # win-cu128, 12.8 on Linux -> cu128. '' when no row fits
+            target = systems['LINUX'] if mode == BUILD_DOCKER else self.system
+            machine = self.detect_arch_tag()
+            if target == systems['LINUX'] and machine == archs['AMD64']:
+                machine = archs['X86_64']
+            current = _normalize_version(version_str)[:2]
+            rows = []
+            for key, entry in torch_matrix.items():
+                m = re.fullmatch(r'(?:win-)?cu(\d+)(\d)', key)
+                if m and target in entry['os'] and machine in entry['arch'] and (int(m.group(1)), int(m.group(2))) <= current:
+                    rows.append(((int(m.group(1)), int(m.group(2))), key))
+            return max(rows)[1] if rows else ''
+
         def version_classify(version_str:Union[str, None], version_range:dict)->tuple:
             # Returns (cmp, current_tuple, min_tuple, max_tuple)
             # cmp: -1 = below min, 0 = in range, 1 = above max, None = parse fail / unranged
@@ -1105,31 +1121,14 @@ class DeviceInstaller():
                     elif cmp is None:
                         msg = legends['msg_cuda_unparseable'].format(version=version)
                     else:
-                        devices['CUDA']['found'] = True
-                        name = devices['CUDA']['proc']
-                        compat_versions = []
-                        for t, entry in torch_matrix.items():
-                            if self.system not in entry['os'] or not t.startswith('cu'):
-                                continue
-                            ver_str = t[len('win-cu'):] if t.startswith('win-cu') else t[len('cu'):]
-                            tag_ver = _normalize_version(ver_str)
-                            if not tag_ver:
-                                continue
-                            compat_versions.append(tag_ver)
-                        tag = None
-                        if compat_versions:
-                            le_versions = [v for v in compat_versions if v <= version]
-                            if le_versions:
-                                matched = max(le_versions)
-                                if self.system == systems['WINDOWS']:
-                                    tag = f'win-cu{matched[0]}.{matched[1]}.{matched[2]}' if matched[2] else f'win-cu{matched[0]}.{matched[1]}'
-                                else:
-                                    tag = f'cu{matched[0]}.{matched[1]}.{matched[2]}' if matched[2] else f'cu{matched[0]}.{matched[1]}'
-                        if cmp == 1:
-                            tag = f'cu{max_tuple[0]}{max_tuple[1]}'
-                            msg = legends['msg_cuda_tested_max'].format(version=version, max=max_ver, tag=f'cu{max_tuple[0]}{max_tuple[1]}')
+                        tag = cuda_tag(max_ver if cmp == 1 else version)
+                        if tag:
+                            devices['CUDA']['found'] = True
+                            name = devices['CUDA']['proc']
+                            if cmp == 1:
+                                msg = legends['msg_cuda_tested_max'].format(version=version, max=max_ver, tag=tag)
                         else:
-                            tag = f'cu{current[0]}{current[1]}'  # still index 0/1, ignore patch
+                            msg = legends['msg_cuda_no_torch_build'].format(version=version)
                 else:
                     msg = legends['msg_cuda_missing']
                 # 4) nvidia-smi header parsing, Docker image builds only
@@ -1147,14 +1146,16 @@ class DeviceInstaller():
                         if cmp == -1:
                             msg = legends['msg_cuda_smi_too_old'].format(version=smi_version)
                         elif cmp is not None:
-                            devices['CUDA']['found'] = True
-                            name = devices['CUDA']['proc']
-                            if cmp == 1:
-                                tag = f'cu{max_tuple[0]}{max_tuple[1]}'
-                                msg = legends['msg_cuda_tested_max'].format(version=smi_version, max=max_ver, tag=f'cu{max_tuple[0]}{max_tuple[1]}')
+                            tag = cuda_tag(max_ver if cmp == 1 else smi_version)
+                            if tag:
+                                devices['CUDA']['found'] = True
+                                name = devices['CUDA']['proc']
+                                if cmp == 1:
+                                    msg = legends['msg_cuda_tested_max'].format(version=smi_version, max=max_ver, tag=tag)
+                                else:
+                                    msg = legends['msg_cuda_smi_driver_only'].format(version=smi_version)
                             else:
-                                tag = f'cu{current[0]}{current[1]}'
-                                msg = legends['msg_cuda_smi_driver_only'].format(version=smi_version)
+                                msg = legends['msg_cuda_no_torch_build'].format(version=smi_version)
                 gpu_results[devices['CUDA']['proc']] = (name, tag, msg)
             # ============================================================
             # INTEL XPU
@@ -2141,10 +2142,9 @@ class DeviceInstaller():
                                 # uv gives --extra-index-url priority over --index-url and by default stops at the
                                 # first index that has the package: without unsafe-best-match a stable pin that the
                                 # nightly index lacks (e.g. torch==2.2.2 on intel macOS) finds no version at all
-                                torch_url_tag = tag_dir
-                                torchaudio_url_tag = tag_dir
-                                if self.system == systems['WINDOWS'] and tag.startswith('win-cu'):
-                                    torch_url_tag = tag.replace('win-', '')
+                                # 'win-cuXYZ' rows keep the Windows torch apart, their wheels are on the plain cuXYZ index
+                                torch_url_tag = tag_dir.replace('win-', '') if tag_dir.startswith('win-cu') else tag_dir
+                                torchaudio_url_tag = torch_url_tag
                                 subprocess.check_call(self._uv_pip('install', '--reinstall-package', 'torch', '--no-cache', f'torch=={torch_version_matrix}', '--index-url', f'{url}/{torch_url_tag}', '--extra-index-url', f'{url_nightly}/{torch_url_tag}', '--index-strategy', 'unsafe-best-match'))
                                 subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', self.torchaudio_spec(torch_version_matrix), '--index-url', f'{url}/{torchaudio_url_tag}', '--extra-index-url', f'{url_nightly}/{torchaudio_url_tag}', '--index-strategy', 'unsafe-best-match'))
                             if not self.check_numpy():
@@ -2175,7 +2175,11 @@ class DeviceInstaller():
                                         print(msg)
                                         rc = subprocess.call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', *torchcodec_pkgs))
                                     else:
-                                        torchcodec_index_url = f'{default_pytorch_url}/cpu' if device_info['name'] in [devices['ROCM']['proc'], devices['VULKAN']['proc']] else f'{default_pytorch_url}/{tag_dir}'
+                                        # the CPU build where the device's index has none: e2a only decodes audio with it
+                                        # (torchaudio.load). ROCm and Vulkan, and CUDA on Windows (cu128 / cu129 carry no
+                                        # Windows torchcodec, and since 0.12 one build serves every torch >= 2.11)
+                                        cpu_torchcodec = device_info['name'] in [devices['ROCM']['proc'], devices['VULKAN']['proc']] or (device_info['name'] == devices['CUDA']['proc'] and self.system == systems['WINDOWS'])
+                                        torchcodec_index_url = f'{default_pytorch_url}/cpu' if cpu_torchcodec else f"{default_pytorch_url}/{tag_dir.replace('win-', '')}"
                                         rc = subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', f'torchcodec=={torchcodec_version_matrix}', '--index-url', torchcodec_index_url))
                                 if rc == 0:
                                     try:
