@@ -26,8 +26,10 @@ class DeviceInstaller():
         'onnxruntime': ['onnxruntime', 'onnxruntime-gpu', 'onnxruntime-directml']
     }
     pip_cache_dir = os.environ.get('E2A_PIP_CACHE_DIR') or os.path.join(tempfile.gettempdir(), 'e2a_pip_cache')
-    # seconds the GPU choice waits for an answer before taking the first GPU, so an unattended install never hangs
+    # seconds the GPU choice waits for an answer before taking the system's GPU 0, so an unattended install never hangs
     gpu_choice_timeout = 60
+    # PCI vendor id -> the device its runtime serves, for the GPU choice
+    gpu_pci_vendors = {0x1002: devices['ROCM']['proc'], 0x10de: devices['CUDA']['proc'], 0x8086: devices['XPU']['proc']}
 
     def __init__(self):
         self.system = sys.platform
@@ -211,8 +213,12 @@ class DeviceInstaller():
             return False
 
     def vulkan_gpus(self)->list:
-        # names of the real Vulkan GPUs the system loader sees: integrated, discrete or virtual.
-        # Software renderers (lavapipe/llvmpipe, SwiftShader: VK_PHYSICAL_DEVICE_TYPE_CPU) don't count
+        # names of the real Vulkan GPUs the system loader sees
+        return [name for _, name in self.vulkan_devices()]
+
+    def vulkan_devices(self)->list:
+        # (PCI vendor id, name) of the real Vulkan GPUs the system loader sees, in its order: integrated, discrete or
+        # virtual. Software renderers (lavapipe/llvmpipe, SwiftShader: VK_PHYSICAL_DEVICE_TYPE_CPU) don't count
         import ctypes
         try:
             vk = ctypes.CDLL(vulkan_loader)
@@ -233,7 +239,7 @@ class DeviceInstaller():
         inst = ctypes.c_void_p()
         if vk.vkCreateInstance(ctypes.byref(info), None, ctypes.byref(inst)) != 0:
             return []
-        names = []
+        found = []
         try:
             count = ctypes.c_uint32(0)
             if vk.vkEnumeratePhysicalDevices(inst, ctypes.byref(count), None) == 0 and count.value:
@@ -243,10 +249,10 @@ class DeviceInstaller():
                     props = ctypes.create_string_buffer(1024)  # VkPhysicalDeviceProperties is 824 bytes
                     vk.vkGetPhysicalDeviceProperties(dev, props)
                     if int.from_bytes(props.raw[16:20], 'little') in (1, 2, 3):  # deviceType: integrated, discrete, virtual
-                        names.append(props.raw[20:276].split(b'\0')[0].decode(errors='replace'))
+                        found.append((int.from_bytes(props.raw[8:12], 'little'), props.raw[20:276].split(b'\0')[0].decode(errors='replace')))  # vendorID, deviceName
         finally:
             vk.vkDestroyInstance(inst, None)
-        return names
+        return found
 
     def vulkan_wheels_ok(self, py:tuple, plat:str)->bool:
         # the +vulkan torch / torchaudio (and torchcodec on macOS) wheels exist on py-pkg for this Python and platform
@@ -323,20 +329,54 @@ class DeviceInstaller():
         except OSError:
             return None
 
+    def gpu_vendor_order(self, vk_devices:list)->list:
+        # PCI vendor id of each GPU in the OS's own GPU numbering, GPU 0 first. Windows: adapter order, which the Vulkan
+        # loader enumerates in (DXGI order), WMI without a loader. Linux: PCI bus order, as lspci lists it
+        if self.system == systems['WINDOWS']:
+            if vk_devices:
+                return [vendor_id for vendor_id, _ in vk_devices]
+            try:
+                out = subprocess.run(['powershell', '-NoProfile', '-Command', 'Get-CimInstance Win32_VideoController | ForEach-Object { $_.PNPDeviceID }'], capture_output=True, text=True, errors='replace', timeout=20).stdout
+            except (OSError, subprocess.TimeoutExpired):
+                return []
+            return [int(vendor_id, 16) for vendor_id in re.findall(r'VEN_([0-9A-F]{4})', out, re.IGNORECASE)]
+        vendor_ids = []
+        sysfs = '/sys/bus/pci/devices'
+        if os.path.isdir(sysfs):
+            for dev in sorted(os.listdir(sysfs)):  # 'dddd:bb:dd.f', fixed width hex: sorted is bus order
+                try:
+                    with open(os.path.join(sysfs, dev, 'class')) as f:
+                        if not f.read().strip().startswith(('0x0300', '0x0302')):
+                            continue
+                    with open(os.path.join(sysfs, dev, 'vendor')) as f:
+                        vendor_ids.append(int(f.read().strip(), 16))
+                except (OSError, ValueError):
+                    continue
+        if not vendor_ids and shutil.which('lspci'):
+            try:
+                out = subprocess.run(['lspci', '-nn'], capture_output=True, text=True, errors='replace', timeout=20).stdout
+            except (OSError, subprocess.TimeoutExpired):
+                return []
+            vendor_ids = [int(vendor_id, 16) for vendor_id in re.findall(r'\[030[02]\].*\[([0-9a-f]{4}):[0-9a-f]{4}\]', out, re.IGNORECASE)]
+        return vendor_ids
+
     def choose_gpu(self, usable:list)->tuple:
         # several GPU vendors have their runtime here and one torch serves one of them. The pick is the name saved in
-        # .device_info.json, kept while that GPU stays usable; else asked on the terminal, else the first one found
+        # .device_info.json, kept while that GPU stays usable; else asked on the terminal, else the system's GPU 0
         names = [result[0] for result in usable]
         previous = self.load_device_info()
         if previous and previous.get('name') in names:
             return usable[names.index(previous['name'])]
-        gpus = self.vulkan_gpus()
-        vendors = {devices['CUDA']['proc']: ('nvidia',), devices['ROCM']['proc']: ('amd', 'radeon'), devices['XPU']['proc']: ('intel',)}
+        vk_devices = self.vulkan_devices()
+        # listed in the OS's GPU numbering from 0, so entry 0, the default, is the system's GPU 0
+        order = [self.gpu_pci_vendors.get(vendor_id) for vendor_id in self.gpu_vendor_order(vk_devices)]
+        usable = sorted(usable, key=lambda result: order.index(result[0]) if result[0] in order else len(order))
+        names = [result[0] for result in usable]
         options = []
-        for index, (name, tag, _) in enumerate(usable, 1):
-            models = ', '.join(gpu for gpu in gpus if any(vendor in gpu.lower() for vendor in vendors.get(name, ())))
+        for index, (name, tag, _) in enumerate(usable):
+            models = ', '.join(model for vendor_id, model in vk_devices if self.gpu_pci_vendors.get(vendor_id) == name)
             options.append(f'  {index}) {models} - {name} ({tag})' if models else f'  {index}) {name} ({tag})')
-        prompt = '\n'.join([legends['msg_gpu_choice_header'], *options, legends['msg_gpu_choice_prompt'].format(count=len(usable), seconds=self.gpu_choice_timeout)])
+        prompt = '\n'.join([legends['msg_gpu_choice_header'], *options, legends['msg_gpu_choice_prompt'].format(last=len(usable) - 1, seconds=self.gpu_choice_timeout)])
         choice = None
         while choice is None:
             answer = self.ask_tty(prompt, self.gpu_choice_timeout)
@@ -344,10 +384,10 @@ class DeviceInstaller():
                 break
             if answer == '':
                 choice = 0
-            elif answer.isdigit() and 1 <= int(answer) <= len(usable):
-                choice = int(answer) - 1
+            elif answer.isdigit() and int(answer) < len(usable):
+                choice = int(answer)
             else:
-                prompt = legends['msg_gpu_choice_invalid'].format(count=len(usable))
+                prompt = legends['msg_gpu_choice_invalid'].format(last=len(usable) - 1)
         # stderr: the launchers read the device info from stdout
         if choice is None:
             choice = 0
