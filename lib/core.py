@@ -4513,7 +4513,7 @@ def convert_ebook(args:dict)->tuple:
             session['interlude_enabled'] = bool(args.get('interlude_enabled', False))
             session['device'] = str(args['device'])
             session['language'] = str(args['language'])
-            session['language_iso1'] = args.get('language_iso1') or Lang(str(args['language'])).pt1
+            session['language_iso1'] = args.get('language_iso1') or ''
             session['translate_enabled'] = bool(args.get('translate_enabled', False))
             session['translate'] = args.get('translate')
             session['translate_iso1'] = args.get('translate_iso1')
