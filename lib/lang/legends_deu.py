@@ -554,6 +554,7 @@ legends = {
     'msg_worker_starting': 'wird gestartet {engine} Mitarbeiter/in{model} ein {device})…',
     'error_worker_failed': '{engine} Worker konnte nicht gestartet werden: {error}',
     'error_worker_exited': 'Worker-Prozess beendet (Code {code})',
+    'msg_worker_busy': 'TTS-Worker nach {seconds} s immer noch ausgelastet, verwendet {cores} von {total} CPU-Kernen …',
     'msg_venv_fetching_source': 'Abrufen der {engine} quelle',
     'msg_venv_creating': 'Plan erstellen {engine} Virtuelle Umgebung {dir}…',
     'msg_venv_installing': 'Die Installation von {pkgs} in der {engine} virtuellen Umgebung dauert eine Weile, bitte haben Sie etwas Geduld...',

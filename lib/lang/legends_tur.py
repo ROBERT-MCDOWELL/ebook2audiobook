@@ -554,6 +554,7 @@ legends = {
     'msg_worker_starting': '{engine} çalışan başlatılıyor ({device} \'ye{model} )…',
     'error_worker_failed': '{engine} işçi başlayamadı: {error}',
     'error_worker_exited': 'İşçi sürecinden çıkıldı (kod {code})',
+    'msg_worker_busy': 'TTS işçisi {seconds} saniye sonra hâlâ meşgul, {total} CPU çekirdeğinden {cores} tanesini kullanıyor…',
     'msg_venv_fetching_source': '{engine} kaynağı alınıyor…',
     'msg_venv_creating': 'Oluşturuluyor {engine} sanal ortam {dir}…',
     'msg_venv_installing': 'Yükleniyor {pkgs} Dr. {engine} sanal ortam, biraz zaman alır, lütfen sabırlı olun…',

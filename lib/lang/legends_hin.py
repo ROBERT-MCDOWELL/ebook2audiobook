@@ -554,6 +554,7 @@ legends = {
     'msg_worker_starting': '{engine} कार्यकर्ता को शुरू करना ({device} पर{model})...',
     'error_worker_failed': '{engine} कार्यकर्ता शुरू नहीं हो सके: {error}',
     'error_worker_exited': 'कार्यकर्ता प्रक्रिया से बाहर निकल गए (कोड {code})',
+    'msg_worker_busy': 'TTS वर्कर {seconds} सेकंड के बाद भी व्यस्त है, {total} में से {cores} CPU कोर का इस्तेमाल कर रहा है…',
     'msg_venv_fetching_source': '{engine} स्रोत प्राप्त किया जा रहा है...',
     'msg_venv_creating': 'बनाना {engine} में वर्चुअल वातावरण {dir}…',
     'msg_venv_installing': 'संस्थापित किया जा रहा है {pkgs} में {engine} आभासी वातावरण, इसमें कुछ समय लगता है, कृपया धैर्य रखें...',

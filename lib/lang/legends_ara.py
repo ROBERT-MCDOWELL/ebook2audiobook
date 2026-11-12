@@ -554,6 +554,7 @@ legends = {
     'msg_worker_starting': 'بدء {engine} عامل ({model} على {device})...',
     'error_worker_failed': '{engine} عامل فشل في بدء التشغيل: {error}',
     'error_worker_exited': 'تم إنهاء عملية العامل (الرمز {code})',
+    'msg_worker_busy': 'لا تزال وحدة تحويل النص إلى كلام مشغولة بعد {seconds} ثانية، وتستخدم {cores} من {total} نواة (نوى) وحدة المعالجة المركزية…',
     'msg_venv_fetching_source': 'جارٍ جلب المصدر {engine}...',
     'msg_venv_creating': 'إنشاء ال {engine} البيئة الافتراضية {dir}…',
     'msg_venv_installing': '[ترجمة المصطلح: Installing] {pkgs} داخل ال {engine} بيئة افتراضية، يستغرق الأمر بعض الوقت، يرجى التحلي بالصبر...',

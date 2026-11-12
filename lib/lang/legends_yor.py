@@ -554,6 +554,7 @@ legends = {
     'msg_worker_starting': 'Bẹrẹ awọn {engine} òṣìṣẹ́ ({model} lórí {device})…',
     'error_worker_failed': '{engine} òṣìṣẹ́ kùnà láti bẹ̀rẹ̀: {error}',
     'error_worker_exited': 'Ilana oṣiṣẹ ti jade (koodu {code})',
+    'msg_worker_busy': 'Òṣìṣẹ́ TTS ṣì ń ṣiṣẹ́ lẹ́yìn ìṣẹ́jú-àáyá {seconds}, ó ń lo {cores} nínú àwọn kọ́ọ̀rù CPU {total}…',
     'msg_venv_fetching_source': 'Gbígbé orísun {engine}...',
     'msg_venv_creating': 'Ṣiṣẹda awọn {engine} ayika foju ni {dir}…',
     'msg_venv_installing': 'Ń fi sí orí ẹ̀rọ... {pkgs} wọle si awọn {engine} àyíká gidi, ó gba ìgbà díẹ̀, jọ̀wọ́ ní sùúrù...',

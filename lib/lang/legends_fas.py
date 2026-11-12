@@ -554,6 +554,7 @@ legends = {
     'msg_worker_starting': 'شروع کارگر {engine} ({model} روی {device})…',
     'error_worker_failed': 'کارگر {engine} نتوانست شروع کند: {error}',
     'error_worker_exited': 'فرآیند کارگر خارج شد (کد {code})',
+    'msg_worker_busy': 'واحد پردازش TTS هنوز پس از {seconds} ثانیه مشغول است و از {cores} هسته از {total} هسته پردازنده استفاده می‌کند…',
     'msg_venv_fetching_source': 'در حال دریافت منبع {engine}…',
     'msg_venv_creating': 'ایجاد محیط مجازی {engine} در {dir}…',
     'msg_venv_installing': 'نصب {pkgs} در محیط مجازی {engine} کمی طول می‌کشد، لطفاً صبور باشید…',

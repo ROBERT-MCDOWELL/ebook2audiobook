@@ -554,6 +554,7 @@ legends = {
     'msg_worker_starting': '正在启动{engine}个工人（{model}对{device} ） ……',
     'error_worker_failed': '{engine}个工作线程启动失败： {error}',
     'error_worker_exited': '工作进程已退出（代码{code} ）',
+    'msg_worker_busy': 'TTS 工作线程在 {seconds} 秒后仍处于忙碌状态，正在使用 {total} 个 CPU 核心中的 {cores} 个……',
     'msg_venv_fetching_source': '正在获取{engine}源…',
     'msg_venv_creating': '创建名单 {engine} 虚拟环境 {dir}…',
     'msg_venv_installing': '正在安装 {pkgs} 进入 {engine} 虚拟环境，需要一段时间，请耐心等待……',

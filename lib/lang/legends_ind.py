@@ -554,6 +554,7 @@ legends = {
     'msg_worker_starting': 'Memulai {engine} pekerja ({model} lawan {device})...',
     'error_worker_failed': '{engine} pekerja gagal memulai: {error}',
     'error_worker_exited': 'Proses pekerja keluar (kode {code})',
+    'msg_worker_busy': 'TTS worker masih sibuk setelah {seconds} dtk, menggunakan {cores} dari {total} inti CPU…',
     'msg_venv_fetching_source': 'Mengambil sumber {engine}…',
     'msg_venv_creating': 'Membuat {engine} Lingkungan virtual. {dir}…',
     'msg_venv_installing': 'Pasangkan {pkgs} ke dalam {engine} lingkungan virtual, butuh beberapa saat, harap bersabar...',

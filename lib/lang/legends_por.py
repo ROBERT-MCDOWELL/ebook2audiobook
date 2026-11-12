@@ -554,6 +554,7 @@ legends = {
     'msg_worker_starting': 'Iniciando o {engine} trabalhador ({model} em {device})...',
     'error_worker_failed': '{engine} trabalhador falhou ao iniciar: {error}',
     'error_worker_exited': 'Processo do trabalhador encerrado (código {code})',
+    'msg_worker_busy': 'O agente de TTS ainda está ocupado após {seconds} s, usando {cores} de {total} núcleos de CPU…',
     'msg_venv_fetching_source': 'A obter a fonte {engine}...',
     'msg_venv_creating': 'Criando a {engine} Ambiente virtual {dir}…',
     'msg_venv_installing': 'Instalando {pkgs} Até a. {engine} ambiente virtual, demora um pouco, por favor, seja paciente...',
