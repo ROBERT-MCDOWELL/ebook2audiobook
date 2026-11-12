@@ -79,7 +79,8 @@ class OmniVoice(TTSUtils, TTSRegistry, name='omnivoice'):
             asr_dir_engine = os.path.join(self.cache_dir, tts_engine, settings['asr_model'].replace('/', '--'))
             if os.path.isdir(asr_dir_engine) and not os.path.exists(self.asr_dir):
                 os.replace(asr_dir_engine, self.asr_dir)
-            self.worker_env = {k: v for k, v in os.environ.items() if k not in ('PYTHONHOME', 'PYTHONPATH', 'PYTHONSTARTUP', 'VIRTUAL_ENV', 'CONDA_PREFIX', 'CONDA_DEFAULT_ENV', 'CONDA_PYTHON_EXE', 'CONDA_SHLVL', '__PYVENV_LAUNCHER__')}
+            # OMP_NUM_THREADS sizes e2a's own torch (conf.py, core.py): left out, the worker's torch takes every core
+            self.worker_env = {k: v for k, v in os.environ.items() if k not in ('PYTHONHOME', 'PYTHONPATH', 'PYTHONSTARTUP', 'VIRTUAL_ENV', 'CONDA_PREFIX', 'CONDA_DEFAULT_ENV', 'CONDA_PYTHON_EXE', 'CONDA_SHLVL', '__PYVENV_LAUNCHER__', 'OMP_NUM_THREADS')}
             self.worker_env['VIRTUAL_ENV'] = self.venv_dir
             self.worker_env['PATH'] = os.pathsep.join([os.path.dirname(self.venv_python), self.worker_env.get('PATH', '')])
             self.worker_env['PYTHONUNBUFFERED'] = '1'

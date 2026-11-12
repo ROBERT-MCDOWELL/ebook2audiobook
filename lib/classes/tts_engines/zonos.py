@@ -162,7 +162,8 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             # the worker is stdlib only: e2a's own interpreter runs it, nothing from python_env is imported
             engine_dir = os.path.dirname(os.path.abspath(__file__))
             self.worker_script = os.path.join(engine_dir, 'workers', f'{tts_engine}_worker.py')
-            self.worker_env = {k: v for k, v in os.environ.items() if k not in ('PYTHONHOME', 'PYTHONPATH', 'PYTHONSTARTUP', '__PYVENV_LAUNCHER__')}
+            # OMP_NUM_THREADS sizes e2a's own torch (conf.py, core.py): left out, the worker's torch takes every core
+            self.worker_env = {k: v for k, v in os.environ.items() if k not in ('PYTHONHOME', 'PYTHONPATH', 'PYTHONSTARTUP', '__PYVENV_LAUNCHER__', 'OMP_NUM_THREADS')}
             self.worker_env['PYTHONUNBUFFERED'] = '1'
             # CUDA packages that do not bundle cuBLAS / cudart find them in the NVIDIA pip packages e2a's own CUDA
             # PyTorch installed into python_env (site-packages/nvidia/<x>/lib, CUDA 13: nvidia/cu13/lib; Windows
