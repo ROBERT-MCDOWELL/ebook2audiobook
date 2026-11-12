@@ -355,7 +355,7 @@ default_engine_settings = {
         # the speech, as F5-TTS derives the generated duration from the reference's seconds per character
         "ref_max": 12.0,
         # languages a checkpoint exists for (presets/f5tts_presets.py: v1 base for eng/zho, community models)
-        "languages": {"eng": "en", "zho": "zh", "fra": "fr", "deu": "de", "ita": "it", "rus": "ru", "spa": "es", "fin": "fi", "hin": "hi", "lav": "lv", "jpn": "ja", "ara": "ar", "srp": "sr"},
+        "languages": {"eng": "en", "zho": "zh", "fra": "fr", "deu": "de", "ita": "it", "rus": "ru", "spa": "es", "fin": "fi", "hin": "hi", "lav": "lv", "jpn": "ja", "ara": "ar"},
         "samplerate": 24000,
         # upstream defaults (utils_infer.py)
         "nfe_step": 32,
@@ -874,7 +874,7 @@ default_engine_settings = {
         "rating": {"VRAM": 1, "CPU": 5, "RAM": 2, "Realism": 4}
     },
     TTS_ENGINES['VITS']: {
-        "languages": {"ben": "bn", "bul": "bg", "cat": "ca", "ces": "cs", "dan": "da", "deu": "de", "ell": "el", "eng": "en", "est": "et", "ewe": "ewe", "fas": "fa", "fin": "fi", "fra": "fr", "gle": "ga", "hau": "hau", "hrv": "hr", "hun": "hu", "ita": "it", "lav": "lv", "lin": "lin", "lit": "lt", "mlt": "mt", "nld": "nl", "pol": "pl", "por": "pt", "rom": "ro", "slk": "sk", "sln": "sl", "spa": "es", "swe": "sv", "tw_akuapem": "tw_akuapem", "tw_asante": "tw_asante", "ukr": "uk", "yor": "yor"},
+        "languages": {"ben": "bn", "bul": "bg", "cat": "ca", "ces": "cs", "dan": "da", "deu": "de", "ell": "el", "eng": "en", "est": "et", "ewe": "ewe", "fas": "fa", "fin": "fi", "fra": "fr", "gle": "ga", "hau": "hau", "hrv": "hr", "hun": "hu", "ita": "it", "lav": "lv", "lin": "lin", "lit": "lt", "mlt": "mt", "nld": "nl", "pol": "pl", "por": "pt", "rom": "ro", "slk": "sk", "sln": "sl", "spa": "es", "srp": "sr", "swe": "sv", "tw_akuapem": "tw_akuapem", "tw_asante": "tw_asante", "ukr": "uk", "yor": "yor"},
         "samplerate": 22050,
         "files": ['config.json', 'best_model.pth', 'ref.wav'],
         "voice": None,
