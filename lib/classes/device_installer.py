@@ -154,7 +154,7 @@ class DeviceInstaller():
                         print(error, file=sys.stderr)
                 return json.dumps(device_info)
         elif mode == BUILD_DOCKER:
-            name, tag, msg = self.check_hardware
+            name, tag, msg = self.detect_device(BUILD_DOCKER)
             os_env = 'manylinux_2_28'
             pyvenv = self.check_pyvenv(tag)
             arch = archs['AARCH64'] if name in [devices['JETSON']['proc'], devices['MPS']['proc']] or (self.system == systems['MACOS'] and self.arch == archs['ARM64']) else self.arch
@@ -203,25 +203,6 @@ class DeviceInstaller():
             return version(pkg)
         except PackageNotFoundError:
             return False
-
-    @cached_property
-    def torch_probe(self)->dict:
-        # what the installed torch reports, read in a child interpreter for the detect_device() fallbacks. Never import
-        # torch here: its DLLs stay loaded for the life of this process, so Windows then refuses to replace them when
-        # install_device_packages() swaps torch for another device ("failed to remove file torch/_C.cp312-win_amd64.pyd:
-        # Access is denied"). {} when torch is absent, has no GPU runtime to ask, or the probe fails
-        torch_version = self.get_package_version('torch')
-        if not torch_version:
-            return {}
-        if torch_version.partition('+')[2] in (devices['CPU']['proc'], devices['VULKAN']['proc']):
-            return {}
-        probe = 'import json, torch; xpu = hasattr(torch, "xpu") and torch.xpu.is_available(); print(json.dumps({"cuda": torch.version.cuda, "hip": getattr(torch.version, "hip", None), "cuda_available": torch.cuda.is_available(), "xpu_available": xpu, "xpu_count": torch.xpu.device_count() if xpu else 0}))'
-        try:
-            out = subprocess.check_output([python_exec, '-I', '-c', probe], text=True, stderr=subprocess.DEVNULL, timeout=180)
-            torch_info = json.loads(out.strip().splitlines()[-1])
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError, ValueError, IndexError):
-            return {}
-        return torch_info if isinstance(torch_info, dict) else {}
 
     def vulkan_gpus(self)->list:
         # names of the real Vulkan GPUs the system loader sees: integrated, discrete or virtual.
@@ -303,7 +284,7 @@ class DeviceInstaller():
         m = platform.machine().upper()
         return archs.get(m, 'unknown')
 
-    def detect_device(self)->str:
+    def detect_device(self, mode:str=NATIVE)->tuple:
         def has_cmd(cmd:str)->bool:
             return shutil.which(cmd) is not None
 
@@ -759,10 +740,7 @@ class DeviceInstaller():
                                 m = re.search(r'HIP version:\s*([\d.]+)', out, re.IGNORECASE)
                                 if m:
                                     version = _normalize_version(m.group(1))
-                # 3) torch.version.hip fallback
-                if not version and self.torch_probe.get('hip'):
-                    version = _normalize_version(self.torch_probe['hip'])
-                # 4) ROCm install dir fallback
+                # 3) ROCm install dir fallback
                 if not version:
                     if os.name == 'posix':
                         for p in sorted(glob('/opt/rocm-*'), reverse=True):
@@ -841,39 +819,6 @@ class DeviceInstaller():
                             msg = legends['msg_rocm_no_torch_build'].format(version=version_str)
                 else:
                     msg = legends['msg_rocm_runtime_missing']
-                # 5) Last-resort torch fallback
-                if not devices['ROCM']['found']:
-                    try:
-                        if self.torch_probe.get('cuda_available') and self.torch_probe.get('hip'):
-                            devices['ROCM']['found'] = True
-                            version = _normalize_version(self.torch_probe['hip'])
-                            if version:
-                                if self.system == systems['WINDOWS'] and version < tuple(rocm_version_range['max']):
-                                    devices['ROCM']['found'] = False
-                                    max_ver = f"{rocm_version_range['max'][0]}.{rocm_version_range['max'][1]}"
-                                    msg = legends['msg_rocm_windows_upgrade'].format(version='.'.join(str(p) for p in version), max=max_ver)
-                                else:
-                                    compat_versions = []
-                                for t, entry in torch_matrix.items():
-                                    if self.system not in entry['os'] or not t.startswith('rocm'):
-                                        continue
-                                    ver_str = t[len('win-rocm'):] if t.startswith('win-rocm') else t[len('rocm'):]
-                                    tag_ver = _normalize_version(ver_str)
-                                    if not tag_ver:
-                                        continue
-                                    compat_versions.append(tag_ver)
-                                tag = None
-                                if compat_versions:
-                                    le_versions = [v for v in compat_versions if v <= version]
-                                    if le_versions:
-                                        matched = max(le_versions)
-                                        if self.system == systems['WINDOWS']:
-                                            tag = f'win-rocm{matched[0]}.{matched[1]}.{matched[2]}' if matched[2] else f'win-rocm{matched[0]}.{matched[1]}'
-                                        else:
-                                            tag = f'rocm{matched[0]}.{matched[1]}.{matched[2]}' if matched[2] else f'rocm{matched[0]}.{matched[1]}'
-                            msg = ''
-                    except Exception:
-                        pass
             # ============================================================
             # CUDA
             # ============================================================
@@ -1004,25 +949,11 @@ class DeviceInstaller():
                             tag = f'cu{current[0]}{current[1]}'  # still index 0/1, ignore patch
                 else:
                     msg = legends['msg_cuda_missing']
-                # 4) PyTorch fallback (only helps if a CUDA-enabled torch is already installed)
-                if not devices['CUDA']['found']:
-                    torch_cuda_ver = self.torch_probe.get('cuda') if self.torch_probe.get('cuda_available') else None
-                    if torch_cuda_ver:
-                        cmp, current, min_tuple, max_tuple = version_classify(torch_cuda_ver, cuda_version_range)
-                        if cmp == -1:
-                            msg = legends['msg_cuda_too_old'].format(version=torch_cuda_ver, min=f'{min_tuple[0]}.{min_tuple[1]}')
-                        elif cmp is not None:
-                            devices['CUDA']['found'] = True
-                            name = devices['CUDA']['proc']
-                            if cmp == 1:
-                                tag = f'cu{max_tuple[0]}{max_tuple[1]}'
-                                msg = legends['msg_cuda_tested_max'].format(version=torch_cuda_ver, max=f'{max_tuple[0]}.{max_tuple[1]}', tag=tag)
-                            else:
-                                tag = f'cu{current[0]}{current[1]}'
-                # 5) nvidia-smi header parsing — last-resort rescue
-                # Works driver-only; useful on fresh installs with no toolkit
-                # and CPU-only torch (where step 4 can't help).
-                if not devices['CUDA']['found'] and has_cmd('nvidia-smi'):
+                # 4) nvidia-smi header parsing, Docker image builds only
+                # Natively CUDA needs the CUDA runtime found above, else the GPU takes the +vulkan torch below.
+                # A Docker image brings its own runtime (the cu torch wheel's nvidia-* packages), so the host
+                # only needs the driver, which nvidia-smi answers for.
+                if mode == BUILD_DOCKER and not devices['CUDA']['found'] and has_cmd('nvidia-smi'):
                     out = try_cmd('nvidia-smi')
                     # Header line: '| NVIDIA-SMI ...  Driver Version: ...  CUDA Version: 12.4 |'
                     m = re.search(r'cuda\s*version\s*:?\s*([0-9]+(?:\.[0-9]+)?)', out, re.IGNORECASE)
@@ -1252,13 +1183,6 @@ class DeviceInstaller():
                         msg = legends['msg_intel_sycl_no_l0'].format(kmd=kmd)
                     else:
                         msg = legends['msg_intel_l0_no_device'].format(kmd=kmd, status=ze_status)
-                # 4) PyTorch last-resort fallback
-                if not devices['XPU']['found'] and self.torch_probe.get('xpu_available'):
-                    devices['XPU']['found'] = True
-                    xpu_device_count = self.torch_probe.get('xpu_count', 0)
-                    name = devices['XPU']['proc']
-                    tag = devices['XPU']['proc']
-                    msg = legends['msg_xpu_fallback']
             # ============================================================
             # APPLE MPS
             # ============================================================
@@ -1269,9 +1193,10 @@ class DeviceInstaller():
             # ============================================================
             # VULKAN
             # ============================================================
-            # CUDA, ROCm, XPU and Jetson keep their torch. Otherwise (MPS, or nothing usable found, including a GPU
-            # whose CUDA/ROCm runtime did not answer) the +vulkan torch is used when vulkan_ok(), ahead of MPS: the
-            # +vulkan wheels keep MPS on Apple Silicon, so MPS stays found and selectable. Intel macOS always takes it
+            # a GPU gets its vendor torch (CUDA, ROCm, XPU, Jetson) only when the system has that vendor's runtime, never
+            # from a torch already in python_env. Otherwise (MPS, or a GPU whose CUDA, ROCm or Level Zero runtime is not
+            # found) the +vulkan torch is used when vulkan_ok(), ahead of MPS: the +vulkan wheels keep MPS on Apple
+            # Silicon, so MPS stays found and selectable. Intel macOS always takes it
             if tag in (None, devices['MPS']['proc']):
                 vulkan_gpu = vulkan_ok()
                 if not vulkan_gpu and self.system == systems['MACOS'] and self.detect_arch_tag() == archs['X86_64']:
