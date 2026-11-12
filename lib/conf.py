@@ -73,6 +73,10 @@ devices = {
     # (native GPU builds) run on it, the others switch to CPU with an alert (lib/core.py)
     "VULKAN": {"proc": "vulkan", "found": False}
 }
+# the system Vulkan loader, the one the GPU driver installs. Windows takes it by absolute path: a bare 'vulkan-1.dll'
+# returns any copy already loaded in the process, and once torch is imported that is the +vulkan wheel's own
+# torch/lib/vulkan-1.dll (Vulkan Loader 1.0.61, 2017), too old to find current drivers
+vulkan_loader = os.path.join(os.environ.get('SystemRoot', r'C:\Windows'), 'System32', 'vulkan-1.dll') if DEVICE_SYSTEM == systems['WINDOWS'] else 'libvulkan.so.1'
 
 device_info_json = '.device_info.json'
 device_info_dict = {"gpu_count": 0, "gpu_backend": None}

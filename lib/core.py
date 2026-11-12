@@ -4692,7 +4692,7 @@ def convert_ebook(args:dict)->tuple:
                         else:
                             import ctypes
                             try:
-                                ctypes.CDLL('vulkan-1.dll' if sys.platform == systems['WINDOWS'] else 'libvulkan.so.1')
+                                ctypes.CDLL(vulkan_loader)
                                 devices['VULKAN']['found'] = True
                             except OSError:
                                 devices['VULKAN']['found'] = False
