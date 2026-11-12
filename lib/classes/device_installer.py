@@ -1625,6 +1625,10 @@ class DeviceInstaller():
                             return 1
                 msg = legends['msg_all_packages_ok']
                 print(msg)
+            # a requirement depending on the plain build (piper-tts -> onnxruntime) installs it next to the
+            # device build picked above, and both unpack into site-packages/onnxruntime/: keep onnx_pkg only.
+            # runs on every pass, not only after an install, to also repair envs that already hold both
+            self.finalize_exclusive_packages({'onnxruntime': onnx_pkg})
         except Exception as e:
             error = f'install_python_packages() error: {e}'
             print(error)
@@ -1859,10 +1863,11 @@ class DeviceInstaller():
             error = f'drop_pip_cache(): {e}'
             print(error)
 
-    def finalize_exclusive_packages(self)->int:
+    def finalize_exclusive_packages(self, specs:dict|None=None)->int:
+        # specs: {pkg: requirement} already chosen by the caller (skips a second select_pkg probe)
         try:
             for pkg, choices in self.exclusive_pkgs.items():
-                spec = self.select_pkg(pkg)
+                spec = (specs or {}).get(pkg) or self.select_pkg(pkg)
                 keep = re.split(r'[<>=!\[;]', spec, 1)[0].strip()
                 installed = [choice for choice in choices if self.get_package_version(choice)]
                 losers = [choice for choice in installed if choice != keep]
