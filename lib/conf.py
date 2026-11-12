@@ -79,6 +79,8 @@ devices = {
 vulkan_loader = os.path.join(os.environ.get('SystemRoot', r'C:\Windows'), 'System32', 'vulkan-1.dll') if DEVICE_SYSTEM == systems['WINDOWS'] else 'libvulkan.so.1'
 
 device_info_json = '.device_info.json'
+# the GPU the user picked when several can run e2a (DeviceInstaller.choose_gpu)
+gpu_choice_file = '.gpu_choice'
 device_info_dict = {"gpu_count": 0, "gpu_backend": None}
 
 default_device = devices['CPU']['proc']

@@ -214,11 +214,24 @@ class DeviceInstaller():
 
     def vulkan_gpus(self)->list:
         # names of the real Vulkan GPUs the system loader sees
-        return [name for _, name in self.vulkan_devices()]
+        return [name for _, name, _ in self.vulkan_devices()]
+
+    @cached_property
+    def vulkan_torch_ok(self)->bool:
+        # the +vulkan torch applies here: this OS / arch in torch_matrix and its wheels on py-pkg for this venv's Python.
+        # Already installed: no network, so an offline start keeps the Vulkan torch
+        entry = torch_matrix.get(devices['VULKAN']['proc'])
+        arch_tag = self.detect_arch_tag()
+        if not entry or self.system not in entry['os'] or arch_tag not in entry['arch']:
+            return False
+        if self.get_package_version('torch') == f"{entry['last']}+{devices['VULKAN']['proc']}":
+            return True
+        return self.vulkan_wheels_ok(self.python_version, f'{self.detect_platform_tag()}_{arch_tag}')
 
     def vulkan_devices(self)->list:
-        # (PCI vendor id, name) of the real Vulkan GPUs the system loader sees, in its order: integrated, discrete or
-        # virtual. Software renderers (lavapipe/llvmpipe, SwiftShader: VK_PHYSICAL_DEVICE_TYPE_CPU) don't count
+        # (PCI vendor id, name, deviceType) of the real Vulkan GPUs the system loader sees, in its order: integrated (1),
+        # discrete (2) or virtual (3). Software renderers (lavapipe/llvmpipe, SwiftShader: VK_PHYSICAL_DEVICE_TYPE_CPU)
+        # don't count
         import ctypes
         try:
             vk = ctypes.CDLL(vulkan_loader)
@@ -248,8 +261,9 @@ class DeviceInstaller():
                 for dev in devs:
                     props = ctypes.create_string_buffer(1024)  # VkPhysicalDeviceProperties is 824 bytes
                     vk.vkGetPhysicalDeviceProperties(dev, props)
-                    if int.from_bytes(props.raw[16:20], 'little') in (1, 2, 3):  # deviceType: integrated, discrete, virtual
-                        found.append((int.from_bytes(props.raw[8:12], 'little'), props.raw[20:276].split(b'\0')[0].decode(errors='replace')))  # vendorID, deviceName
+                    device_type = int.from_bytes(props.raw[16:20], 'little')
+                    if device_type in (1, 2, 3):  # integrated, discrete, virtual
+                        found.append((int.from_bytes(props.raw[8:12], 'little'), props.raw[20:276].split(b'\0')[0].decode(errors='replace'), device_type))  # vendorID, deviceName
         finally:
             vk.vkDestroyInstance(inst, None)
         return found
@@ -283,9 +297,9 @@ class DeviceInstaller():
                 return False
         return True
 
-    def ask_tty(self, prompt:str, timeout:int)->Union[str, None]:
+    def ask_tty(self, prompt:str, timeout:int)->Union[str, bool, None]:
         # one line typed on the terminal, read past the launchers' redirections (their capture of stdout, bash feeding the
-        # script on stdin). None when there is no terminal (Docker build, GUI, CI) or no Enter within timeout seconds
+        # script on stdin). None when there is no terminal (Docker build, GUI, CI), False without Enter within timeout
         import time
         deadline = time.monotonic() + timeout
         try:
@@ -316,7 +330,7 @@ class DeviceInstaller():
                             out.write(char)
                         out.flush()
                     out.write('\n')
-                    return None
+                    return False
             import select
             # one handle each way: 'r+' would need a seekable file, a terminal is not
             with open('/dev/tty', 'w', encoding='utf-8') as tty_out, open('/dev/tty', 'r', encoding='utf-8') as tty_in:
@@ -325,77 +339,128 @@ class DeviceInstaller():
                 if select.select([tty_in], [], [], timeout)[0]:
                     return tty_in.readline().strip()
                 tty_out.write('\n')
-                return None
+                return False
         except OSError:
             return None
 
-    def gpu_vendor_order(self, vk_devices:list)->list:
-        # PCI vendor id of each GPU in the OS's own GPU numbering, GPU 0 first. Windows: adapter order, which the Vulkan
-        # loader enumerates in (DXGI order), WMI without a loader. Linux: PCI bus order, as lspci lists it
+    def system_gpus(self, vk_devices:list)->list:
+        # the GPUs in the OS's own numbering, GPU 0 first, as (PCI vendor id, model, add-in card). Windows: adapter order,
+        # which the Vulkan loader enumerates in (DXGI order), WMI without a loader. Linux: PCI bus order. Model and card
+        # come from the Vulkan device of the same vendor (deviceType discrete); without one the card is guessed: Intel's
+        # integrated GPU is 00:02.0 on the PCI bus (on Windows: any Intel), NVIDIA and AMD count as cards
+        if self.system == systems['WINDOWS'] and vk_devices:
+            return [(vendor_id, model, device_type == 2) for vendor_id, model, device_type in vk_devices]
+        pci = []  # (vendor id, PCI address)
         if self.system == systems['WINDOWS']:
-            if vk_devices:
-                return [vendor_id for vendor_id, _ in vk_devices]
             try:
                 out = subprocess.run(['powershell', '-NoProfile', '-Command', 'Get-CimInstance Win32_VideoController | ForEach-Object { $_.PNPDeviceID }'], capture_output=True, text=True, errors='replace', timeout=20).stdout
             except (OSError, subprocess.TimeoutExpired):
-                return []
-            return [int(vendor_id, 16) for vendor_id in re.findall(r'VEN_([0-9A-F]{4})', out, re.IGNORECASE)]
-        vendor_ids = []
-        sysfs = '/sys/bus/pci/devices'
-        if os.path.isdir(sysfs):
-            for dev in sorted(os.listdir(sysfs)):  # 'dddd:bb:dd.f', fixed width hex: sorted is bus order
+                out = ''
+            pci = [(int(vendor_id, 16), '') for vendor_id in re.findall(r'VEN_([0-9A-F]{4})', out, re.IGNORECASE)]
+        else:
+            sysfs = '/sys/bus/pci/devices'
+            if os.path.isdir(sysfs):
+                for dev in sorted(os.listdir(sysfs)):  # 'dddd:bb:dd.f', fixed width hex: sorted is bus order
+                    try:
+                        with open(os.path.join(sysfs, dev, 'class')) as f:
+                            if not f.read().strip().startswith(('0x0300', '0x0302')):
+                                continue
+                        with open(os.path.join(sysfs, dev, 'vendor')) as f:
+                            pci.append((int(f.read().strip(), 16), dev))
+                    except (OSError, ValueError):
+                        continue
+            if not pci and shutil.which('lspci'):
                 try:
-                    with open(os.path.join(sysfs, dev, 'class')) as f:
-                        if not f.read().strip().startswith(('0x0300', '0x0302')):
-                            continue
-                    with open(os.path.join(sysfs, dev, 'vendor')) as f:
-                        vendor_ids.append(int(f.read().strip(), 16))
-                except (OSError, ValueError):
-                    continue
-        if not vendor_ids and shutil.which('lspci'):
-            try:
-                out = subprocess.run(['lspci', '-nn'], capture_output=True, text=True, errors='replace', timeout=20).stdout
-            except (OSError, subprocess.TimeoutExpired):
-                return []
-            vendor_ids = [int(vendor_id, 16) for vendor_id in re.findall(r'\[030[02]\].*\[([0-9a-f]{4}):[0-9a-f]{4}\]', out, re.IGNORECASE)]
-        return vendor_ids
+                    out = subprocess.run(['lspci', '-nn'], capture_output=True, text=True, errors='replace', timeout=20).stdout
+                except (OSError, subprocess.TimeoutExpired):
+                    out = ''
+                for address, vendor_id in re.findall(r'^(\S+) .*\[030[02]\].*\[([0-9a-f]{4}):[0-9a-f]{4}\]', out, re.IGNORECASE | re.MULTILINE):
+                    pci.append((int(vendor_id, 16), address if address.count(':') == 2 else f'0000:{address}'))
+        if not pci:
+            return [(vendor_id, model, device_type == 2) for vendor_id, model, device_type in vk_devices]
+        unmatched = list(vk_devices)
+        gpus = []
+        for vendor_id, address in pci:
+            card = vendor_id != 0x8086 or (bool(address) and not address.endswith(':00:02.0'))
+            same = [device for device in unmatched if device[0] == vendor_id]
+            device = next((device for device in same if (device[2] == 2) == card), same[0] if same else None)
+            if device:
+                unmatched.remove(device)
+                gpus.append((vendor_id, device[1], device[2] == 2))
+            else:
+                gpus.append((vendor_id, '', card))
+        # Vulkan GPUs not on the PCI list (virtual GPUs) come last
+        return gpus + [(vendor_id, model, device_type == 2) for vendor_id, model, device_type in unmatched]
 
-    def choose_gpu(self, usable:list)->tuple:
-        # several GPU vendors have their runtime here and one torch serves one of them. The pick is the name saved in
-        # .device_info.json, kept while that GPU stays usable; else asked on the terminal, else the system's GPU 0
-        names = [result[0] for result in usable]
-        previous = self.load_device_info()
-        if previous and previous.get('name') in names:
-            return usable[names.index(previous['name'])]
+    def gpu_candidates(self, gpu_results:dict)->list:
+        # each way e2a can run a GPU here, as (name, tag, msg, models): a vendor runtime detect_device() found (cuda,
+        # rocm, xpu) and one +vulkan torch for the GPUs whose vendor runtime is missing, when Vulkan sees them and the
+        # +vulkan torch applies. Add-in cards first, then the OS's GPU order: entry 0, the default, is the card in a slot
         vk_devices = self.vulkan_devices()
-        # listed in the OS's GPU numbering from 0, so entry 0, the default, is the system's GPU 0
-        order = [self.gpu_pci_vendors.get(vendor_id) for vendor_id in self.gpu_vendor_order(vk_devices)]
-        usable = sorted(usable, key=lambda result: order.index(result[0]) if result[0] in order else len(order))
-        names = [result[0] for result in usable]
-        options = []
-        for index, (name, tag, _) in enumerate(usable):
-            models = ', '.join(model for vendor_id, model in vk_devices if self.gpu_pci_vendors.get(vendor_id) == name)
-            options.append(f'  {index}) {models} - {name} ({tag})' if models else f'  {index}) {name} ({tag})')
-        prompt = '\n'.join([legends['msg_gpu_choice_header'], *options, legends['msg_gpu_choice_prompt'].format(last=len(usable) - 1, seconds=self.gpu_choice_timeout)])
+        gpus = self.system_gpus(vk_devices)
+        vk_vendors = {vendor_id for vendor_id, _, _ in vk_devices}
+        ranked = {}
+        for index, (vendor_id, model, card) in enumerate(gpus):
+            result = gpu_results.get(self.gpu_pci_vendors.get(vendor_id))
+            if result and result[1]:
+                key, msg = (result[0], result[1]), result[2]
+            elif vendor_id in vk_vendors and self.vulkan_torch_ok:
+                key, msg = (devices['VULKAN']['proc'], devices['VULKAN']['proc']), None
+            else:
+                continue
+            entry = ranked.setdefault(key, {'rank': (0 if card else 1, index), 'msg': msg, 'models': []})
+            entry['rank'] = min(entry['rank'], (0 if card else 1, index))
+            if model and model not in entry['models']:
+                entry['models'].append(model)
+        # a runtime that answered for a GPU missing from the listing (WSL2's CUDA: no PCI device) still counts, as a card
+        for name, tag, msg in gpu_results.values():
+            if tag and (name, tag) not in ranked:
+                ranked[(name, tag)] = {'rank': (0, len(gpus)), 'msg': msg, 'models': []}
+        candidates = []
+        for (name, tag), entry in sorted(ranked.items(), key=lambda item: item[1]['rank']):
+            models = ', '.join(entry['models'])
+            msg = entry['msg'] if entry['msg'] is not None else legends['msg_vulkan_selected'].format(gpu=models or devices['VULKAN']['proc'])
+            candidates.append((name, tag, msg, models))
+        return candidates
+
+    def choose_gpu(self, candidates:list)->tuple:
+        # several ways to run a GPU here and one torch serves one of them. The user's pick saved in gpu_choice_file wins
+        # while it stays possible; else asked on the terminal, the answer or no answer (entry 0) being saved; else, no
+        # terminal, entry 0 unsaved. Returns (name, tag, msg)
+        names = [candidate[0] for candidate in candidates]
+        try:
+            with open(gpu_choice_file, 'r', encoding='utf-8') as f:
+                saved = f.read().strip()
+        except OSError:
+            saved = ''
+        if saved in names:
+            return candidates[names.index(saved)][:3]
+        options = [f'  {index}) {models} - {name} ({tag})' if models else f'  {index}) {name} ({tag})' for index, (name, tag, _, models) in enumerate(candidates)]
+        prompt = '\n'.join([legends['msg_gpu_choice_header'], *options, legends['msg_gpu_choice_prompt'].format(last=len(candidates) - 1, seconds=self.gpu_choice_timeout)])
         choice = None
         while choice is None:
             answer = self.ask_tty(prompt, self.gpu_choice_timeout)
-            if answer is None:
-                break
-            if answer == '':
+            if answer is None or answer is False or answer == '':
                 choice = 0
-            elif answer.isdigit() and int(answer) < len(usable):
+            elif answer.isdigit() and int(answer) < len(candidates):
                 choice = int(answer)
             else:
-                prompt = legends['msg_gpu_choice_invalid'].format(last=len(usable) - 1)
+                prompt = legends['msg_gpu_choice_invalid'].format(last=len(candidates) - 1)
+        name, tag = candidates[choice][:2]
+        if answer is not None:
+            try:
+                with open(gpu_choice_file, 'w', encoding='utf-8') as f:
+                    f.write(name)
+            except OSError as e:
+                error = legends['msg_device_info_write_failed'].format(e=e)
+                print(error, file=sys.stderr)
         # stderr: the launchers read the device info from stdout
-        if choice is None:
-            choice = 0
-            msg = legends['msg_gpu_choice_default'].format(devices=', '.join(names), device=usable[0][0], tag=usable[0][1], file=device_info_json)
+        if isinstance(answer, str):
+            msg = legends['msg_gpu_choice_done'].format(device=name, tag=tag, file=gpu_choice_file)
         else:
-            msg = legends['msg_gpu_choice_done'].format(device=usable[choice][0], tag=usable[choice][1], file=device_info_json)
+            msg = legends['msg_gpu_choice_default'].format(devices=', '.join(names), device=name, tag=tag, file=gpu_choice_file)
         print(msg, file=sys.stderr)
-        return usable[choice]
+        return candidates[choice][:3]
 
     def detect_platform_tag(self)->str:
         if self.system == systems['WINDOWS']:
@@ -680,24 +745,12 @@ class DeviceInstaller():
             return False
 
         def vulkan_ok()->str:
-            # the Vulkan GPU name when the +vulkan torch applies here, else ''. Needs this OS / arch in torch_matrix,
-            # a real Vulkan GPU (macOS: every Mac on 11+ has a Metal GPU, the wheel brings MoltenVK), and the wheels for
-            # this venv's Python on py-pkg. Already installed: no network, so an offline start keeps the Vulkan torch
-            entry = torch_matrix.get(devices['VULKAN']['proc'])
-            arch_tag = self.detect_arch_tag()
-            if not entry or self.system not in entry['os'] or arch_tag not in entry['arch']:
-                return ''
+            # the Vulkan GPU name when the +vulkan torch applies here (vulkan_torch_ok), else ''. macOS: every Mac on 11+
+            # has a Metal GPU, the wheel brings MoltenVK. Elsewhere the first real Vulkan GPU
             if self.system == systems['MACOS']:
-                gpu = 'Metal (MoltenVK)'
-            else:
-                gpus = self.vulkan_gpus()
-                if not gpus:
-                    return ''
-                gpu = gpus[0]
-            torch_ver = entry['last']
-            if self.get_package_version('torch') == f"{torch_ver}+{devices['VULKAN']['proc']}":
-                return gpu
-            return gpu if self.vulkan_wheels_ok(self.python_version, f'{self.detect_platform_tag()}_{arch_tag}') else ''
+                return 'Metal (MoltenVK)' if self.vulkan_torch_ok else ''
+            gpus = self.vulkan_gpus()
+            return gpus[0] if gpus and self.vulkan_torch_ok else ''
 
         def _normalize_version(v:str)->tuple:
             '''Parse version string into (major, minor, patch). Patch defaults to 0.'''
@@ -728,8 +781,8 @@ class DeviceInstaller():
                 msg = legends['msg_device_tag_invalid']
         else:
             tegra = arch in (archs['AARCH64'],archs['ARM64']) and (os.path.exists('/etc/nv_tegra_release') or 'tegra' in try_cmd('cat /proc/device-tree/compatible'))
-            # (name, tag, msg) of each GPU vendor below: they all answer, a machine can have several (GPU CHOICE)
-            gpu_results = []
+            # vendor -> (name, tag, msg) of each GPU vendor below: they all answer, a machine can have several (GPU CHOICE)
+            gpu_results = {}
             # ============================================================
             # JETSON
             # ============================================================
@@ -947,7 +1000,7 @@ class DeviceInstaller():
                             msg = legends['msg_rocm_no_torch_build'].format(version=version_str)
                 else:
                     msg = legends['msg_rocm_runtime_missing']
-                gpu_results.append((name, tag, msg))
+                gpu_results[devices['ROCM']['proc']] = (name, tag, msg)
             # ============================================================
             # CUDA
             # ============================================================
@@ -1102,7 +1155,7 @@ class DeviceInstaller():
                             else:
                                 tag = f'cu{current[0]}{current[1]}'
                                 msg = legends['msg_cuda_smi_driver_only'].format(version=smi_version)
-                gpu_results.append((name, tag, msg))
+                gpu_results[devices['CUDA']['proc']] = (name, tag, msg)
             # ============================================================
             # INTEL XPU
             # ============================================================
@@ -1315,22 +1368,22 @@ class DeviceInstaller():
                         msg = legends['msg_intel_sycl_no_l0'].format(kmd=kmd)
                     else:
                         msg = legends['msg_intel_l0_no_device'].format(kmd=kmd, status=ze_status)
-                gpu_results.append((name, tag, msg))
+                gpu_results[devices['XPU']['proc']] = (name, tag, msg)
             # ============================================================
             # GPU CHOICE
             # ============================================================
-            # one torch serves one vendor: several with their runtime (e.g. an NVIDIA card with CUDA and an Intel Arc
-            # with Level Zero) go to choose_gpu(). None: their notes stay for the Vulkan / CPU fallback below
-            if gpu_results:
-                usable = [result for result in gpu_results if result[1]]
-                if len(usable) > 1:
-                    name, tag, msg = self.choose_gpu(usable)
-                elif usable:
-                    name, tag, msg = usable[0]
+            # one torch serves one way of running a GPU: its vendor runtime found above, or the +vulkan torch for a GPU
+            # without one (gpu_candidates). Several go to choose_gpu(). None: the vendors' notes stay for the CPU fallback
+            if not tegra and self.system != systems['MACOS']:
+                candidates = self.gpu_candidates(gpu_results)
+                if len(candidates) > 1:
+                    name, tag, msg = self.choose_gpu(candidates)
+                elif candidates:
+                    name, tag, msg = candidates[0][:3]
                 else:
                     name, tag = None, None
-                    msg = ' '.join(result[2] for result in gpu_results if result[2])
-                for key in ('ROCM', 'CUDA', 'XPU'):
+                    msg = ' '.join(result[2] for result in gpu_results.values() if result[2])
+                for key in ('ROCM', 'CUDA', 'XPU', 'VULKAN'):
                     devices[key]['found'] = bool(tag) and name == devices[key]['proc']
                 if devices['ROCM']['found']:
                     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:False'
@@ -1345,11 +1398,10 @@ class DeviceInstaller():
             # ============================================================
             # VULKAN
             # ============================================================
-            # a GPU gets its vendor torch (CUDA, ROCm, XPU, Jetson) only when the system has that vendor's runtime, never
-            # from a torch already in python_env. Otherwise (MPS, or a GPU whose CUDA, ROCm or Level Zero runtime is not
-            # found) the +vulkan torch is used when vulkan_ok(), ahead of MPS: the +vulkan wheels keep MPS on Apple
-            # Silicon, so MPS stays found and selectable. Intel macOS always takes it
-            if tag in (None, devices['MPS']['proc']):
+            # Linux / Windows decided Vulkan in GPU CHOICE above. macOS (MPS or nothing found) and a Jetson whose JetPack
+            # has no torch build take the +vulkan torch when vulkan_ok(), ahead of MPS: the +vulkan wheels keep MPS on
+            # Apple Silicon, so MPS stays found and selectable. Intel macOS always takes it
+            if tag in (None, devices['MPS']['proc']) and (tegra or self.system == systems['MACOS']):
                 vulkan_gpu = vulkan_ok()
                 if not vulkan_gpu and self.system == systems['MACOS'] and self.detect_arch_tag() == archs['X86_64']:
                     # PyTorch has no Intel macOS wheel after 2.2.2: the +vulkan build is the only current torch there
