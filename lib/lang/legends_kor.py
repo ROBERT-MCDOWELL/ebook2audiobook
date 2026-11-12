@@ -496,6 +496,7 @@ legends = {
     'msg_installing_libs': '{name}에 맞는 라이브러리 패키지를 설치하는 중…',
     'msg_installing_rocm_sdk': 'ROCm SDK {version} 설치 중…',
     'msg_installing_torchcodec_xpu': 'torchcodec과 Intel XPU 플러그인을 설치하는 중…',
+    'msg_installing_torchcodec_xpu_no_plugin': 'torchcodec 설치 중(Intel XPU 플러그인은 Linux 전용입니다. 오디오 디코딩은 CPU에서 계속 진행됩니다)…',
     'error_torchcodec_import': 'torchcodec이 설치되어 있지만 가져올 수 없습니다. 로그를 확인하고 ffmpeg가 공유 라이브러리로 설치되어 있으며 경로가 OS 라이브러리 경로에 등록되어 있는지 확인하세요.',
     'error_torchcodec_missing': 'torchcodec이 설치되어 있지 않습니다! 로그를 확인하고 ffmpeg가 공유 라이브러리로 설치되어 있으며 경로가 OS 라이브러리 경로에 등록되어 있는지 확인하세요.',
     'error_torch_install_failed': 'torch 패키지 설치 실패: {e}',

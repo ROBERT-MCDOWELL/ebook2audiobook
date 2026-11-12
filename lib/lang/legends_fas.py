@@ -496,6 +496,7 @@ legends = {
     'msg_installing_libs': 'در حال نصب بسته‌های کتابخانه مناسب برای {name}…',
     'msg_installing_rocm_sdk': 'در حال نصب ROCm SDK {version}…',
     'msg_installing_torchcodec_xpu': 'در حال نصب torchcodec و افزونه Intel XPU…',
+    'msg_installing_torchcodec_xpu_no_plugin': 'در حال نصب torchcodec (افزونه Intel XPU فقط برای لینوکس است: رمزگشایی صدا روی CPU باقی می‌ماند)…',
     'error_torchcodec_import': 'torchcodec نصب است اما وارد نمی‌شود. لطفاً گزارش را بررسی کنید و ببینید ffmpeg به‌صورت اشتراکی نصب شده و مسیر آن در مسیر کتابخانه‌های سیستم ثبت شده است یا نه.',
     'error_torchcodec_missing': 'torchcodec نصب نیست! لطفاً گزارش را بررسی کنید و ببینید ffmpeg به‌صورت اشتراکی نصب شده و مسیر آن در مسیر کتابخانه‌های سیستم ثبت شده است یا نه.',
     'error_torch_install_failed': 'نصب بسته torch ناموفق بود: {e}',

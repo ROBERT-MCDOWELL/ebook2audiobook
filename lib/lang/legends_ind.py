@@ -496,6 +496,7 @@ legends = {
     'msg_installing_libs': 'Memasang paket pustaka yang sesuai untuk {name}…',
     'msg_installing_rocm_sdk': 'Memasang ROCm SDK {version}…',
     'msg_installing_torchcodec_xpu': 'Memasang torchcodec dan plugin Intel XPU…',
+    'msg_installing_torchcodec_xpu_no_plugin': 'Menginstal torchcodec (plugin Intel XPU hanya tersedia di Linux: pengodean audio tetap ada di CPU)…',
     'error_torchcodec_import': 'torchcodec terpasang tetapi tidak dapat diimpor. Periksa log dan pastikan ffmpeg terpasang sebagai shared dan jalurnya terdaftar di jalur pustaka OS Anda.',
     'error_torchcodec_missing': 'torchcodec belum terpasang! Periksa log dan pastikan ffmpeg terpasang sebagai shared dan jalurnya terdaftar di jalur pustaka OS Anda.',
     'error_torch_install_failed': 'Gagal memasang paket torch: {e}',

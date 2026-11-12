@@ -496,6 +496,7 @@ legends = {
     'msg_installing_libs': '{name} के लिए सही लाइब्रेरी पैकेज इंस्टॉल हो रहे हैं…',
     'msg_installing_rocm_sdk': 'ROCm SDK {version} इंस्टॉल हो रहा है…',
     'msg_installing_torchcodec_xpu': 'torchcodec और Intel XPU प्लगइन इंस्टॉल हो रहे हैं…',
+    'msg_installing_torchcodec_xpu_no_plugin': 'torchcodec इंस्टॉल किया जा रहा है (Intel XPU प्लगइन सिर्फ़ Linux के लिए है: ऑडियो डिकोडिंग CPU पर ही बनी रहती है)…',
     'error_torchcodec_import': 'torchcodec इंस्टॉल है, लेकिन इम्पोर्ट नहीं हो सकता। कृपया लॉग देखें और जाँचें कि ffmpeg शेयर्ड रूप में इंस्टॉल है और उसका पथ आपके OS के लाइब्रेरी पथ में दर्ज है।',
     'error_torchcodec_missing': 'torchcodec इंस्टॉल नहीं है! कृपया लॉग देखें और जाँचें कि ffmpeg शेयर्ड रूप में इंस्टॉल है और उसका पथ आपके OS के लाइब्रेरी पथ में दर्ज है।',
     'error_torch_install_failed': 'torch पैकेज इंस्टॉल करना विफल: {e}',

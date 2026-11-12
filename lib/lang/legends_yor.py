@@ -496,6 +496,7 @@ legends = {
     'msg_installing_libs': 'À ń fi àwọn àpò ilé ìkàwé tó yẹ fún {name} sí i…',
     'msg_installing_rocm_sdk': 'À ń fi ROCm SDK {version} sí i…',
     'msg_installing_torchcodec_xpu': 'À ń fi torchcodec àti plugin Intel XPU sí i…',
+    'msg_installing_torchcodec_xpu_no_plugin': 'Fífi torchcodec síi (àfikún Intel XPU wà fún Linux nìkan: ṣíṣe àwárí ohùn wà lórí CPU)…',
     'error_torchcodec_import': 'A ti fi torchcodec sí i ṣùgbọ́n a kò lè gbé e wọlé. Ẹ jọ̀wọ́ ẹ wo àkọsílẹ̀, kí ẹ sì ṣàyẹ̀wò bóyá a fi ffmpeg sí i gẹ́gẹ́ bí àjùmọ̀lò àti pé ọ̀nà rẹ̀ wà nínú ọ̀nà ilé ìkàwé OS yín.',
     'error_torchcodec_missing': 'A kò fi torchcodec sí i! Ẹ jọ̀wọ́ ẹ wo àkọsílẹ̀, kí ẹ sì ṣàyẹ̀wò bóyá a fi ffmpeg sí i gẹ́gẹ́ bí àjùmọ̀lò àti pé ọ̀nà rẹ̀ wà nínú ọ̀nà ilé ìkàwé OS yín.',
     'error_torch_install_failed': 'Fífi àpò torch sí i kò ṣiṣẹ́: {e}',

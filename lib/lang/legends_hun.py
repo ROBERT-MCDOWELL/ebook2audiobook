@@ -496,6 +496,7 @@ legends = {
     'msg_installing_libs': 'A(z) {name} eszközhöz illő könyvtárcsomagok telepítése…',
     'msg_installing_rocm_sdk': 'A ROCm SDK {version} telepítése…',
     'msg_installing_torchcodec_xpu': 'A torchcodec és az Intel XPU bővítmény telepítése…',
+    'msg_installing_torchcodec_xpu_no_plugin': 'A torchcodec telepítése (az Intel XPU bővítmény csak Linux rendszeren érhető el: a hangdekódolás a CPU-n marad)…',
     'error_torchcodec_import': 'A torchcodec telepítve van, de nem importálható. Nézze meg a naplót, és ellenőrizze, hogy az ffmpeg megosztott változatban van-e telepítve, és az útvonala szerepel-e a rendszer könyvtárútvonalában.',
     'error_torchcodec_missing': 'A torchcodec nincs telepítve! Nézze meg a naplót, és ellenőrizze, hogy az ffmpeg megosztott változatban van-e telepítve, és az útvonala szerepel-e a rendszer könyvtárútvonalában.',
     'error_torch_install_failed': 'A torch csomag telepítése sikertelen: {e}',

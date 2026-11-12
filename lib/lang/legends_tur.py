@@ -496,6 +496,7 @@ legends = {
     'msg_installing_libs': '{name} için uygun kütüphane paketleri kuruluyor…',
     'msg_installing_rocm_sdk': 'ROCm SDK {version} kuruluyor…',
     'msg_installing_torchcodec_xpu': 'torchcodec ve Intel XPU eklentisi kuruluyor…',
+    'msg_installing_torchcodec_xpu_no_plugin': 'torchcodec yükleniyor (Intel XPU eklentisi yalnızca Linux içindir: ses kod çözme işlemi CPU\'da kalır)...',
     'error_torchcodec_import': 'torchcodec kurulu ancak içe aktarılamıyor. Lütfen günlüğü kontrol edin ve ffmpeg\'in paylaşımlı olarak kurulu ve yolunun işletim sisteminizin kütüphane yoluna kayıtlı olup olmadığına bakın.',
     'error_torchcodec_missing': 'torchcodec kurulu değil! Lütfen günlüğü kontrol edin ve ffmpeg\'in paylaşımlı olarak kurulu ve yolunun işletim sisteminizin kütüphane yoluna kayıtlı olup olmadığına bakın.',
     'error_torch_install_failed': 'torch paketi kurulamadı: {e}',

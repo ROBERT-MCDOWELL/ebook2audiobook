@@ -496,6 +496,7 @@ legends = {
     'msg_installing_libs': '正在为 {name} 安装合适的库…',
     'msg_installing_rocm_sdk': '正在安装 ROCm SDK {version}…',
     'msg_installing_torchcodec_xpu': '正在安装 torchcodec 和 Intel XPU 插件…',
+    'msg_installing_torchcodec_xpu_no_plugin': '正在安装 torchcodec（Intel XPU 插件仅适用于 Linux：音频解码仍由 CPU 完成）……',
     'error_torchcodec_import': 'torchcodec 已安装但无法导入。请检查日志，并确认 ffmpeg 是以共享库方式安装且其路径已加入系统库路径。',
     'error_torchcodec_missing': '未安装 torchcodec！请检查日志，并确认 ffmpeg 是以共享库方式安装且其路径已加入系统库路径。',
     'error_torch_install_failed': '安装 torch 包失败：{e}',

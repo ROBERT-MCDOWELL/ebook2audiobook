@@ -496,6 +496,7 @@ legends = {
     'msg_installing_libs': '{name} க்கான சரியான நூலகத் தொகுப்புகள் நிறுவப்படுகின்றன…',
     'msg_installing_rocm_sdk': 'ROCm SDK {version} நிறுவப்படுகிறது…',
     'msg_installing_torchcodec_xpu': 'torchcodec மற்றும் Intel XPU செருகுநிரல் நிறுவப்படுகின்றன…',
+    'msg_installing_torchcodec_xpu_no_plugin': 'torchcodec ஐ நிறுவுகிறது (Intel XPU சொருகி Linux க்கு மட்டுமே: ஆடியோ டிகோடிங் CPU இல் இருக்கும்)…',
     'error_torchcodec_import': 'torchcodec நிறுவப்பட்டுள்ளது, ஆனால் இறக்குமதி செய்ய முடியவில்லை. பதிவைச் சரிபார்த்து, ffmpeg பகிர்வுப் பதிப்பாக நிறுவப்பட்டு அதன் பாதை உங்கள் OS நூலகப் பாதையில் பதிவு செய்யப்பட்டுள்ளதா எனப் பார்க்கவும்.',
     'error_torchcodec_missing': 'torchcodec நிறுவப்படவில்லை! பதிவைச் சரிபார்த்து, ffmpeg பகிர்வுப் பதிப்பாக நிறுவப்பட்டு அதன் பாதை உங்கள் OS நூலகப் பாதையில் பதிவு செய்யப்பட்டுள்ளதா எனப் பார்க்கவும்.',
     'error_torch_install_failed': 'torch தொகுப்பை நிறுவ முடியவில்லை: {e}',

@@ -496,6 +496,7 @@ legends = {
     'msg_installing_libs': 'جارٍ تثبيت حزم المكتبات المناسبة لـ {name}…',
     'msg_installing_rocm_sdk': 'جارٍ تثبيت ROCm SDK {version}…',
     'msg_installing_torchcodec_xpu': 'جارٍ تثبيت torchcodec وإضافة Intel XPU…',
+    'msg_installing_torchcodec_xpu_no_plugin': 'جارٍ تثبيت torchcodec (المكون الإضافي Intel XPU مخصص لنظام التشغيل Linux فقط: يظل فك ترميز الصوت على وحدة المعالجة المركزية)…',
     'error_torchcodec_import': 'torchcodec مثبّت لكن تعذّر استيراده. يُرجى مراجعة السجل والتحقق من تثبيت ffmpeg كمكتبة مشتركة وتسجيل مساره في مسار مكتبات النظام.',
     'error_torchcodec_missing': 'torchcodec غير مثبّت! يُرجى مراجعة السجل والتحقق من تثبيت ffmpeg كمكتبة مشتركة وتسجيل مساره في مسار مكتبات النظام.',
     'error_torch_install_failed': 'فشل تثبيت حزمة torch: {e}',

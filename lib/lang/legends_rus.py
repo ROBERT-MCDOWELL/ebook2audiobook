@@ -496,6 +496,7 @@ legends = {
     'msg_installing_libs': 'Установка подходящих библиотек для {name}…',
     'msg_installing_rocm_sdk': 'Установка ROCm SDK {version}…',
     'msg_installing_torchcodec_xpu': 'Установка torchcodec и плагина Intel XPU…',
+    'msg_installing_torchcodec_xpu_no_plugin': 'Установка torchcodec (плагин Intel XPU доступен только для Linux: декодирование аудио выполняется на ЦП)…',
     'error_torchcodec_import': 'torchcodec установлен, но не импортируется. Проверьте журнал и то, что ffmpeg установлен как разделяемая сборка, а его путь добавлен в путь библиотек вашей ОС.',
     'error_torchcodec_missing': 'torchcodec не установлен! Проверьте журнал и то, что ffmpeg установлен как разделяемая сборка, а его путь добавлен в путь библиотек вашей ОС.',
     'error_torch_install_failed': 'Не удалось установить пакет torch: {e}',
