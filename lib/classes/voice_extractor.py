@@ -6,9 +6,10 @@ from pydub.silence import detect_nonsilent
 from pathlib import Path
             
 from lib.classes.tts_engines.common.audio import get_audio_duration
+from lib.classes.tts_engines.common.hf_download import hf_download
 from lib.classes.subprocess_pipe import SubprocessPipe
-from lib.conf import systems, devices, voice_formats, default_audio_proc_samplerate
-from lib.conf_models import TTS_ENGINES
+from lib.conf import systems, devices, voice_formats, default_audio_proc_samplerate, tts_dir
+from lib.conf_models import TTS_ENGINES, default_voice_separation_model
 from lib.lang import legends
 
 class VoiceExtractor:
@@ -107,8 +108,26 @@ class VoiceExtractor:
             print(error)
         return False, False, error
 
+    def _load_demucs(self)->Any:
+        import torch
+        from demucs.pretrained import get_model, REMOTE_ROOT, LocalRepo, BagOnlyRepo, AnyModelRepo
+        name = default_voice_separation_model['name']
+        file = default_voice_separation_model['file']
+        repo_id = default_voice_separation_model['repo']
+        # already in torch.hub's cache from an earlier run on the official host: no download at all
+        if os.path.isfile(os.path.join(torch.hub.get_dir(), 'checkpoints', file)):
+            return get_model(name=name)
+        try:
+            model_path = hf_download(self.progress_bar if self.is_gui_process else None, legends['msg_extracting_voice'], repo_id=repo_id, filename=file, cache_dir=tts_dir)
+            # LocalRepo checks the sha256 prefix carried by the file name, the bag yaml (signatures, weights, segment)
+            # ships with demucs itself: same model as get_model(name), only the checkpoint comes from the HF mirror
+            model_repo = LocalRepo(Path(model_path).parent)
+            return AnyModelRepo(model_repo, BagOnlyRepo(REMOTE_ROOT, model_repo)).get_model(name)
+        except Exception as e:
+            print(f'_load_demucs() {repo_id} error: {e}, trying the official demucs host')
+        return get_model(name=name)
+
     def _demucs_voice(self)->tuple[bool, str]:
-        from demucs.pretrained import get_model
         from demucs.apply import apply_model
         from demucs.audio import AudioFile
 
@@ -131,7 +150,7 @@ class VoiceExtractor:
             msg = legends['msg_extracting_voice']
             if self.is_gui_process:
                 self.progress_bar(0.0, desc=msg)
-            model = get_model(name="htdemucs")
+            model = self._load_demucs()
             model.to(self.device)
             model.eval()
             audio_result = AudioFile(self.wav_file).read(
