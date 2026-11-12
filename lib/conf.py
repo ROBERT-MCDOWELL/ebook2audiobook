@@ -1,4 +1,4 @@
-import os, tempfile, sys, re
+import os, ssl, tempfile, sys, re
 from pathlib import Path
 
 debug_mode = False
@@ -214,6 +214,37 @@ if DEVICE_SYSTEM == systems['WINDOWS']:
 if not any(_v in os.environ for _v in ('ROCR_VISIBLE_DEVICES', 'HIP_VISIBLE_DEVICES', 'CUDA_VISIBLE_DEVICES')):
     os.environ['ROCR_VISIBLE_DEVICES'] = '0'
     os.environ['HIP_VISIBLE_DEVICES'] = '0'
+
+# ---------------------------------------------------------------------
+# TLS trust
+# ---------------------------------------------------------------------
+def ssl_patch()->None:
+    # stdlib urllib (torch.hub -> demucs/pyannote checkpoints, urllib.request.urlopen) trusts only the python build's
+    # own OpenSSL store, stale or empty on some hosts (uv/python.org builds on macOS: "certificate has expired",
+    # "unable to get local issuer certificate") while requests/huggingface_hub already trust certifi.
+    # Give urllib the certifi roots on top of the system store: SSL_CERT_FILE/SSL_CERT_DIR and corporate CAs
+    # stay honored, OpenSSL picks the time-valid issuer when both stores hold one, verification stays on.
+    # Idempotent: safe on every lib.conf import (spawn children re-import it)
+    if getattr(ssl._create_default_https_context, 'e2a_certifi', False):
+        return
+    try:
+        import certifi
+        cafile = certifi.where()
+    except Exception:
+        return
+    if not os.path.isfile(cafile):
+        return
+    def _create_https_context(*args, **kwargs)->ssl.SSLContext:
+        ctx = ssl.create_default_context(*args, **kwargs)
+        try:
+            ctx.load_verify_locations(cafile=cafile)
+        except Exception:
+            pass
+        return ctx
+    _create_https_context.e2a_certifi = True
+    ssl._create_default_https_context = _create_https_context
+
+ssl_patch()
 
 # ---------------------------------------------------------------------
 # Global settings
