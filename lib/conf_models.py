@@ -127,7 +127,7 @@ default_vc_model = TTS_VOICE_CONVERSION['seed_vc']['path']
 default_voice_detection_model = 'drewThomasson/segmentation'
 # demucs voice separation checkpoint mirrored on HF (the official dl.fbaipublicfiles.com host is not reliable).
 # file keeps its demucs name: <signature>-<sha256 prefix>.th, the prefix is checked again at load
-default_voice_separation_model = dict(repo='ebook2audiobook/htdemucs', name='htdemucs', file='955717e8-8726e21a.th')
+default_voice_separation_model = dict(repo='drewThomasson/htdemucs', name='htdemucs', file='955717e8-8726e21a.th')
 default_speaker = os.path.join(voices_dir, 'eng', 'adult', 'male', 'KumarDahl.wav')
 
 tts_engines_from_coqui = [TTS_ENGINES['XTTS'], TTS_ENGINES['BARK'], TTS_ENGINES['TORTOISE'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
