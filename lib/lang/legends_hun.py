@@ -453,6 +453,7 @@ legends = {
     'msg_cuda_unparseable': 'A(z) {version} CUDA-verzió nem olvasható.',
     'msg_cuda_tested_max': 'CUDA {version}, de a tesztelt maximum {max}, ezért a(z) {tag} torch lesz használva',
     'msg_cuda_missing': 'A CUDA Toolkit vagy Runtime nincs telepítve, vagy a hardver nem észlelhető.',
+    'msg_cuda_no_torch_build': 'CUDA {version}: nincs Torch-összeállítás ehhez az operációs rendszerhez és architektúrához.',
     'msg_cuda_smi_too_old': 'CUDA {version} (nvidia-smi szerint) < min. Frissítsen.',
     'msg_cuda_smi_driver_only': 'CUDA {version} észlelve nvidia-smi segítségével (csak illesztőprogram).',
     'msg_xpu_oneapi_too_old': '{count} Intel GPU Level Zero-n keresztül. oneAPI {version} < min. {min}, de a torch alapértelmezett xpu-buildje így is használva lesz.',

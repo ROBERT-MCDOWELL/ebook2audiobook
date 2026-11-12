@@ -453,6 +453,7 @@ legends = {
     'msg_cuda_unparseable': 'Versi CUDA {version} ora bisa diwaca.',
     'msg_cuda_tested_max': 'CUDA {version} nanging maksimum sing dites {max}, mula nganggo torch kanggo {tag}',
     'msg_cuda_missing': 'CUDA Toolkit utawa Runtime durung dipasang utawa hardware ora kadeteksi.',
+    'msg_cuda_no_torch_build': 'CUDA {version}: ora ana build torch kanggo OS lan arsitektur iki.',
     'msg_cuda_smi_too_old': 'CUDA {version} (saka nvidia-smi) < min. Mangga dianyari.',
     'msg_cuda_smi_driver_only': 'CUDA {version} kadeteksi liwat nvidia-smi (mung driver).',
     'msg_xpu_oneapi_too_old': '{count} GPU Intel liwat Level Zero. oneAPI {version} < min {min} nanging tetep nganggo build xpu gawan torch.',

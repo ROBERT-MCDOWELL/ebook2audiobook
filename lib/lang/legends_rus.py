@@ -453,6 +453,7 @@ legends = {
     'msg_cuda_unparseable': 'Версия CUDA {version} не распознана.',
     'msg_cuda_tested_max': 'CUDA {version}, но протестировано до {max}, поэтому используется torch для {tag}',
     'msg_cuda_missing': 'CUDA Toolkit или Runtime не установлены, либо оборудование не обнаружено.',
+    'msg_cuda_no_torch_build': 'CUDA {version}: для этой ОС и архитектуры нет сборки Torch.',
     'msg_cuda_smi_too_old': 'CUDA {version} (по nvidia-smi) < мин. Обновитесь.',
     'msg_cuda_smi_driver_only': 'CUDA {version} обнаружена через nvidia-smi (только драйвер).',
     'msg_xpu_oneapi_too_old': 'GPU Intel через Level Zero: {count}. oneAPI {version} < мин. {min}, но всё равно используется стандартная xpu-сборка torch.',

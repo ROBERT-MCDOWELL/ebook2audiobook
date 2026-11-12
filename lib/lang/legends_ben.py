@@ -453,6 +453,7 @@ legends = {
     'msg_cuda_unparseable': 'CUDA সংস্করণ {version} পড়া যায়নি।',
     'msg_cuda_tested_max': 'CUDA {version}, কিন্তু পরীক্ষিত সর্বোচ্চ {max}, তাই {tag}-এর torch ব্যবহার হচ্ছে',
     'msg_cuda_missing': 'CUDA Toolkit বা Runtime ইনস্টল নেই, অথবা হার্ডওয়্যার শনাক্ত হয়নি।',
+    'msg_cuda_no_torch_build': 'CUDA {version}: এই OS এবং আর্কিটেকচারের জন্য কোনও টর্চ বিল্ড নেই।',
     'msg_cuda_smi_too_old': 'CUDA {version} (nvidia-smi অনুযায়ী) ন্যূনতমের চেয়ে কম। অনুগ্রহ করে আপগ্রেড করুন।',
     'msg_cuda_smi_driver_only': 'nvidia-smi দিয়ে CUDA {version} শনাক্ত হয়েছে (শুধু ড্রাইভার)।',
     'msg_xpu_oneapi_too_old': 'Level Zero-এর মাধ্যমে {count}টি Intel GPU। oneAPI {version} < ন্যূনতম {min}, তবুও torch-এর ডিফল্ট xpu বিল্ড ব্যবহার হচ্ছে।',

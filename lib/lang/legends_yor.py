@@ -453,6 +453,7 @@ legends = {
     'msg_cuda_unparseable': 'A kò lè ka ẹ̀yà CUDA {version}.',
     'msg_cuda_tested_max': 'CUDA {version} ṣùgbọ́n èyí tó ga jù tí a dánwò ni {max}, nítorí náà à ń lo torch fún {tag}',
     'msg_cuda_missing': 'A kò fi CUDA Toolkit tàbí Runtime sí i, tàbí a kò rí ẹ̀rọ náà.',
+    'msg_cuda_no_torch_build': 'CUDA {version}: kò sí ìkọ́ torch fún OS yìí àti àwọn ètò rẹ̀.',
     'msg_cuda_smi_too_old': 'CUDA {version} (láti nvidia-smi) kéré ju èyí tí a nílò. Ẹ jọ̀wọ́ ẹ ṣe àtúnṣe.',
     'msg_cuda_smi_driver_only': 'A rí CUDA {version} nípasẹ̀ nvidia-smi (awakọ̀ nìkan).',
     'msg_xpu_oneapi_too_old': 'Intel GPU {count} nípasẹ̀ Level Zero. oneAPI {version} < kéré jù {min} ṣùgbọ́n à ń lo xpu àtilẹ̀wá torch bákan náà.',

@@ -453,6 +453,7 @@ legends = {
     'msg_cuda_unparseable': 'CUDA వెర్షన్ {version} చదవలేకపోయాం.',
     'msg_cuda_tested_max': 'CUDA {version}, కానీ పరీక్షించిన గరిష్ఠం {max}, కాబట్టి {tag} కోసం torch వాడుతోంది',
     'msg_cuda_missing': 'CUDA Toolkit లేదా Runtime ఇన్‌స్టాల్ కాలేదు, లేదా హార్డ్‌వేర్ గుర్తించబడలేదు.',
+    'msg_cuda_no_torch_build': 'CUDA {version}: ఈ OS మరియు ఆర్కిటెక్చర్ కోసం టార్చ్ బిల్డ్ లేదు.',
     'msg_cuda_smi_too_old': 'CUDA {version} (nvidia-smi ప్రకారం) కనిష్ఠం కంటే తక్కువ. అప్‌గ్రేడ్ చేయండి.',
     'msg_cuda_smi_driver_only': 'nvidia-smi ద్వారా CUDA {version} గుర్తించబడింది (డ్రైవర్ మాత్రమే).',
     'msg_xpu_oneapi_too_old': 'Level Zero ద్వారా {count} Intel GPU(లు). oneAPI {version} < కనిష్ఠం {min}, అయినా torch డిఫాల్ట్ xpu బిల్డ్ వాడుతోంది.',

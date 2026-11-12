@@ -453,6 +453,7 @@ legends = {
     'msg_cuda_unparseable': 'نسخه CUDA {version} قابل خواندن نیست.',
     'msg_cuda_tested_max': 'CUDA {version} اما بالاترین نسخه آزمایش‌شده {max} است، پس از torch مخصوص {tag} استفاده می‌شود',
     'msg_cuda_missing': 'CUDA Toolkit یا Runtime نصب نیست یا سخت‌افزار شناسایی نشد.',
+    'msg_cuda_no_torch_build': 'CUDA {version}: هیچ نسخه Torch برای این سیستم عامل و معماری وجود ندارد.',
     'msg_cuda_smi_too_old': 'CUDA {version} (طبق nvidia-smi) کمتر از حداقل است. لطفاً ارتقا دهید.',
     'msg_cuda_smi_driver_only': 'CUDA {version} از طریق nvidia-smi شناسایی شد (فقط درایور).',
     'msg_xpu_oneapi_too_old': '{count} GPU اینتل از طریق Level Zero. oneAPI {version} کمتر از حداقل {min} است اما به هر حال نسخه xpu پیش‌فرض torch استفاده می‌شود.',

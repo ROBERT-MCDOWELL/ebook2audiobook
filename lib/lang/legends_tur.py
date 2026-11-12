@@ -453,6 +453,7 @@ legends = {
     'msg_cuda_unparseable': 'CUDA sürümü {version} okunamadı.',
     'msg_cuda_tested_max': 'CUDA {version} ancak test edilen en yüksek {max}, bu yüzden {tag} için torch kullanılıyor',
     'msg_cuda_missing': 'CUDA Toolkit veya Runtime kurulu değil ya da donanım algılanmadı.',
+    'msg_cuda_no_torch_build': 'CUDA {version}: Bu işletim sistemi ve mimari için torch derlemesi yok.',
     'msg_cuda_smi_too_old': 'CUDA {version} (nvidia-smi\'ye göre) < en az. Lütfen yükseltin.',
     'msg_cuda_smi_driver_only': 'CUDA {version} nvidia-smi ile algılandı (yalnızca sürücü).',
     'msg_xpu_oneapi_too_old': 'Level Zero ile {count} Intel GPU. oneAPI {version} < en az {min}, yine de torch varsayılan xpu derlemesi kullanılıyor.',

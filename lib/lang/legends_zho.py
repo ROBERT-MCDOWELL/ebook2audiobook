@@ -453,6 +453,7 @@ legends = {
     'msg_cuda_unparseable': '无法解析 CUDA 版本 {version}。',
     'msg_cuda_tested_max': 'CUDA {version}，但已测试的最高版本为 {max}，因此使用 {tag} 的 torch',
     'msg_cuda_missing': '未安装 CUDA Toolkit 或 Runtime，或未检测到硬件。',
+    'msg_cuda_no_torch_build': 'CUDA {version}：没有适用于此操作系统和架构的PyTorch版本。',
     'msg_cuda_smi_too_old': 'CUDA {version}（来自 nvidia-smi）低于最低版本。请升级。',
     'msg_cuda_smi_driver_only': '通过 nvidia-smi 检测到 CUDA {version}（仅驱动）。',
     'msg_xpu_oneapi_too_old': '通过 Level Zero 检测到 {count} 个 Intel GPU。oneAPI {version} < 最低版本 {min}，但仍使用 torch 默认 xpu 版本。',

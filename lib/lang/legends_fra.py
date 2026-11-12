@@ -453,6 +453,7 @@ legends = {
     'msg_cuda_unparseable': 'Version CUDA {version} illisible.',
     'msg_cuda_tested_max': 'CUDA {version} mais max testé {max}, torch pour {tag} utilisé',
     'msg_cuda_missing': 'CUDA Toolkit ou Runtime non installé, ou matériel non détecté.',
+    'msg_cuda_no_torch_build': 'CUDA {version} : aucune version de PyTorch pour ce système d’exploitation et cette architecture.',
     'msg_cuda_smi_too_old': 'CUDA {version} (via nvidia-smi) < min. Veuillez mettre à jour.',
     'msg_cuda_smi_driver_only': 'CUDA {version} détecté via nvidia-smi (pilote seul).',
     'msg_xpu_oneapi_too_old': '{count} GPU Intel via Level Zero. oneAPI {version} < min {min}, version xpu par défaut de torch utilisée quand même.',

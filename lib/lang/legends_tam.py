@@ -453,6 +453,7 @@ legends = {
     'msg_cuda_unparseable': 'CUDA பதிப்பு {version} ஐப் படிக்க முடியவில்லை.',
     'msg_cuda_tested_max': 'CUDA {version}, ஆனால் சோதிக்கப்பட்ட அதிகபட்சம் {max}, எனவே {tag} க்கான torch பயன்படுத்தப்படுகிறது',
     'msg_cuda_missing': 'CUDA Toolkit அல்லது Runtime நிறுவப்படவில்லை, அல்லது வன்பொருள் கண்டறியப்படவில்லை.',
+    'msg_cuda_no_torch_build': 'CUDA {version}: இந்த OS மற்றும் கட்டமைப்பிற்கான டார்ச் உருவாக்கம் இல்லை.',
     'msg_cuda_smi_too_old': 'CUDA {version} (nvidia-smi படி) குறைந்தபட்சத்தை விடக் குறைவு. மேம்படுத்தவும்.',
     'msg_cuda_smi_driver_only': 'nvidia-smi மூலம் CUDA {version} கண்டறியப்பட்டது (இயக்கி மட்டும்).',
     'msg_xpu_oneapi_too_old': 'Level Zero வழியாக {count} Intel GPU. oneAPI {version} < குறைந்தபட்சம் {min}, இருந்தாலும் torch இன் இயல்புநிலை xpu உருவாக்கம் பயன்படுத்தப்படுகிறது.',
