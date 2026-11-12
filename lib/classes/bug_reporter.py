@@ -1,4 +1,4 @@
-import os, sys, re, ssl, json, glob, atexit, shutil, struct, getpass, hashlib, platform, threading, traceback, subprocess, faulthandler, urllib.request, urllib.error
+import os, sys, re, ssl, json, glob, time, atexit, shutil, signal, struct, getpass, hashlib, platform, threading, traceback, subprocess, faulthandler, urllib.request, urllib.error
 
 from datetime import datetime, timezone
 from importlib import metadata
@@ -20,6 +20,10 @@ class BugReporter:
     dll_error_re = re.compile(r'Error loading "([^"]+?\.(?:dll|pyd))"', re.IGNORECASE)
     pyd_error_re = re.compile(r'DLL load failed while importing (\w+)')
     selftest_timeout = 45
+    # exit codes of a child killed by the same Ctrl+C: SIGINT (POSIX, raw and shell style), STATUS_CONTROL_C_EXIT (Windows)
+    interrupt_codes = {-2, 130, 0xC000013A, -1073741510}
+    # how long a live report waits for a Ctrl+C racing with it (see send())
+    grace = 1.0
     # tiny workload run by gpu_selftest() in a fresh interpreter; prints one JSON line, one key per step
     selftest_code = '''
 import json, sys
@@ -80,6 +84,9 @@ print(json.dumps(out))
         self.redact = []
         self.sent = set()
         self.selftest = None
+        self.interrupted = False
+        self.exiting = False
+        self.sigint_hook = None
         self.lock = threading.Lock()
         self.selftest_lock = threading.Lock()
         self.sys_hook = sys.excepthook
@@ -125,7 +132,7 @@ print(json.dumps(out))
                 created = datetime.fromtimestamp(os.path.getmtime(path), timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
                 with open(path, 'r', encoding='utf-8', errors='replace') as f:
                     dump = f.read().strip()
-                if not dump:
+                if not dump or '0xc000013a' in dump.lower():
                     os.remove(path)
                     continue
             except Exception:
@@ -147,6 +154,19 @@ print(json.dumps(out))
             atexit.register(self.on_exit)
         except Exception:
             pass
+        # Ctrl+C and a normal quit report nothing: chain the SIGINT handler (the app's KeyboardInterrupt flow is
+        # unchanged), and hook the end of the main thread, which runs before threads are joined and atexit handlers
+        try:
+            prev = signal.getsignal(signal.SIGINT)
+            if callable(prev):
+                self.sigint_hook = prev
+                signal.signal(signal.SIGINT, self.on_sigint)
+        except Exception:
+            pass
+        try:
+            getattr(threading, '_register_atexit', atexit.register)(self.on_shutdown)
+        except Exception:
+            pass
         from lib.lang import legends
         msg = legends['msg_crash_reports_on']
         print(msg)
@@ -155,6 +175,8 @@ print(json.dumps(out))
     def report(self, where:str|None=None, session:Any=None, exc_info:tuple|None=None, kind:str='exception', wait:bool=False)->None:
         exc_type, exc, tb = exc_info if exc_info else sys.exc_info()
         if not self.url or not isinstance(exc, Exception) or exc_type.__module__ == 'gradio.exceptions' or getattr(exc, '_e2a_reported', False):
+            return
+        if self.quitting(exc):
             return
         try:
             exc._e2a_reported = True
@@ -492,12 +514,36 @@ print(json.dumps(out))
                 pos += 20
             return names
 
+    def quitting(self, exc:BaseException)->bool:
+        # Ctrl+C or the app quitting: what fails from then on is a side effect (children killed by the same Ctrl+C,
+        # threads torn down with the interpreter), not a bug
+        if self.interrupted or self.exiting or sys.is_finalizing() or not threading.main_thread().is_alive():
+            return True
+        cur, depth = exc, 0
+        while cur is not None and depth < 8:
+            if isinstance(cur, (KeyboardInterrupt, SystemExit)) or (isinstance(cur, subprocess.CalledProcessError) and cur.returncode in self.interrupt_codes):
+                return True
+            cur, depth = cur.__cause__ or cur.__context__, depth + 1
+        return False
+
     def send(self, payload:dict, path:str|None=None)->None:
+        if path is None:
+            # a child killed by Ctrl+C can fail a worker thread before the main thread runs the SIGINT handler:
+            # give that handler a moment, then drop the report if Ctrl+C came. Reports queued before a normal
+            # quit still go out (their threads are joined at exit)
+            try:
+                time.sleep(self.grace)
+            except KeyboardInterrupt:
+                return
+            if self.interrupted:
+                return
         try:
             system = self.system_info()
             # a native crash from an earlier run (path set) has no runtime state left to read: this process is new
             runtime = self.runtime_info(payload) if path is None else {}
             payload['system'] = dict(system, runtime=runtime) if runtime else system
+            if path is None and self.interrupted:
+                return
             body = json.dumps(self.scrub(payload), ensure_ascii=False).encode('utf-8')
             req = urllib.request.Request(self.url, data=body, method='POST', headers={'Content-Type': 'application/json; charset=utf-8', 'User-Agent': f"ebook2audiobook/{self.version}"})
             if self.ctx is None:
@@ -528,11 +574,27 @@ print(json.dumps(out))
         self.thread_hook(args)
         self.report(f'thread {args.thread.name}' if args.thread else None, None, (args.exc_type, args.exc_value, args.exc_traceback), 'thread')
 
+    def on_sigint(self, signum:int, frame:Any)->None:
+        # Ctrl+C means quit: report nothing more, and drop the native crash log so a crash while exiting (CUDA
+        # teardown...) is not sent at the next start either. Then the previous handler (KeyboardInterrupt) as before
+        self.interrupted = True
+        self.on_exit()
+        self.sigint_hook(signum, frame)
+
+    def on_shutdown(self)->None:
+        # the main thread ended: a normal quit. Same as Ctrl+C for what is raised from now on, but reports already
+        # queued are still sent
+        self.on_exit()
+
     def on_exit(self)->None:
+        # idempotent: Ctrl+C, end of the main thread and atexit all land here
+        self.exiting = True
         try:
             faulthandler.disable()
-            self.fault_file.close()
-            os.remove(self.fault_path)
+            if self.fault_file is not None and not self.fault_file.closed:
+                self.fault_file.close()
+            if self.fault_path and os.path.exists(self.fault_path):
+                os.remove(self.fault_path)
         except Exception:
             pass
 
