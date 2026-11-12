@@ -121,7 +121,7 @@ torch_matrix = {
     # MPS
     "mps":       {"os": [systems['MACOS']], "arch": [archs['ARM64']], "last": "2.14.1", "codec": "0.17.0"},
     # XPU
-    "xpu":       {"os": [systems['LINUX'], systems['WINDOWS']], "arch": [archs['X86_64'], archs['AMD64']], "last": "2.14.1", "codec": "0.16.0"},
+    "xpu":       {"os": [systems['LINUX'], systems['WINDOWS']], "arch": [archs['X86_64'], archs['AMD64']], "last": "2.14.1", "codec": "0.17.0"},
     # JETSON
     "jetson5":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "last": "2.3.1", "codec": ""},
     "jetson6":   {"os": [systems['LINUX']], "arch": [archs['AARCH64']], "last": "2.8.0", "codec": ""},

@@ -2111,9 +2111,17 @@ class DeviceInstaller():
                                     rc = subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', torchcodec_wheel_url))
                                 else:
                                     if device_info['name'] == devices['XPU']['proc']:
-                                        msg = legends['msg_installing_torchcodec_xpu']
+                                        # all from PyPI: the xpu index only mirrors torchcodec's Linux CPU build, and under uv's
+                                        # first-index rule it hid PyPI's Windows wheel. Intel's plugin (torchcodec-xpu, with
+                                        # torchlib-xpu) is Linux only and follows torchcodec's versions, so it takes the same pin
+                                        torchcodec_pkgs = [f'torchcodec=={torchcodec_version_matrix}']
+                                        if self.system == systems['LINUX']:
+                                            torchcodec_pkgs += [f'torchcodec-xpu=={torchcodec_version_matrix}', 'torchlib-xpu']
+                                            msg = legends['msg_installing_torchcodec_xpu']
+                                        else:
+                                            msg = legends['msg_installing_torchcodec_xpu_no_plugin']
                                         print(msg)
-                                        rc = subprocess.call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', f'torchcodec=={torchcodec_version_matrix}', f'torchcodec-xpu', 'torchlib-xpu', '--extra-index-url', f'{default_pytorch_url}/xpu'))
+                                        rc = subprocess.call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', *torchcodec_pkgs))
                                     else:
                                         torchcodec_index_url = f'{default_pytorch_url}/cpu' if device_info['name'] in [devices['ROCM']['proc'], devices['VULKAN']['proc']] else f'{default_pytorch_url}/{tag_dir}'
                                         rc = subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', f'torchcodec=={torchcodec_version_matrix}', '--index-url', torchcodec_index_url))
