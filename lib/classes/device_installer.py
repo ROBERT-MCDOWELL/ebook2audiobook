@@ -26,6 +26,8 @@ class DeviceInstaller():
         'onnxruntime': ['onnxruntime', 'onnxruntime-gpu', 'onnxruntime-directml']
     }
     pip_cache_dir = os.environ.get('E2A_PIP_CACHE_DIR') or os.path.join(tempfile.gettempdir(), 'e2a_pip_cache')
+    # seconds the GPU choice waits for an answer before taking the first GPU, so an unattended install never hangs
+    gpu_choice_timeout = 60
 
     def __init__(self):
         self.system = sys.platform
@@ -156,16 +158,20 @@ class DeviceInstaller():
         elif mode == BUILD_DOCKER:
             name, tag, msg = self.detect_device(BUILD_DOCKER)
             os_env = 'manylinux_2_28'
-            pyvenv = self.check_pyvenv(tag)
             arch = archs['AARCH64'] if name in [devices['JETSON']['proc'], devices['MPS']['proc']] or (self.system == systems['MACOS'] and self.arch == archs['ARM64']) else self.arch
-            # a macOS host's containers run in a VM without its GPU: no MPS, no Vulkan there
-            if name in [devices['JETSON']['proc'], devices['MPS']['proc']] or (self.system == systems['MACOS'] and name == devices['VULKAN']['proc']):
+            # Jetson and MPS get no image of their own: a container sees no Tegra nor Metal GPU
+            if name in [devices['JETSON']['proc'], devices['MPS']['proc']]:
                 name = tag = devices['CPU']['proc']
-            elif name in [devices['CPU']['proc'], devices['VULKAN']['proc']]:
-                # the image is Linux with python max_python_version, so Vulkan is decided for that, not for the host's
-                # python: a Vulkan GPU on the host (passed in with --device=/dev/dri) and the wheels for the image
+            # after the mapping above: the image is Linux with the python of its own tag, not the host's
+            pyvenv = self.check_pyvenv(tag)
+            if name in [devices['CPU']['proc'], devices['VULKAN']['proc']]:
+                # an image without a GPU torch is the +vulkan one whenever its wheels exist: it runs on the CPU like the cpu
+                # image, and a GPU passed in later (--device=/dev/dri, a VM GPU such as Podman's libkrun on macOS) is used
+                # once the device is set to vulkan. The launchers run it like the cpu image on a host without /dev/dri
                 linux_arch = archs['X86_64'] if arch == archs['AMD64'] else arch
-                if (name == devices['VULKAN']['proc'] or self.vulkan_gpus()) and self.vulkan_wheels_ok(tuple(pyvenv), f'{os_env}_{linux_arch}'):
+                if self.vulkan_wheels_ok(tuple(pyvenv), f'{os_env}_{linux_arch}'):
+                    if name == devices['CPU']['proc']:
+                        msg = legends['msg_vulkan_docker_image']
                     name = tag = devices['VULKAN']['proc']
                     arch = linux_arch
                 else:
@@ -270,6 +276,86 @@ class DeviceInstaller():
             if code not in (200, 302):
                 return False
         return True
+
+    def ask_tty(self, prompt:str, timeout:int)->Union[str, None]:
+        # one line typed on the terminal, read past the launchers' redirections (their capture of stdout, bash feeding the
+        # script on stdin). None when there is no terminal (Docker build, GUI, CI) or no Enter within timeout seconds
+        import time
+        deadline = time.monotonic() + timeout
+        try:
+            if self.system == systems['WINDOWS']:
+                import msvcrt
+                with open('CONOUT$', 'w', encoding='utf-8') as out:
+                    out.write(prompt)
+                    out.flush()
+                    chars = []
+                    while time.monotonic() < deadline:
+                        if not msvcrt.kbhit():
+                            time.sleep(0.05)
+                            continue
+                        char = msvcrt.getwch()
+                        if char in ('\r', '\n'):
+                            out.write('\n')
+                            return ''.join(chars).strip()
+                        if char == '\x03':
+                            raise KeyboardInterrupt
+                        if char in ('\x00', '\xe0'):
+                            msvcrt.getwch()  # second half of an arrow / function key
+                        elif char == '\b':
+                            if chars:
+                                chars.pop()
+                                out.write('\b \b')
+                        elif char.isprintable():
+                            chars.append(char)
+                            out.write(char)
+                        out.flush()
+                    out.write('\n')
+                    return None
+            import select
+            # one handle each way: 'r+' would need a seekable file, a terminal is not
+            with open('/dev/tty', 'w', encoding='utf-8') as tty_out, open('/dev/tty', 'r', encoding='utf-8') as tty_in:
+                tty_out.write(prompt)
+                tty_out.flush()
+                if select.select([tty_in], [], [], timeout)[0]:
+                    return tty_in.readline().strip()
+                tty_out.write('\n')
+                return None
+        except OSError:
+            return None
+
+    def choose_gpu(self, usable:list)->tuple:
+        # several GPU vendors have their runtime here and one torch serves one of them. The pick is the name saved in
+        # .device_info.json, kept while that GPU stays usable; else asked on the terminal, else the first one found
+        names = [result[0] for result in usable]
+        previous = self.load_device_info()
+        if previous and previous.get('name') in names:
+            return usable[names.index(previous['name'])]
+        gpus = self.vulkan_gpus()
+        vendors = {devices['CUDA']['proc']: ('nvidia',), devices['ROCM']['proc']: ('amd', 'radeon'), devices['XPU']['proc']: ('intel',)}
+        options = []
+        for index, (name, tag, _) in enumerate(usable, 1):
+            models = ', '.join(gpu for gpu in gpus if any(vendor in gpu.lower() for vendor in vendors.get(name, ())))
+            options.append(f'  {index}) {models} - {name} ({tag})' if models else f'  {index}) {name} ({tag})')
+        prompt = '\n'.join([legends['msg_gpu_choice_header'], *options, legends['msg_gpu_choice_prompt'].format(count=len(usable), seconds=self.gpu_choice_timeout)])
+        choice = None
+        while choice is None:
+            answer = self.ask_tty(prompt, self.gpu_choice_timeout)
+            if answer is None:
+                break
+            if answer == '':
+                choice = 0
+            elif answer.isdigit() and 1 <= int(answer) <= len(usable):
+                choice = int(answer) - 1
+            else:
+                prompt = legends['msg_gpu_choice_invalid'].format(count=len(usable))
+        # stderr: the launchers read the device info from stdout
+        if choice is None:
+            choice = 0
+            msg = legends['msg_gpu_choice_default'].format(devices=', '.join(names), device=usable[0][0], tag=usable[0][1], file=device_info_json)
+        else:
+            msg = legends['msg_gpu_choice_done'].format(device=usable[choice][0], tag=usable[choice][1], file=device_info_json)
+        print(msg, file=sys.stderr)
+        return usable[choice]
 
     def detect_platform_tag(self)->str:
         if self.system == systems['WINDOWS']:
@@ -601,10 +687,13 @@ class DeviceInstaller():
             else:
                 msg = legends['msg_device_tag_invalid']
         else:
+            tegra = arch in (archs['AARCH64'],archs['ARM64']) and (os.path.exists('/etc/nv_tegra_release') or 'tegra' in try_cmd('cat /proc/device-tree/compatible'))
+            # (name, tag, msg) of each GPU vendor below: they all answer, a machine can have several (GPU CHOICE)
+            gpu_results = []
             # ============================================================
             # JETSON
             # ============================================================
-            if arch in (archs['AARCH64'],archs['ARM64']) and (os.path.exists('/etc/nv_tegra_release') or 'tegra' in try_cmd('cat /proc/device-tree/compatible')):
+            if tegra:
                 raw = tegra_version()
                 jp_code, msg = jetpack_version(raw)
                 if jp_code not in ('unsupported', 'unknown'):
@@ -629,9 +718,8 @@ class DeviceInstaller():
             # ============================================================
             # ROCm
             # ============================================================
-            elif has_rocm() and has_amd_gpu_pci():
-                os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:False'
-                os.environ['PYTORCH_HIP_ALLOC_CONF'] = 'expandable_segments:False'
+            if not tegra and has_rocm() and has_amd_gpu_pci():
+                name, tag, msg = None, None, ''
                 # HSA_OVERRIDE_GFX_VERSION is read once, when this process first initializes the HSA runtime:
                 # the ctypes hipGetDeviceCount() below does it, and torch later reuses that loaded libhsa-runtime64.so.1,
                 # so the override must be in os.environ before it. detect_gpu.py inherits it and reports it back unchanged.
@@ -819,10 +907,12 @@ class DeviceInstaller():
                             msg = legends['msg_rocm_no_torch_build'].format(version=version_str)
                 else:
                     msg = legends['msg_rocm_runtime_missing']
+                gpu_results.append((name, tag, msg))
             # ============================================================
             # CUDA
             # ============================================================
-            elif has_cuda() and (has_nvidia_gpu_pci() or is_wsl2()):
+            if not tegra and has_cuda() and (has_nvidia_gpu_pci() or is_wsl2()):
+                name, tag, msg = None, None, ''
                 version = ''
                 msg = ''
                 # 1) CUDA runtime detection via ctypes (primary)
@@ -972,6 +1062,7 @@ class DeviceInstaller():
                             else:
                                 tag = f'cu{current[0]}{current[1]}'
                                 msg = legends['msg_cuda_smi_driver_only'].format(version=smi_version)
+                gpu_results.append((name, tag, msg))
             # ============================================================
             # INTEL XPU
             # ============================================================
@@ -980,7 +1071,8 @@ class DeviceInstaller():
             # SYCL runtime and need none of it, so gating on them dropped real XPU
             # hosts to cpu with an empty note. The decision now happens inside the
             # branch, where a missing user-mode driver produces a message that says so.
-            elif has_intel_gpu_pci():
+            if not tegra and has_intel_gpu_pci():
+                name, tag, msg = None, None, ''
                 version = ''
                 msg = ''
                 xpu_device_count = 0
@@ -1183,10 +1275,30 @@ class DeviceInstaller():
                         msg = legends['msg_intel_sycl_no_l0'].format(kmd=kmd)
                     else:
                         msg = legends['msg_intel_l0_no_device'].format(kmd=kmd, status=ze_status)
+                gpu_results.append((name, tag, msg))
+            # ============================================================
+            # GPU CHOICE
+            # ============================================================
+            # one torch serves one vendor: several with their runtime (e.g. an NVIDIA card with CUDA and an Intel Arc
+            # with Level Zero) go to choose_gpu(). None: their notes stay for the Vulkan / CPU fallback below
+            if gpu_results:
+                usable = [result for result in gpu_results if result[1]]
+                if len(usable) > 1:
+                    name, tag, msg = self.choose_gpu(usable)
+                elif usable:
+                    name, tag, msg = usable[0]
+                else:
+                    name, tag = None, None
+                    msg = ' '.join(result[2] for result in gpu_results if result[2])
+                for key in ('ROCM', 'CUDA', 'XPU'):
+                    devices[key]['found'] = bool(tag) and name == devices[key]['proc']
+                if devices['ROCM']['found']:
+                    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:False'
+                    os.environ['PYTORCH_HIP_ALLOC_CONF'] = 'expandable_segments:False'
             # ============================================================
             # APPLE MPS
             # ============================================================
-            elif self.system == systems['MACOS'] and arch in (archs['ARM64'], archs['AARCH64']):
+            if tag is None and self.system == systems['MACOS'] and arch in (archs['ARM64'], archs['AARCH64']):
                 devices['MPS']['found'] = True
                 name = devices['MPS']['proc']
                 tag = devices['MPS']['proc']

@@ -638,6 +638,11 @@ build_docker_image() {
 	case "$DEVICE_TAG" in
 		cpu|mps) COMPOSE_PROFILES=cpu;; cu*) COMPOSE_PROFILES=cuda;; rocm*) COMPOSE_PROFILES=rocm;; jetson*) COMPOSE_PROFILES=jetson;; xpu) COMPOSE_PROFILES=xpu;; vulkan) COMPOSE_PROFILES=vulkan;; *) COMPOSE_PROFILES=cpu;;
 	esac
+	# a vulkan image runs on the CPU too: without /dev/dri (no GPU, Docker Desktop on macOS) it is run like the cpu image
+	if [[ "$DEVICE_TAG" == "vulkan" && ! -e /dev/dri ]]; then
+		cmd_options=""
+		COMPOSE_PROFILES=cpu
+	fi
 	export COMPOSE_PROFILES
 	get_dri_gids
 	SERVICE="ebook2audiobook-${COMPOSE_PROFILES}"
