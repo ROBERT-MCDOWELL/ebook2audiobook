@@ -100,21 +100,21 @@ class VoiceConversion(SubprocessPipe):
                         print(msg)
             # a voice other than the engine's built-in ones: each sentence also goes through the voice conversion (task
             # "tts": spoken again by its model). The device it really runs on: the one selected (Jetson / CUDA packages for
-            # those, Metal for MPS), else the GPU package or CPU it switched to. On a GPU (the one selected, or Vulkan after a
-            # switch) the ebook conversion is slightly slower than with a built-in voice, on CPU much slower
+            # those, Metal for MPS), else the GPU package or CPU it switched to. On the GPU selected: no alert. After a switch
+            # to another GPU (Vulkan) the ebook conversion is slightly slower than with a built-in voice, on CPU much slower
             backend_devices = {'cuda': devices['CUDA']['proc'], 'vulkan': devices['VULKAN']['proc'], 'metal': devices['MPS']['proc']}
             vc_device = session['device'] if self.backend == 'cuda' and session['device'] in [devices['CUDA']['proc'], devices['JETSON']['proc']] else backend_devices.get(self.backend, devices['CPU']['proc'])
             on_cpu = vc_device == devices['CPU']['proc']
+            msg = None
             if vc_device != session['device']:
                 msg = legends['msg_vc_device_switch_cpu' if on_cpu else 'msg_vc_device_switch'].format(engine=session['tts_engine'], vc_model=self.vc_model, device=session['device'].upper(), new_device=vc_device.upper())
             elif on_cpu:
                 msg = legends['msg_vc_cpu_slow'].format(engine=session['tts_engine'], vc_model=self.vc_model)
-            else:
-                msg = legends['msg_vc_slow'].format(engine=session['tts_engine'], vc_model=self.vc_model, device=vc_device.upper())
-            if show_alert is not None:
-                show_alert(session['id'], {'type': 'warning', 'msg': msg})
-            else:
-                print(msg)
+            if msg is not None:
+                if show_alert is not None:
+                    show_alert(session['id'], {'type': 'warning', 'msg': msg})
+                else:
+                    print(msg)
         except Exception as e:
             error = f'VoiceConversion.__init__() error: {e}'
             raise RuntimeError(error) from e

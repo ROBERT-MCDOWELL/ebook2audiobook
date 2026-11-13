@@ -569,7 +569,6 @@ legends = {
     'error_zonos2_no_gpu_package': '{engine} has no GPU package that runs on this machine ({machine}) with {device}. Select CPU as the device to run {engine} on CPU, which is much slower.',
     'msg_audiocpp_offline_package': 'Unpacking the {engine} server package {package} from the offline copy…',
     'msg_vc_model_fallback': 'Voice conversion {vc_model} cannot speak {lang}: {fallback} converts the voice instead.',
-    'msg_vc_slow': 'Using a voice other than the {engine} built-in voices: the {vc_model} voice conversion runs on {device} on every sentence, so the ebook conversion is slightly slower than with a built-in voice.',
     'msg_vc_cpu_slow': 'Using a voice other than the {engine} built-in voices: the {vc_model} voice conversion runs on CPU on every sentence, so the ebook conversion is much slower than with a built-in voice.',
     'msg_vc_device_switch': 'Using a voice other than the {engine} built-in voices: the {vc_model} voice conversion cannot run on {device} and switches to {new_device}, so the ebook conversion is slightly slower than with a built-in voice.',
     'msg_vc_device_switch_cpu': 'Using a voice other than the {engine} built-in voices: the {vc_model} voice conversion cannot run on {device} and switches to {new_device}, so the ebook conversion is much slower than with a built-in voice.',
