@@ -67,7 +67,7 @@ class AudioCpp(TTSUtils):
             self.xtts_speakers = self._load_xtts_builtin_list()
             self.device = devices['CUDA']['proc'] if self.session['device'] in [devices['CUDA']['proc'], devices['ROCM']['proc'], devices['JETSON']['proc']] else self.session['device']
             # --- the audiocpp_server package for this machine (VoiceConversion: shared with the VC stage of the built-in voice engines) ---
-            attempts, gpu_wanted = VoiceConversion.packages(self.session, tts_engine)
+            attempts, gpu_wanted = VoiceConversion.packages(self.session['device'], tts_engine)
             # --- GGUF weights through e2a's Hugging Face cache (tts_dir), byte progress in the terminal and the GUI ---
             # cloning engines taking a reference transcript also get the ASR model, loaded by the worker only for a voice it
             # has never transcribed, then unloaded. Built-in voice engines get default_vc_model for a picked voice file, run in

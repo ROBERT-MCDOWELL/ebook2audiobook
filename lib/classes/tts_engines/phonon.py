@@ -60,7 +60,7 @@ class Phonon(TTSUtils, TTSRegistry, name='phonon'):
             self.model_dir = os.path.join(self.cache_dir, tts_engine, self.checkpoint['repo'].replace('/', '--'))
             self.voices_dir = os.path.join(self.cache_dir, tts_engine, settings['voices_repo'].replace('/', '--'))
             self.xtts_speakers = self._load_xtts_builtin_list()
-            # ptts' PyPI wheels build no GPU backend: Phonon runs on CPU, the voice conversion keeps the session device
+            # ptts' PyPI wheels build no GPU backend: Phonon runs on CPU (and the voice conversion too, as for every engine)
             self.device = devices['CUDA']['proc'] if self.session['device'] in [devices['CUDA']['proc'], devices['ROCM']['proc'], devices['JETSON']['proc']] else self.session['device']
             if self.device != devices['CPU']['proc']:
                 msg = legends['msg_phonon_cpu'].format(engine=tts_engine, device=self.device)
@@ -206,10 +206,7 @@ class Phonon(TTSUtils, TTSRegistry, name='phonon'):
                                 'language': self.language
                             })
                             if not reply.get('ok'):
-                                # no retry: core.py unloads the engine, which stops the VC worker. A GPU server that died counts
-                                # against its package (dropped on the second death, no GPU package left stops the next run)
-                                if reply.get('server_exited') and self.engine_zs.backend != 'cpu':
-                                    self.engine_zs.gpu_crashes[self.engine_zs.package_name] = self.engine_zs.gpu_crashes.get(self.engine_zs.package_name, 0) + 1
+                                # no retry: core.py unloads the engine, which stops the VC worker
                                 if os.path.exists(vc_file):
                                     os.unlink(vc_file)
                                 error = f"convert() error: {reply.get('error')} segment: {part}"
