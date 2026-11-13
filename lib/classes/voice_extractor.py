@@ -92,7 +92,7 @@ class VoiceExtractor:
             if self.is_gui_process:
                 self.progress_bar(1, desc=msg)
             detector = BackgroundDetector(wav_file=self.wav_file, device=self.device)
-            status, report = detector.detect(vad_ratio_thresh=0.27)
+            status, report = detector.detect()
             if report:
                 print(report)
                 if status:
