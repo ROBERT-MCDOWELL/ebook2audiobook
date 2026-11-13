@@ -31,14 +31,20 @@ class DeviceInstaller():
     # PCI vendor id -> the device its runtime serves, for the GPU choice
     gpu_pci_vendors = {0x1002: devices['ROCM']['proc'], 0x10de: devices['CUDA']['proc'], 0x8086: devices['XPU']['proc']}
 
+    uv_install_url = 'https://docs.astral.sh/uv/getting-started/installation/'
+
     def __init__(self):
         self.system = sys.platform
         self.arch = self.check_arch
         self.python_version = sys.version_info[:2]
         self.python_version_tuple = sys.version_info
-        self.uv_bin = self._find_uv()
+        self.uv_bin = self.find_uv()
+        if not self.uv_bin:
+            # app.py checks uv first (check_uv) and the launchers install it before any DeviceInstaller: never reached by a normal run
+            raise FileNotFoundError(legends['error_uv_missing'].format(url=self.uv_install_url))
 
-    def _find_uv(self)->str:
+    @staticmethod
+    def find_uv()->Union[str, None]:
         p = shutil.which('uv')
         if p:
             return p
@@ -54,7 +60,7 @@ class DeviceInstaller():
         for c in candidates:
             if os.path.isfile(c):
                 return c
-        raise FileNotFoundError('uv binary not found. Install: https://docs.astral.sh/uv/getting-started/installation/')
+        return None
 
     def _uv_pip(self, subcommand:str, *args)->list:
         return [self.uv_bin, 'pip', subcommand, '--python', python_exec, *args]

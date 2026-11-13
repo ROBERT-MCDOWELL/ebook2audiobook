@@ -15,11 +15,23 @@ def init_multiprocessing():
     except RuntimeError:
         pass
 
+def check_uv()->bool:
+    # every script mode builds a DeviceInstaller, which needs uv: a missing uv stops here, not in its constructor
+    from lib.classes.device_installer import DeviceInstaller
+    if DeviceInstaller.find_uv():
+        return True
+    error=f'''***********
+{legends['error_uv_missing'].format(url=DeviceInstaller.uv_install_url)}
+{install_info}
+***********'''
+    print(error)
+    return False
+
 def check_virtual_env(script_mode:str)->bool:
     current_version=sys.version_info[:2]  # (major, minor)
     search_python_env = str(os.path.basename(sys.prefix))
     if script_mode == FULL_DOCKER:
-        return True
+        return check_uv()
     if search_python_env == 'python_env':
         pyvenv_cfg = os.path.join(sys.prefix, 'pyvenv.cfg')
         conda_meta = os.path.join(sys.prefix, 'conda-meta')
@@ -64,22 +76,7 @@ def check_virtual_env(script_mode:str)->bool:
 ***********'''
             print(error)
             return False
-        uv_bin = shutil.which('uv')
-        if not uv_bin:
-            uv_candidates = [os.path.expanduser('~/.local/bin/uv'), os.path.expanduser('~/.cargo/bin/uv')]
-            if os.name == 'nt':
-                uv_candidates += [os.path.expanduser(r'~\.local\bin\uv.exe'), os.path.expanduser(r'~\.cargo\bin\uv.exe')]
-            else:
-                uv_candidates.append(os.path.expanduser('~/Library/Application Support/uv/bin/uv'))
-            uv_bin = next((c for c in uv_candidates if os.path.isfile(c)), None)
-        if not uv_bin:
-            error=f'''***********
-{legends['error_uv_missing'].format(url='https://docs.astral.sh/uv/getting-started/installation/')}
-{install_info}
-***********'''
-            print(error)
-            return False
-        return True
+        return check_uv()
     if script_mode == NATIVE:
         # app.py started directly with a python outside python_env: e2a is not installed, or not run with its own python
         error=f'''***********
@@ -89,7 +86,7 @@ def check_virtual_env(script_mode:str)->bool:
         print(error)
         return False
     if current_version >= min_python_version and current_version <= max_python_version:
-        return True
+        return check_uv()
     error=f'''***********
 {legends['error_wrong_venv']}
 {install_info}
