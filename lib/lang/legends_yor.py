@@ -356,6 +356,7 @@ legends = {
     'msg_venv_reinstall': 'Ẹ jọ̀wọ́ ẹ pa àpò \'{env}\' rẹ́ kí ẹ sì tún olùfisílẹ̀ ṣiṣẹ́:\n"./ebook2audiobook.command" fún Linux àti Mac tàbí "ebook2audiobook.cmd" fún Windows',
     'error_uv_missing': 'Ìbẹ̀rẹ̀ tí kò tọ́: a kò rí ètò uv.\nÌṣàfilọ́lẹ̀ yìí nílò uv láti ṣàkóso àwọn àpò Python.\nẸ jọ̀wọ́ ẹ fi uv sí i: {url}\nLẹ́yìn náà ẹ tún olùfisílẹ̀ ṣiṣẹ́.',
     'error_wrong_venv': 'Ìbẹ̀rẹ̀ tí kò tọ́! ebook2audiobook gbọdọ̀ ṣiṣẹ́ nínú àyíká àfojúrí tirẹ̀!',
+    'error_launcher_required': 'Ìbẹ̀rẹ̀ tí kò tọ́: ebook2audiobook gbọ́dọ̀ máa bẹ̀rẹ̀ nígbà gbogbo pẹ̀lú ìwé àkọsílẹ̀ ìbẹ̀rẹ̀ rẹ̀:\n"./e2a.sh" fún Linux àti Mac tàbí "e2a.cmd" fún Windows.\nBí o bá ti fi ebook2audiobook sílẹ̀ tán, bẹ̀rẹ̀ app.py lẹ́sẹ̀kẹsẹ̀ yóò ṣiṣẹ́ lẹ́ẹ̀kan ṣoṣo, pẹ̀lú python ti fódà python_env rẹ̀.',
     'error_python_version': 'Ìbẹ̀rẹ̀ tí kò tọ́: ẹ̀yà Python ẹ̀rọ yín kò bá a mu! (lọ́wọ́lọ́wọ́: {version})\nLáti fi sí i àti/tàbí lo ebook2audiobook dáadáa, ẹ pa gbogbo àpò python_env rẹ́\nkí ẹ sì ṣiṣẹ́ "./ebook2audiobook.command" fún Linux àti Mac tàbí "ebook2audiobook.cmd" fún Windows.',
     'error_unrecognized_option': 'Àṣìṣe: àṣàyàn tí a kò mọ̀ "{arg}"',
     'error_full_docker_internal': '{full} jẹ́ àṣàyàn inú fún docker fúnra rẹ̀ nìkan. Ẹ lo {build} tí ẹ bá fẹ́ kọ́ àwòrán docker.',

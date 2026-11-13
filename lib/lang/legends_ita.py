@@ -356,6 +356,7 @@ legends = {
     'msg_venv_reinstall': 'Elimina la cartella \'{env}\' e riesegui l\'installer:\n"./ebook2audiobook.command" per Linux e Mac o "ebook2audiobook.cmd" per Windows',
     'error_uv_missing': 'Avvio errato: eseguibile uv non trovato.\nL\'applicazione richiede uv per gestire i pacchetti Python.\nInstalla uv: {url}\nPoi riesegui l\'installer.',
     'error_wrong_venv': 'Avvio errato! ebook2audiobook deve girare nel proprio ambiente virtuale!',
+    'error_launcher_required': 'Avvio errato: ebook2audiobook deve essere sempre avviato con il suo script di avvio:\n"./e2a.sh" per Linux e Mac o "e2a.cmd" per Windows.\nL\'avvio diretto di app.py funziona solo se ebook2audiobook è installato, con il Python della sua cartella python_env.',
     'error_python_version': 'Avvio errato: la versione di Python del sistema non è compatibile! (attuale: {version})\nPer installare e/o usare correttamente ebook2audiobook elimina completamente la cartella python_env\ne avvia "./ebook2audiobook.command" per Linux e Mac o "ebook2audiobook.cmd" per Windows.',
     'error_unrecognized_option': 'Errore: opzione non riconosciuta "{arg}"',
     'error_full_docker_internal': '{full} è solo un\'opzione interna del docker stesso. Usa {build} per creare un\'immagine docker.',

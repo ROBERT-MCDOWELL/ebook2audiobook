@@ -356,6 +356,7 @@ legends = {
     'msg_venv_reinstall': 'Törölje a(z) \'{env}\' mappát, és futtassa újra a telepítőt:\n"./ebook2audiobook.command" Linuxon és Macen, vagy "ebook2audiobook.cmd" Windowson',
     'error_uv_missing': 'Hibás indítás: az uv program nem található.\nAz alkalmazásnak uv kell a Python-csomagok kezeléséhez.\nTelepítse az uv-t: {url}\nEzután futtassa újra a telepítőt.',
     'error_wrong_venv': 'Hibás indítás! Az ebook2audiobook csak a saját virtuális környezetében futhat!',
+    'error_launcher_required': 'Helytelen indítás: az ebook2audiobook programot mindig az indítóparancsfájljával kell elindítani:\n"./e2a.sh" Linux és Mac rendszerre, illetve "e2a.cmd" Windows rendszerre.\nA(z) app.py közvetlen indítása csak akkor működik, ha az ebook2audiobook telepítve van a python_env mappájában található pythonnal.',
     'error_python_version': 'Hibás indítás: a rendszer Python-verziója nem kompatibilis! (jelenlegi: {version})\nAz ebook2audiobook helyes telepítéséhez és/vagy használatához törölje teljesen a python_env mappát,\nmajd futtassa a "./ebook2audiobook.command" (Linux és Mac) vagy az "ebook2audiobook.cmd" (Windows) fájlt.',
     'error_unrecognized_option': 'Hiba: ismeretlen opció: "{arg}"',
     'error_full_docker_internal': 'A(z) {full} csak a docker belső opciója. Docker-kép készítéséhez használja ezt: {build}.',

@@ -356,6 +356,7 @@ legends = {
     'msg_venv_reinstall': 'Busak direktori \'{env}\' lan lakokake manèh penginstal:\n"./ebook2audiobook.command" kanggo Linux lan Mac utawa "ebook2audiobook.cmd" kanggo Windows',
     'error_uv_missing': 'Peluncuran salah: program uv ora ditemokake.\nAplikasi iki butuh uv kanggo ngatur paket Python.\nPasang uv: {url}\nBanjur lakokake manèh penginstal.',
     'error_wrong_venv': 'Peluncuran salah! ebook2audiobook kudu mlaku ing lingkungan virtualé dhéwé!',
+    'error_launcher_required': 'Peluncuran salah: ebook2audiobook kudu tansah diwiwiti nganggo skrip peluncure:\n"./e2a.sh" kanggo Linux lan Mac utawa "e2a.cmd" kanggo Windows.\nMiwiti app.py kanthi langsung mung bisa digunakake sawise ebook2audiobook diinstal, nganggo python saka folder python_env.',
     'error_python_version': 'Peluncuran salah: versi Python sistem sampeyan ora kompatibel! (saiki: {version})\nKanggo masang lan/utawa nganggo ebook2audiobook kanthi bener, busak kabèh folder python_env\nbanjur lakokake "./ebook2audiobook.command" kanggo Linux lan Mac utawa "ebook2audiobook.cmd" kanggo Windows.',
     'error_unrecognized_option': 'Kesalahan: opsi ora dikenal "{arg}"',
     'error_full_docker_internal': '{full} mung opsi internal kanggo docker dhéwé. Gunakake {build} yen arep nggawe image docker.',

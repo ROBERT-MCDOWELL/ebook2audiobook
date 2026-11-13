@@ -356,6 +356,7 @@ legends = {
     'msg_venv_reinstall': 'Удалите каталог \'{env}\' и снова запустите установщик:\n"./ebook2audiobook.command" для Linux и Mac или "ebook2audiobook.cmd" для Windows',
     'error_uv_missing': 'Неправильный запуск: программа uv не найдена.\nПриложению нужен uv для управления пакетами Python.\nУстановите uv: {url}\nЗатем снова запустите установщик.',
     'error_wrong_venv': 'Неправильный запуск! ebook2audiobook должен работать в собственном виртуальном окружении!',
+    'error_launcher_required': 'Неправильный запуск: ebook2audiobook всегда должен запускаться с помощью специального скрипта:\n"./e2a.sh" для Linux и Mac или "e2a.cmd" для Windows.\nПрямой запуск app.py возможен только после установки ebook2audiobook с помощью Python из папки python_env.',
     'error_python_version': 'Неправильный запуск: версия Python в вашей системе несовместима! (текущая: {version})\nЧтобы правильно установить и/или использовать ebook2audiobook, полностью удалите папку python_env\nи запустите "./ebook2audiobook.command" для Linux и Mac или "ebook2audiobook.cmd" для Windows.',
     'error_unrecognized_option': 'Ошибка: неизвестный параметр "{arg}"',
     'error_full_docker_internal': '{full} — внутренний параметр только для самого docker. Используйте {build}, чтобы собрать образ docker.',

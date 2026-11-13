@@ -356,6 +356,7 @@ legends = {
     'msg_venv_reinstall': 'Hapus direktori \'{env}\' lalu jalankan ulang penginstal:\n"./ebook2audiobook.command" untuk Linux dan Mac atau "ebook2audiobook.cmd" untuk Windows',
     'error_uv_missing': 'Peluncuran salah: program uv tidak ditemukan.\nAplikasi ini memerlukan uv untuk mengelola paket Python.\nInstal uv: {url}\nLalu jalankan ulang penginstal.',
     'error_wrong_venv': 'Peluncuran salah! ebook2audiobook harus berjalan di lingkungan virtualnya sendiri!',
+    'error_launcher_required': 'Peluncuran salah: ebook2audiobook harus selalu dimulai dengan skrip peluncurnya:\n"./e2a.sh" untuk Linux dan Mac atau "e2a.cmd" untuk Windows.\nMemulai app.py secara langsung hanya berfungsi setelah ebook2audiobook diinstal, dengan python dari folder python_env-nya.',
     'error_python_version': 'Peluncuran salah: versi Python sistem Anda tidak kompatibel! (saat ini: {version})\nUntuk menginstal dan/atau menggunakan ebook2audiobook dengan benar, hapus seluruh folder python_env\nlalu jalankan "./ebook2audiobook.command" untuk Linux dan Mac atau "ebook2audiobook.cmd" untuk Windows.',
     'error_unrecognized_option': 'Kesalahan: opsi tidak dikenali "{arg}"',
     'error_full_docker_internal': '{full} hanyalah opsi internal untuk docker itu sendiri. Gunakan {build} jika Anda perlu membangun image docker.',

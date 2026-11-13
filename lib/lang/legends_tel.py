@@ -356,6 +356,7 @@ legends = {
     'msg_venv_reinstall': 'దయచేసి \'{env}\' డైరెక్టరీని తొలగించి ఇన్‌స్టాలర్‌ను మళ్లీ నడపండి:\nLinux మరియు Mac కోసం "./ebook2audiobook.command" లేదా Windows కోసం "ebook2audiobook.cmd"',
     'error_uv_missing': 'తప్పు ప్రారంభం: uv ప్రోగ్రామ్ కనుగొనబడలేదు.\nPython ప్యాకేజీలను నిర్వహించడానికి ఈ అప్లికేషన్‌కు uv అవసరం.\nదయచేసి uvని ఇన్‌స్టాల్ చేయండి: {url}\nతర్వాత ఇన్‌స్టాలర్‌ను మళ్లీ నడపండి.',
     'error_wrong_venv': 'తప్పు ప్రారంభం! ebook2audiobook తన సొంత వర్చువల్ ఎన్విరాన్‌మెంట్‌లోనే నడవాలి!',
+    'error_launcher_required': 'తప్పుగా ప్రారంభించడం: ebook2audiobookను ఎల్లప్పుడూ దాని లాంచర్ స్క్రిప్ట్‌తో ప్రారంభించాలి:\nLinux మరియు Mac కోసం "./e2a.sh" లేదా Windows కోసం "e2a.cmd".\nebook2audiobook దాని python_env ఫోల్డర్‌లోని పైథాన్‌తో ఇన్‌స్టాల్ చేసిన తర్వాత మాత్రమే app.py నేరుగా ప్రారంభించడం పని చేస్తుంది.',
     'error_python_version': 'తప్పు ప్రారంభం: మీ సిస్టమ్ Python వెర్షన్ అనుకూలంగా లేదు! (ప్రస్తుతం: {version})\nebook2audiobookను సరిగ్గా ఇన్‌స్టాల్ చేయడానికి మరియు/లేదా ఉపయోగించడానికి python_env ఫోల్డర్‌ను పూర్తిగా తొలగించి\nLinux మరియు Mac కోసం "./ebook2audiobook.command" లేదా Windows కోసం "ebook2audiobook.cmd"ను నడపండి.',
     'error_unrecognized_option': 'లోపం: గుర్తించని ఎంపిక "{arg}"',
     'error_full_docker_internal': '{full} అనేది docker కోసం మాత్రమే ఉన్న అంతర్గత ఎంపిక. docker ఇమేజ్ నిర్మించడానికి {build} ఉపయోగించండి.',

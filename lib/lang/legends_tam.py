@@ -356,6 +356,7 @@ legends = {
     'msg_venv_reinstall': '\'{env}\' கோப்புறையை நீக்கி நிறுவியை மீண்டும் இயக்கவும்:\nLinux மற்றும் Mac க்கு "./ebook2audiobook.command" அல்லது Windows க்கு "ebook2audiobook.cmd"',
     'error_uv_missing': 'தவறான தொடக்கம்: uv நிரல் கிடைக்கவில்லை.\nPython தொகுப்புகளை நிர்வகிக்க இந்தப் பயன்பாட்டுக்கு uv தேவை.\nuv ஐ நிறுவவும்: {url}\nபிறகு நிறுவியை மீண்டும் இயக்கவும்.',
     'error_wrong_venv': 'தவறான தொடக்கம்! ebook2audiobook தனக்கென உள்ள மெய்நிகர் சூழலில் மட்டுமே இயங்க வேண்டும்!',
+    'error_launcher_required': 'தவறான தொடக்கம்: ebook2audiobook எப்போதும் அதன் துவக்கி ஸ்கிரிப்டுடன் தொடங்கப்பட வேண்டும்:\nLinux மற்றும் Mac-க்கு "./e2a.sh" அல்லது Windows-க்கு "e2a.cmd".\nebook2audiobook ஆனது அதன் python_env கோப்புறையின் பைத்தானுடன் நிறுவப்பட்ட பின்னரே app.py ஐ நேரடியாகத் தொடங்குவது ஒரு முறை மட்டுமே செயல்படும்.',
     'error_python_version': 'தவறான தொடக்கம்: உங்கள் கணினியின் Python பதிப்பு பொருந்தவில்லை! (தற்போது: {version})\nebook2audiobook ஐச் சரியாக நிறுவ மற்றும்/அல்லது பயன்படுத்த python_env கோப்புறையை முழுமையாக நீக்கி\nLinux மற்றும் Mac க்கு "./ebook2audiobook.command" அல்லது Windows க்கு "ebook2audiobook.cmd" ஐ இயக்கவும்.',
     'error_unrecognized_option': 'பிழை: அறியப்படாத விருப்பம் "{arg}"',
     'error_full_docker_internal': '{full} என்பது docker க்கு மட்டுமான உள் விருப்பம். docker படத்தை உருவாக்க {build} ஐப் பயன்படுத்தவும்.',

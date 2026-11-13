@@ -356,6 +356,7 @@ legends = {
     'msg_venv_reinstall': 'Lütfen \'{env}\' klasörünü silip yükleyiciyi yeniden çalıştırın:\nLinux ve Mac için "./ebook2audiobook.command", Windows için "ebook2audiobook.cmd"',
     'error_uv_missing': 'Hatalı başlatma: uv programı bulunamadı.\nUygulama, Python paketlerini yönetmek için uv gerektirir.\nLütfen uv kurun: {url}\nArdından yükleyiciyi yeniden çalıştırın.',
     'error_wrong_venv': 'Hatalı başlatma! ebook2audiobook kendi sanal ortamında çalışmalıdır!',
+    'error_launcher_required': 'Yanlış başlatma: ebook2audiobook her zaman başlatıcı komut dosyasıyla başlatılmalıdır:\nLinux ve Mac için "./e2a.sh" veya Windows için "e2a.cmd".\napp.py uygulamasını doğrudan başlatmak, yalnızca ebook2audiobook yüklüyse ve python_env klasöründeki python ile çalışır.',
     'error_python_version': 'Hatalı başlatma: sisteminizin Python sürümü uyumlu değil! (mevcut: {version})\nebook2audiobook\'u doğru şekilde kurmak ve/veya kullanmak için python_env klasörünü tamamen silin\nve Linux ile Mac için "./ebook2audiobook.command", Windows için "ebook2audiobook.cmd" dosyasını çalıştırın.',
     'error_unrecognized_option': 'Hata: tanınmayan seçenek "{arg}"',
     'error_full_docker_internal': '{full} yalnızca docker\'ın kendisi için dahili bir seçenektir. Docker imajı oluşturmak için {build} kullanın.',

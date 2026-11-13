@@ -356,6 +356,7 @@ legends = {
     'msg_venv_reinstall': '请删除“{env}”目录并重新运行安装程序：\nLinux 和 Mac 使用 "./ebook2audiobook.command"，Windows 使用 "ebook2audiobook.cmd"',
     'error_uv_missing': '启动方式错误：未找到 uv 程序。\n本应用需要 uv 来管理 Python 包。\n请安装 uv：{url}\n然后重新运行安装程序。',
     'error_wrong_venv': '启动方式错误！ebook2audiobook 必须在其专属的虚拟环境中运行！',
+    'error_launcher_required': '启动错误：ebook2audiobook 必须始终通过其启动脚本启动：\nLinux 和 Mac 为"./e2a.sh"，Windows 为"e2a.cmd"。\n只有在安装了 ebook2audiobook 之后，才能使用其python_env文件夹中的 Python 直接启动app.py。',
     'error_python_version': '启动方式错误：系统的 Python 版本不兼容！（当前：{version}）\n要正确安装和/或使用 ebook2audiobook，请彻底删除 python_env 文件夹，\n然后运行 "./ebook2audiobook.command"（Linux 和 Mac）或 "ebook2audiobook.cmd"（Windows）。',
     'error_unrecognized_option': '错误：无法识别的选项 "{arg}"',
     'error_full_docker_internal': '{full} 仅是 docker 自身使用的内部选项。如需构建 docker 镜像，请使用 {build}。',

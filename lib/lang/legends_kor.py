@@ -356,6 +356,7 @@ legends = {
     'msg_venv_reinstall': '\'{env}\' 디렉터리를 삭제하고 설치 프로그램을 다시 실행하세요:\nLinux와 Mac은 "./ebook2audiobook.command", Windows는 "ebook2audiobook.cmd"',
     'error_uv_missing': '잘못된 실행: uv 프로그램을 찾을 수 없습니다.\n이 애플리케이션은 Python 패키지 관리를 위해 uv가 필요합니다.\nuv를 설치하세요: {url}\n그런 다음 설치 프로그램을 다시 실행하세요.',
     'error_wrong_venv': '잘못된 실행! ebook2audiobook은 전용 가상 환경에서 실행해야 합니다!',
+    'error_launcher_required': '잘못된 실행: ebook2audiobook은 항상 런처 스크립트로 시작해야 합니다.\nLinux 및 Mac의 경우 "./e2a.sh", Windows의 경우 "e2a.cmd".\napp.py을(를) 직접 시작하는 것은 ebook2audiobook이 python_env 폴더의 Python으로 설치된 경우에만 한 번 작동합니다.',
     'error_python_version': '잘못된 실행: 시스템의 Python 버전이 호환되지 않습니다! (현재: {version})\nebook2audiobook을 올바르게 설치하거나 사용하려면 python_env 폴더를 완전히 삭제하고\nLinux와 Mac은 "./ebook2audiobook.command", Windows는 "ebook2audiobook.cmd"를 실행하세요.',
     'error_unrecognized_option': '오류: 인식할 수 없는 옵션 "{arg}"',
     'error_full_docker_internal': '{full}은(는) docker 자체에서만 쓰는 내부 옵션입니다. docker 이미지를 빌드하려면 {build}을(를) 사용하세요.',
