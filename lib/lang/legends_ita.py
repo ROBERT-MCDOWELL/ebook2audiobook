@@ -326,7 +326,11 @@ legends = {
     'msg_conversion_skipped': 'Conversione saltata.',
     'error_model_extract_failed': 'Impossibile estrarre {model} oppure mancano file obbligatori',
     'error_no_presets_module': 'Nessun modulo di preimpostazioni per il motore TTS \'{engine}\': {e}',
+<<<<<<< HEAD
     'error_device_not_supported': '{device} non supportato da Torch installato!<br/>Leggi {wiki}<br/>Seleziona un altro dispositivo da convertire.',
+=======
+    'error_device_not_supported': '{device} non è supportato da Torch installato!<br/>Leggi {wiki}<br/>Seleziona un altro dispositivo da convertire.',
+>>>>>>> 5dfc3d97e (...)
     'error_device_unavailable': '{error}<br/>Leggi {wiki}<br/>Seleziona un altro dispositivo da convertire.',
     'msg_process_folder_note': 'NOTA: la cartella di processo {dir} è usata esclusivamente per attività interne e non ha nulla a che fare con la conversione finale.',
     'error_language_differs_epub': 'ATTENZIONE!!! la lingua selezionata {selected} è diversa dalla lingua del file EPUB {other}',
@@ -563,14 +567,22 @@ legends = {
     'error_zonos2_no_package': '{engine} non ha alcun pacchetto server per questa macchina ({machine}).',
     'error_zonos2_macos_min': '{engine} ha bisogno di macOS {min} o più recente (questo Mac esegue macOS {version}).',
     'msg_zonos2_gpu_restart': 'Il server GPU {engine} ({package}) si è schiantato ({error}): riavviandolo e rifacendo la frase.',
+<<<<<<< HEAD
     'msg_zonos2_gpu_dropped': 'Il server GPU {engine} ({package}) si è bloccato di nuovo ({error}): lasciandolo fino al riavvio di e2a e ripetendo la frase sul pacchetto GPU successivo, la conversione si interrompe se non ne rimane alcuno.',
+=======
+    'msg_zonos2_gpu_dropped': 'Il server GPU {engine} ({package}) si è bloccato di nuovo ({error}): lo si lascia fino al riavvio di e2a e si ripete la frase sul pacchetto GPU successivo; la conversione si interrompe se non ne rimane alcuno.',
+>>>>>>> 5dfc3d97e (...)
     'msg_zonos2_gpu_failed': 'Impossibile avviare il server {engine} ({package}): {error} Tentativo con il pacchetto successivo.',
     'error_zonos2_gpu_failed': 'Impossibile avviare il server GPU {engine} ({package}): {error} Selezionare la CPU come dispositivo per eseguire {engine} sulla CPU, che è molto più lenta.',
     'error_zonos2_no_gpu_package': '{engine} non dispone di alcun pacchetto GPU eseguibile su questo computer ({machine}) con {device}. Seleziona la CPU come dispositivo per eseguire {engine} sulla CPU, che è molto più lenta.',
     'msg_audiocpp_offline_package': 'Disimballaggio del pacchetto {engine} server {package} dalla copia offline...',
     'msg_vc_model_fallback': 'La conversione vocale {vc_model} non può parlare {lang}: {fallback} converte invece la voce.',
     'msg_vc_cpu_slow': 'Utilizzo di una voce diversa dalle {engine} voci integrate: la conversione vocale {vc_model} viene eseguita sulla CPU per ogni frase, quindi la conversione dell\'e-book è molto più lenta rispetto a quella con una voce integrata.',
+<<<<<<< HEAD
     'msg_vc_device_switch': 'Utilizzo di una voce diversa dalle {engine} voci integrate: la conversione vocale {vc_model} non può essere eseguita su {device} e passa a {new_device}, pertanto la conversione dell\'e-book è leggermente più lenta rispetto a quella con una voce integrata.',
+=======
+    'msg_vc_device_switch': 'Utilizzo di una voce diversa dalle {engine} voci integrate: la conversione vocale {vc_model} non può essere eseguita su {device} e passa a {new_device}, quindi la conversione dell\'e-book è leggermente più lenta rispetto a quella con una voce integrata.',
+>>>>>>> 5dfc3d97e (...)
     'msg_vc_device_switch_cpu': 'Utilizzo di una voce diversa dalle {engine} voci integrate: la conversione vocale {vc_model} non può essere eseguita su {device} e passa a {new_device}, pertanto la conversione dell\'e-book è molto più lenta rispetto a quella con una voce integrata.',
     'msg_zonos2_old_venv': 'Rimuovendo il vecchio ambiente Zonos v0.1 in {dir}, ZONOS2 non ne ha bisogno...',
     'msg_zonos2_models': 'Ottenere i file del modello {engine} ({files}), il primo download richiede un po\' di tempo...',

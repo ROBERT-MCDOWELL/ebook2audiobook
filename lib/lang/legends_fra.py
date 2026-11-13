@@ -569,7 +569,11 @@ legends = {
     'error_zonos2_no_gpu_package': '{engine} ne dispose d’aucun package GPU qui fonctionne sur cette machine ({machine}) avec {device}. Sélectionnez le processeur comme périphérique pour exécuter {engine} sur le processeur, ce qui est beaucoup plus lent.',
     'msg_audiocpp_offline_package': 'Déballage du package serveur {engine} {package} à partir de la copie hors ligne…',
     'msg_vc_model_fallback': 'La conversion vocale {vc_model} ne peut pas parler {lang}: {fallback} convertit la voix à la place.',
+<<<<<<< HEAD
     'msg_vc_cpu_slow': 'Utilisation d\'une voix autre que les {engine} voix intégrées : la conversion vocale {vc_model} s\'exécute sur le processeur pour chaque phrase, de sorte que la conversion de l\'e-book est beaucoup plus lente qu\'avec une voix intégrée.',
+=======
+    'msg_vc_cpu_slow': 'Utilisation d\'une voix autre que les {engine} voix intégrées : la conversion de la voix {vc_model} s\'effectue sur le processeur pour chaque phrase, de sorte que la conversion de l\'e-book est beaucoup plus lente qu\'avec une voix intégrée.',
+>>>>>>> 5dfc3d97e (...)
     'msg_vc_device_switch': 'Utilisation d\'une voix autre que les {engine} voix intégrées : la conversion de la voix {vc_model} ne peut pas s\'exécuter sur {device} et passe à {new_device}. La conversion du livre électronique est donc légèrement plus lente qu\'avec une voix intégrée.',
     'msg_vc_device_switch_cpu': 'Utilisation d\'une voix autre que les {engine} voix intégrées : la conversion vocale {vc_model} ne peut pas s\'exécuter sur {device} et passe à {new_device}, de sorte que la conversion du livre électronique est beaucoup plus lente qu\'avec une voix intégrée.',
     'msg_zonos2_old_venv': 'Suppression de l\'ancien environnement Zonos v0.1 en {dir}, ZONOS2 n\'en a pas besoin…',

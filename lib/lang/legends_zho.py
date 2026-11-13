@@ -563,6 +563,7 @@ legends = {
     'error_zonos2_no_package': '{engine}没有此计算机({machine})的服务器包。',
     'error_zonos2_macos_min': '{engine}需要macOS {min}或更高版本（此Mac运行macOS {version} ）。',
     'msg_zonos2_gpu_restart': '{engine} GPU服务器（{package} ）崩溃（{error} ） ：重新启动并重做句子。',
+<<<<<<< HEAD
     'msg_zonos2_gpu_dropped': '{engine} GPU 服务器（{package}）再次崩溃（{error}）：将其搁置，直到 e2a 重启并在下一个 GPU 包上重做该句子；如果没有剩余的 GPU 包，则转换停止。',
     'msg_zonos2_gpu_failed': '{engine}服务器（{package}）无法启动：{error}正在尝试下一个包。',
     'error_zonos2_gpu_failed': '{engine} GPU服务器（{package}）无法启动：{error}选择CPU作为运行{engine}的设备，在CPU上运行速度要慢得多。',
@@ -572,6 +573,17 @@ legends = {
     'msg_vc_cpu_slow': '使用{engine}内置语音以外的语音：{vc_model}语音转换在每句话上都由 CPU 运行，因此电子书的转换速度比使用内置语音慢得多。',
     'msg_vc_device_switch': '使用非{engine}内置语音：{vc_model}语音转换无法在{device}上运行，因此将切换至{new_device}，所以电子书转换速度比使用内置语音时略慢。',
     'msg_vc_device_switch_cpu': '使用非{engine}内置语音：{vc_model}语音转换无法在{device}上运行，并切换到{new_device}，因此电子书转换的速度比使用内置语音慢得多。',
+=======
+    'msg_zonos2_gpu_dropped': '{engine} GPU 服务器（{package}）再次崩溃（{error}）：将其搁置，直到 e2a 重启并在下一个 GPU 包上重做句子；如果没有剩余的句子，则转换停止。',
+    'msg_zonos2_gpu_failed': '{engine}服务器（{package}）无法启动：{error}正在尝试下一个软件包。',
+    'error_zonos2_gpu_failed': '{engine} GPU服务器（{package}）无法启动：{error}选择CPU作为运行{engine}的设备，在CPU上运行速度要慢得多。',
+    'error_zonos2_no_gpu_package': '{engine}没有使用{device}在此计算机（{machine}）上运行的GPU包。选择 CPU 作为在 CPU 上运行{engine}的设备，这要慢得多。',
+    'msg_audiocpp_offline_package': '正在 从脱机副本中解压缩{engine}服务器包{package}…',
+    'msg_vc_model_fallback': '语音转换{vc_model}不能说话{lang}: {fallback}转换语音。',
+    'msg_vc_cpu_slow': '使用{engine}内置语音以外的语音：{vc_model}语音转换在 CPU 上对每个句子进行处理，因此电子书的转换速度比使用内置语音慢得多。',
+    'msg_vc_device_switch': '使用非{engine}内置语音：{vc_model}语音转换无法在{device}上运行，将切换为{new_device}，因此电子书转换速度比使用内置语音时略慢。',
+    'msg_vc_device_switch_cpu': '使用非{engine}内置语音：{vc_model}语音转换无法在{device}上运行，并切换到{new_device}，因此电子书转换速度比使用内置语音慢得多。',
+>>>>>>> 5dfc3d97e (...)
     'msg_zonos2_old_venv': '删除旧的Zonos v0.1环境 {dir}， ZONOS2不需要它……',
     'msg_zonos2_models': '是让大家 {engine} 模型文件（{files}） ，第一次下载需要一段时间……',
     'msg_vulkan_selected': 'Vulkan GPU {gpu} ：已选择Vulkan Torch',
@@ -581,14 +593,22 @@ legends = {
     'msg_gpu_choice_invalid': '输入一个从 0 到 {last} 的数字： ',
     'msg_gpu_choice_done': '已选择 GPU {device} ({tag})。要重新选择，请删除{file}或设置DEVICE_TAG。',
     'msg_gpu_choice_default': '此处有多个 GPU 可以运行 e2a ({devices})，无应答：使用{device} ({tag})。要进行选择，请删除{file}，然后从终端再次运行e2a，或设置DEVICE_TAG。',
+<<<<<<< HEAD
     'error_device_engine': '{engine}无法在{device}上运行（{engine}在{devices}上运行）。<br/>选择其他设备或TTS引擎进行转换。',
+=======
+    'error_device_engine': '{engine}无法在{device}上运行（{engine}在{devices}上运行）。<br/>选择其他设备或 TTS 引擎进行转换。',
+>>>>>>> 5dfc3d97e (...)
     'msg_device_reset': '{engine}无法在此计算机上的{device}上运行：设备已设置为{new_device}。',
     'error_device_not_supported_vulkan': '在此系统上未找到 Vulkan 加载器！<br/>读取{wiki}<br/>选择其他设备进行转换。',
     'msg_zonos2_hybrid_gone': 'ZONOS2中不存在ZONOS混合模型：切换到 {model} 车型',
     'error_venv_torch_unsupported': '{engine}无法在此设备上运行，因为割炬最大版本< {min}。请选择其他TTS引擎。',
     'error_venv_install_failed': '{engine}虚拟环境安装失败： {step}',
     'msg_orpheus_cpu_slow': '{engine}是3B型号：在CPU上，它的运行速度比实时慢约40倍，需要约14 GB的RAM。强烈建议使用GPU。',
+<<<<<<< HEAD
     'msg_phonon_cpu': '{engine}仅在CPU上运行（比实时更快），不在{device}上运行。',
+=======
+    'msg_phonon_cpu': '{engine}仅在CPU上运行（比实时快），不在{device}上运行。',
+>>>>>>> 5dfc3d97e (...)
     'error_orpheus_gated': '{repo}在Hugging Face上封闭：使用您的帐户接受其条件https://huggingface.co/{repo} ，然后将HF_TOKEN环境变量设置为该帐户的令牌并重新启动e2a。',
     'error_phonon_cpu_flags': '{engine}需要具有AVX2、FMA和F16C的CPU （缺少： {flags} ）。请选择其他TTS引擎。',
     'error_chattts_voice_language': '{engine}仅克隆讲英语或中文的语音文件， {voice}讲{language}。请选择其他语音文件。',

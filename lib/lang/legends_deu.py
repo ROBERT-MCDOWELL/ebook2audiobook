@@ -564,12 +564,20 @@ legends = {
     'error_zonos2_macos_min': '{engine} benötigt macOS {min} oder neuer (auf diesem Mac läuft macOS {version}).',
     'msg_zonos2_gpu_restart': 'Der {engine} GPU-Server ({package}) ist abgestürzt ({error}): Neustart und Wiederholung des Satzes.',
     'msg_zonos2_gpu_dropped': 'Der {engine}-GPU-Server ({package}) ist erneut abgestürzt ({error}): Er wird bis zum Neustart von e2a beibehalten und der Satz auf dem nächsten GPU-Paket erneut ausgeführt. Die Konvertierung wird abgebrochen, wenn keines mehr übrig ist.',
+<<<<<<< HEAD
     'msg_zonos2_gpu_failed': 'Der {engine}-Server ({package}) konnte nicht gestartet werden: {error} Versuch mit dem nächsten Paket.',
+=======
+    'msg_zonos2_gpu_failed': 'Der {engine}-Server ({package}) konnte nicht gestartet werden: {error} Der nächste Paket wird ausprobiert.',
+>>>>>>> 5dfc3d97e (...)
     'error_zonos2_gpu_failed': 'Der {engine}-GPU-Server ({package}) konnte nicht gestartet werden: {error} Wählen Sie die CPU als Gerät aus, um {engine} auf der CPU auszuführen, was wesentlich langsamer ist.',
     'error_zonos2_no_gpu_package': '{engine} verfügt über kein GPU-Paket, das auf diesem Computer ({machine}) mit {device} ausgeführt werden kann. Wählen Sie die CPU als Gerät aus, um {engine} auf der CPU auszuführen, was wesentlich langsamer ist.',
     'msg_audiocpp_offline_package': 'Auspacken der {engine} server-Paket {package} aus der Offline-Kopie...',
     'msg_vc_model_fallback': 'Die Sprachkonvertierung {vc_model} kann nicht {lang}: {fallback} sprechen und konvertiert stattdessen die Stimme.',
+<<<<<<< HEAD
     'msg_vc_cpu_slow': 'Verwendung einer anderen Stimme als die {engine} integrierten Stimmen: Die {vc_model}-Stimmenkonvertierung wird bei jedem Satz auf der CPU ausgeführt, sodass die E-Book-Konvertierung wesentlich langsamer ist als bei einer integrierten Stimme.',
+=======
+    'msg_vc_cpu_slow': 'Verwendung einer anderen Stimme als die {engine} integrierten Stimmen: Die {vc_model}-Stimmenumwandlung wird bei jedem Satz auf der CPU ausgeführt, sodass die E-Book-Umwandlung viel langsamer ist als mit einer integrierten Stimme.',
+>>>>>>> 5dfc3d97e (...)
     'msg_vc_device_switch': 'Verwendung einer anderen Stimme als die {engine} integrierten Stimmen: Die {vc_model}-Stimmenkonvertierung kann nicht auf {device} ausgeführt werden und wechselt zu {new_device}, sodass die E-Book-Konvertierung etwas langsamer ist als mit einer integrierten Stimme.',
     'msg_vc_device_switch_cpu': 'Verwendung einer anderen Stimme als die {engine} integrierten Stimmen: Die {vc_model}-Stimmenkonvertierung kann nicht auf {device} ausgeführt werden und wechselt zu {new_device}, sodass die E-Book-Konvertierung viel langsamer ist als mit einer integrierten Stimme.',
     'msg_zonos2_old_venv': 'Entfernen der alten Zonos v0.1-Umgebung in {dir}, ZONOS2 braucht es nicht...',

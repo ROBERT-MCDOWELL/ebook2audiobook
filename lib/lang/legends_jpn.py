@@ -326,7 +326,11 @@ legends = {
     'msg_conversion_skipped': '変換をスキップしました。',
     'error_model_extract_failed': '{model} を展開できないか、必須ファイルが不足しています',
     'error_no_presets_module': 'TTS エンジン「{engine}」のプリセットモジュールがありません: {e}',
+<<<<<<< HEAD
     'error_device_not_supported': '{device}はインストールされているTorchではサポートされていません！<br/>読み取り{wiki}<br/>変換する別のデバイスを選択します。',
+=======
+    'error_device_not_supported': '{device}はインストールされているTorchではサポートされていません！<br/>読み込み{wiki}<br/>変換する別のデバイスを選択してください。',
+>>>>>>> 5dfc3d97e (...)
     'error_device_unavailable': '{error}<br/>読む{wiki}<br/>変換する別のデバイスを選択します。',
     'msg_process_folder_note': '注意: 処理フォルダー {dir} は内部処理専用で、最終的な変換結果とは関係ありません。',
     'error_language_differs_epub': '警告！！！選択した言語 {selected} は EPUB ファイルの言語 {other} と異なります',
@@ -563,9 +567,15 @@ legends = {
     'error_zonos2_no_package': '{engine} このマシンのサーバーパッケージがありません（{machine}).',
     'error_zonos2_macos_min': '{engine} macOSが必要です {min} またはそれ以降（このMacはmacOSを実行します {version}).',
     'msg_zonos2_gpu_restart': '{engine} GPUサーバー（{package} ）がクラッシュしました（{error} ） ：それを再起動し、文章をやり直します。',
+<<<<<<< HEAD
     'msg_zonos2_gpu_dropped': '{engine} GPUサーバー（{package}）が再びクラッシュしました（{error}）。e2aが再起動するまで放置し、次のGPUパッケージで文をやり直します。残っていない場合は変換が停止します。',
     'msg_zonos2_gpu_failed': '{engine}サーバー（{package}）を起動できませんでした：{error}次のパッケージを試行しています。',
     'error_zonos2_gpu_failed': '{engine} GPUサーバー（{package}）を起動できませんでした：{error} CPU上で{engine}を実行するデバイスとしてCPUを選択してください。これははるかに低速です。',
+=======
+    'msg_zonos2_gpu_dropped': '{engine} GPUサーバー（{package}）が再びクラッシュしました（{error}）。e2aが再起動するまでそのままにしておき、次のGPUパッケージで文をやり直します。残っていない場合は変換が停止します。',
+    'msg_zonos2_gpu_failed': '{engine}サーバー（{package}）を起動できませんでした：{error}次のパッケージを試行しています。',
+    'error_zonos2_gpu_failed': '{engine} GPUサーバー（{package}）を起動できませんでした：{error} CPUをデバイスとして選択して{engine}をCPU上で実行します。これははるかに低速です。',
+>>>>>>> 5dfc3d97e (...)
     'msg_audiocpp_offline_package': 'の開梱 {engine} サーバーパッケージ {package} オフラインコピーから…',
     'msg_vc_model_fallback': '音声変換 {vc_model} 話すことができません {lang}: {fallback} 代わりに音声を変換します。',
     'msg_zonos2_old_venv': '古いZonos v0.1環境の削除 {dir}、ZONOS 2はそれを必要としません...',
