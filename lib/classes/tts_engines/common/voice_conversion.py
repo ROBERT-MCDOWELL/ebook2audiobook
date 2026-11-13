@@ -99,14 +99,17 @@ class VoiceConversion(SubprocessPipe):
                     else:
                         print(msg)
             # a voice other than the engine's built-in ones: each sentence also goes through the voice conversion (task
-            # "tts": spoken again by its model), much slower than a built-in voice. The device it really runs on: the one
-            # selected (Jetson / CUDA packages for those, Metal for MPS), else the GPU package or CPU it switched to
+            # "tts": spoken again by its model). The device it really runs on: the one selected (Jetson / CUDA packages for
+            # those, Metal for MPS), else the GPU package or CPU it switched to. On the GPU selected the ebook conversion is
+            # slightly slower than with a built-in voice, on CPU or after a switch much slower
             backend_devices = {'cuda': devices['CUDA']['proc'], 'vulkan': devices['VULKAN']['proc'], 'metal': devices['MPS']['proc']}
             vc_device = session['device'] if self.backend == 'cuda' and session['device'] in [devices['CUDA']['proc'], devices['JETSON']['proc']] else backend_devices.get(self.backend, devices['CPU']['proc'])
-            if vc_device == session['device']:
-                msg = legends['msg_vc_slow'].format(engine=session['tts_engine'], vc_model=self.vc_model, device=vc_device.upper())
-            else:
+            if vc_device != session['device']:
                 msg = legends['msg_vc_device_switch'].format(engine=session['tts_engine'], vc_model=self.vc_model, device=session['device'].upper(), new_device=vc_device.upper())
+            elif vc_device == devices['CPU']['proc']:
+                msg = legends['msg_vc_cpu_slow'].format(engine=session['tts_engine'], vc_model=self.vc_model)
+            else:
+                msg = legends['msg_vc_slow'].format(engine=session['tts_engine'], vc_model=self.vc_model, device=vc_device.upper())
             if show_alert is not None:
                 show_alert(session['id'], {'type': 'warning', 'msg': msg})
             else:
