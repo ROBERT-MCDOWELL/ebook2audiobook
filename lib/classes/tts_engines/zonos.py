@@ -140,19 +140,21 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
             if not usable:
                 error = legends['error_zonos2_no_package'].format(engine=tts_engine, machine=machine_desc)
                 raise ValueError(error)
-            # first choice, plus the CPU package to fall back on if a GPU package cannot start
-            # (no Vulkan loader, an old driver, a too old system library)
-            # a GPU first choice is followed by the other GPU packages (CUDA 13 -> CUDA 12, own Vulkan -> Zyphra's),
-            # then by one CPU package
-            attempts = [usable[0]]
-            if packages[usable[0]]['gpu']:
-                attempts = [k for k in usable if packages[k]['gpu']] + [k for k in usable if not packages[k]['gpu']][:1]
-            if gpu_wanted and not packages[usable[0]]['gpu'] and not any(n >= 2 for n in Zonos.gpu_crashes.values()):
-                msg = legends['msg_zonos2_cpu_fallback'].format(engine=tts_engine, machine=machine_desc)
-                if show_alert is not None:
-                    show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
-                else:
-                    print(msg)
+            if gpu_wanted:
+                # a GPU device runs on a GPU package or not at all: first choice, then the other GPU packages if it
+                # cannot start (no Vulkan loader, an old driver, a too old system library: CUDA 13 -> CUDA 12, own
+                # Vulkan -> Zyphra's). None for this machine, or none left after two crashes, stops the conversion
+                # instead of switching to a CPU package (the user selects CPU for that)
+                attempts = [k for k in usable if packages[k]['gpu']]
+                if not attempts:
+                    error = legends['error_zonos2_no_gpu_package'].format(engine=tts_engine, machine=machine_desc, device=self.session['device'].upper())
+                    raise ValueError(error)
+            else:
+                # first choice; a GPU package run with --cpu (Zyphra's Vulkan build, the last resort) is followed by the
+                # other GPU packages, then by one CPU package
+                attempts = [usable[0]]
+                if packages[usable[0]]['gpu']:
+                    attempts = [k for k in usable if packages[k]['gpu']] + [k for k in usable if not packages[k]['gpu']][:1]
             # --- GGUF weights through e2a's Hugging Face cache (tts_dir), byte progress in the terminal and the GUI ---
             msg = legends['msg_zonos2_models'].format(engine=tts_engine, files=', '.join(model_cfg['files']))
             print(msg)
@@ -266,6 +268,10 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                     break
                 except Exception as e:
                     if attempt + 1 >= len(attempts):
+                        if gpu_wanted:
+                            # no GPU package left to try: stop, no switch to a CPU package
+                            error = legends['error_zonos2_gpu_failed'].format(engine=tts_engine, package=self.package_name, error=e)
+                            raise RuntimeError(error) from e
                         raise
                     msg = legends['msg_zonos2_gpu_failed'].format(engine=tts_engine, package=self.package_name, error=e)
                     if show_alert is not None:
@@ -358,7 +364,8 @@ class Zonos(TTSUtils, TTSRegistry, name='zonos'):
                         if not reply.get('ok') and reply.get('server_exited') and self.backend == 'gpu':
                             # the GPU server died mid-sentence (a driver abort such as MoltenVK's "Completed handler
                             # provided after commit call"): restart it once, drop the package on its second death, and
-                            # redo the whole sentence with a fresh engine (__init__ picks the package, CPU last)
+                            # redo the whole sentence with a fresh engine (__init__ picks the next GPU package, none left
+                            # stops the conversion)
                             crashes = Zonos.gpu_crashes[self.package_name] = Zonos.gpu_crashes.get(self.package_name, 0) + 1
                             # the worker's error carries the server's last log lines joined by ' | ': the last one is
                             # the cause (e.g. the Metal assertion), the rest is startup noise

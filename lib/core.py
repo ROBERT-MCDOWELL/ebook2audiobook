@@ -4638,32 +4638,30 @@ def convert_ebook(args:dict)->tuple:
                     session['ebook'] = os.path.join(session['process_dir'], ebook_file)
                     shutil.copy((session['ebook_textarea_src'] if session['ebook_mode'] == ebook_modes['TEXT'] else session['ebook_src']), session['ebook'])
                     session['filename_noext'] = os.path.splitext(os.path.basename(session['ebook']))[0]
-                    msg = ''
-                    msg_extra = ''                      
+                    msg_extra = ''
+                    # the conversion runs on the device the user selected or not at all: when the installed Torch, the
+                    # system or the TTS engine cannot run on it, it stops here with an error instead of switching to
+                    # CPU (or another GPU) behind the user's back
+                    device_error = None
                     if session['device'] == devices['CUDA']['proc']:
                         if not devices['CUDA']['found']:
-                            # CUDA, then Vulkan (checked below), then CPU
-                            session['device'] = devices['VULKAN']['proc']
-                            msg += legends['msg_device_not_supported_try_vulkan'].format(device='CUDA', wiki=default_gpu_wiki)
-                    elif session['device'] == devices['JETSON']['proc'] or session['device'] == devices['JETSON']['proc']:
+                            device_error = legends['error_device_not_supported'].format(device='CUDA', wiki=default_gpu_wiki)
+                    elif session['device'] == devices['JETSON']['proc']:
                         if not devices['JETSON']['found']:
-                            session['device'] = devices['CPU']['proc']
-                            msg += legends['msg_device_not_supported'].format(device='JETSON CUDA', wiki=default_gpu_wiki)
+                            device_error = legends['error_device_not_supported'].format(device='JETSON CUDA', wiki=default_gpu_wiki)
                     elif session['device'] == devices['MPS']['proc']:
                         if not devices['MPS']['found']:
-                            session['device'] = devices['CPU']['proc']
-                            msg += legends['msg_device_not_supported'].format(device='MPS', wiki=default_gpu_wiki)
+                            device_error = legends['error_device_not_supported'].format(device='MPS', wiki=default_gpu_wiki)
                     elif session['device'] == devices['ROCM']['proc']:
                         if not devices['ROCM']['found']:
-                            session['device'] = devices['CPU']['proc']
-                            msg += legends['msg_device_not_supported'].format(device='ROCM', wiki=default_gpu_wiki)
+                            device_error = legends['error_device_not_supported'].format(device='ROCM', wiki=default_gpu_wiki)
                     elif session['device'] == devices['XPU']['proc']:
                         # devices['XPU']['found'] is a static capability flag: on an
                         # image built for xpu it stays True even when no Intel GPU is
                         # visible at runtime (Level Zero driver absent, /dev/dri not
                         # passed to the container). Unlike CUDA that never trips the
                         # branch below, so the failure surfaces as a crash inside
-                        # TTSManager() instead of a switch to CPU. Ask torch directly.
+                        # TTSManager() instead of a clear error here. Ask torch directly.
                         xpu_error = None
                         if not devices['XPU']['found']:
                             xpu_error = 'XPU not supported by the Torch installed!'
@@ -4675,18 +4673,15 @@ def convert_ebook(args:dict)->tuple:
                             except Exception as e:
                                 xpu_error = f'XPU not available: runtime probe failed ({e!r})'
                         if xpu_error is not None:
-                            session['device'] = devices['CPU']['proc']
-                            msg += legends['msg_device_error_switch_cpu'].format(error=xpu_error, wiki=default_gpu_wiki)
-                    if session['device'] == devices['VULKAN']['proc']:
-                        # a separate if, not elif: a CUDA session that found no CUDA arrives here too.
-                        # torch has no Vulkan device: like Zonos' hybrid model, an engine that cannot run on it is
-                        # switched (to CPU) with an alert. Engines that can (native GPU builds) still need the
-                        # system Vulkan loader, e2a installs no system library. macOS has none: its packages run
-                        # Metal (arm64) or bring MoltenVK (x86_64), so no loader check there
+                            device_error = legends['error_device_unavailable'].format(error=xpu_error, wiki=default_gpu_wiki)
+                    elif session['device'] == devices['VULKAN']['proc']:
+                        # torch has no Vulkan device: an engine that cannot run on it stops the conversion. Engines
+                        # that can (native GPU builds) still need the system Vulkan loader, e2a installs no system
+                        # library. macOS has none: its packages run Metal (arm64) or bring MoltenVK (x86_64), so no
+                        # loader check there
                         vulkan_engines = [k for k, v in default_engine_settings.items() if v.get('vulkan')]
                         if session['tts_engine'] not in vulkan_engines:
-                            session['device'] = devices['CPU']['proc']
-                            msg += legends['msg_vulkan_engine_cpu'].format(engine=session['tts_engine'], engines=', '.join(vulkan_engines))
+                            device_error = legends['error_vulkan_engine'].format(engine=session['tts_engine'], engines=', '.join(vulkan_engines))
                         elif sys.platform == systems['MACOS']:
                             devices['VULKAN']['found'] = True
                         else:
@@ -4696,54 +4691,49 @@ def convert_ebook(args:dict)->tuple:
                                 devices['VULKAN']['found'] = True
                             except OSError:
                                 devices['VULKAN']['found'] = False
-                                session['device'] = devices['CPU']['proc']
-                                msg += legends['msg_device_not_supported_vulkan'].format(wiki=default_gpu_wiki)
-                    if session['device'] == devices['CPU']['proc']:
-                        os.environ['OMP_NUM_THREADS'] = '4'
-                    vram_dict = VRAMDetector().detect_vram(session['device'], session['script_mode'])
-                    print(f'vram_dict: {vram_dict}')
-                    total_vram_gb = vram_dict.get('total_vram_gb', 0)
-                    detected_free_vram_gb = vram_dict.get('free_vram_gb', 0)
-                    session['free_vram_gb'] = detected_free_vram_gb
-                    if session['free_vram_gb'] == 0:
-                        msg_extra += f"<br/>Memory capacity not detected! restrict to {session['free_vram_gb']}GB max"
-                    else:
-                        msg_extra += f"<br/>Free Memory available: {session['free_vram_gb']}GB"
-                        if session['free_vram_gb'] < default_engine_settings[session['tts_engine']]['rating']['VRAM']:
-                            msg_extra += f"<br/>Free Memory {session['free_vram_gb']}GB is lower than VRAM/RAM {default_engine_settings[session['tts_engine']]['rating']['VRAM']}GB required!<br/>It will probably crash the conversion!"
-                        if session['free_vram_gb'] > 4.0:
-                            if session['tts_engine'] == TTS_ENGINES['BARK']:
-                                os.environ['SUNO_USE_SMALL_MODELS'] = 'FALSE'  
-                    if session['tts_engine'] == TTS_ENGINES['BARK']:
-                        if session['free_vram_gb'] < 12.0:
-                            os.environ['SUNO_OFFLOAD_CPU'] = 'TRUE'
-                            os.environ['SUNO_USE_SMALL_MODELS'] = "TRUE"
-                            msg_extra += f'<br/>Switching BARK to SMALL models'
+                                device_error = legends['error_device_not_supported_vulkan'].format(wiki=default_gpu_wiki)
+                    if device_error is None:
+                        if session['device'] == devices['CPU']['proc']:
+                            os.environ['OMP_NUM_THREADS'] = '4'
+                        vram_dict = VRAMDetector().detect_vram(session['device'], session['script_mode'])
+                        print(f'vram_dict: {vram_dict}')
+                        total_vram_gb = vram_dict.get('total_vram_gb', 0)
+                        detected_free_vram_gb = vram_dict.get('free_vram_gb', 0)
+                        session['free_vram_gb'] = detected_free_vram_gb
+                        if session['free_vram_gb'] == 0:
+                            msg_extra += f"<br/>Memory capacity not detected! restrict to {session['free_vram_gb']}GB max"
                         else:
-                            os.environ['SUNO_OFFLOAD_CPU'] = 'FALSE'
-                            os.environ['SUNO_USE_SMALL_MODELS'] = 'FALSE'
-                    if msg == '':
+                            msg_extra += f"<br/>Free Memory available: {session['free_vram_gb']}GB"
+                            if session['free_vram_gb'] < default_engine_settings[session['tts_engine']]['rating']['VRAM']:
+                                msg_extra += f"<br/>Free Memory {session['free_vram_gb']}GB is lower than VRAM/RAM {default_engine_settings[session['tts_engine']]['rating']['VRAM']}GB required!<br/>It will probably crash the conversion!"
+                            if session['free_vram_gb'] > 4.0:
+                                if session['tts_engine'] == TTS_ENGINES['BARK']:
+                                    os.environ['SUNO_USE_SMALL_MODELS'] = 'FALSE'
+                        if session['tts_engine'] == TTS_ENGINES['BARK']:
+                            if session['free_vram_gb'] < 12.0:
+                                os.environ['SUNO_OFFLOAD_CPU'] = 'TRUE'
+                                os.environ['SUNO_USE_SMALL_MODELS'] = "TRUE"
+                                msg_extra += f'<br/>Switching BARK to SMALL models'
+                            else:
+                                os.environ['SUNO_OFFLOAD_CPU'] = 'FALSE'
+                                os.environ['SUNO_USE_SMALL_MODELS'] = 'FALSE'
                         msg_extra = f"Using {session['device'].upper()}" + msg_extra
-                    device_vram_required = default_engine_settings[session['tts_engine']]['rating']['RAM'] if session['device'] == devices['CPU']['proc'] else default_engine_settings[session['tts_engine']]['rating']['VRAM']
-                    # venv engines (gptsovits, ...) mirror python_env's torch into their own venv: stop
-                    # here with an alert when it is too old or comes from a custom wheel URL
-                    # (e.g. Windows ROCm, or a torch below the engine's torch_min), not later in TTSManager()
-                    torch_error = None
-                    torch_min = default_engine_settings[session['tts_engine']].get('torch_min')
-                    if torch_min:
-                        import torch
-                        torch_base, _, torch_tag = torch.__version__.partition('+')
-                        torch_version = tuple(int(x) for x in re.findall(r'\d+', torch_base)[:3])
-                        torch_index_ok = torch_tag in ('', 'cpu', 'xpu') or bool(re.fullmatch(r'cu\d+', torch_tag)) or (bool(re.fullmatch(r'rocm[\d.]+', torch_tag)) and sys.platform == systems['LINUX']) or bool(re.fullmatch(r'jetson\d+', torch_tag))
-                        if torch_version < tuple(int(x) for x in torch_min.split('.')) or not torch_index_ok:
-                            torch_error = legends['error_venv_torch_unsupported'].format(engine=session['tts_engine'], min=torch_min, version=torch.__version__)
-                    if torch_error is not None:
-                        error = torch_error
+                        device_vram_required = default_engine_settings[session['tts_engine']]['rating']['RAM'] if session['device'] == devices['CPU']['proc'] else default_engine_settings[session['tts_engine']]['rating']['VRAM']
+                        # venv engines (gptsovits, ...) mirror python_env's torch into their own venv: stop
+                        # here with an alert when it is too old or comes from a custom wheel URL
+                        # (e.g. Windows ROCm, or a torch below the engine's torch_min), not later in TTSManager()
+                        torch_min = default_engine_settings[session['tts_engine']].get('torch_min')
+                        if torch_min:
+                            import torch
+                            torch_base, _, torch_tag = torch.__version__.partition('+')
+                            torch_version = tuple(int(x) for x in re.findall(r'\d+', torch_base)[:3])
+                            torch_index_ok = torch_tag in ('', 'cpu', 'xpu') or bool(re.fullmatch(r'cu\d+', torch_tag)) or (bool(re.fullmatch(r'rocm[\d.]+', torch_tag)) and sys.platform == systems['LINUX']) or bool(re.fullmatch(r'jetson\d+', torch_tag))
+                            if torch_version < tuple(int(x) for x in torch_min.split('.')) or not torch_index_ok:
+                                device_error = legends['error_venv_torch_unsupported'].format(engine=session['tts_engine'], min=torch_min, version=torch.__version__)
+                    if device_error is not None:
+                        error = device_error
                     elif float(total_vram_gb) >= float(device_vram_required):
-                        if msg:
-                            show_alert(session_id, {"type": "warning", "msg": msg + msg_extra})
-                        else:
-                            show_alert(session_id, {"type": "info", "msg": msg_extra})
+                        show_alert(session_id, {"type": "info", "msg": msg_extra})
                         session['epub_path'] = os.path.join(session['process_dir'], f"__{session['filename_noext']}.epub")
                         session['blocks_orig_json'] = os.path.join(session['process_dir'], f"{file_prefixes['clone']}{session['filename_noext']}.json")
                         session['blocks_saved_json']   = os.path.join(session['process_dir'], f"{file_prefixes['saved']}{session['filename_noext']}.json")

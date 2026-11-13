@@ -70,7 +70,7 @@ devices = {
     "JETSON": {"proc": "jetson", "found": False},
     # Vulkan: torch is installed from the +vulkan wheels (py-pkg) when no CUDA/ROCm/XPU/Jetson torch applies, ahead of
     # MPS (they keep MPS on Apple Silicon). At run time only engines with "vulkan": True in default_engine_settings
-    # (native GPU builds) run on it, the others switch to CPU with an alert (lib/core.py)
+    # (native GPU builds) run on it, the others stop the conversion with an error (lib/core.py)
     "VULKAN": {"proc": "vulkan", "found": False}
 }
 # the system Vulkan loader, the one the GPU driver installs. Windows takes it by absolute path: a bare 'vulkan-1.dll'

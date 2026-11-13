@@ -112,6 +112,10 @@ class AudioCpp(TTSUtils):
                     break
                 except Exception as e:
                     if attempt + 1 >= len(attempts):
+                        if gpu_wanted:
+                            # no GPU package left to try: stop, no switch to a CPU package
+                            error = legends['error_zonos2_gpu_failed'].format(engine=tts_engine, package=self.package_name, error=e)
+                            raise RuntimeError(error) from e
                         raise
                     msg = legends['msg_zonos2_gpu_failed'].format(engine=tts_engine, package=self.package_name, error=e)
                     if show_alert is not None:
@@ -202,7 +206,8 @@ class AudioCpp(TTSUtils):
                         })
                         if not reply.get('ok') and reply.get('server_exited') and self.backend != 'cpu':
                             # the GPU server died mid-sentence (driver abort): restart it once, drop the package on its second
-                            # death, and redo the whole sentence with a fresh engine (__init__ picks the package, CPU last)
+                            # death, and redo the whole sentence with a fresh engine (__init__ picks the next GPU package,
+                            # none left stops the conversion)
                             crashes = VoiceConversion.gpu_crashes[self.package_name] = VoiceConversion.gpu_crashes.get(self.package_name, 0) + 1
                             error = str(reply.get('error') or '')
                             error = (error.split(': ', 1)[0] + ': ' + error.split(' | ')[-1]) if ' | ' in error else error

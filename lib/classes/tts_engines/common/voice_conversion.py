@@ -90,6 +90,10 @@ class VoiceConversion(SubprocessPipe):
                     if getattr(self, 'process', None) is not None:
                         self.stop()
                     if attempt + 1 >= len(attempts):
+                        if gpu_wanted:
+                            # no GPU package left to try: stop, no switch to a CPU package
+                            error = legends['error_zonos2_gpu_failed'].format(engine=engine_name, package=self.package_name, error=e)
+                            raise RuntimeError(error) from e
                         raise
                     msg = legends['msg_zonos2_gpu_failed'].format(engine=engine_name, package=self.package_name, error=e)
                     if show_alert is not None:
@@ -111,8 +115,7 @@ class VoiceConversion(SubprocessPipe):
     @staticmethod
     def packages(session:DictProxy, engine_name:str)->tuple:
         # the audiocpp_server packages to try on this machine for session['device'], best first. Returns
-        # (attempts, gpu_wanted); raises when no package fits the machine
-        show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
+        # (attempts, gpu_wanted); raises when no package fits the machine, or no GPU package on a GPU device
         machine = platform.machine().lower()
         gpu_wanted = session['device'] != devices['CPU']['proc']
         # CUDA packages for NVIDIA devices only: ROCm and XPU go to Vulkan, MPS to Metal
@@ -175,16 +178,16 @@ class VoiceConversion(SubprocessPipe):
             else:
                 error = legends['error_zonos2_no_package'].format(engine=engine_name, machine=machine_desc)
             raise ValueError(error)
-        # first choice, then the other GPU packages, then one CPU package to fall back on if a GPU one cannot start
-        attempts = [usable[0]]
-        if packages[usable[0]]['gpu']:
-            attempts = [k for k in usable if packages[k]['gpu']] + [k for k in usable if not packages[k]['gpu']][:1]
-        if gpu_wanted and not packages[usable[0]]['gpu'] and not any(n >= 2 for n in VoiceConversion.gpu_crashes.values()):
-            msg = legends['msg_zonos2_cpu_fallback'].format(engine=engine_name, machine=machine_desc)
-            if show_alert is not None:
-                show_alert(session['id'], {'type': 'warning', 'msg': msg})
-            else:
-                print(msg)
+        if gpu_wanted:
+            # a GPU device runs on a GPU package or not at all: first choice, then the other GPU packages if it cannot
+            # start. None for this machine, or none left after two crashes, stops the conversion instead of switching
+            # to a CPU package (the user selects CPU for that)
+            attempts = [k for k in usable if packages[k]['gpu']]
+            if not attempts:
+                error = legends['error_zonos2_no_gpu_package'].format(engine=engine_name, machine=machine_desc, device=session['device'].upper())
+                raise ValueError(error)
+        else:
+            attempts = [usable[0]]
         return attempts, gpu_wanted
 
     @staticmethod
