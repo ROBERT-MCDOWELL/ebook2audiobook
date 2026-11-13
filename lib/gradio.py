@@ -773,6 +773,15 @@ def build_interface(args:dict)->gr.Blocks:
                 outputs = tuple(gr.update() for _ in range(len(outputs_enable_components)))
                 return outputs
 
+            def _enable_on_end(session_id:str)->tuple:
+                # the session can be gone by now: a tab unload/reload pops it (SessionTracker.end_session) and get_session
+                # returns {}. Read it once with .get(): an unknown session gets no update, like one not ended yet
+                session = context.get_session(session_id)
+                if session.get('status') in [status_tags['END'], status_tags['READY']]:
+                    is_text_mode = session.get('ebook_mode') == ebook_modes['TEXT']
+                    return _enable_components(session_id) + (1 if is_text_mode else 0,)
+                return tuple(gr.update() for _ in range(len(outputs_enable_components))) + (0,)
+
             def _disable_on_voice_upload()->tuple:
                 outputs = tuple([gr.update(interactive=False) for _ in range(9)])
                 return outputs + (gr.update(visible='hidden'), gr.update(visible='hidden'), gr.update(interactive=False), gr.update(interactive=False))
@@ -3715,16 +3724,7 @@ def build_interface(args:dict)->gr.Blocks:
                     )
                 else:
                     return event.then(
-                        fn=lambda s: (
-                            _enable_components(s) + (1,)
-                            if context.get_session(s)['status'] in [status_tags['END'], status_tags['READY']]
-                            and context.get_session(s)['ebook_mode'] == ebook_modes['TEXT']
-                            else (
-                                _enable_components(s) + (0,)
-                                if context.get_session(s)['status'] in [status_tags['END'], status_tags['READY']]
-                                else [gr.update()] * len(outputs_enable_components) + [0]
-                            )
-                        ),
+                        fn=_enable_on_end,
                         inputs=[gr_session],
                         outputs=outputs_enable_components + [gr_end_event],
                         show_progress_on=[gr_progress]
