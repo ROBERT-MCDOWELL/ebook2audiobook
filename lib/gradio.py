@@ -2691,8 +2691,8 @@ def build_interface(args:dict)->gr.Blocks:
                             for name, details in models.items()
                             if details.get("lang") in ("multi", session['language']) or language in (details.get("languages") or {})
                         ]
-                        if session['tts_engine'] in tts_engines_with_custom_model:
-                            custom_model_tts_dir = _check_custom_model_tts(session['custom_model_dir'], session['tts_engine'])
+                        custom_model_tts_dir = _check_custom_model_tts(session['custom_model_dir'], session['tts_engine']) if session['tts_engine'] in tts_engines_with_custom_model else None
+                        if custom_model_tts_dir is not None:
                             custom_model_options += [
                                 (
                                     str(dir),

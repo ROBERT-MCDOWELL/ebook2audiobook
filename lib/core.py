@@ -231,7 +231,8 @@ class SessionContext:
             "voice_map": {},
             "ebook_selected": None,
             "custom_model": None,
-            "custom_model_dir": None,
+            # set from the start, never None: events of the same session can run while the GUI restores it
+            "custom_model_dir": os.path.join(models_dir, '__sessions', f"model-{session_id}"),
             "output_dir": None,
             "output_format": default_output_format,
             "output_channel": default_output_channel,
