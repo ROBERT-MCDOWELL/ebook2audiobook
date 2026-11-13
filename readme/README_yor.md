@@ -211,7 +211,7 @@ Nítorí náà o gbọ́dọ̀ kọ́kọ́ yọ ọ̀rọ̀ èyíkéyìí tí o
 2. **Fún Ọ̀nà Àjọ̀dún**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (gbogbo OS)
+   `python app.py --share` (gbogbo OS, lẹẹkan ṣoṣo ti a fi sii ati pẹlu python ti folda python_env rẹ)
 
 > [!IMPORTANT]
 **Tí a bá dúró kọ̀ǹpútà-ìtọ́ni tí a sì tún ṣe é, o nílò láti tún wíwo GUI gradio rẹ ṣe<br>

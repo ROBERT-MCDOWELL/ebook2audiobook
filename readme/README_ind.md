@@ -211,7 +211,7 @@ Jadi Anda harus terlebih dahulu menghapus secara manual teks apa pun yang tidak 
 2. **Untuk Tautan Publik**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (semua OS)
+   `python app.py --share` (semua OS, hanya sekali diinstal dan dengan python dari folder python_env-nya)
 
 > [!IMPORTANT] 
 **Jika skrip dihentikan dan dijalankan lagi, Anda perlu menyegarkan antarmuka GUI gradio Anda<br>

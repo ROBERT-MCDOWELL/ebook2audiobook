@@ -211,7 +211,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 2. **للرابط العام**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    ويندوز `ebook2audiobook.cmd --share`
-   `python app.py --share` (جميع أنظمة التشغيل)
+   `python app.py --share` (جميع أنظمة التشغيل، مرة واحدة فقط عند التثبيت ومع بايثون من مجلد python_env الخاص به)
 
 > هام:
 **إذا تم إيقاف البرنامج النصي وتشغيله مرة أخرى، فستحتاج إلى تحديث واجهة Gradio GUI الخاصة بك<br>

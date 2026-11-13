@@ -211,7 +211,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 2. **পাবলিক লিঙ্কের জন্য**:
    `./ebook2audiobook.command --share` (লিনাক্স/ম্যাকওএস)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (সব ওএস)
+   `python app.py --share` (সমস্ত OS, শুধুমাত্র একবার ইনস্টল করা হয়েছে এবং এর python_env ফোল্ডারের পাইথন সহ)
 
 > [!IMPORTANT]
 **যদি স্ক্রিপ্ট বন্ধ করে আবার চালানো হয়, তাহলে আপনাকে আপনার Gradio GUI ইন্টারফেস রিফ্রেশ করতে হবে<br>

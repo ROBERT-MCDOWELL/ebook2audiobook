@@ -211,7 +211,7 @@ Ezért először manuálisan el kell távolítanod minden olyan szöveget, amely
 2. **Nyilvános linkhez**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (összes operációs rendszer)
+   `python app.py --share` (minden operációs rendszer, csak egyszer telepítve és a python_env mappájában található Pythonnal)
 
 > [!IMPORTANT]
 **Ha a szkriptet leállítják és újra futtatják, frissítened kell a Gradio GUI felületedet<br>

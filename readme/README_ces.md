@@ -211,7 +211,7 @@ Proto byste měli nejprve ručně odstranit veškerý text, který nechcete pře
 2. **Pro veřejný odkaz**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (všechny OS)
+   `python app.py --share` (všechny OS, pouze jednou nainstalováno a s pythonem ze složky python_env)
 
 > [!IMPORTANT]
 **Pokud je skript zastaven a znovu spuštěn, musíte obnovit své grafické rozhraní Gradio<br>

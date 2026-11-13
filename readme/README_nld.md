@@ -211,7 +211,7 @@ Daarom moet je eerst handmatig alle tekst verwijderen die je niet naar audio wil
 2. **Voor een openbare link**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (alle besturingssystemen)
+   `python app.py --share` (alle besturingssystemen, slechts eenmaal geïnstalleerd en met de Python van de map python_env)
 
 > [!IMPORTANT]
 **Als het script wordt gestopt en opnieuw uitgevoerd, moet je je Gradio-GUI-interface vernieuwen<br>

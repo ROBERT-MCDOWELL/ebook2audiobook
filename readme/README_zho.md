@@ -211,7 +211,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 2. **对于公开链接** ：
    `./ebook2audiobook.command --share` （ Linux/MacOS ）
    `ebook2audiobook.cmd --share` (Windows)
-   所有操作系统 `python app.py --share`
+   `python app.py --share`（所有操作系统，仅安装一次，并使用其 python_env 文件夹中的 Python）
 
 > 重要
 **如果脚本停止并再次运行，则需要刷新gradio GUI界面<br>

@@ -211,7 +211,7 @@ So you should first remove manually any text you don't want to be converted in a
 2. **For Public Link**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (all OS, only once installed and with the python of its python_env folder)
 
 > [!IMPORTANT]
 **If the script is stopped and run again, you need to refresh your gradio GUI interface<br>

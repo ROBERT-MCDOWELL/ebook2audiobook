@@ -211,7 +211,7 @@ Quindi dovresti prima rimuovere manualmente qualsiasi testo che non vuoi convert
 2. **Per un link pubblico**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (tutti i sistemi operativi, solo una volta installato e con il Python della sua cartella python_env)
 
 > [!IMPORTANT]
 **Se lo script viene interrotto e rieseguito, devi aggiornare la tua interfaccia grafica Gradio<br>

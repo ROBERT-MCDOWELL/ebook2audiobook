@@ -211,7 +211,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 2. **Для публичной ссылки**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (все ОС)
+   `python app.py --share` (все ОС, только после установки и с Python из папки python_env)
 
 > Важно
 **Если скрипт остановлен и запущен снова, вам нужно обновить ваш интерфейс Gradio GUI<br>

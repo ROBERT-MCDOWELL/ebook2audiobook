@@ -211,7 +211,7 @@ Dlatego najpierw należy ręcznie usunąć wszelki tekst, którego nie chcesz ko
 2. **Aby uzyskać link publiczny**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (wszystkie systemy operacyjne, tylko po zainstalowaniu i z Pythonem z folderu python_env)
 
 > [!IMPORTANT]
 **Jeśli skrypt zostanie zatrzymany i uruchomiony ponownie, musisz odświeżyć swój interfejs graficzny Gradio<br>

@@ -211,7 +211,7 @@ Por isso, deve primeiro remover manualmente qualquer texto que não queira conve
 2. **Para um link público**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (todos OS)
+   `python app.py --share` (todos os sistemas operacionais, apenas uma vez instalado e com o Python da sua pasta python_env)
 
 > [!IMPORTANT]
 **Se o script for parado e executado novamente, precisa de atualizar a sua interface gráfica Gradio<br>

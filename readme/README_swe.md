@@ -211,7 +211,7 @@ Du bör därför först manuellt ta bort all text som du inte vill omvandla till
 2. **För en offentlig länk**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (alla operativsystem)
+   `python app.py --share` (alla operativsystem, endast när det har installerats och med Python i mappen python_env)
 
 > [!IMPORTANT]
 **Om skriptet stoppas och körs igen måste du uppdatera ditt Gradio-GUI-gränssnitt<br>

@@ -211,7 +211,7 @@ Vous devez donc d'abord supprimer manuellement tout texte que vous ne souhaitez 
 2. **Pour le lien public** :
    `./ebook2audiobook.command --share` (Linux/MacOS)
    Windows. `ebook2audiobook.cmd --share`
-   Tous les OS `python app.py --share`
+   `python app.py --share` (tous les systèmes d'exploitation, uniquement une fois installé et avec le Python de son dossier python_env)
 
 > Important
 **Si le script est arrêté et exécuté à nouveau, vous devez actualiser votre interface graphique gradio<br>

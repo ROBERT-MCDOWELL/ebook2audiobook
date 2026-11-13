@@ -211,7 +211,7 @@ Kwa hivyo unapaswa kwanza kuondoa kwa mkono maandishi yoyote ambayo hutaki kubad
 2. **Kwa Kiungo cha Umma**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (OS zote)
+   `python app.py --share` (OS zote, mara moja tu baada ya kufungwa na kwa kutumia python ya folda yake ya python_env)
 
 > [!IMPORTANT]
 **Ikiwa hati itasimamishwa na kuendeshwa tena, unahitaji kuonyesha upya kiolesura chako cha GUI cha gradio<br>

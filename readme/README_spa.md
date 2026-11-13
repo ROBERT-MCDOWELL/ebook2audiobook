@@ -211,7 +211,7 @@ Por lo tanto, primero debes eliminar manualmente cualquier texto que no quieras 
 2. **Para Enlace Público**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   TODOS (O.S) `python app.py --share`
+   `python app.py --share` (todos los sistemas operativos, solo una vez instalado y con el Python de su carpeta python_env)
 
 > Importante
 **Si el script se detiene y se ejecuta de nuevo, debe actualizar la interfaz GUI de gradio<br>

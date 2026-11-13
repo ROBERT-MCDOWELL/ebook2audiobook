@@ -211,7 +211,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 2. **برای پیوند عمومی**:
    `./ebook2audiobook.command --share` (لینوکس/مک او اس)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (all OS)
+   `python app.py --share` (همه سیستم‌عامل‌ها، فقط یک بار نصب شده و با پایتون موجود در پوشه python_env آن)
 
 > [!IMPORTANT]
 **اگر اسکریپت متوقف و دوباره اجرا شود، باید رابط گرافیکی Gradio خود را تازه‌سازی کنید<br>

@@ -211,7 +211,7 @@ Daher sollten Sie zunächst manuell jeglichen Text entfernen, den Sie nicht in A
 2. **Für einen öffentlichen Link**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (alle Betriebssysteme)
+   `python app.py --share` (alle Betriebssysteme, nur einmal installiert und mit dem Python des Ordners python_env)
 
 > [!IMPORTANT]
 **Wenn das Skript gestoppt und erneut ausgeführt wird, müssen Sie Ihre Gradio-GUI-Oberfläche aktualisieren<br>

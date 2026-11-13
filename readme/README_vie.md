@@ -211,7 +211,7 @@ Vì vậy, trước tiên bạn nên xóa thủ công bất kỳ văn bản nào
 2. **Để có liên kết công khai**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (tất CẢ HĐH)
+   `python app.py --share` (tất cả các hệ điều hành, chỉ cài đặt một lần và với python trong thư mục python_env của nó)
 
 > [!IMPORTANT]
 **Nếu tập lệnh bị dừng và chạy lại, bạn cần làm mới giao diện GUI Gradio của mình<br>

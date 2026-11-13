@@ -211,7 +211,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 2. **公開リンクの場合**:
    `./ebook2audiobook.command --share` （ Linux/MacOS ）
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` （すべてのOS ）
+   `python app.py --share`（すべてのOS、インストール後1回のみ、python_envフォルダーのPythonを使用）
 
 > [!IMPORTANT]
 **スクリプトを停止して再実行した場合、Gradio GUIインターフェースを更新する必要があります<br>

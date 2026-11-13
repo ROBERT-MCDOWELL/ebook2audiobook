@@ -211,7 +211,7 @@ Bu yüzden önce sese dönüştürmek istemediğiniz her metni manuel olarak kal
 2. **Genel Bağlantı için**:
    `./ebook2audiobook.command --share` (Linux/MacOS)
    `ebook2audiobook.cmd --share` (Windows)
-   `python app.py --share` (tüm işletim sistemleri)
+   `python app.py --share` (tüm işletim sistemleri, yalnızca bir kez kurulmuş ve python_env klasöründeki python ile)
 
 > [!IMPORTANT]
 **Komut dosyası durdurulup tekrar çalıştırılırsa, Gradio GUI arayüzünüzü yenilemeniz gerekir<br>
