@@ -321,9 +321,17 @@ valence, arousal (-1 to 1).""")
     args = vars(parser.parse_args())
 
     if not 'help' in args:
+        args['script_mode'] = args['script_mode'] if args['script_mode'] else NATIVE
+        # launch checks first, on stdlib only: a direct "python app.py" outside python_env has none of the
+        # third-party packages (cryptography, ...) and must get the launcher message, not a ModuleNotFoundError
+        if args['script_mode'] == FULL_DOCKER and not is_running_in_container():
+            error = legends['error_full_docker_internal'].format(full=FULL_DOCKER, build=BUILD_DOCKER)
+            print(error)
+            sys.exit(1)
+        elif (not check_virtual_env(args['script_mode'])) or (not check_python_version(args['script_mode'])):
+            sys.exit(1)
         from cryptography.fernet import Fernet
         os.environ['HF_TOKEN'] = Fernet(fernet_key.encode('utf-8')).decrypt(fernet_data).decode('utf-8')
-        args['script_mode'] = args['script_mode'] if args['script_mode'] else NATIVE
         if args['script_mode'] in [NATIVE, FULL_DOCKER]:
             from lib.classes.bug_reporter import bug_reporter
             bug_reporter.install(bug_report_url, prog_version, args['script_mode'], bug_reports_dir, voices_dir, bug_report_enabled and not bug_report_env_opt_out)
@@ -331,13 +339,7 @@ valence, arousal (-1 to 1).""")
         args['ebook_mode'] = 'single'
         args['ebook_list'] = None
 
-        if args['script_mode'] == FULL_DOCKER and not is_running_in_container():
-            error = legends['error_full_docker_internal'].format(full=FULL_DOCKER, build=BUILD_DOCKER)
-            print(error)
-            sys.exit(1)
-        elif (not check_virtual_env(args['script_mode'])) or (not check_python_version(args['script_mode'])):
-            sys.exit(1)
-        elif args.get('headless', False) and args.get('share', False):
+        if args.get('headless', False) and args.get('share', False):
             error = legends['error_share_headless']
             print(error)
             sys.exit(1)
