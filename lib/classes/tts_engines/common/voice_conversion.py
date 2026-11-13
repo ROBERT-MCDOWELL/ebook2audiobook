@@ -18,7 +18,7 @@ class VoiceConversion(SubprocessPipe):
     # (AudioCpp).
     # GPU packages whose server died during a conversion, per e2a process: package -> crash count (shared by the audio.cpp
     # engines and the voice conversion, they run the same packages). One crash restarts the same package, a second one
-    # drops it until e2a restarts (next GPU package, else CPU)
+    # drops it until e2a restarts (next GPU package, none left stops the conversion)
     gpu_crashes = {}
 
     def __init__(self, session:DictProxy)->None:
@@ -43,6 +43,14 @@ class VoiceConversion(SubprocessPipe):
                 cfg = TTS_VOICE_CONVERSION[self.vc_model]
                 settings = default_engine_settings[cfg['engine']] if cfg.get('engine') else None
             self.resynthesis = cfg['task'] == 'tts'
+            if session['device'] == devices['CPU']['proc']:
+                # CPU picked by the user: the conversion goes on, but each sentence in a voice other than the engine's
+                # built-in ones also goes through the voice conversion (task "tts": spoken again by its model) on CPU
+                msg = legends['msg_vc_cpu_slow'].format(engine=session['tts_engine'], vc_model=self.vc_model)
+                if show_alert is not None:
+                    show_alert(session['id'], {'type': 'warning', 'msg': msg})
+                else:
+                    print(msg)
             # task "tts": e2a language -> the model's code (send())
             self.languages = settings['languages'] if self.resynthesis else None
             family_cfg = settings['audiocpp'] if settings else {}

@@ -569,6 +569,7 @@ legends = {
     'error_zonos2_no_gpu_package': '{engine} has no GPU package that runs on this machine ({machine}) with {device}. Select CPU as the device to run {engine} on CPU, which is much slower.',
     'msg_audiocpp_offline_package': 'Unpacking the {engine} server package {package} from the offline copy…',
     'msg_vc_model_fallback': 'Voice conversion {vc_model} cannot speak {lang}: {fallback} converts the voice instead.',
+    'msg_vc_cpu_slow': 'Using a voice other than the {engine} built-in voices on CPU: the {vc_model} voice conversion runs on every sentence, which makes the conversion much slower.',
     'msg_zonos2_old_venv': 'Removing the old Zonos v0.1 environment in {dir}, ZONOS2 does not need it…',
     'msg_zonos2_models': 'Getting the {engine} model files ({files}), the first download takes a while…',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan Torch selected',

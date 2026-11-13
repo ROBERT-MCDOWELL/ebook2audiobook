@@ -8,7 +8,8 @@ from lib.lang import legends
 
 class Zonos(TTSUtils, TTSRegistry, name='zonos'):
     # GPU packages whose server died during a conversion, per e2a process: package -> crash count. One crash restarts
-    # the same package (driver aborts can be rare), a second one drops it until e2a restarts (next GPU package, else CPU)
+    # the same package (driver aborts can be rare), a second one drops it until e2a restarts (next GPU package, none
+    # left stops the conversion)
     gpu_crashes = {}
 
     def __init__(self, session:DictProxy):
