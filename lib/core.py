@@ -150,8 +150,27 @@ class DependencyError(Exception):
 class SessionTracker:
     def __init__(self):
         self.lock = threading.Lock()
+        # session id -> number of running tasks (conversion, edit, extraction, deletion...) holding the session.
+        # Keyed by id, not by session dict: a page reload must not replace a session a task still works on
+        self.tasks:dict[str, int] = {}
         #self.blocks_autosave = AppAutosave()
         #self.blocks_autosave.start()
+
+    def begin_task(self, session_id:str)->None:
+        with self.lock:
+            self.tasks[session_id] = self.tasks.get(session_id, 0) + 1
+
+    def end_task(self, session_id:str)->None:
+        with self.lock:
+            count = self.tasks.get(session_id, 0) - 1
+            if count > 0:
+                self.tasks[session_id] = count
+            else:
+                self.tasks.pop(session_id, None)
+
+    def is_busy(self, session_id:str)->bool:
+        with self.lock:
+            return session_id in self.tasks
 
     def start_session(self, session_id:str)->bool:
         with self.lock:
@@ -1369,6 +1388,8 @@ def get_cover(epubBook:EpubBook, session_id:str)->bool|str:
         session = context.get_session(session_id)
         if session and session.get('id', False):
             if session['cancellation_requested']:
+                return False
+            if not session['process_dir'] or not session['filename_noext']:
                 return False
             cover_image = None
             cover_path = os.path.join(session['process_dir'], session['filename_noext'] + '.jpg')
@@ -5064,7 +5085,8 @@ def on_unload(req:gr.Request)->None:
         session_id = context.find_id_by_hash(socket_hash)
         if session_id:
             session = context.get_session(session_id)
-            if session['status'] == status_tags['CONVERTING']:
+            # a running task (CONVERTING, or EDIT while a blocks preview is prepared) is cancelled, not ended under it
+            if session['status'] == status_tags['CONVERTING'] or context_tracker.is_busy(session_id):
                 session['cancellation_requested'] = True
                 session['status'] = status_tags['DISCONNECTED']
                 session['socket_hash'] = socket_hash

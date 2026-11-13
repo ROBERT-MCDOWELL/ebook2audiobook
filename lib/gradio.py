@@ -682,17 +682,26 @@ def build_interface(args:dict)->gr.Blocks:
                     return legends['error_session_switch_pending']
                 return legends[legend_key]
 
+            def _take_lock(session_id:str)->None:
+                # start of a task: the status is the lock, and the tracker keeps a page reload from replacing the session
+                session = context.get_session(session_id)
+                session['status'] = status_tags['CONVERTING']
+                context_tracker.begin_task(session_id)
+
             def _release_lock(session_id:str)->bool:
                 # end of a task: back to READY, or end the session if its tab was closed meanwhile
-                # (on_unload() only flags a CONVERTING session, the task is the one to end it)
-                session = context.get_session(session_id)
-                if session and session.get('id', False):
-                    if session['status'] == status_tags['DISCONNECTED']:
-                        context_tracker.end_session(session_id, session['socket_hash'])
-                        return False
-                    session['status'] = status_tags['READY']
-                    return True
-                return False
+                # (on_unload() only flags a CONVERTING or busy session, the task is the one to end it)
+                try:
+                    session = context.get_session(session_id)
+                    if session and session.get('id', False):
+                        if session['status'] == status_tags['DISCONNECTED']:
+                            context_tracker.end_session(session_id, session['socket_hash'])
+                            return False
+                        session['status'] = status_tags['READY']
+                        return True
+                    return False
+                finally:
+                    context_tracker.end_task(session_id)
 
             def _disable_components(session_id:str, exceptions:list|None=None)->tuple:
                 if session_id is None:
@@ -1546,7 +1555,7 @@ def build_interface(args:dict)->gr.Blocks:
                                 voice_name = get_sanitized(voice_name)
                                 final_voice_file = os.path.join(session['voice_dir'], f'{voice_name}.wav')
                                 # the voice conversion holds the lock: no ebook conversion, edit or deletion meanwhile
-                                session['status'] = status_tags['CONVERTING']
+                                _take_lock(session_id)
                                 try:
                                     extractor = VoiceExtractor(session, f, voice_name)
                                     status, msg = extractor.extract_voice()
@@ -1930,7 +1939,7 @@ def build_interface(args:dict)->gr.Blocks:
                             channels = 1 if int(interlude_info.get('channels') or 2) == 1 else 2
                             from lib.classes.interlude_generator import InterludeGenerator
                             generator = None
-                            session['status'] = status_tags['CONVERTING']
+                            _take_lock(session_id)
                             session['cancellation_requested'] = False
                             try:
                                 msg = legends['msg_generating_interlude'].format(prompt=prompt)
@@ -2002,7 +2011,7 @@ def build_interface(args:dict)->gr.Blocks:
                             session['tts_engine'] = block.get('tts_engine') or session['tts_engine']
                             session['fine_tuned'] = block.get('fine_tuned') or session['fine_tuned']
                             session['model_cache'] = f"{session['tts_engine']}-{session['fine_tuned']}"
-                            session['status'] = status_tags['CONVERTING']
+                            _take_lock(session_id)
                             session['cancellation_requested'] = False
                             tts_manager = None
                             converted = False
@@ -2125,7 +2134,7 @@ def build_interface(args:dict)->gr.Blocks:
                             sentence_file = os.path.join(session['sentences_dir'], block_id, f'{sentence_idx}.{default_audio_proc_format}')
                             backup_file = f'{sentence_file}.bak'
                             chapter_file = os.path.join(session['chapters_dir'], f'{block_id}.{default_audio_proc_format}')
-                            session['status'] = status_tags['CONVERTING']
+                            _take_lock(session_id)
                             session['cancellation_requested'] = False
                             try:
                                 msg = legends['msg_replacing_sentence'].format(sentence=sentence_idx, block=block_id)
@@ -2337,7 +2346,7 @@ def build_interface(args:dict)->gr.Blocks:
                                 else:
                                     interludes_dir = os.path.join(session['chapters_dir'], 'interludes')
                                     session['interlude_enabled'] = os.path.isdir(interludes_dir) and any(f.endswith(f'.{default_audio_proc_format}') and not f.startswith('__') for f in os.listdir(interludes_dir))
-                                session['status'] = status_tags['CONVERTING']
+                                _take_lock(session_id)
                                 session['cancellation_requested'] = False
                                 exported_files = None
                                 try:
@@ -2388,6 +2397,7 @@ def build_interface(args:dict)->gr.Blocks:
                 return gr.update(interactive=True), gr.update(interactive=True), gr.update(interactive=True), gr.update(interactive=True), convert_update
 
             def _click_gr_deletion(session_id:str, voice_path:str, custom_model:str, audiobook:str, method:str|None=None)->tuple:
+                deleting = False
                 try:
                     nonlocal models, voice_options
                     if method is None:
@@ -2400,6 +2410,8 @@ def build_interface(args:dict)->gr.Blocks:
                         if session and session.get('id', False):
                             if session['status'] == status_tags['DELETION']:
                                 session['status'] = status_tags['READY']
+                                context_tracker.begin_task(session_id)
+                                deleting = True
                                 models = load_engine_presets(session['tts_engine'])
                                 if method == 'confirm_voice_del':
                                     selected_name = Path(voice_path).stem
@@ -2470,6 +2482,9 @@ def build_interface(args:dict)->gr.Blocks:
                 except Exception as e:
                     error = f'_click_gr_deletion(): {e}!'
                     exception_alert(session_id, error)
+                finally:
+                    if deleting:
+                        context_tracker.end_task(session_id)
                 return  gr.update(value='', visible=False), gr.update(), gr.update(), gr.update()
 
             def _update_gr_voice_list(session_id:str)->dict:
@@ -2805,7 +2820,7 @@ def build_interface(args:dict)->gr.Blocks:
                                 if analyze_uploaded_file(custom_file, models['internal']['files'], default_engine_settings[tts_engine].get('files_sharded')):
                                     session['custom_model'] = custom_file
                                     # the custom model extraction holds the lock: no ebook conversion, edit or deletion meanwhile
-                                    session['status'] = status_tags['CONVERTING']
+                                    _take_lock(session_id)
                                     try:
                                         model = extract_custom_model(session_id)
                                     finally:
@@ -2945,6 +2960,11 @@ def build_interface(args:dict)->gr.Blocks:
                                 show_alert(back_id, {"type": "warning", "msg": msg})
                                 return gr.update(), gr.update(), backup_session_id, gr.update(), None, None
                             new_session_id = new_id.strip()
+                            if new_session_id != back_id and context_tracker.is_busy(new_session_id):
+                                # its status is the lock of the task running on it: neither reset it nor load it now
+                                error = legends['error_session_task_running']
+                                show_alert(back_id, {"type": "warning", "msg": error})
+                                return gr.update(), gr.update(), backup_session_id, gr.update(), None, None
                             session['status'] = status_tags['READY']
                             if new_session_id == back_id:
                                 return gr.update(), gr.update(interactive=False), back_id, gr.update(value='🔒︎'), None, back_id
@@ -3051,6 +3071,8 @@ def build_interface(args:dict)->gr.Blocks:
                     translate_enabled:bool, translate_target:str|None
                 )->tuple:
                 error = None
+                # the whole conversion holds the session: a page reload waits for it instead of replacing the session
+                context_tracker.begin_task(session_id)
                 try:
                     session = context.get_session(session_id)
                     reset_ebook_session(session_id, force=True, filter_keys=False)
@@ -3227,6 +3249,8 @@ def build_interface(args:dict)->gr.Blocks:
                     error = f'_start_conversion(): {e}'
                     exception_alert(session_id, error)
                     return gr.update(value=error)
+                finally:
+                    context_tracker.end_task(session_id)
 
             def _update_gr_audiobook_list(session_id:str)->dict:
                 try:
@@ -3562,6 +3586,11 @@ def build_interface(args:dict)->gr.Blocks:
                 try:
                     nonlocal models
                     msg = legends['msg_session_load_error']
+                    # a task still holds this session (reload during a conversion, second tab...): set_session() below
+                    # would replace it under the task, so wait until the task has ended
+                    if data.get('id', False) and context_tracker.is_busy(data.get('id')):
+                        error = legends['error_session_task_running']
+                        return gr.update(), gr.update(), gr.update(value=''), _update_gr_glassmask(str=error)
                     if not data.get('id', False):
                         session = context.set_session(str(uuid.uuid4()))
                     else:
