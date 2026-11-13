@@ -1,5 +1,5 @@
 import os, re
-from lib.conf import tts_dir, voices_dir
+from lib.conf import tts_dir, voices_dir, devices
 
 loaded_tts = {}
 xtts_builtin_speakers_list = {}
@@ -192,10 +192,15 @@ audiocpp_repo = "audio-cpp/audio.cpp-gguf"
 max_custom_model = 100
 max_custom_voices = 1000
 
+# devices each engine runs on ("devices" below): gradio's device list offers the ones found on this machine, convert_ebook()
+# stops on any other. torch engines: every torch device, no Vulkan (torch has no Vulkan device). Native builds (zonos,
+# audio.cpp): Vulkan too, their ROCm / XPU sessions run the Vulkan packages and MPS the Metal ones
+torch_devices = [devices['CPU']['proc'], devices['CUDA']['proc'], devices['ROCM']['proc'], devices['XPU']['proc'], devices['MPS']['proc'], devices['JETSON']['proc']]
+native_devices = torch_devices + [devices['VULKAN']['proc']]
+
 default_engine_settings = {
     TTS_ENGINES['ZONOS']: {
         "version": "0.5.2",
-        "vulkan": True,
         "packages": {
             "linux-x64-cuda13": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-linux-x64-cuda13.tar.gz", "gpu": True},
             "linux-x64-cuda12": {"url": "https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/zonos2/zonos2-server-linux-x64-cuda12.tar.gz", "gpu": True},
@@ -245,6 +250,7 @@ default_engine_settings = {
         "files": [],
         "voice": default_speaker,
         "voices": {},
+        "devices": native_devices,
         "rating": {"VRAM": 6, "CPU": 3, "RAM": 8, "Realism": 5}
     },
     TTS_ENGINES['GPTSOVITS']: {
@@ -287,6 +293,7 @@ default_engine_settings = {
         "files": [],
         "voice": default_speaker,
         "voices": {},
+        "devices": torch_devices,
         "rating": {"VRAM": 4, "CPU": 2, "RAM": 8, "Realism": 4}
     },
     TTS_ENGINES['OMNIVOICE']: {
@@ -320,6 +327,7 @@ default_engine_settings = {
         "files": ["config.json", "model.safetensors", "tokenizer.json", "tokenizer_config.json", "ref.wav"],
         "voice": default_speaker,
         "voices": {},
+        "devices": torch_devices,
         "rating": {"VRAM": 4, "CPU": 3, "RAM": 8, "Realism": 5}
     },
     TTS_ENGINES['F5TTS']: {
@@ -372,6 +380,7 @@ default_engine_settings = {
         "files": ["config.json", "model.safetensors", "vocab.txt", "ref.wav"],
         "voice": default_speaker,
         "voices": {},
+        "devices": torch_devices,
         "rating": {"VRAM": 3, "CPU": 1, "RAM": 4, "Realism": 4}
     },
     TTS_ENGINES['ORPHEUS']: {
@@ -422,6 +431,7 @@ default_engine_settings = {
         "voice": None,
         "voices": {},
         # 3.3B params: bf16 / fp16 on GPU, fp32 on CPU (~40x slower than real time there)
+        "devices": torch_devices,
         "rating": {"VRAM": 7, "CPU": 1, "RAM": 14, "Realism": 5}
     },
     TTS_ENGINES['SPARKTTS']: {
@@ -468,6 +478,7 @@ default_engine_settings = {
         "voice": default_speaker,
         "voices": {},
         # 0.5B LLM (bf16 from sm 8.0, fp32 below) + BiCodec + wav2vec2-large (fp32)
+        "devices": torch_devices,
         "rating": {"VRAM": 3, "CPU": 2, "RAM": 6, "Realism": 4}
     },
     TTS_ENGINES['CHATTTS']: {
@@ -518,6 +529,7 @@ default_engine_settings = {
         "voice": default_speaker,
         "voices": {},
         # 0.2B GPT + DVAE, decoder and Vocos (0.3B in all), all fp32: upstream asks 4 GB VRAM for 30 s of audio
+        "devices": torch_devices,
         "rating": {"VRAM": 4, "CPU": 2, "RAM": 4, "Realism": 4}
     },
     TTS_ENGINES['OPENVOICE']: {
@@ -574,6 +586,7 @@ default_engine_settings = {
         "voice": None,
         "voices": {},
         # MeloTTS (~52M params) + its language's BERT + the converter (~33M): real time on CPU
+        "devices": torch_devices,
         "rating": {"VRAM": 2, "CPU": 4, "RAM": 4, "Realism": 4}
     },
     TTS_ENGINES['MELOTTS']: {
@@ -621,6 +634,7 @@ default_engine_settings = {
         "voice": None,
         "voices": {},
         # MeloTTS (~52M params) + its language's BERT (base size): faster than real time on CPU
+        "devices": torch_devices,
         "rating": {"VRAM": 1, "CPU": 4, "RAM": 2, "Realism": 4}
     },
     TTS_ENGINES['CSM']: {
@@ -678,6 +692,7 @@ default_engine_settings = {
         "voice": default_speaker,
         "voices": {},
         # 1B backbone + 0.1B depth decoder (bf16 from sm 8.0, fp16 below, fp32 on Pascal / GTX 16xx and cpu) + Mimi (fp32)
+        "devices": torch_devices,
         "rating": {"VRAM": 4, "CPU": 1, "RAM": 8, "Realism": 4}
     },
     TTS_ENGINES['PHONON']: {
@@ -702,6 +717,8 @@ default_engine_settings = {
         "voice": None,
         "voices": {},
         # 31M / 40M params, q8 weights ~65-75 MB, faster than real time on one CPU core
+        # ptts' PyPI wheels build no GPU backend
+        "devices": [devices['CPU']['proc']],
         "rating": {"VRAM": 1, "CPU": 5, "RAM": 1, "Realism": 4}
     },
     TTS_ENGINES['XTTS']: {
@@ -744,6 +761,7 @@ default_engine_settings = {
             "FerranSimen": "Ferran Simen", "XavierHayasaka": "Xavier Hayasaka", "LuisMoray": "Luis Moray",
             "MarcosRudaski": "Marcos Rudaski"
         },
+        "devices": torch_devices,
         "rating": {"VRAM": 4, "CPU": 2, "RAM": 4, "Realism": 5}
     },
     TTS_ENGINES['BARK']: {
@@ -800,6 +818,7 @@ default_engine_settings = {
             "zh_speaker_6": "Speaker 6", "zh_speaker_7": "Speaker 7", "zh_speaker_8": "Speaker 8",
             "zh_speaker_9": "Speaker 9"
         },
+        "devices": torch_devices,
         "rating": {"VRAM": 6, "CPU": 1, "RAM": 6, "Realism": 4}
     },
     TTS_ENGINES['TORTOISE']: {
@@ -808,6 +827,7 @@ default_engine_settings = {
         "files": [],
         "voice": default_speaker,
         "voices": {},
+        "devices": torch_devices,
         "rating": {"VRAM": 6, "CPU": 2, "RAM": 6, "Realism": 4}
     },
     TTS_ENGINES['PIPER']: {
@@ -874,6 +894,8 @@ default_engine_settings = {
             "vi_VN-vais1000-medium":            "Vais",
             "zh_CN-huayan-medium":              "Huayan"
         },
+        # onnxruntime-gpu is its only GPU path: the CUDA build (x86_64 / win_amd64 wheels), no ROCm, OpenVINO nor Jetson one
+        "devices": [devices['CPU']['proc'], devices['CUDA']['proc']],
         "rating": {"VRAM": 1, "CPU": 5, "RAM": 2, "Realism": 4}
     },
     TTS_ENGINES['VITS']: {
@@ -882,6 +904,7 @@ default_engine_settings = {
         "files": ['config.json', 'best_model.pth', 'ref.wav'],
         "voice": None,
         "voices": {},
+        "devices": torch_devices,
         "rating": {"VRAM": 2, "CPU": 4, "RAM": 4, "Realism": 4}
     },
     TTS_ENGINES['FAIRSEQ']: {
@@ -891,6 +914,7 @@ default_engine_settings = {
         "files": ['config.json', 'G_100000.pth', 'vocab.txt', 'ref.wav'],
         "voice": None,
         "voices": {},
+        "devices": torch_devices,
         "rating": {"VRAM": 2, "CPU": 4, "RAM": 4, "Realism": 4}
     },
     TTS_ENGINES['GLOWTTS']: {
@@ -899,6 +923,7 @@ default_engine_settings = {
         "files": [],
         "voice": None,
         "voices": {},
+        "devices": torch_devices,
         "rating": {"VRAM": 1, "CPU": 4, "RAM": 2, "Realism": 3}
     },
     TTS_ENGINES['TACOTRON']: {
@@ -907,6 +932,7 @@ default_engine_settings = {
         "files": [],
         "voice": None,
         "voices": {},
+        "devices": torch_devices,
         "rating": {"VRAM": 1, "CPU": 5, "RAM": 2, "Realism": 3}
     },
     TTS_ENGINES['YOURTTS']: {
@@ -915,6 +941,7 @@ default_engine_settings = {
         "files": [],
         "voice": None,
         "voices": {"Machinella-5": "female-en-5", "ElectroMale-2": "male-en-2", 'Machinella-4': 'female-pt-4\n', 'ElectroMale-3': 'male-pt-3\n'},
+        "devices": torch_devices,
         "rating": {"VRAM": 1, "CPU": 5, "RAM": 1, "Realism": 2}
     }
 }
@@ -974,7 +1001,7 @@ for _acpp_engine, _acpp_cfg in audiocpp_families.items():
     _acpp_cfg = {"language_option": False, "voice_ids": {}, "ref_text": None, "ref_fallback": {}, "ref_min": 3.2, "ref_max": 10.0, "load": {}, "session": {}, "request": {}, "load_by_language": {}, "speaker_label": False, "espeak": False, **_acpp_cfg}
     audiocpp_families[_acpp_engine] = _acpp_cfg
     default_engine_settings[_acpp_engine] = {
-        "vulkan": True,
+        "devices": native_devices,
         "audiocpp": _acpp_cfg,
         "languages": _acpp_cfg['languages'],
         "samplerate": _acpp_cfg['samplerate'],

@@ -82,7 +82,7 @@ def build_interface(args:dict)->gr.Blocks:
                                         gr_voice_del_btn = gr.Button('🗑', elem_id='gr_voice_del_btn', elem_classes=['small-btn-red'], variant='secondary', interactive=True, visible=False, scale=0, min_width=60)
                                 with gr.Group(elem_id='gr_group_device', elem_classes=['gr-group']):
                                     gr_device_markdown = gr.Markdown(elem_id='gr_device_markdown', elem_classes=['gr-markdown'], value=legends['gr_device_markdown'])
-                                    gr_device = gr.Dropdown(label='', elem_id='gr_device', choices=[(k, v['proc']) for k, v in devices.items()], type='value', value=default_device, interactive=True)
+                                    gr_device = gr.Dropdown(label='', elem_id='gr_device', choices=get_compatible_devices(default_tts_engine), type='value', value=default_device, interactive=True)
                             with gr.Column(elem_id='gr_col_2', elem_classes=['gr-col'], scale=3):
                                 with gr.Group(elem_id='gr_group_tts_engine', elem_classes=['gr-group']):
                                     gr_tts_rating = gr.Markdown(elem_id='gr_tts_rating', elem_classes=['gr-markdown'], value=legends['gr_tts_rating'])
@@ -1015,6 +1015,9 @@ def build_interface(args:dict)->gr.Blocks:
                             except Exception:
                                 session['translate_iso1'] = None
                         translate_visible = translate_enabled_state and bool(translate_options)
+                        # the engine list first: it may change the engine, and the device list follows the engine
+                        tts_engine_update = _update_gr_tts_engine_list(session_id)
+                        device_update = _update_gr_device_list(session_id)
                         return (
                             gr.update(visible=visible_xtts),
                             gr.update(visible=visible_bark),
@@ -1029,12 +1032,12 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(value=session['ebook_mode']),
                             gr.update(value=bool(session['blocks_preview'])),
                             gr.update(value=bool(session.get('interlude_enabled', False))),
-                            gr.update(value=session['device']),
+                            device_update,
                             gr.update(value=session['language']),
                             gr.update(value=translate_enabled_state),
                             gr.update(visible=translate_visible, choices=translate_options, value=translate),
                             _update_gr_voice_list(session_id),
-                            _update_gr_tts_engine_list(session_id),
+                            tts_engine_update,
                             gr.update(value=_show_rating(session['tts_engine'])),
                             _update_gr_custom_model_list(session_id),
                             gr.update(value=session['output_format']),
@@ -1305,7 +1308,7 @@ def build_interface(args:dict)->gr.Blocks:
                                 gr.update(value='', visible=False), gr.update(visible=visible_main),
                                 gr.update(visible=visible_xtts), gr.update(visible=visible_bark), gr.update(visible=visible_zonos), gr.update(visible=visible_gptsovits), gr.update(visible=visible_orpheus), gr.update(visible=visible_sparktts), gr.update(visible=visible_chattts), gr.update(visible=visible_csm), gr.update(visible=visible_abs),
                                 gr.update(interactive=enabled_convert_btn), gr.update(visible=visible_ebook_src, value=ebook_data), gr.update(visible=visible_ebook_textarea, value=ebook_textarea),
-                                gr.update(value=session['device']), gr.update(value=session['audiobook']), _update_gr_audiobook_list(session_id),
+                                _update_gr_device_list(session_id), gr.update(value=session['audiobook']), _update_gr_audiobook_list(session_id),
                                 _update_gr_voice_list(session_id), gr.update(''), gr.update(value='')
                             )
                         elif session['status'] in [status_tags['CONVERTING']]:
@@ -2655,6 +2658,23 @@ def build_interface(args:dict)->gr.Blocks:
                     exception_alert(session_id, error)              
                 return gr.update()
 
+            def _update_gr_device_list(session_id:str)->dict:
+                try:
+                    session = context.get_session(session_id)
+                    if session and session.get('id', False):
+                        # the selected engine's devices this machine has (default_engine_settings "devices"). A device
+                        # the engine cannot run on goes back to default_device, in the dropdown, before any conversion
+                        device_options = get_compatible_devices(session['tts_engine'])
+                        if session['device'] not in [device for _, device in device_options]:
+                            msg = legends['msg_device_reset'].format(engine=session['tts_engine'], device=str(session['device']).upper(), default=default_device.upper())
+                            session['device'] = default_device
+                            show_alert(session_id, {'type': 'warning', 'msg': msg})
+                        return gr.update(choices=device_options, value=session['device'])
+                except Exception as e:
+                    error = f'_update_gr_device_list(): {e}!'
+                    exception_alert(session_id, error)
+                return gr.update()
+
             def _update_gr_custom_model_list(session_id:str)->dict:
                 try:
                     nonlocal models
@@ -2873,12 +2893,14 @@ def build_interface(args:dict)->gr.Blocks:
                                 gr.update(visible=visible_csm),
                                 gr.update(visible=visible_custom_model),
                                 gr.update(label=file_label),
-                                _update_gr_custom_model_list(session_id)
+                                _update_gr_custom_model_list(session_id),
+                                _update_gr_device_list(session_id)
                             )
                 except Exception as e:
                     error = f'_change_gr_tts_engine_list(): {e}'
                     exception_alert(session_id, error)
-                return tuple(gr.update() for _ in range(12))
+                # the engine may already be the session's (a language change switched it): the device list follows anyway
+                return tuple(gr.update() for _ in range(12)) + (_update_gr_device_list(session_id),)
 
             def _change_gr_output_format_list(session_id:str, val:str)->None:
                 session = context.get_session(session_id)
@@ -4025,7 +4047,7 @@ def build_interface(args:dict)->gr.Blocks:
             ).then(
                 fn=_change_gr_tts_engine_list,
                 inputs=[gr_session, gr_tts_engine_list],
-                outputs=[gr_tts_rating, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_orpheus_params, gr_tab_sparktts_params, gr_tab_chattts_params, gr_tab_csm_params, gr_group_custom_model, gr_custom_model_file, gr_custom_model_list],
+                outputs=[gr_tts_rating, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_orpheus_params, gr_tab_sparktts_params, gr_tab_chattts_params, gr_tab_csm_params, gr_group_custom_model, gr_custom_model_file, gr_custom_model_list, gr_device],
                 show_progress_on=[gr_progress]
             ).then(
                 fn=_update_gr_voice_list,
@@ -4036,7 +4058,7 @@ def build_interface(args:dict)->gr.Blocks:
             gr_tts_engine_list.change(
                 fn=_change_gr_tts_engine_list,
                 inputs=[gr_session, gr_tts_engine_list],
-                outputs=[gr_tts_rating, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_orpheus_params, gr_tab_sparktts_params, gr_tab_chattts_params, gr_tab_csm_params, gr_group_custom_model, gr_custom_model_file, gr_custom_model_list],
+                outputs=[gr_tts_rating, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_orpheus_params, gr_tab_sparktts_params, gr_tab_chattts_params, gr_tab_csm_params, gr_group_custom_model, gr_custom_model_file, gr_custom_model_list, gr_device],
                 show_progress_on=[gr_progress]
             ).then(
                 fn=_update_gr_voice_list,

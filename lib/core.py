@@ -4345,6 +4345,15 @@ def get_compatible_tts_engines(language:str)->list[str]:
         if language in cfg.get('languages', {})
     ]
 
+def get_compatible_devices(tts_engine:str)->list[tuple]:
+    # the devices the engine runs on that this machine has, in the devices order, as (label, proc) dropdown choices
+    engine_devices = default_engine_settings[tts_engine]['devices']
+    return [
+        (name, device['proc'])
+        for name, device in devices.items()
+        if device['found'] and device['proc'] in engine_devices
+    ]
+
 def translate_blocks(session_id:str, raw_blocks:list)->tuple:
     progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
     try:
@@ -4641,9 +4650,13 @@ def convert_ebook(args:dict)->tuple:
                     msg_extra = ''
                     # the conversion runs on the device the user selected or not at all: when the installed Torch, the
                     # system or the TTS engine cannot run on it, it stops here with an error instead of switching to
-                    # CPU (or another GPU) behind the user's back
+                    # CPU (or another GPU) behind the user's back. The engine's own devices first (default_engine_settings
+                    # "devices", the same list gradio's device dropdown offers), then the machine
                     device_error = None
-                    if session['device'] == devices['CUDA']['proc']:
+                    engine_devices = default_engine_settings[session['tts_engine']]['devices']
+                    if session['device'] not in engine_devices:
+                        device_error = legends['error_device_engine'].format(engine=session['tts_engine'], device=session['device'].upper(), devices=', '.join(d.upper() for d in engine_devices))
+                    elif session['device'] == devices['CUDA']['proc']:
                         if not devices['CUDA']['found']:
                             device_error = legends['error_device_not_supported'].format(device='CUDA', wiki=default_gpu_wiki)
                     elif session['device'] == devices['JETSON']['proc']:
@@ -4675,14 +4688,10 @@ def convert_ebook(args:dict)->tuple:
                         if xpu_error is not None:
                             device_error = legends['error_device_unavailable'].format(error=xpu_error, wiki=default_gpu_wiki)
                     elif session['device'] == devices['VULKAN']['proc']:
-                        # torch has no Vulkan device: an engine that cannot run on it stops the conversion. Engines
-                        # that can (native GPU builds) still need the system Vulkan loader, e2a installs no system
-                        # library. macOS has none: its packages run Metal (arm64) or bring MoltenVK (x86_64), so no
-                        # loader check there
-                        vulkan_engines = [k for k, v in default_engine_settings.items() if v.get('vulkan')]
-                        if session['tts_engine'] not in vulkan_engines:
-                            device_error = legends['error_vulkan_engine'].format(engine=session['tts_engine'], engines=', '.join(vulkan_engines))
-                        elif sys.platform == systems['MACOS']:
+                        # the engines running on Vulkan (native GPU builds) still need the system Vulkan loader, e2a
+                        # installs no system library. macOS has none: its packages run Metal (arm64) or bring MoltenVK
+                        # (x86_64), so no loader check there
+                        if sys.platform == systems['MACOS']:
                             devices['VULKAN']['found'] = True
                         else:
                             import ctypes

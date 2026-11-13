@@ -69,8 +69,8 @@ devices = {
     "XPU": {"proc": "xpu", "found": False},
     "JETSON": {"proc": "jetson", "found": False},
     # Vulkan: torch is installed from the +vulkan wheels (py-pkg) when no CUDA/ROCm/XPU/Jetson torch applies, ahead of
-    # MPS (they keep MPS on Apple Silicon). At run time only engines with "vulkan": True in default_engine_settings
-    # (native GPU builds) run on it, the others stop the conversion with an error (lib/core.py)
+    # MPS (they keep MPS on Apple Silicon). At run time only engines listing it in their default_engine_settings
+    # "devices" (native GPU builds) run on it: gradio offers it to them only, lib/core.py stops the others
     "VULKAN": {"proc": "vulkan", "found": False}
 }
 # the system Vulkan loader, the one the GPU driver installs. Windows takes it by absolute path: a bare 'vulkan-1.dll'

@@ -60,11 +60,8 @@ class Phonon(TTSUtils, TTSRegistry, name='phonon'):
             self.model_dir = os.path.join(self.cache_dir, tts_engine, self.checkpoint['repo'].replace('/', '--'))
             self.voices_dir = os.path.join(self.cache_dir, tts_engine, settings['voices_repo'].replace('/', '--'))
             self.xtts_speakers = self._load_xtts_builtin_list()
-            # ptts' PyPI wheels build no GPU backend: Phonon runs on CPU (and the voice conversion too, as for every engine)
+            # ptts' PyPI wheels build no GPU backend: CPU is Phonon's only device (default_engine_settings "devices")
             self.device = devices['CUDA']['proc'] if self.session['device'] in [devices['CUDA']['proc'], devices['ROCM']['proc'], devices['JETSON']['proc']] else self.session['device']
-            if self.device != devices['CPU']['proc']:
-                msg = legends['msg_phonon_cpu'].format(engine=tts_engine, device=self.device)
-                print(msg)
             # Linux / Windows x86_64 wheels are x86-64-v3: importing ptts without AVX2 / FMA / F16C kills the whole
             # process (SIGILL, no python exception), so the flags are checked before the import. macOS x86_64 has no floor
             machine = platform.machine().lower()
