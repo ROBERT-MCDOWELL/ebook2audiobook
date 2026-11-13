@@ -56,6 +56,14 @@ def check_virtual_env(script_mode:str)->bool:
 ***********'''
             print(error)
             return False
+        # the launcher writes .provisioned once python_env is fully installed: before that, app.py cannot run on its own
+        if not os.path.isfile(os.path.join(sys.prefix, '.provisioned')):
+            error=f'''***********
+{legends['error_launcher_required']}
+{install_info}
+***********'''
+            print(error)
+            return False
         uv_bin = shutil.which('uv')
         if not uv_bin:
             uv_candidates = [os.path.expanduser('~/.local/bin/uv'), os.path.expanduser('~/.cargo/bin/uv')]
@@ -73,7 +81,13 @@ def check_virtual_env(script_mode:str)->bool:
             return False
         return True
     if script_mode == NATIVE:
-        return True
+        # app.py started directly with a python outside python_env: e2a is not installed, or not run with its own python
+        error=f'''***********
+{legends['error_launcher_required']}
+{install_info}
+***********'''
+        print(error)
+        return False
     if current_version >= min_python_version and current_version <= max_python_version:
         return True
     error=f'''***********
