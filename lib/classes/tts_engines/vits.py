@@ -224,7 +224,10 @@ class Vits(TTSUtils, TTSRegistry, name='vits'):
                                 if os.path.exists(tmp_out_wav):
                                     os.remove(tmp_out_wav)
                                 if not reply.get('ok'):
-                                    # no retry: core.py unloads the engine, which stops the VC worker
+                                    # no retry: core.py unloads the engine, which stops the VC worker. A GPU server that died counts
+                                    # against its package (dropped on the second death, next GPU package, CPU last)
+                                    if reply.get('server_exited') and self.engine_zs.backend != 'cpu':
+                                        self.engine_zs.gpu_crashes[self.engine_zs.package_name] = self.engine_zs.gpu_crashes.get(self.engine_zs.package_name, 0) + 1
                                     if os.path.exists(vc_wav):
                                         os.remove(vc_wav)
                                     error = f"convert() error: {reply.get('error')} segment: {part}"

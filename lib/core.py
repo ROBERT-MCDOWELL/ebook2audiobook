@@ -4354,6 +4354,12 @@ def get_compatible_devices(tts_engine:str)->list[tuple]:
         if device['found'] and device['proc'] in engine_devices
     ]
 
+def get_best_device(tts_engine:str)->str:
+    # the device gradio falls back on when the selected one is not offered for tts_engine: its first GPU found on this
+    # machine (devices order: the native backends before Vulkan), else default_device
+    gpus = [device for _, device in get_compatible_devices(tts_engine) if device != devices['CPU']['proc']]
+    return gpus[0] if gpus else default_device
+
 def translate_blocks(session_id:str, raw_blocks:list)->tuple:
     progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
     try:
@@ -5235,10 +5241,15 @@ def cleanup_models_cache()->None:
         error = f"cleanup_models_cache() error: {e}"
         print(error)
 
+def alert_text(msg:str)->str:
+    # terminal form of an alert written for the GUI (headless mode, logs): <br/> as new lines, <a href="url">text</a>
+    # as "text (url)"
+    return re.sub(r'<a\s+href="([^"]*)"[^>]*>(.*?)</a>', r'\2 (\1)', msg).replace('<br/>', '\n')
+
 def show_alert(session_id:str|None, state:dict|None)->None:
     if state is not None:
         if state.get('msg'):
-            print(state['msg'].replace('<br/>', '\n'))
+            print(alert_text(state['msg']))
             if session_id is not None:
                 session = context.get_session(session_id)
                 if session.get('is_gui_process'):
@@ -5255,8 +5266,8 @@ def show_alert(session_id:str|None, state:dict|None)->None:
 
 def exception_alert(session_id:str|None, error:str|None)->None:
     if error is not None:
-        print(error.replace('<br/>', '\n'))
-        bug_reporter.report(error.replace('<br/>', '\n'), context.get_session(session_id) if session_id is not None and context is not None else None)
+        print(alert_text(error))
+        bug_reporter.report(alert_text(error), context.get_session(session_id) if session_id is not None and context is not None else None)
         if session_id is not None:
             session = context.get_session(session_id)
             if session and session.get('id', False):

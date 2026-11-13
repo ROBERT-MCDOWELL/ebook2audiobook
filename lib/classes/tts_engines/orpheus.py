@@ -496,7 +496,10 @@ class Orpheus(TTSUtils, TTSRegistry, name='orpheus'):
                                 'language': self.language
                             })
                             if not reply.get('ok'):
-                                # no retry: core.py unloads the engine, which stops the VC worker
+                                # no retry: core.py unloads the engine, which stops the VC worker. A GPU server that died counts
+                                # against its package (dropped on the second death, next GPU package, CPU last)
+                                if reply.get('server_exited') and self.engine_zs.backend != 'cpu':
+                                    self.engine_zs.gpu_crashes[self.engine_zs.package_name] = self.engine_zs.gpu_crashes.get(self.engine_zs.package_name, 0) + 1
                                 if os.path.exists(vc_file):
                                     os.unlink(vc_file)
                                 error = f"convert() error: {reply.get('error')} segment: {part}"

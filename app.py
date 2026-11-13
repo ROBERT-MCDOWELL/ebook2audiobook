@@ -250,7 +250,9 @@ Each entry overrides --voice for that specific ebook. Missing/null entries fall 
 Keys may be absolute paths or basenames. Example:
 {"book1.epub": "/voices/eng/adult/female/alice.wav", "/abs/path/book2.epub": null}''')
     headless_optional_group.add_argument(cli_options[12], type=str, default=default_device, choices=list(devices.keys())+[k.lower() for k in devices.keys()], help=f'''Processor unit type for the conversion.
-Default is set in ./lib/conf.py if not present. Fall back to CPU if CUDA or MPS is not available.''')
+Default is set in ./lib/conf.py if not present. The conversion stops if this machine does not have the device
+or the TTS engine cannot run on it (no fall back to CPU). With a voice other than the engine's built-in ones, its
+voice conversion takes the next GPU (Vulkan included) or CPU when it cannot run on the device, and goes on.''')
     headless_optional_group.add_argument(cli_options[13], type=str, default=TTS_ENGINES['XTTS'], choices=tts_engine_list_keys+tts_engine_list_values, help=f'''Preferred TTS engine (available are: {tts_engine_list_keys+tts_engine_list_values}.
 Default depends on the selected language. The tts engine should be compatible with the chosen language''')
     headless_optional_group.add_argument(cli_options[14], type=str, default=None, help='Path to the custom model zip file containing mandatory model files. Please refer to ./lib/models.py')
@@ -616,7 +618,7 @@ valence, arousal (-1 to 1).""")
             else:
                 error = legends['error_gui_options']
         if error:
-            print(error)
+            print(c.alert_text(error))
             sys.exit(1)
 
 if __name__ == '__main__':

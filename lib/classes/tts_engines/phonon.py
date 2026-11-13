@@ -62,6 +62,9 @@ class Phonon(TTSUtils, TTSRegistry, name='phonon'):
             self.xtts_speakers = self._load_xtts_builtin_list()
             # ptts' PyPI wheels build no GPU backend: CPU is Phonon's only device (default_engine_settings "devices")
             self.device = devices['CUDA']['proc'] if self.session['device'] in [devices['CUDA']['proc'], devices['ROCM']['proc'], devices['JETSON']['proc']] else self.session['device']
+            if self.device != devices['CPU']['proc']:
+                msg = legends['msg_phonon_cpu'].format(engine=tts_engine, device=self.device)
+                print(msg)
             # Linux / Windows x86_64 wheels are x86-64-v3: importing ptts without AVX2 / FMA / F16C kills the whole
             # process (SIGILL, no python exception), so the flags are checked before the import. macOS x86_64 has no floor
             machine = platform.machine().lower()
@@ -203,7 +206,10 @@ class Phonon(TTSUtils, TTSRegistry, name='phonon'):
                                 'language': self.language
                             })
                             if not reply.get('ok'):
-                                # no retry: core.py unloads the engine, which stops the VC worker
+                                # no retry: core.py unloads the engine, which stops the VC worker. A GPU server that died counts
+                                # against its package (dropped on the second death, next GPU package, CPU last)
+                                if reply.get('server_exited') and self.engine_zs.backend != 'cpu':
+                                    self.engine_zs.gpu_crashes[self.engine_zs.package_name] = self.engine_zs.gpu_crashes.get(self.engine_zs.package_name, 0) + 1
                                 if os.path.exists(vc_file):
                                     os.unlink(vc_file)
                                 error = f"convert() error: {reply.get('error')} segment: {part}"

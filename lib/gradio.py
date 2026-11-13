@@ -2663,11 +2663,13 @@ def build_interface(args:dict)->gr.Blocks:
                     session = context.get_session(session_id)
                     if session and session.get('id', False):
                         # the selected engine's devices this machine has (default_engine_settings "devices"). A device
-                        # the engine cannot run on goes back to default_device, in the dropdown, before any conversion
+                        # the engine cannot run on goes to its best one (get_best_device), in the dropdown, with a
+                        # warning, before any conversion. Headless mode has no fallback: convert_ebook() stops
                         device_options = get_compatible_devices(session['tts_engine'])
                         if session['device'] not in [device for _, device in device_options]:
-                            msg = legends['msg_device_reset'].format(engine=session['tts_engine'], device=str(session['device']).upper(), default=default_device.upper())
-                            session['device'] = default_device
+                            best_device = get_best_device(session['tts_engine'])
+                            msg = legends['msg_device_reset'].format(engine=session['tts_engine'], device=str(session['device']).upper(), new_device=best_device.upper())
+                            session['device'] = best_device
                             show_alert(session_id, {'type': 'warning', 'msg': msg})
                         return gr.update(choices=device_options, value=session['device'])
                 except Exception as e:
