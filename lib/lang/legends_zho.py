@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': '至少必须保留一个区块。',
     'msg_session_load_error': '加载已保存会话时出错。请尝试删除 Cookie 并刷新页面',
     'error_session_already_active': '您的会话已处于活动状态。<br>如果并非如此，请关闭浏览器后重新打开。',
+    'error_session_task_running': '此会话的一个任务仍在运行或正在停止。请稍后重试。',
     'msg_shared_access_limit': ' 注意：访问时间限制为 {days} 天。 ',
     'msg_session_cleanup_notice': ' 注意：如果 {days} 天内没有任何活动，您的会话将被清理。 ',
     'msg_cookies_required': '浏览器需要启用 Cookie 才能恢复转换。',

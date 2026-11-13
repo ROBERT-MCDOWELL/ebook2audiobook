@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': '블록을 하나 이상 유지해야 합니다.',
     'msg_session_load_error': '저장된 세션을 불러오는 중 오류가 발생했습니다. 쿠키를 삭제하고 페이지를 새로 고쳐 보세요',
     'error_session_already_active': '세션이 이미 활성 상태입니다.<br>그렇지 않다면 브라우저를 닫고 다시 실행하세요.',
+    'error_session_task_running': '이 세션의 작업이 아직 실행 중이거나 중지되고 있습니다. 잠시 후 다시 시도해 주세요.',
     'msg_shared_access_limit': ' 참고: 접근 시간은 {days}일로 제한됩니다. ',
     'msg_session_cleanup_notice': ' 참고: {days}일 동안 활동이 없으면 세션이 정리됩니다. ',
     'msg_cookies_required': '변환을 이어서 하려면 브라우저에서 쿠키를 허용해야 합니다.',

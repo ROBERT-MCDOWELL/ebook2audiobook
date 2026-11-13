@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': 'At least one block must be kept.',
     'msg_session_load_error': 'Error while loading saved session. Please try to delete your cookies and refresh the page',
     'error_session_already_active': 'Your session is already active.<br>If it\'s not the case please close your browser and relaunch it.',
+    'error_session_task_running': 'A task of this session is still running or being stopped. Please try again in a moment.',
     'msg_shared_access_limit': ' Note: access limit time: {days} days. ',
     'msg_session_cleanup_notice': ' Note: if no activity is detected after {days} days, your session will be cleaned up. ',
     'msg_cookies_required': 'Your browser needs cookies enabled to resume the conversions.',

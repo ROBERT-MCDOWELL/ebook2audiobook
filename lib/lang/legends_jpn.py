@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': '少なくとも 1 つのブロックを残す必要があります。',
     'msg_session_load_error': '保存済みセッションの読み込み中にエラーが発生しました。Cookie を削除してページを再読み込みしてください',
     'error_session_already_active': 'セッションはすでにアクティブです。<br>そうでない場合は、ブラウザーを閉じて再起動してください。',
+    'error_session_task_running': 'このセッションのタスクはまだ実行中か、停止中です。しばらくしてからもう一度お試しください。',
     'msg_shared_access_limit': ' 注意: アクセス期限は {days} 日です。 ',
     'msg_session_cleanup_notice': ' 注意: {days} 日間操作がない場合、セッションは削除されます。 ',
     'msg_cookies_required': '変換を再開するには、ブラウザーで Cookie を有効にする必要があります。',

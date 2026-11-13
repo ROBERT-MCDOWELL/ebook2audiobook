@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': 'Ó kéré tán àkójọ kan gbọdọ̀ wà.',
     'msg_session_load_error': 'Àṣìṣe nígbà tí a ń ṣí ìgbà ìlò tí a fi pamọ́. Ẹ pa àwọn cookie yín rẹ́ kí ẹ sì tún ojú-ìwé náà ṣí',
     'error_session_already_active': 'Ìgbà ìlò yín ti ń ṣiṣẹ́ tẹ́lẹ̀.<br>Tí kò bá rí bẹ́ẹ̀, ẹ pa aṣàwákiri yín dé kí ẹ sì tún un ṣí.',
+    'error_session_task_running': 'Iṣẹ́ kan nínú ìpàdé yìí ṣì ń lọ lọwọ́ tàbí wọ́n ń dá a dúró. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan síi láìpẹ́.',
     'msg_shared_access_limit': ' Àkíyèsí: àkókò ìwọlé ní òpin ọjọ́ {days}. ',
     'msg_session_cleanup_notice': ' Àkíyèsí: tí a kò bá rí ìgbòkègbodò kankan fún ọjọ́ {days}, a ó nu ìgbà ìlò yín. ',
     'msg_cookies_required': 'Aṣàwákiri yín gbọdọ̀ gba cookie láàyè kí ẹ lè máa bá ìyípadà lọ.',

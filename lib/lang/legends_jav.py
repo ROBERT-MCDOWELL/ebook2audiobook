@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': 'Paling ora siji blok kudu dijaga.',
     'msg_session_load_error': 'Ana kesalahan nalika mbukak sesi sing disimpen. Coba busak cookie lan muat ulang kaca',
     'error_session_already_active': 'Sesi sampeyan wis aktif.<br>Yen ora, tutup peramban lan bukak manèh.',
+    'error_session_task_running': 'Tugas saka sesi iki isih lumaku utawa lagi diendhegake. Coba maneh sawetara wektu mengko.',
     'msg_shared_access_limit': ' Cathetan: wektu akses diwatesi {days} dina. ',
     'msg_session_cleanup_notice': ' Cathetan: yen ora ana aktivitas suwene {days} dina, sesi sampeyan bakal diresiki. ',
     'msg_cookies_required': 'Peramban sampeyan kudu ngaktifake cookie kanggo nerusake konversi.',

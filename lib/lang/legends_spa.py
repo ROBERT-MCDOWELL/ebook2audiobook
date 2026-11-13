@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': 'Debe conservarse al menos un bloque.',
     'msg_session_load_error': 'Error al cargar la sesión guardada. Intente eliminar sus cookies y actualizar la página',
     'error_session_already_active': 'Su sesión ya está activa.<br>Si no es así, cierre su navegador y vuelva a abrirlo.',
+    'error_session_task_running': 'Una tarea de esta sesión aún se está ejecutando o deteniendo. Vuelva a intentarlo dentro de un momento.',
     'msg_shared_access_limit': ' Nota: tiempo de acceso limitado a {days} días. ',
     'msg_session_cleanup_notice': ' Nota: si no se detecta actividad durante {days} días, su sesión se limpiará. ',
     'msg_cookies_required': 'Su navegador necesita las cookies activadas para reanudar las conversiones.',

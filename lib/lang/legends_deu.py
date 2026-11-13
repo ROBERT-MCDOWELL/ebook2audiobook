@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': 'Mindestens ein Block muss behalten werden.',
     'msg_session_load_error': 'Fehler beim Laden der gespeicherten Sitzung. Bitte lösche deine Cookies und lade die Seite neu',
     'error_session_already_active': 'Deine Sitzung ist bereits aktiv.<br>Falls nicht, schließe deinen Browser und starte ihn neu.',
+    'error_session_task_running': 'Eine Aufgabe dieser Sitzung wird noch ausgeführt oder beendet. Bitte versuchen Sie es in Kürze erneut.',
     'msg_shared_access_limit': ' Hinweis: Zugriffsdauer begrenzt auf {days} Tage. ',
     'msg_session_cleanup_notice': ' Hinweis: Wird {days} Tage lang keine Aktivität erkannt, wird deine Sitzung bereinigt. ',
     'msg_cookies_required': 'Dein Browser muss Cookies erlauben, um Konvertierungen fortzusetzen.',

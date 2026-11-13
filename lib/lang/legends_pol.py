@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': 'Należy zachować co najmniej jeden blok.',
     'msg_session_load_error': 'Błąd podczas wczytywania zapisanej sesji. Spróbuj usunąć pliki cookie i odświeżyć stronę',
     'error_session_already_active': 'Twoja sesja jest już aktywna.<br>Jeśli tak nie jest, zamknij przeglądarkę i uruchom ją ponownie.',
+    'error_session_task_running': 'Zadanie tej sesji nadal jest w toku lub jest w trakcie zatrzymywania. Spróbuj ponownie za chwilę.',
     'msg_shared_access_limit': ' Uwaga: czas dostępu ograniczony do {days} dni. ',
     'msg_session_cleanup_notice': ' Uwaga: jeśli przez {days} dni nie zostanie wykryta aktywność, Twoja sesja zostanie wyczyszczona. ',
     'msg_cookies_required': 'Przeglądarka musi mieć włączone pliki cookie, aby wznawiać konwersje.',

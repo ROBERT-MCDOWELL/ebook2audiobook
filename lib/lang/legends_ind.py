@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': 'Setidaknya satu blok harus dipertahankan.',
     'msg_session_load_error': 'Terjadi kesalahan saat memuat sesi tersimpan. Coba hapus cookie Anda lalu muat ulang halaman',
     'error_session_already_active': 'Sesi Anda sudah aktif.<br>Jika tidak, tutup peramban lalu buka kembali.',
+    'error_session_task_running': 'Tugas sesi ini masih berjalan atau sedang dihentikan. Coba lagi sebentar lagi.',
     'msg_shared_access_limit': ' Catatan: waktu akses dibatasi {days} hari. ',
     'msg_session_cleanup_notice': ' Catatan: jika tidak ada aktivitas selama {days} hari, sesi Anda akan dibersihkan. ',
     'msg_cookies_required': 'Peramban Anda harus mengaktifkan cookie untuk melanjutkan konversi.',

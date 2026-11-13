@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': 'Legalább egy blokkot meg kell tartani.',
     'msg_session_load_error': 'Hiba a mentett munkamenet betöltésekor. Próbálja törölni a sütiket, és frissítse az oldalt',
     'error_session_already_active': 'A munkamenete már aktív.<br>Ha nem így van, zárja be a böngészőt, és indítsa újra.',
+    'error_session_task_running': 'A munkamenet egyik feladata még fut, vagy éppen leállítás alatt áll. Kérjük, próbálja meg újra egy kis idő múlva.',
     'msg_shared_access_limit': ' Megjegyzés: a hozzáférési idő {days} napra korlátozott. ',
     'msg_session_cleanup_notice': ' Megjegyzés: ha {days} napig nincs aktivitás, a munkamenete törlődik. ',
     'msg_cookies_required': 'A konvertálások folytatásához a böngészőben engedélyezni kell a sütiket.',

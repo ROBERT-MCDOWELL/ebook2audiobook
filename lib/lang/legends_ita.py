@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': 'Bisogna mantenere almeno un blocco.',
     'msg_session_load_error': 'Errore durante il caricamento della sessione salvata. Prova a eliminare i cookie e ad aggiornare la pagina',
     'error_session_already_active': 'La tua sessione è già attiva.<br>Se non è così, chiudi il browser e riaprilo.',
+    'error_session_task_running': 'Un\'attività di questa sessione è ancora in esecuzione o in fase di arresto. Riprova tra poco.',
     'msg_shared_access_limit': ' Nota: tempo di accesso limitato a {days} giorni. ',
     'msg_session_cleanup_notice': ' Nota: se non viene rilevata attività per {days} giorni, la tua sessione verrà ripulita. ',
     'msg_cookies_required': 'Il browser deve avere i cookie abilitati per riprendere le conversioni.',

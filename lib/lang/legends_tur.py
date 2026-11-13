@@ -213,6 +213,7 @@ legends = {
     'error_keep_one_block': 'En az bir blok tutulmalıdır.',
     'msg_session_load_error': 'Kayıtlı oturum yüklenirken hata oluştu. Lütfen çerezlerinizi silip sayfayı yenileyin',
     'error_session_already_active': 'Oturumunuz zaten etkin.<br>Değilse tarayıcınızı kapatıp yeniden başlatın.',
+    'error_session_task_running': 'Bu oturumun bir görevi hâlâ çalışıyor veya durduruluyor. Lütfen kısa bir süre sonra tekrar deneyin.',
     'msg_shared_access_limit': ' Not: erişim süresi {days} gün ile sınırlıdır. ',
     'msg_session_cleanup_notice': ' Not: {days} gün boyunca etkinlik algılanmazsa oturumunuz temizlenecektir. ',
     'msg_cookies_required': 'Dönüştürmeleri sürdürmek için tarayıcınızda çerezlerin etkin olması gerekir.',
