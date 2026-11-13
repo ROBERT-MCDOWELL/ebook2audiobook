@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Utambuzi wa Kifaa cha GPU
 - [x] Zuia sauti yoyote ya kumbukumbu ya mandharinyuma kwa ajili ya upakiaji wa sauti
 - [x] Upakiaji wa modeli mahususi iliyotengenezwa vizuri
-- [ ] programu ya iOS
-- [ ] Programu ya Android
 
 #### Maombi ya Mtumiaji
 - [ ] Ongeza modeli ya lugha ya Kireno cha Ulaya kwa angalau xttsv2, fairseq, vits, piper (msaada unakaribishwa)

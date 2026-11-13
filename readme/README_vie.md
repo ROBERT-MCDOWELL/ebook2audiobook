@@ -660,7 +660,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Dockerfile
 - [x] Soạn nhạc Docker
 - [x] Podman compose
-- [x] Kaggle Notebook
+- [x] Sổ ghi chép Kaggle
 - [x] Máy tính xách tay Google Colab
 - [x] Tích hợp Audiobookshelf
 - [x] Tùy chọn dịch sách điện tử
@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Phát hiện thiết bị GPU
 - [x] Làm nhiễu bất kỳ âm thanh tham chiếu nền nào để tải lên nhân bản giọng nói
 - [x] Tải lên mô hình tinh chỉnh tùy chỉnh
-- [ ] Ứng dụng IOS
-- [ ] Ứng dụng Android
 
 #### Yêu cầu người dùng
 - [ ] Thêm mô hình ngôn ngữ tiếng Bồ Đào Nha châu Âu cho ít nhất xttsv2, fairseq, vits, piper (hoan nghênh sự giúp đỡ)

@@ -658,7 +658,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Notebookok mappa [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
 - [x] A kínai szövegfelosztás úgy alakítása, hogy ne vágjon szét szavakat, és a szünetek időzítésének javítása [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/18#issuecomment-2401154894)
 - [x] Dokkolófájl
-- [x] Docker compose
+- [x] Docker Compose
 - [x] Podman zeneszerző
 - [x] Kaggle notebook
 - [x] Google Colab notebook
@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] GPU-eszköz észlelése
 - [x] Bármilyen háttér-referenciahang denoise a hangklónozás feltöltéséhez
 - [x] Egyedi, finomhangolt modellfeltöltés
-- [ ] IOS-alkalmazás
-- [ ] Android
 
 #### Felhasználói igények
 - [ ] Európai portugál nyelvi modell hozzáadása legalább xttsv2, fairseq, vits, piper számára (segítség szívesen látott)

@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Détection des dispositifs
 - [x] Dénoisez tout son de référence d'arrière-plan pour le téléchargement de clonage vocal
 - [x] Téléchargement personnalisé du modèle affiné
-- [ ] Application IOS
-- [ ] Application Android
 
 #### Demandes utilisateur
 - [ ] Ajouter un modèle de langue portugaise européenne pour xttsv2, fairseq, vits, piper au moins (aide bienvenue)

@@ -660,7 +660,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Dockerfile
 - [x] تركيب عامل الرصيف
 - [x] تأليف بودمان
-- [x] Kaggle Notebook
+- [x] دفتر ملاحظات Kaggle
 - [x] دفتر ملاحظات Google Colab
 - [x] تكامل رف الكتب الصوتية
 - [x] خيار ترجمة الكتب الإلكترونية
@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] اكتشاف جهاز وحدة معالجة الرسومات
 - [x] قم بإزالة الضوضاء من أي صوت مرجعي للخلفية لتحميل الاستنساخ الصوتي
 - [x] تحميل نموذج مضبوط بدقة مخصص
-- [ ] تطبيق أيفون
-- [ ] تطبيق اندرويد
 
 #### طلبات المستخدم
 - [ ] إضافة نموذج اللغة البرتغالية الأوروبية لـ xttsv2، fairseq، vits، piper على الأقل (مساعدة الترحيب)

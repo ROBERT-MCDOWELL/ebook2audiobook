@@ -661,7 +661,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Docker- Compose
 - [x] Podman componer
 - [x] Cuaderno Kaggle
-- [x] Google Colab Notebook
+- [x] Cuaderno de Google Colab
 - [x] Integración de estantes de audiolibros
 - [x] Opción de traducción de libros electrónicos
 - [x] Opciones de formato de salida
@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Detección del dispositivo
 - [x] Denoise cualquier audio de referencia de fondo para la carga de clonación de voz
 - [x] Carga de modelo personalizada y ajustada
-- [ ] iOS Aplicación
-- [ ] Aplicación Android
 
 #### Peticiones de usuario
 - [ ] Añade el modelo de idioma portugués europeo para xttsv2, fairseq, vits, piper al menos (ayuda bienvenida)

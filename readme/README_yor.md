@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Ìdánimọ̀ Ẹ̀rọ GPU
 - [x] Yọ eyikeyi ohun afetigbọ itọkasi abẹlẹ fun gbigbasilẹ ohun afetigbọ
 - [x] Awoṣe aṣa ti o dara-tuned gbe soke
-- [ ] Ohun elo IOS
-- [ ] Ohun elo Android
 
 #### Àwọn ìbéèrè oníṣe
 - [ ] Ṣàfikún àwòṣe èdè Portuguese Yúróòpù fún ó kéré tán xttsv2, fairseq, vits, piper (a kí ìrànlọ́wọ́ káàbọ̀)

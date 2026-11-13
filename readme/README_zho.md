@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] 设备检测
 - [x] 对语音克隆上传的任何背景参考音频进行降噪
 - [x] 自定义微调模型上传
-- [ ] IOS App
-- [ ] 安卓App
 
 #### 用户请求
 - [ ] 至少为xttsv2、fairseq、vits、piper添加欧洲葡萄牙语语言模型（帮助欢迎）

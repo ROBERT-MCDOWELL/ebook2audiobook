@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] GPU Aygıt algılama
 - [x] Ses klonlama yüklemesi için herhangi bir arka plan referans sesini gürültüden arındırın
 - [x] Özel ince ayarlı model yükleme
-- [ ] IOS Uygulaması
-- [ ] Android App 
 
 #### Kullanıcı İstekleri
 - [ ] En azından xttsv2, fairseq, vits, piper için Avrupa Portekizcesi dil modeli ekleme (yardım memnuniyetle karşılanır)

@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Deteksi Perangkat GPU
 - [x] Denoise audio referensi latar belakang apa pun untuk unggahan kloning suara
 - [x] Unggahan model fine - tuned kustom
-- [ ] APLIKASI IOS
-- [ ] App Android
 
 #### Permintaan Pengguna
 - [ ] Menambahkan model bahasa Portugis Eropa setidaknya untuk xttsv2, fairseq, vits, piper (bantuan dipersilakan)

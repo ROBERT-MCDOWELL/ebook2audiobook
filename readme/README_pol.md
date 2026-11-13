@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Wykrywanie urządzenia GPU
 - [x] Usuń szumy z dowolnego dźwięku referencyjnego w tle do przesyłania klonowania głosu
 - [x] Niestandardowe, dopracowane przesyłanie modelu
-- [ ] Aplikacja na iOS
-- [ ] Aplikacja Android
 
 #### Prośby użytkowników
 - [ ] Dodać model języka portugalskiego europejskiego przynajmniej dla xttsv2, fairseq, vits, piper (pomoc mile widziana)

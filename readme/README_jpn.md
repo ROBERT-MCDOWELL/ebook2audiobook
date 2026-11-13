@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] GPUデバイス検出
 - [x] 音声クローンアップロードのバックグラウンドリファレンス音声をノイズ除去する
 - [x] カスタム微調整されたモデルのアップロード
-- [ ] iOSアプリ
-- [ ] Androidアプリ
 
 #### ユーザーリクエスト
 - [ ] 少なくともxttsv2、fairseq、vits、piper向けにヨーロッパポルトガル語の言語モデルを追加（支援歓迎）

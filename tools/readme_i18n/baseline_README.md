@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] GPU Device detection
 - [x] Denoise any background reference audio for voice cloning upload
 - [x] Custom fine-tuned model upload
-- [ ] IOS app
-- [ ] Android app
 
 #### User Requests
 - [ ] Add European Portuguese language model for xttsv2, fairseq, vits, piper at least (help welcome)

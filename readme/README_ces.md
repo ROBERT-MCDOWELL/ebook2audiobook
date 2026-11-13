@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Detekce zařízení GPU
 - [x] Odšumte jakýkoli referenční zvuk na pozadí pro nahrání hlasového klonování
 - [x] Vlastní doladěné nahrávání modelu
-- [ ] Aplikace IOS
-- [ ] Aplikace pro Android
 
 #### Žádosti uživatelů
 - [ ] Přidat jazykový model evropské portugalštiny alespoň pro xttsv2, fairseq, vits, piper (pomoc vítána)

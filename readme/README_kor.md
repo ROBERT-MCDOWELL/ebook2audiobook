@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] GPU 장치 감지
 - [x] 음성 복제 업로드를 위한 모든 배경 참조 오디오 잡음 제거
 - [x] 맞춤형 미세 조정 모델 업로드
-- [ ] IOS App
-- [ ] Andorid 앱
 
 #### 사용자 요청
 - [ ] 최소한 xttsv2, fairseq, vits, piper용 유럽 포르투갈어 언어 모델 추가(도움 환영)

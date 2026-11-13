@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] تشخیص دستگاه GPU
 - [x] حذف نویز هرگونه صدای مرجع پس‌زمینه برای آپلود شبیه‌سازی صدا
 - [x] آپلود مدل سفارشی و تنظیم‌شده
-- [ ] برنامه آی او اِس
-- [ ] ‫Android app+
 
 #### درخواست های کاربر
 - [ ] افزودن مدل زبانی پرتغالی اروپایی حداقل برای xttsv2، fairseq، vits، piper (از کمک استقبال می‌شود)

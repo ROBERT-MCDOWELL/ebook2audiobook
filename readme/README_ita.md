@@ -658,7 +658,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Cartella dei notebook [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/5#issuecomment-2408773254)
 - [x] Fare in modo che la divisione del testo cinese non spezzi le parole e migliorare la sincronizzazione delle pause [Talked about here](https://github.com/DrewThomasson/ebook2audiobookXTTS/issues/18#issuecomment-2401154894)
 - [x] Dockerfile
-- [x] Docker compose
+- [x] Docker Compose
 - [x] Podman compone
 - [x] Notebook Kaggle
 - [x] Notebook Google Colab
@@ -668,10 +668,8 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Conversione con multiprocessing
 - [x] Conversione in batch di una cartella di e-book
 - [x] Rilevamento del dispositivo GPU
-- [x] Denoise any background reference audio for voice cloning upload
+- [x] Rimuovi il rumore di fondo da qualsiasi traccia audio di riferimento per il caricamento della clonazione vocale
 - [x] Caricamento del modello personalizzato perfezionato
-- [ ] App IOS
-- [ ] App Android
 
 #### Richieste degli utenti
 - [ ] Aggiungere un modello linguistico portoghese europeo almeno per xttsv2, fairseq, vits, piper (aiuto benvenuto)

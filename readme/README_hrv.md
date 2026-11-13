@@ -670,8 +670,6 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Otkrivanje GPU uređaja
 - [x] Denoizirati bilo koji pozadinski referentni zvuk za prijenos glasovnog kloniranja
 - [x] Prijenos prilagođenog precizno podešenog modela
-- [ ] IOS App
-- [ ] Android App
 
 #### Korisnički zahtjevi
 - [ ] Dodati jezični model europskog portugalskog barem za xttsv2, fairseq, vits, piper (pomoć dobrodošla)
