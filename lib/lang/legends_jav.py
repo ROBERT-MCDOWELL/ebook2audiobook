@@ -563,22 +563,14 @@ legends = {
     'error_zonos2_no_package': '{engine} ora duwe paket server kanggo mesin iki ({machine}).',
     'error_zonos2_macos_min': '{engine} mbutuhake macOS {min} utawa luwih anyar (Mac iki nganggo macOS {version}).',
     'msg_zonos2_gpu_restart': 'Server {engine} GPU ({package}) nabrak ({error}): miwiti maneh lan gawe maneh ukara.',
-<<<<<<< HEAD
     'msg_zonos2_gpu_dropped': 'Server GPU {engine} ({package}) krasak maneh ({error}): ninggalake nganti e2a miwiti maneh lan nindakake maneh ukara ing paket GPU sabanjure, konversi mandheg yen ora ana sing ditinggalake.',
-=======
-    'msg_zonos2_gpu_dropped': 'Server GPU {engine} ({package}) ambruk maneh ({error}): ninggalake nganti e2a miwiti maneh lan nindakake maneh ukara ing paket GPU sabanjure, konversi mandheg yen ora ana sing ditinggalake.',
->>>>>>> 5dfc3d97e (...)
     'msg_zonos2_gpu_failed': 'Server {engine} ({package}) ora bisa diwiwiti: {error} Nyoba paket sabanjure.',
     'error_zonos2_gpu_failed': 'Server GPU {engine} ({package}) ora bisa diwiwiti: {error} Pilih CPU minangka piranti kanggo mbukak {engine} ing CPU, sing luwih alon.',
     'error_zonos2_no_gpu_package': '{engine} ora duwe paket GPU sing mlaku ing mesin iki ({machine}) nganggo {device}. Pilih CPU minangka piranti kanggo mbukak {engine} ing CPU, sing luwih alon.',
     'msg_audiocpp_offline_package': 'Mbukak paket {engine} server {package} saka salinan offline...',
     'msg_vc_model_fallback': 'Konversi swara {vc_model} ora bisa ngomong {lang}: {fallback} ngowahi swara tinimbang.',
     'msg_vc_cpu_slow': 'Nggunakake swara liyane kajaba {engine} swara sing wis ana: konversi swara {vc_model} mlaku ing CPU saben ukara, mula konversi ebook luwih alon tinimbang nggunakake swara sing wis ana.',
-<<<<<<< HEAD
     'msg_vc_device_switch': 'Nggunakake swara liya kajaba {engine} swara bawaan: konversi swara {vc_model} ora bisa digunakake ing {device} lan ganti dadi {new_device}, mula konversi ebook rada luwih alon tinimbang nggunakake swara bawaan.',
-=======
-    'msg_vc_device_switch': 'Nggunakake swara liya kajaba {engine} swara sing wis ana: konversi swara {vc_model} ora bisa dilakokake ing {device} lan ganti dadi {new_device}, mula konversi ebook rada luwih alon tinimbang nggunakake swara sing wis ana.',
->>>>>>> 5dfc3d97e (...)
     'msg_vc_device_switch_cpu': 'Nggunakake swara liyane kajaba {engine} swara sing wis ana: konversi swara {vc_model} ora bisa dilakokake ing {device} lan ganti dadi {new_device}, mula konversi ebook luwih alon tinimbang nggunakake swara sing wis ana.',
     'msg_zonos2_old_venv': 'Ngilangi lingkungan Zonos v0.1 lawas ing {dir}, ZONOS2 ora butuh...',
     'msg_zonos2_models': 'Njaluk file model {engine} ({files}), download pisanan njupuk sawetara wektu...',
@@ -589,11 +581,7 @@ legends = {
     'msg_gpu_choice_invalid': 'Ketik nomer saka 0 nganti {last}: ',
     'msg_gpu_choice_done': 'GPU {device} ({tag}) dipilih. Kanggo milih maneh, busak {file} utawa setel DEVICE_TAG.',
     'msg_gpu_choice_default': 'Sawetara GPU bisa mbukak e2a ing kene ({devices}), ora ana jawaban: {device} ({tag}) digunakake. Kanggo milih, busak {file} lan lakokna e2a maneh saka terminal, utawa setel DEVICE_TAG.',
-<<<<<<< HEAD
     'error_device_engine': '{engine} ora bisa mlaku ing {device} ({engine} mlaku ing {devices}).<br/>Pilih piranti utawa mesin TTS liyane kanggo dikonversi.',
-=======
-    'error_device_engine': '{engine} ora bisa mlaku ing {device} ({engine} mlaku ing {devices}).<br/>Pilih piranti utawa mesin TTS liyané kanggo dikonversi.',
->>>>>>> 5dfc3d97e (...)
     'msg_device_reset': '{engine} ora bisa mlaku ing {device} ing komputer iki: piranti disetel dadi {new_device}.',
     'error_device_not_supported_vulkan': 'Ora ana loader Vulkan sing ditemokake ing sistem iki!<br/>Waca {wiki}<br/>Pilih piranti liyane kanggo dikonversi.',
     'msg_zonos2_hybrid_gone': 'Model hibrida Zonos ora ana ing ZONOS2: ngalih menyang model {model}.',

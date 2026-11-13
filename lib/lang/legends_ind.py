@@ -565,20 +565,12 @@ legends = {
     'msg_zonos2_gpu_restart': 'Server GPU {engine} ({package}) macet ({error}): memulai ulang dan mengulang kalimat.',
     'msg_zonos2_gpu_dropped': 'Server GPU {engine} ({package}) mengalami crash lagi ({error}): membiarkannya hingga e2a dimulai ulang dan mengulangi kalimat pada paket GPU berikutnya, konversi berhenti jika tidak ada yang tersisa.',
     'msg_zonos2_gpu_failed': 'Server {engine} ({package}) tidak dapat dimulai: {error} Mencoba paket berikutnya.',
-<<<<<<< HEAD
     'error_zonos2_gpu_failed': 'Server GPU {engine} ({package}) tidak dapat dimulai: {error} Pilih CPU sebagai perangkat untuk menjalankan {engine} pada CPU, yang jauh lebih lambat.',
-=======
-    'error_zonos2_gpu_failed': 'Server GPU {engine} ({package}) tidak dapat dimulai: {error} Pilih CPU sebagai perangkat untuk menjalankan {engine} di CPU, yang jauh lebih lambat.',
->>>>>>> 5dfc3d97e (...)
     'error_zonos2_no_gpu_package': '{engine} tidak memiliki paket GPU yang berjalan di komputer ini ({machine}) dengan {device}. Pilih CPU sebagai perangkat untuk menjalankan {engine} di CPU, yang jauh lebih lambat.',
     'msg_audiocpp_offline_package': 'Membuka paket server {engine} {package} dari salinan offline…',
     'msg_vc_model_fallback': 'Konversi suara {vc_model} tidak dapat berbicara {lang}: {fallback} mengubah suara sebagai gantinya.',
     'msg_vc_cpu_slow': 'Menggunakan suara selain {engine} suara bawaan: konversi suara {vc_model} berjalan di CPU untuk setiap kalimat, sehingga konversi ebook jauh lebih lambat dibandingkan dengan suara bawaan.',
-<<<<<<< HEAD
     'msg_vc_device_switch': 'Menggunakan suara selain {engine} suara bawaan: konversi suara {vc_model} tidak dapat berjalan di {device} dan beralih ke {new_device}, sehingga konversi ebook sedikit lebih lambat dibandingkan dengan suara bawaan.',
-=======
-    'msg_vc_device_switch': 'Menggunakan suara selain {engine} suara bawaan: konversi suara {vc_model} tidak dapat dijalankan di {device} dan beralih ke {new_device}, sehingga konversi ebook sedikit lebih lambat dibandingkan dengan suara bawaan.',
->>>>>>> 5dfc3d97e (...)
     'msg_vc_device_switch_cpu': 'Menggunakan suara selain {engine} suara bawaan: konversi suara {vc_model} tidak dapat dijalankan di {device} dan beralih ke {new_device}, sehingga konversi ebook jauh lebih lambat dibandingkan dengan suara bawaan.',
     'msg_zonos2_old_venv': 'Menghapus lingkungan Zona v0.1 lama dalam {dir}, ZONOS2 tidak membutuhkannya...',
     'msg_zonos2_models': 'Mendapatkan {engine} file model ({files}), unduhan pertama membutuhkan waktu…',
@@ -596,11 +588,7 @@ legends = {
     'error_venv_torch_unsupported': '{engine} tidak dapat berjalan pada perangkat ini karena versi obor maks < {min}. Silakan pilih mesin tts lain.',
     'error_venv_install_failed': '{engine} instalasi lingkungan virtual gagal pada: {step}',
     'msg_orpheus_cpu_slow': '{engine} adalah model 3B: pada CPU berjalan sekitar 40 kali lebih lambat dari waktu nyata dan membutuhkan sekitar 14 GB Ram. GPU sangat dianjurkan.',
-<<<<<<< HEAD
     'msg_phonon_cpu': '{engine} berjalan hanya pada CPU (lebih cepat dari waktu nyata di sana), bukan pada {device}.',
-=======
-    'msg_phonon_cpu': '{engine} berjalan hanya di CPU (lebih cepat daripada waktu nyata di sana), bukan di {device}.',
->>>>>>> 5dfc3d97e (...)
     'error_orpheus_gated': '{repo} dipagari pada Hugging Face: terima kondisinya pada https://huggingface.co/{repo} dengan akun Anda, lalu atur variabel lingkungan HF_TOKEN ke token akun itu dan mulai ulang e2a.',
     'error_phonon_cpu_flags': '{engine} membutuhkan CPU dengan AVX2, FMA dan F16C (hilang: {flags}). Silakan pilih mesin tts lain.',
     'error_chattts_voice_language': '{engine} hanya mengkloning file suara yang berbicara bahasa Inggris atau Cina, dan {voice} berbicara {language}. Silakan pilih file suara lain.',
