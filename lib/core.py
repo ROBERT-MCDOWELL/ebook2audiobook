@@ -4399,6 +4399,32 @@ def delete_unused_tmp_dirs(session_id:str, output_dir:str, days:int)->None:
                                 error = legends['error_deleting'].format(path=full_dir_path, e=e)
                                 print(error)
 
+def cuda_arch_error()->str|None:
+    # the installed CUDA torch has kernels for this GPU: its own SASS (sm_XY runs on the same major, minor XY or above)
+    # or PTX (compute_XY, compiled on the fly for XY and above). cu128+ builds stop at Turing (7.5), so an older GPU
+    # with a recent driver (or a cu130 Docker image) failed at the first op with "no kernel image is available"
+    try:
+        import torch
+        if getattr(torch.version, 'hip', None) or not torch.cuda.is_available():
+            return None
+        major, minor = torch.cuda.get_device_capability(0)
+        arch_list = torch.cuda.get_arch_list()
+        for arch in arch_list:
+            # sm_75, sm_90a, sm_120, compute_120: the digits are major * 10 + minor
+            m = re.fullmatch(r'(sm|compute)_(\d+)[a-z]?', arch)
+            if not m:
+                continue
+            arch_major, arch_minor = divmod(int(m.group(2)), 10)
+            if m.group(1) == 'sm' and arch_major == major and arch_minor <= minor:
+                return None
+            if m.group(1) == 'compute' and (arch_major, arch_minor) <= (major, minor):
+                return None
+        if not arch_list:
+            return None
+        return legends['error_cuda_arch_unsupported'].format(gpu=torch.cuda.get_device_name(0), cc=f'{major}.{minor}', torch=torch.__version__, archs=', '.join(arch_list))
+    except Exception:
+        return None
+
 def get_compatible_tts_engines(language:str)->list[str]:
     return [
         engine
@@ -4730,6 +4756,8 @@ def convert_ebook(args:dict)->tuple:
                     elif session['device'] == devices['CUDA']['proc']:
                         if not devices['CUDA']['found']:
                             device_error = legends['error_device_not_supported'].format(device='CUDA', wiki=default_gpu_wiki)
+                        else:
+                            device_error = cuda_arch_error()
                     elif session['device'] == devices['JETSON']['proc']:
                         if not devices['JETSON']['found']:
                             device_error = legends['error_device_not_supported'].format(device='JETSON CUDA', wiki=default_gpu_wiki)

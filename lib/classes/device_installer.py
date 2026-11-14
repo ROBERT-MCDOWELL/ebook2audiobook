@@ -538,6 +538,19 @@ class DeviceInstaller():
                 return m.group(3)
             return None
 
+        cuda_arch = {}
+        def cuda_min_compute_cap()->Union[tuple, None]:
+            # the lowest compute capability of the NVIDIA GPUs, from nvidia-smi (no torch), read once
+            if 'cap' not in cuda_arch:
+                caps = []
+                if has_cmd('nvidia-smi'):
+                    for line in try_cmd('nvidia-smi --query-gpu=compute_cap --format=csv,noheader').splitlines():
+                        m = re.match(r'\s*(\d+)\.(\d+)', line)
+                        if m:
+                            caps.append((int(m.group(1)), int(m.group(2))))
+                cuda_arch['cap'] = min(caps) if caps else None
+            return cuda_arch['cap']
+
         def cuda_tag(version_str:str)->str:
             # the torch_matrix CUDA row for this CUDA version: the newest one at or below it among the rows built for the
             # target OS and arch (a Docker image is Linux whatever the host), e.g. 13.1 -> cu130, 12.8 on Windows ->
@@ -547,6 +560,11 @@ class DeviceInstaller():
             if target == systems['LINUX'] and machine == archs['AMD64']:
                 machine = archs['X86_64']
             current = _normalize_version(version_str)[:2]
+            # torch's cu128 and later builds carry no kernels below Turing (compute capability 7.5: Maxwell, Pascal,
+            # Volta), "no kernel image is available" at the first op: those GPUs keep the cu126 row, whatever the driver
+            cap = cuda_min_compute_cap()
+            if cap is not None and cap < (7, 5):
+                current = min(current, (12, 6))
             rows = []
             for key, entry in torch_matrix.items():
                 m = re.fullmatch(r'(?:win-)?cu(\d+)(\d)', key)
