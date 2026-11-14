@@ -4593,6 +4593,10 @@ def convert_ebook(args:dict)->tuple:
             session['translate_enabled'] = bool(args.get('translate_enabled', False))
             session['translate'] = args.get('translate')
             session['translate_iso1'] = args.get('translate_iso1')
+            # str(None) would leave 'None' as the session's engine, and every presets load after it fails
+            if args.get('tts_engine') not in default_engine_settings:
+                error = legends['error_invalid_tts_engine'].format(engine=args.get('tts_engine'))
+                return error, False
             session['tts_engine'] = str(args['tts_engine'])
             session['custom_model'] =  args['custom_model']
             session['fine_tuned'] = str(args['fine_tuned'])

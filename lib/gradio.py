@@ -3099,7 +3099,8 @@ def build_interface(args:dict)->gr.Blocks:
                                 "blocks_preview": blocks_preview,
                                 "interlude_enabled": interlude_enabled,
                                 "device": device,
-                                "tts_engine": tts_engine,
+                                # the Dropdown sends None when gradio cleared it (its value left out of new choices)
+                                "tts_engine": tts_engine if tts_engine in default_engine_settings else session['tts_engine'],
                                 "ebook": None,
                                 "ebook_mode": ebook_mode,
                                 "ebook_src": ebook_src if ebook_mode == ebook_modes['SINGLE'] else session['ebook_src'],
