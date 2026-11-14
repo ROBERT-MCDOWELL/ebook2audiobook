@@ -156,6 +156,27 @@ voices_url = 'https://huggingface.co/datasets/ebook2audiobook/E2A-Voices/resolve
 tts_dir = os.path.join(models_dir, 'tts')
 components_dir = os.path.abspath('components')
 tempfile.tempdir = run_dir
+
+# components/sitecustomize.py, copied into python_env by the launchers, routes torchaudio.load to soundfile (torchcodec
+# cannot load everywhere: FFmpeg 8 on Windows, ROCm builds) and allowlists coqui's config for torch.load. When this
+# interpreter did not run it (copy missing, app.py started another way), it runs here, before torch/torchaudio import
+def sitecustomize_patch()->None:
+    if any(type(hook).__name__ == 'LazyPatchHook' for hook in sys.meta_path):
+        return
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('e2a_sitecustomize', os.path.join(os.path.dirname(root_dir), 'components', 'sitecustomize.py'))
+        if spec is None or spec.loader is None:
+            return
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        # an import made before this point is patched right away
+        if 'torchaudio' in sys.modules and hasattr(module, 'patch_torchaudio'):
+            module.patch_torchaudio(sys.modules['torchaudio'])
+    except Exception as e:
+        error = f'sitecustomize_patch(): {e}'
+        print(error)
+sitecustomize_patch()
 detect_gpu_script = os.path.join(components_dir, './detect_gpu.py')
 
 # ---------------------------------------------------------------------
