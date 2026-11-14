@@ -22,6 +22,10 @@ class DeviceInstaller():
     # add a row when a release raises the floor again, and test it: the declared
     # floor alone is not enough.
     transformers_caps = {'2.4': '5.1', '2.5': '5.8'}
+    # coqui-tts' own transformers floor (coqui-tts 0.28: transformers>=4.57). A bare 'transformers' keeps an older
+    # release installed by hand, which coqui-tts does not run with: 4.46 imports torch.distributed.fsdp in generate()
+    # and fails on torch builds without distributed (the +vulkan wheels)
+    transformers_min = '4.57'
     exclusive_pkgs = {
         'onnxruntime': ['onnxruntime', 'onnxruntime-gpu', 'onnxruntime-directml']
     }
@@ -1935,8 +1939,8 @@ class DeviceInstaller():
                 if torch_version:
                     for torch_floor, transformers_cap in self.transformers_caps.items():
                         if self.version_tuple(torch_version, 2) < self.version_tuple(torch_floor, 2):
-                            return f'transformers<{transformers_cap}'
-                return 'transformers'
+                            return f'transformers>={self.transformers_min},<{transformers_cap}'
+                return f'transformers>={self.transformers_min}'
             case _:
                 raise ValueError(f'select_pkg(): no rule for {pkg}')
 
