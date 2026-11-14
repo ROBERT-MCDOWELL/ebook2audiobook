@@ -29,6 +29,10 @@ class DeviceInstaller():
     exclusive_pkgs = {
         'onnxruntime': ['onnxruntime', 'onnxruntime-gpu', 'onnxruntime-directml']
     }
+    # dependencies install_missing_dependencies() never pulls from PyPI: install_device_packages() puts them in from
+    # its own wheels/indexes (a PyPI torchvision would drag a CPU torch in), finalize_exclusive_packages() swaps the
+    # onnxruntime builds, demucs-simple replaces demucs, remove_obsolete_packages() takes unidic out on purpose
+    dependency_skip_re = re.compile(r'^(?:torch|torchaudio|torchcodec|torchvision|onnxruntime(?:-[a-z0-9]+)?|nvidia-.*|triton|pytorch-triton.*|rocm.*|intel-.*|demucs|unidic)$')
     pip_cache_dir = os.environ.get('E2A_PIP_CACHE_DIR') or os.path.join(tempfile.gettempdir(), 'e2a_pip_cache')
     # seconds the GPU choice waits for an answer before taking the system's GPU 0, so an unattended install never hangs
     gpu_choice_timeout = 60
@@ -1751,11 +1755,50 @@ class DeviceInstaller():
             # device build picked above, and both unpack into site-packages/onnxruntime/: keep onnx_pkg only.
             # runs on every pass, not only after an install, to also repair envs that already hold both
             self.finalize_exclusive_packages({'onnxruntime': onnx_pkg})
+            if self.install_missing_dependencies() == 1:
+                return 1
         except Exception as e:
             error = f'install_python_packages() error: {e}'
             print(error)
             self.drop_pip_cache()
             return 1
+
+    def install_missing_dependencies(self)->int:
+        # requirements.txt only lists the top packages: a dependency of theirs removed afterwards (uninstalled by
+        # hand, interrupted install, antivirus) is never put back, and every start then fails at import (gradio
+        # without uvicorn). uv pip check lists them. Version conflicts are left alone (some are intended, see
+        # transformers_caps and sitecustomize.py), and so are the packages the device step installs from its own
+        # wheels or swaps (torch family, GPU runtimes, onnxruntime builds: onnxruntime-gpu stands for onnxruntime)
+        try:
+            result = subprocess.run(self._uv_pip('check'), capture_output=True, text=True, encoding='utf-8', errors='replace')
+        except OSError:
+            return 0
+        missing = []
+        for req in re.findall(r"requires `([^`]+)`, but it's not installed", f'{result.stdout}\n{result.stderr}'):
+            if not self.dependency_skip_re.match(self.pkg_head(req)) and req not in missing:
+                missing.append(req)
+        if not missing:
+            return 0
+        msg = legends['msg_installing_missing_deps'].format(pkgs=', '.join(missing))
+        print(msg)
+        # a missing device package (transformers) comes back with its cap; the other pins stay out, they are not missing
+        heads = {self.pkg_head(req) for req in missing}
+        pins = []
+        for dpkg in self.device_pkgs:
+            try:
+                pin = self.select_pkg(dpkg)
+                if self.pkg_head(pin) in heads:
+                    pins.append(pin)
+            except Exception:
+                pass
+        try:
+            subprocess.check_call(self._uv_pip('install', '--cache-dir', self.pip_cache_dir, *self.apply_pins(missing, pins)))
+        except subprocess.CalledProcessError as e:
+            msg = legends['msg_install_pkg_failed'].format(pkg=', '.join(missing), e=e)
+            print(msg)
+            return 1
+        importlib.invalidate_caches()
+        return 0
 
     def remove_obsolete_packages(self)->int:
         # packages removed from requirements.txt that must also be uninstalled
