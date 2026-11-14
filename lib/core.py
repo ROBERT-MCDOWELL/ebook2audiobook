@@ -361,6 +361,8 @@ class SessionContext:
                 "relation": None,
                 "Source": None,
                 "Modified": None,
+                "series": None,
+                "series_index": None,
             }
         }, manager=self.manager)
         return self.sessions[session_id]
@@ -1410,6 +1412,49 @@ def get_ebook_title(epubBook:EpubBook, all_docs:list[Any])->str|None:
             if alt and 'cover' not in alt.lower():
                 return alt
     return None
+
+def get_epub_series(epubBook:EpubBook)->tuple[str|None, str|None]:
+    # series lives in opf <meta>, not in DC: calibre/EPUB2 writes <meta name="calibre:series" content="..."/> and
+    # calibre:series_index, EPUB3 a <meta property="belongs-to-collection" id="x"> refined by collection-type
+    # and group-position. ebooklib files these under a prefix or a namespace depending on the opf nsmap, so scan all
+    def _index(value:Any)->str|None:
+        try:
+            num = float(str(value).strip())
+        except (TypeError, ValueError):
+            return None
+        if not math.isfinite(num) or num < 0:
+            return None
+        return str(int(num)) if num.is_integer() else f'{num:.2f}'.rstrip('0').rstrip('.')
+
+    try:
+        calibre_series = None
+        calibre_index = None
+        collections:dict = {}
+        refines:dict = {}
+        for names in (getattr(epubBook, 'metadata', None) or {}).values():
+            for items in names.values():
+                for value, attributes in items:
+                    attributes = attributes or {}
+                    text = ' '.join(str(attributes.get('content') or value or '').split())
+                    if attributes.get('name') == 'calibre:series':
+                        calibre_series = calibre_series or text or None
+                    elif attributes.get('name') == 'calibre:series_index':
+                        calibre_index = calibre_index or text or None
+                    elif attributes.get('property') == 'belongs-to-collection' and attributes.get('id'):
+                        collections[attributes['id']] = text
+                    elif attributes.get('refines') and attributes.get('property'):
+                        refines.setdefault(attributes['refines'].lstrip('#'), {})[attributes['property']] = text
+        # EPUB3 first, same order and collection types as calibre
+        for collection_id, name in collections.items():
+            props = refines.get(collection_id, {})
+            if name and props.get('collection-type') in ['series', 'set']:
+                return name, _index(props.get('group-position'))
+        if calibre_series:
+            return calibre_series, _index(calibre_index)
+    except Exception as e:
+        error = f'get_epub_series(): {e}'
+        print(error)
+    return None, None
 
 def get_cover(epubBook:EpubBook, session_id:str)->bool|str:
     try:
@@ -3611,6 +3656,11 @@ def combine_audio_chapters(session_id:str)->list[str]|None:
                     asin = session['metadata']['identifiers'].get('mobi-asin')
                     if asin:
                         ffmpeg_metadata += f"{tag('asin')}={asin}\n"
+            # series / series-part: the tag names Audiobookshelf and most audiobook players read
+            if session['metadata'].get('series'):
+                ffmpeg_metadata += f"{tag('series')}={session['metadata']['series']}\n"
+                if session['metadata'].get('series_index'):
+                    ffmpeg_metadata += f"{tag('series-part')}={session['metadata']['series_index']}\n"
             if interlude_durations is None:
                 interlude_durations = {}
             if chapter_global_indices is None:
@@ -4926,6 +4976,7 @@ def convert_ebook(args:dict)->tuple:
                                     if data:
                                         for value, attributes in data:
                                             metadata[key] = value
+                                metadata['series'], metadata['series_index'] = get_epub_series(epubBook)
                                 metadata['language'] = final_language
                                 metadata['title'] = metadata['title'] or Path(session['ebook']).stem.replace('_', ' ')
                                 metadata['creator'] = False if not metadata['creator'] or metadata['creator'] == 'Unknown' else metadata['creator']
@@ -5095,7 +5146,9 @@ def finalize_audiobook(session_id:str)->tuple:
                     if abs_library_id:
                         a_title = os.path.basename(session['audiobook'])
                         a_author = str(session.get('metadata', {}).get('creator') or '')
-                        ok, msg = upload_to_abs([session['audiobook']], a_title, a_author, session['abs_url'],  session['abs_api_token'], abs_library_id)
+                        a_series = str(session.get('metadata', {}).get('series') or '')
+                        a_series_index = str(session.get('metadata', {}).get('series_index') or '')
+                        ok, msg = upload_to_abs([session['audiobook']], a_title, a_author, session['abs_url'],  session['abs_api_token'], abs_library_id, series=a_series, series_index=a_series_index)
                         if ok:
                             msg = legends['msg_abs_upload'].format(msg=msg)
                             print(msg)
@@ -5230,6 +5283,8 @@ def reset_ebook_session(session_id:str, force:bool, filter_keys:bool)->None:
             "relation": None,
             "Source": None,
             "Modified": None,
+            "series": None,
+            "series_index": None,
         }
     }
     restore_session_from_data(data, session, force, filter_keys=filter_keys)

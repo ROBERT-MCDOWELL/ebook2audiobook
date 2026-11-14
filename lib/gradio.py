@@ -1239,12 +1239,14 @@ def build_interface(args:dict)->gr.Blocks:
                     from urllib.parse import urlparse
                     title = Path(audiobook).stem
                     author = str(session.get('metadata', {}).get('creator') or '')
+                    series = str(session.get('metadata', {}).get('series') or '')
+                    series_index = str(session.get('metadata', {}).get('series_index') or '')
                     if not url or not api_token or not library_id:
                         return (gr.update(interactive=True), 'Configure ABS settings first')
                     parsed = urlparse(url)
                     if not parsed.scheme or not parsed.netloc:
                         return (gr.update(interactive=True), 'Invalid server URL')
-                    ok, msg = upload_to_abs([audiobook], title, author, url, api_token, library_id)
+                    ok, msg = upload_to_abs([audiobook], title, author, url, api_token, library_id, series=series, series_index=series_index)
                     if ok:
                         return (gr.update(interactive=True), f'{msg}')
                     else:
@@ -1812,6 +1814,7 @@ def build_interface(args:dict)->gr.Blocks:
                                                     if data:
                                                         for value, attributes in data:
                                                             metadata[key] = value
+                                                metadata['series'], metadata['series_index'] = get_epub_series(epubBook)
                                             metadata['language'] = audio_tags.get('language') or metadata['language']
                                             metadata['title'] = metadata['title'] or base_name.replace('_', ' ')
                                             metadata['creator'] = False if not metadata['creator'] or metadata['creator'] == 'Unknown' else metadata['creator']
@@ -2315,6 +2318,7 @@ def build_interface(args:dict)->gr.Blocks:
                                             if data:
                                                 for value, attributes in data:
                                                     metadata[key] = value
+                                        metadata['series'], metadata['series_index'] = get_epub_series(epubBook)
                                     metadata['language'] = audio_tags.get('language') or metadata['language']
                                     metadata['title'] = metadata['title'] or base_name.replace('_', ' ')
                                     metadata['creator'] = False if not metadata['creator'] or metadata['creator'] == 'Unknown' else metadata['creator']
