@@ -412,7 +412,18 @@ valence, arousal (-1 to 1).""")
             error = legends['error_download_voices']
             print(error)
             sys.exit(1)
-        import lib.core as c
+        try:
+            import lib.core as c
+        except ImportError as e:
+            # Windows Smart App Control / an App Control policy refusing an unsigned module (Python's, a package's)
+            from lib.classes.bug_reporter import bug_reporter as reporter
+            if not reporter.app_control_blocked(e):
+                raise
+            error = f'''***********
+{legends['error_app_control_blocked'].format(error=e)}
+***********'''
+            print(error)
+            sys.exit(1)
         c.context = c.SessionContext() if c.context is None else c.context
         c.context_tracker = c.SessionTracker() if c.context_tracker is None else c.context_tracker
         c.active_sessions = set() if c.active_sessions is None else c.active_sessions

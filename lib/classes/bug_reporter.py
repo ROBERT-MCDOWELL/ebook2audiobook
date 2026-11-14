@@ -200,7 +200,7 @@ print(json.dumps(out))
         exc_type, exc, tb = exc_info if exc_info else sys.exc_info()
         if not self.url or not isinstance(exc, Exception) or exc_type.__module__ == 'gradio.exceptions' or getattr(exc, '_e2a_reported', False):
             return
-        if self.quitting(exc) or self.disk_full(exc):
+        if self.quitting(exc) or self.disk_full(exc) or self.app_control_blocked(exc):
             return
         try:
             exc._e2a_reported = True
@@ -563,6 +563,33 @@ print(json.dumps(out))
         frames = traceback.extract_tb(exc.__traceback__)
         line = (frames[-1].line or '').strip() if frames else ''
         return line.startswith('print(') or '.stdout.write(' in line or '.stderr.write(' in line
+
+    # Windows code integrity: an App Control policy (WDAC) or Smart App Control refusing a file, mostly an unsigned one
+    app_control_codes = (4551, 4556, 4557, 4558, 4559, 4560)
+
+    def app_control_blocked(self, exc:BaseException)->bool:
+        # the user's Windows refusing the file, not a bug. "DLL load failed while importing X: <text>" carries no error
+        # code, only Windows' own text for it in the system language: compared with the texts FormatError() gives here
+        if sys.platform != 'win32':
+            return False
+        texts = []
+        try:
+            import ctypes
+            for code in self.app_control_codes:
+                text = ctypes.FormatError(code).strip().rstrip('.')
+                if len(text) > 15 and '<' not in text:
+                    texts.append(text)
+        except Exception:
+            pass
+        cur, depth = exc, 0
+        while cur is not None and depth < 8:
+            if isinstance(cur, OSError) and getattr(cur, 'winerror', None) in self.app_control_codes:
+                return True
+            message = str(cur)
+            if any(text in message for text in texts):
+                return True
+            cur, depth = cur.__cause__ or cur.__context__, depth + 1
+        return False
 
     def disk_full(self, exc:BaseException)->bool:
         # a full disk is the user's machine, not a bug: OSError ENOSPC anywhere in the chain
