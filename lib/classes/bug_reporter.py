@@ -523,8 +523,19 @@ print(json.dumps(out))
         while cur is not None and depth < 8:
             if isinstance(cur, (KeyboardInterrupt, SystemExit)) or (isinstance(cur, subprocess.CalledProcessError) and cur.returncode in self.interrupt_codes):
                 return True
+            if self.stdio_gone(cur):
+                return True
             cur, depth = cur.__cause__ or cur.__context__, depth + 1
         return False
+
+    def stdio_gone(self, exc:BaseException)->bool:
+        # the terminal (or the program reading the output through a pipe) was closed: print() itself raises,
+        # BrokenPipeError / EPIPE on POSIX, EINVAL on Windows (ERROR_NO_DATA, the pipe is being closed)
+        if not isinstance(exc, OSError) or not (isinstance(exc, BrokenPipeError) or exc.errno in (errno.EPIPE, errno.EINVAL)):
+            return False
+        frames = traceback.extract_tb(exc.__traceback__)
+        line = (frames[-1].line or '').strip() if frames else ''
+        return line.startswith('print(') or '.stdout.write(' in line or '.stderr.write(' in line
 
     def disk_full(self, exc:BaseException)->bool:
         # a full disk is the user's machine, not a bug: OSError ENOSPC anywhere in the chain
