@@ -487,6 +487,7 @@ legends = {
     'msg_reinstall_pkg_failed': '{pkg} दोबारा इंस्टॉल करना विफल: {e}',
     'msg_pkg_still_missing': 'गंभीर: --reinstall के बाद भी {pkg} इंस्टॉल नहीं है।',
     'msg_all_packages_ok': '\nसभी आवश्यक पैकेज इंस्टॉल हैं।',
+    'msg_installing_missing_deps': 'अनुपस्थित निर्भरताएँ इंस्टॉल की जा रही हैं: {pkgs}',
     'msg_removing_obsolete': 'पुराना पैकेज {pkg} हटाया जा रहा है…',
     'msg_remove_obsolete_failed': 'पुराना पैकेज {pkg} हटाना विफल (गंभीर नहीं): {e}',
     'error_numpy_install_failed': 'numpy पैकेज इंस्टॉल करना विफल: {e}',

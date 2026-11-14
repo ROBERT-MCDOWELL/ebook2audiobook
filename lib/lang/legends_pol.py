@@ -487,6 +487,7 @@ legends = {
     'msg_reinstall_pkg_failed': 'Nie można ponownie zainstalować {pkg}: {e}',
     'msg_pkg_still_missing': 'KRYTYCZNE: {pkg} nadal nie jest zainstalowany po --reinstall.',
     'msg_all_packages_ok': '\nWszystkie wymagane pakiety są zainstalowane.',
+    'msg_installing_missing_deps': 'Instalowanie brakujących zależności: {pkgs}',
     'msg_removing_obsolete': 'Usuwanie przestarzałego pakietu {pkg}…',
     'msg_remove_obsolete_failed': 'Nie można usunąć przestarzałego pakietu {pkg} (niekrytyczne): {e}',
     'error_numpy_install_failed': 'Nie można zainstalować pakietu numpy: {e}',

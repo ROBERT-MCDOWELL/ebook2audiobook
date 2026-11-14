@@ -487,6 +487,7 @@ legends = {
     'msg_reinstall_pkg_failed': '{pkg} మళ్లీ ఇన్‌స్టాల్ విఫలమైంది: {e}',
     'msg_pkg_still_missing': 'తీవ్రం: --reinstall తర్వాత కూడా {pkg} ఇన్‌స్టాల్ కాలేదు.',
     'msg_all_packages_ok': '\nఅవసరమైన అన్ని ప్యాకేజీలు ఇన్‌స్టాల్ అయ్యాయి.',
+    'msg_installing_missing_deps': 'మిస్ అయిన డిపెండెన్సీలను ఇన్‌స్టాల్ చేస్తోంది: {pkgs}',
     'msg_removing_obsolete': 'పాత ప్యాకేజీ {pkg} తొలగించబడుతోంది…',
     'msg_remove_obsolete_failed': 'పాత ప్యాకేజీ {pkg}ను తొలగించలేకపోయాం (తీవ్రం కాదు): {e}',
     'error_numpy_install_failed': 'numpy ప్యాకేజీ ఇన్‌స్టాల్ విఫలమైంది: {e}',

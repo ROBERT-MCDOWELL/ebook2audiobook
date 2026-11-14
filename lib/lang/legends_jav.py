@@ -487,6 +487,7 @@ legends = {
     'msg_reinstall_pkg_failed': 'Gagal masang ulang {pkg}: {e}',
     'msg_pkg_still_missing': 'KRITIS: {pkg} isih durung dipasang sawisé --reinstall.',
     'msg_all_packages_ok': '\nKabèh paket sing dibutuhaké wis dipasang.',
+    'msg_installing_missing_deps': 'Nginstal dependensi sing ora ana: {pkgs}',
     'msg_removing_obsolete': 'Mbusak paket lawas {pkg}…',
     'msg_remove_obsolete_failed': 'Gagal mbusak paket lawas {pkg} (ora fatal): {e}',
     'error_numpy_install_failed': 'Gagal masang paket numpy: {e}',

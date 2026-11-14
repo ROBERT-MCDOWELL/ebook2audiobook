@@ -487,6 +487,7 @@ legends = {
     'msg_reinstall_pkg_failed': 'نصب دوباره {pkg} ناموفق بود: {e}',
     'msg_pkg_still_missing': 'بحرانی: {pkg} پس از --reinstall هنوز نصب نیست.',
     'msg_all_packages_ok': '\nهمه بسته‌های لازم نصب شده‌اند.',
+    'msg_installing_missing_deps': 'در حال نصب وابستگی‌های موجود: {pkgs}',
     'msg_removing_obsolete': 'در حال حذف بسته منسوخ {pkg}…',
     'msg_remove_obsolete_failed': 'حذف بسته منسوخ {pkg} ناموفق بود (غیربحرانی): {e}',
     'error_numpy_install_failed': 'نصب بسته numpy ناموفق بود: {e}',

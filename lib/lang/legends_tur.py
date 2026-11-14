@@ -487,6 +487,7 @@ legends = {
     'msg_reinstall_pkg_failed': '{pkg} yeniden kurulamadı: {e}',
     'msg_pkg_still_missing': 'KRİTİK: {pkg}, --reinstall sonrasında hâlâ kurulu değil.',
     'msg_all_packages_ok': '\nGerekli tüm paketler kurulu.',
+    'msg_installing_missing_deps': 'Eksik bağımlılıklar yükleniyor: {pkgs}',
     'msg_removing_obsolete': 'Eski paket {pkg} kaldırılıyor…',
     'msg_remove_obsolete_failed': 'Eski paket {pkg} kaldırılamadı (kritik değil): {e}',
     'error_numpy_install_failed': 'numpy paketi kurulamadı: {e}',

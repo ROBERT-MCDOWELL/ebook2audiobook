@@ -487,6 +487,7 @@ legends = {
     'msg_reinstall_pkg_failed': '{pkg} আবার ইনস্টল ব্যর্থ: {e}',
     'msg_pkg_still_missing': 'গুরুতর: --reinstall-এর পরও {pkg} ইনস্টল হয়নি।',
     'msg_all_packages_ok': '\nসব প্রয়োজনীয় প্যাকেজ ইনস্টল আছে।',
+    'msg_installing_missing_deps': 'অনুপস্থিত ডিপেন্ডেন্সিগুলি ইনস্টল করা হচ্ছে: {pkgs}',
     'msg_removing_obsolete': 'পুরোনো প্যাকেজ {pkg} সরানো হচ্ছে…',
     'msg_remove_obsolete_failed': 'পুরোনো প্যাকেজ {pkg} সরানো যায়নি (গুরুতর নয়): {e}',
     'error_numpy_install_failed': 'numpy প্যাকেজ ইনস্টল ব্যর্থ: {e}',

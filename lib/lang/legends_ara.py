@@ -487,6 +487,7 @@ legends = {
     'msg_reinstall_pkg_failed': 'فشلت إعادة تثبيت {pkg}: {e}',
     'msg_pkg_still_missing': 'حرج: {pkg} لا تزال غير مثبتة بعد --reinstall.',
     'msg_all_packages_ok': '\nجميع الحزم المطلوبة مثبتة.',
+    'msg_installing_missing_deps': 'جارٍ تثبيت التبعيات المفقودة: {pkgs}',
     'msg_removing_obsolete': 'جارٍ إزالة الحزمة القديمة {pkg}…',
     'msg_remove_obsolete_failed': 'فشلت إزالة الحزمة القديمة {pkg} (غير حرج): {e}',
     'error_numpy_install_failed': 'فشل تثبيت حزمة numpy: {e}',

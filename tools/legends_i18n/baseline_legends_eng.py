@@ -487,6 +487,7 @@ legends = {
     'msg_reinstall_pkg_failed': 'Failed to reinstall {pkg}: {e}',
     'msg_pkg_still_missing': 'CRITICAL: {pkg} is still not installed after --reinstall.',
     'msg_all_packages_ok': '\nAll required packages are installed.',
+    'msg_installing_missing_deps': 'Installing missing dependencies: {pkgs}',
     'msg_removing_obsolete': 'Removing obsolete package {pkg}…',
     'msg_remove_obsolete_failed': 'Failed to remove obsolete package {pkg} (non-fatal): {e}',
     'error_numpy_install_failed': 'Failed to install numpy package: {e}',

@@ -487,6 +487,7 @@ legends = {
     'msg_reinstall_pkg_failed': '重新安装 {pkg} 失败：{e}',
     'msg_pkg_still_missing': '严重：--reinstall 后 {pkg} 仍未安装。',
     'msg_all_packages_ok': '\n所有必需的包均已安装。',
+    'msg_installing_missing_deps': '正在安装缺少的依赖项：{pkgs}',
     'msg_removing_obsolete': '正在移除过时的包 {pkg}…',
     'msg_remove_obsolete_failed': '移除过时的包 {pkg} 失败（不影响运行）：{e}',
     'error_numpy_install_failed': '安装 numpy 包失败：{e}',

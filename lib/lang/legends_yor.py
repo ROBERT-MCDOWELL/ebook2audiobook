@@ -487,6 +487,7 @@ legends = {
     'msg_reinstall_pkg_failed': 'Títún {pkg} fi sí i kò ṣiṣẹ́: {e}',
     'msg_pkg_still_missing': 'PÀTÀKÌ: {pkg} ṣì kò sí lẹ́yìn --reinstall.',
     'msg_all_packages_ok': '\nGbogbo àwọn àpò tí a nílò ti wà.',
+    'msg_installing_missing_deps': 'Fífi àwọn ìdíwọ̀n tí kò sí sí: {pkgs}',
     'msg_removing_obsolete': 'À ń yọ àpò àtijọ́ {pkg} kúrò…',
     'msg_remove_obsolete_failed': 'Yíyọ àpò àtijọ́ {pkg} kò ṣiṣẹ́ (kò léwu): {e}',
     'error_numpy_install_failed': 'Fífi àpò numpy sí i kò ṣiṣẹ́: {e}',

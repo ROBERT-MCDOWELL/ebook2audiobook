@@ -487,6 +487,7 @@ legends = {
     'msg_reinstall_pkg_failed': 'A(z) {pkg} újratelepítése sikertelen: {e}',
     'msg_pkg_still_missing': 'KRITIKUS: a(z) {pkg} a --reinstall után sincs telepítve.',
     'msg_all_packages_ok': '\nMinden szükséges csomag telepítve van.',
+    'msg_installing_missing_deps': 'Hiányzó függőségek telepítése: {pkgs}',
     'msg_removing_obsolete': 'Az elavult {pkg} csomag eltávolítása…',
     'msg_remove_obsolete_failed': 'Az elavult {pkg} csomag eltávolítása sikertelen (nem kritikus): {e}',
     'error_numpy_install_failed': 'A numpy csomag telepítése sikertelen: {e}',
