@@ -92,6 +92,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - [Usage](#instructions)
   - [Run Locally](#instructions)
     - [Launching Gradio Web Interface](#instructions)
+    - [Install with pip / pipx](#pip-install)
     - [Basic Headless Usage](#basic-usage)
     - [Headless Custom XTTS Model Usage](#example-of-custom-model-zip-upload)
     - [Help command output](#help-command-output)
@@ -217,6 +218,44 @@ So you should first remove manually any text you don't want to be converted in a
 **If the script is stopped and run again, you need to refresh your gradio GUI interface<br>
 to let the web page reconnect to the new connection socket.**
 
+<a id="pip-install"></a>
+### Install with pip / pipx
+Another way to install and launch ebook2audiobook, without cloning the repo: pip installs the `ebook2audiobook` command<br>
+(all OS, any python 3.8+). The cloned repo with its launchers above keeps working the same way.
+
+1. **Install the command**
+   ```bash
+   pipx install git+https://github.com/DrewThomasson/ebook2audiobook.git
+   ```
+   or with pip
+   ```bash
+   pip install git+https://github.com/DrewThomasson/ebook2audiobook.git
+   ```
+   <i>Without git installed, use `https://github.com/DrewThomasson/ebook2audiobook/archive/refs/heads/main.tar.gz` in place of the `git+https://...` URL.</i>
+
+2. **Install / Run ebook2audiobook**, with the same options as the launchers:
+   ```bash
+   ebook2audiobook
+   ```
+   ```bash
+   ebook2audiobook --headless --ebook <path_to_ebook_file> --voice <path_to_voice_file> --language <language_code>
+   ```
+   If the command is not found (pip's scripts folder is not in your PATH): `python -m ebook2audiobook`
+
+- The first start copies ebook2audiobook to `~/ebook2audiobook` (`%USERPROFILE%\ebook2audiobook` on Windows) and installs it there<br>
+  with its launcher, exactly like `./ebook2audiobook.command` or `ebook2audiobook.cmd` would do.
+- To use another folder, set `E2A_HOME` before the first start and keep it set for the next ones<br>
+  (i.e. `export E2A_HOME=/data/ebook2audiobook` on Linux/MacOS, `setx E2A_HOME D:\ebook2audiobook` then a new terminal on Windows).
+- That folder is a regular ebook2audiobook folder: `./ebook2audiobook.command` (`./e2a.sh`) and `ebook2audiobook.cmd` (`e2a.cmd`) work in it too.
+- If that folder already holds a cloned or downloaded ebook2audiobook, it is started as it is and pip never changes it.
+- Relative paths given to `--ebook`, `--ebooks_dir`, `--voice`, `--voice_map`, `--custom_model` and `--output_dir`<br>
+  are read from the folder where you type the command.
+- No need to deactivate your venv or conda env: ebook2audiobook always runs in its own `python_env`.
+- **Update**: `pipx reinstall ebook2audiobook`, or `pip install --force-reinstall git+https://github.com/DrewThomasson/ebook2audiobook.git`.<br>
+  The next start updates the app files and keeps `python_env`, models, voices, audiobooks and anything you added to the folder.
+- **Uninstall**: run the uninstaller of the folder (`./uninstall.sh` or `uninstall.cmd`),<br>
+  then `pipx uninstall ebook2audiobook` (or `pip uninstall ebook2audiobook`).
+
 <a id="basic-usage"></a>
 ### Basic  Usage
    - **Linux/MacOS**:
@@ -226,6 +265,10 @@ to let the web page reconnect to the new connection socket.**
    - **Windows**
      ```bash
      ebook2audiobook.cmd --headless --ebook <path_to_ebook_file> --voice <path_to_voice_file> --language <language_code>
+     ```
+   - **pip / pipx install** (all OS)
+     ```bash
+     ebook2audiobook --headless --ebook <path_to_ebook_file> --voice <path_to_voice_file> --language <language_code>
      ```
      
   - **[--ebook]**: Path to your eBook file
@@ -260,6 +303,10 @@ to let the web page reconnect to the new connection socket.**
    - **Windows**
      ```bash
      ebook2audiobook.cmd --help
+     ```
+   - **pip / pipx install** (all OS)
+     ```bash
+     ebook2audiobook --help
      ```
    - **Or for all OS**
     ```python
@@ -373,6 +420,15 @@ Linux/Mac:
     ./ebook2audiobook.command
     Headless mode:
     ./ebook2audiobook.command --headless --ebook '/path/to/file' --language eng
+pip/pipx install (all OS, python 3.8+, no clone needed):
+    pipx install git+https://github.com/DrewThomasson/ebook2audiobook.git
+    (or: pip install git+https://github.com/DrewThomasson/ebook2audiobook.git)
+    Gradio/GUI:
+    ebook2audiobook
+    Headless mode:
+    ebook2audiobook --headless --ebook '/path/to/file' --language eng
+    The first start installs e2a in ~/ebook2audiobook, or in the folder set in E2A_HOME,
+    where ./ebook2audiobook.command (e2a.sh) or ebook2audiobook.cmd (e2a.cmd) also work.
 
 SML tags available:
 	[break] — silence (random range **0.3–0.6 sec.**)

@@ -204,6 +204,15 @@ Gradio/GUI:
 ./ebook2audiobook.command
 Headless mode:
 ./ebook2audiobook.command --headless --ebook '/path/to/file' --language eng
+pip/pipx install (all OS, python 3.8+, no clone needed):
+pipx install git+https://github.com/DrewThomasson/ebook2audiobook.git
+(or: pip install git+https://github.com/DrewThomasson/ebook2audiobook.git)
+Gradio/GUI:
+ebook2audiobook
+Headless mode:
+ebook2audiobook --headless --ebook '/path/to/file' --language eng
+The first start installs e2a in ~/ebook2audiobook, or in the folder set in E2A_HOME,
+where ./ebook2audiobook.command (e2a.sh) or ebook2audiobook.cmd (e2a.cmd) also work.
 Docker build image:
 Windows:
 Docker:
