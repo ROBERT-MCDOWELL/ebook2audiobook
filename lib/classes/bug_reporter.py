@@ -138,11 +138,24 @@ print(json.dumps(out))
             except Exception:
                 continue
             title = dump.splitlines()[0].strip()
-            frames = re.findall(r'File "([^"]+)", line (\d+) in (\S+)', dump.split('Current thread', 1)[-1])
+            # one block per thread: faulthandler marks the crashing one 'Current thread' only when it runs Python code
+            frame_re = r'File "([^"]+)", line (\d+) in (\S+)'
+            blocks = re.split(r'\n\s*\n', dump)
+            current = next((b for b in blocks if b.lstrip().startswith('Current thread')), None)
+            if current is not None:
+                frames = re.findall(frame_re, current)
+                sig = [f'{os.path.basename(f)}:{n}' for f, _, n in frames]
+                location = f'{os.path.basename(frames[0][0])}:{frames[0][1]} {frames[0][2]}' if frames else None
+            else:
+                # crash in a native thread (torch/OpenMP/driver worker) that has no Python frame of its own: sign it
+                # with what each Python thread was running instead of blaming the first thread listed
+                tops = [re.search(frame_re, b) for b in blocks if b.lstrip().startswith('Thread 0x')]
+                sig = sorted({f'{os.path.basename(m.group(1))}:{m.group(3)}' for m in tops if m})
+                location = 'non-Python thread'
             payload = dict(
                 app='ebook2audiobook', version=self.version, kind='native', created=created,
-                fingerprint=hashlib.sha1('|'.join([title] + [f'{os.path.basename(f)}:{n}' for f, _, n in frames]).encode('utf-8')).hexdigest()[:16],
-                where=None, location=f'{os.path.basename(frames[0][0])}:{frames[0][1]} {frames[0][2]}' if frames else None,
+                fingerprint=hashlib.sha1('|'.join([title] + sig).encode('utf-8')).hexdigest()[:16],
+                where=None, location=location,
                 error_type=title.split(':')[-1].strip(), error_message=title, root_type=None, root_message=None,
                 traceback=dump[:self.max_traceback], session={}
             )
