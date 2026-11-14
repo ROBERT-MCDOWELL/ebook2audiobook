@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'حرج: {pkg} لا تزال غير مثبتة بعد --reinstall.',
     'msg_all_packages_ok': '\nجميع الحزم المطلوبة مثبتة.',
     'msg_installing_missing_deps': 'جارٍ تثبيت التبعيات المفقودة: {pkgs}',
+    'msg_vulkan_torch_libomp': 'يفتقر مشعل Vulkan المثبت إلى {dll} ولا يمكن تحميله: إعادة تثبيته من العجلة المنشورة.',
     'msg_reinstalling_incomplete': 'إعادة تثبيت الحزم التي تحتوي على ملفات مفقودة: {pkgs}',
     'msg_removing_unusable_torchcodec': 'إزالة torchcodec {version}: لا يعمل torchcodec مع torch {torch} (أقل من 2.9)، ويعمل pyannote بدونه.',
     'msg_removing_obsolete': 'جارٍ إزالة الحزمة القديمة {pkg}…',

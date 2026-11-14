@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'கடுமையானது: --reinstall க்குப் பிறகும் {pkg} நிறுவப்படவில்லை.',
     'msg_all_packages_ok': '\nதேவையான அனைத்துத் தொகுப்புகளும் நிறுவப்பட்டுள்ளன.',
     'msg_installing_missing_deps': 'இல்லாத சார்புகளை நிறுவுகிறது: {pkgs}',
+    'msg_vulkan_torch_libomp': 'நிறுவப்பட்ட Vulkan டார்ச்-இல் {dll} இல்லை, மேலும் அதை ஏற்ற முடியவில்லை: வெளியிடப்பட்ட வீலில் இருந்து அதை மீண்டும் நிறுவவும்.',
     'msg_reinstalling_incomplete': 'கோப்புகள் இல்லாத தொகுப்புகளை மீண்டும் நிறுவுகிறது: {pkgs}',
     'msg_removing_unusable_torchcodec': 'torchcodec {version} ஐ அகற்றுதல்: torch {torch} உடன் torchcodec இயங்காது (2.9 க்கு கீழே), pyannote அது இல்லாமல் இயங்கும்.',
     'msg_removing_obsolete': 'பழைய தொகுப்பு {pkg} நீக்கப்படுகிறது…',

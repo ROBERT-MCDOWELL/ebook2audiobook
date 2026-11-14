@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'KRITIKUS: a(z) {pkg} a --reinstall után sincs telepítve.',
     'msg_all_packages_ok': '\nMinden szükséges csomag telepítve van.',
     'msg_installing_missing_deps': 'Hiányzó függőségek telepítése: {pkgs}',
+    'msg_vulkan_torch_libomp': 'A telepített Vulkan Torchből hiányzik a(z) {dll}, és nem lehet betölteni: telepítse újra a közzétett wheelből.',
     'msg_reinstalling_incomplete': 'Hiányzó fájlokat tartalmazó csomagok újratelepítése: {pkgs}',
     'msg_removing_unusable_torchcodec': 'A(z) {version} torchcodec eltávolítása: a torchcodec nem működik a(z) {torch} torch-csal (2.9 alatt), a pyannote nélküle működik.',
     'msg_removing_obsolete': 'Az elavult {pkg} csomag eltávolítása…',

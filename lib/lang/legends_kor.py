@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': '심각: --reinstall 후에도 {pkg}이(가) 설치되지 않았습니다.',
     'msg_all_packages_ok': '\n필요한 패키지가 모두 설치되어 있습니다.',
     'msg_installing_missing_deps': '누락된 종속성 설치 중: {pkgs}',
+    'msg_vulkan_torch_libomp': '설치된 Vulkan 토치가 {dll}을(를) 갖추지 않아 로드할 수 없습니다. 게시된 휠에서 다시 설치합니다.',
     'msg_reinstalling_incomplete': '파일이 누락된 패키지 재설치 중: {pkgs}',
     'msg_removing_unusable_torchcodec': 'torchcodec {version} 제거 중: torch {torch}(2.9 미만)에서는 torchcodec이 실행되지 않으며, pyannote는 torchcodec 없이 작동합니다.',
     'msg_removing_obsolete': '오래된 패키지 {pkg}을(를) 제거하는 중…',

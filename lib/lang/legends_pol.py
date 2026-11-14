@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'KRYTYCZNE: {pkg} nadal nie jest zainstalowany po --reinstall.',
     'msg_all_packages_ok': '\nWszystkie wymagane pakiety są zainstalowane.',
     'msg_installing_missing_deps': 'Instalowanie brakujących zależności: {pkgs}',
+    'msg_vulkan_torch_libomp': 'Zainstalowana pochodnia Vulkan nie ma {dll} i nie można jej załadować: trwa ponowna instalacja z opublikowanego koła.',
     'msg_reinstalling_incomplete': 'Ponowna instalacja pakietów z brakującymi plikami: {pkgs}',
     'msg_removing_unusable_torchcodec': 'Usuwanie torchcodec {version}: torchcodec nie działa z torch {torch} (poniżej 2.9), pyannote działa bez niego.',
     'msg_removing_obsolete': 'Usuwanie przestarzałego pakietu {pkg}…',
