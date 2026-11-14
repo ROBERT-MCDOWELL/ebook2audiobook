@@ -2586,8 +2586,10 @@ def build_interface(args:dict)->gr.Blocks:
                                                         session['voice'] = default_engine_settings[session['tts_engine']]['voice']
                         else:
                             if options and options[0][1] is not None:
-                                new_voice_path = models[session['fine_tuned']]['voice']
-                                if os.path.exists(new_voice_path) and any(v[1] == new_voice_path for v in options):
+                                # this session's own engine presets, not the shared 'models' another event may have
+                                # reloaded for its engine meanwhile (an inner speaker engine's preset has voice None)
+                                new_voice_path = load_engine_presets(session['tts_engine']).get(session['fine_tuned'], {}).get('voice')
+                                if isinstance(new_voice_path, str) and os.path.exists(new_voice_path) and any(v[1] == new_voice_path for v in options):
                                     session['voice'] = new_voice_path
                                 else:
                                     session['voice'] = options[0][1]
