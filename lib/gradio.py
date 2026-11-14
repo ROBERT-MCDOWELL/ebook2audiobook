@@ -1337,6 +1337,9 @@ def build_interface(args:dict)->gr.Blocks:
                 try:
                     session = context.get_session(session_id)
                     if session and session.get('id', False):
+                        # gradio can hand this single-select Dropdown's value as a list ([] once cleared)
+                        if isinstance(selected, (list, tuple)):
+                            selected = selected[0] if selected else None
                         if session.get('audiobook') != selected:
                             session['audiobook'] = selected
                         visible = session['audiobook'] is not None
@@ -1351,7 +1354,7 @@ def build_interface(args:dict)->gr.Blocks:
                 try:
                     session = context.get_session(session_id)
                     if session and session.get('id', False):
-                        if session['audiobook'] is not None: 
+                        if isinstance(session['audiobook'], str):
                             vtt = Path(session['audiobook']).with_suffix('.vtt')
                             # a warning, not exception_alert(): the list stays usable during a conversion and
                             # exception_alert() would put the session back to READY, releasing the lock it holds
@@ -3652,6 +3655,9 @@ def build_interface(args:dict)->gr.Blocks:
                     if isinstance(session.get('audiobook'), str):
                         if not os.path.exists(session['audiobook']):
                             session['audiobook'] = None
+                    elif session.get('audiobook') is not None:
+                        # a saved value that is not a path (a list the Dropdown once sent) is no selection
+                        session['audiobook'] = None
                     if session.get('audiobook_edit_preview') and os.path.exists(session['audiobook_edit_preview']):
                         os.unlink(session['audiobook_edit_preview'])
                     session['audiobook_edit_block_id'] = None
