@@ -168,8 +168,14 @@ def register_dlls()->str|bool:
     if found:
         candidates.append(Path(found).parent)
     for p in candidates:
-        if p and p.is_dir() and any(p.glob('avcodec-*.dll')):
-            os.add_dll_directory(str(p))
+        # os.add_dll_directory() takes absolute paths only (WinError 87): shutil.which() returns a bare 'ffmpeg.EXE'
+        # when it finds it in the current folder (parent '.'), and a missing LOCALAPPDATA leaves a relative path
+        p = p.resolve()
+        if p.is_dir() and any(p.glob('avcodec-*.dll')):
+            try:
+                os.add_dll_directory(str(p))
+            except OSError:
+                continue
             return str(p)
     return False
 
