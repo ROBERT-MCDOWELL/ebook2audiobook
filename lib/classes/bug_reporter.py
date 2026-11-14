@@ -541,6 +541,9 @@ print(json.dumps(out))
         # threads torn down with the interpreter), not a bug
         if self.interrupted or self.exiting or sys.is_finalizing() or not threading.main_thread().is_alive():
             return True
+        # uninstalled while still running: the app keeps going from memory and fails on what was deleted under it
+        if not os.path.isfile(os.path.join(self.app_root, 'app.py')):
+            return True
         cur, depth = exc, 0
         while cur is not None and depth < 8:
             if isinstance(cur, (KeyboardInterrupt, SystemExit)) or (isinstance(cur, subprocess.CalledProcessError) and cur.returncode in self.interrupt_codes):

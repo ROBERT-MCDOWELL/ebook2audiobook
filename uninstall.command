@@ -55,6 +55,21 @@ echo "  $SCRIPT_DIR"
 echo
 
 # =========================================================
+# REFUSE WHILE RUNNING
+# =========================================================
+# deleting python_env, run/ and the app files under a running ebook2audiobook leaves it half alive: it keeps going
+# from memory and fails at its next step (its session manager socket goes with run/)
+if command -v pgrep >/dev/null 2>&1; then
+	running_re="$(printf '%s' "$SCRIPT_DIR" | sed 's/[][\.*^$+?(){}|]/\\&/g')/(app\.py|python_env/)"
+	running_pids="$(pgrep -f -- "$running_re" 2>/dev/null | tr '\n' ' ' || true)"
+	if [[ -n "${running_pids// /}" ]]; then
+		echo "$APP_NAME is still running from this folder (PID: ${running_pids% })."
+		echo "Quit it first, then run the uninstaller again."
+		exit 1
+	fi
+fi
+
+# =========================================================
 # USER CONFIRMATION
 # =========================================================
 if [[ -t 0 ]]; then
