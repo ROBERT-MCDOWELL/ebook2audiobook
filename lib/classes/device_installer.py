@@ -1,8 +1,8 @@
-import os, re, sys, platform, shutil, subprocess, importlib, json, tempfile
+import os, re, sys, csv, platform, shutil, subprocess, importlib, json, tempfile
 from functools import cached_property
 from typing import Union
 from glob import glob
-from importlib.metadata import version, PackageNotFoundError
+from importlib.metadata import version, distributions, PackageNotFoundError
 from lib.conf import *
 from lib.lang import legends
 
@@ -1758,6 +1758,8 @@ class DeviceInstaller():
             self.remove_unusable_torchcodec()
             if self.install_missing_dependencies() == 1:
                 return 1
+            if self.repair_incomplete_packages() == 1:
+                return 1
         except Exception as e:
             error = f'install_python_packages() error: {e}'
             print(error)
@@ -1780,6 +1782,44 @@ class DeviceInstaller():
         except Exception as e:
             error = f'remove_unusable_torchcodec(): {e}'
             print(error)
+
+    def repair_incomplete_packages(self)->int:
+        # an install cut short (closed terminal, antivirus, full disk) can leave a package with its metadata but not
+        # all its files: the version checks and uv pip check pass and the import fails (gradio without
+        # gradio/history.py: "cannot import name 'history' from partially initialized module 'gradio'"). RECORD lists
+        # each package's files: the same version is reinstalled when code files are missing. Left out: the device
+        # step's packages (dependency_skip_re) and packages installed from a URL or a local path (direct_url.json)
+        code_suffixes = ('.py', '.so', '.pyd', '.dll', '.dylib')
+        incomplete = {}
+        try:
+            for dist in distributions():
+                name = self.pkg_head(dist.metadata['Name'] or '')
+                if not name or name in incomplete or self.dependency_skip_re.match(name) or dist.read_text('direct_url.json'):
+                    continue
+                # RECORD itself: Distribution.files leaves out the entries whose file is gone (python >= 3.12)
+                for row in csv.reader((dist.read_text('RECORD') or '').splitlines()):
+                    if row and row[0].endswith(code_suffixes) and not os.path.exists(dist.locate_file(row[0])):
+                        incomplete[name] = dist.version
+                        break
+        except Exception as e:
+            error = f'repair_incomplete_packages(): {e}'
+            print(error)
+            return 0
+        if not incomplete:
+            return 0
+        msg = legends['msg_reinstalling_incomplete'].format(pkgs=', '.join(incomplete))
+        print(msg)
+        cmd = self._uv_pip('install', '--cache-dir', self.pip_cache_dir)
+        for name in incomplete:
+            cmd += ['--reinstall-package', name]
+        try:
+            subprocess.check_call(cmd + [f'{name}=={ver}' for name, ver in incomplete.items()])
+        except subprocess.CalledProcessError as e:
+            msg = legends['msg_install_pkg_failed'].format(pkg=', '.join(incomplete), e=e)
+            print(msg)
+            return 1
+        importlib.invalidate_caches()
+        return 0
 
     def install_missing_dependencies(self)->int:
         # requirements.txt only lists the top packages: a dependency of theirs removed afterwards (uninstalled by

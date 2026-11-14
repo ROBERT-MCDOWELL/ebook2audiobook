@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'CRITICAL: {pkg} is still not installed after --reinstall.',
     'msg_all_packages_ok': '\nAll required packages are installed.',
     'msg_installing_missing_deps': 'Installing missing dependencies: {pkgs}',
+    'msg_reinstalling_incomplete': 'Reinstalling packages with missing files: {pkgs}',
     'msg_removing_unusable_torchcodec': 'Removing torchcodec {version}: no torchcodec runs with torch {torch} (below 2.9), pyannote works without it.',
     'msg_removing_obsolete': 'Removing obsolete package {pkg}…',
     'msg_remove_obsolete_failed': 'Failed to remove obsolete package {pkg} (non-fatal): {e}',
