@@ -2,7 +2,7 @@ import os, re, sys, csv, platform, shutil, subprocess, importlib, json, tempfile
 from functools import cached_property
 from typing import Union
 from glob import glob
-from importlib.metadata import version, distributions, PackageNotFoundError
+from importlib.metadata import version, distribution, distributions, PackageNotFoundError
 from lib.conf import *
 from lib.lang import legends
 
@@ -2111,6 +2111,53 @@ class DeviceInstaller():
             print(error)
             return 0
 
+    vulkan_libomp_marker = os.path.join(sys.prefix, '.e2a_vulkan_torch_libomp')
+
+    def vulkan_torch_lacks_libomp(self, torch_url:str)->bool:
+        # the Windows +vulkan torch links MSVC's LLVM OpenMP runtime (libomp140.x86_64.dll), which no VC++
+        # redistributable installs: a wheel published without it in torch/lib does not import ("Error loading shm.dll or
+        # one of its dependencies"). The repacked wheel keeps the same version, so the missing file tells them apart. It
+        # is reinstalled only when the published wheel changed since the last install (ETag or size and date from a HEAD
+        # request, kept in python_env): an unfixed wheel is not downloaded again at every start
+        self.vulkan_libomp_signature = None
+        try:
+            torch_dist = distribution('torch')
+            lib_dir = str(torch_dist.locate_file(os.path.join('torch', 'lib')))
+            torch_cpu = os.path.join(lib_dir, 'torch_cpu.dll')
+            if not os.path.isfile(torch_cpu) or os.path.isfile(os.path.join(lib_dir, 'libomp140.x86_64.dll')):
+                return False
+            import mmap
+            with open(torch_cpu, 'rb') as f, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as data:
+                if data.find(b'libomp140.x86_64.dll') < 0:
+                    return False
+            import urllib.request
+            with urllib.request.urlopen(urllib.request.Request(torch_url, method='HEAD'), timeout=15) as response:
+                headers = response.headers
+            signature = headers.get('ETag') or f"{headers.get('Content-Length')}|{headers.get('Last-Modified')}"
+            previous = ''
+            if os.path.isfile(self.vulkan_libomp_marker):
+                with open(self.vulkan_libomp_marker, 'r', encoding='utf-8') as f:
+                    previous = f.read().strip()
+            if signature == previous:
+                return False
+            msg = legends['msg_vulkan_torch_libomp'].format(dll='libomp140.x86_64.dll')
+            print(msg)
+            self.vulkan_libomp_signature = signature
+            return True
+        except Exception:
+            # no torch, unreadable file, offline: nothing to decide on, the normal checks stand
+            return False
+
+    def save_vulkan_libomp_try(self)->None:
+        signature = getattr(self, 'vulkan_libomp_signature', None)
+        if not signature:
+            return
+        try:
+            with open(self.vulkan_libomp_marker, 'w', encoding='utf-8') as f:
+                f.write(signature)
+        except OSError:
+            pass
+
     def install_device_packages(self, device_info_str:str)->int:
         def _tag_ok(installed_tag):
             # CPU index: '/whl/cpu' -> bare on macOS, '+cpu' on linux/windows; both are fine
@@ -2158,6 +2205,12 @@ class DeviceInstaller():
             # torchcodec: presence only (when torch >= 2.9 needs it)
             if self.version_tuple(torch_version_matrix, 2) >= (2, 9) and not self.get_package_version('torchcodec'):
                 return True
+            # Windows +vulkan torch published without the OpenMP runtime it links: same version as the fixed wheel
+            if device_info['name'] == devices['VULKAN']['proc'] and self.system == systems['WINDOWS']:
+                py_major, py_minor = device_info['pyvenv']
+                vulkan_torch_url = f"{default_jetson_url}/torch/torch-{torch_version_matrix}%2B{tag}-cp{py_major}{py_minor}-cp{py_major}{py_minor}-{device_info['os']}_{device_info['arch']}.whl"
+                if self.vulkan_torch_lacks_libomp(vulkan_torch_url):
+                    return True
             return False
 
         def _probe_gpus()->dict:
@@ -2227,6 +2280,7 @@ class DeviceInstaller():
                                 torch_pkg = f"{url}/torch/torch-{torch_version_matrix}%2B{tag}-{tag_py}-{tag_py}-{os_env}_{arch}.whl"
                                 torchaudio_pkg = f"{url}/torchaudio/torchaudio-{torchaudio_version_matrix}%2B{tag}-{tag_py}-{tag_py}-{os_env}_{arch}.whl"
                                 subprocess.check_call(self._uv_pip('install', '--reinstall', '--no-cache', '--no-deps', torch_pkg, torchaudio_pkg))
+                                self.save_vulkan_libomp_try()
                             elif device_info['name'] == devices['ROCM']['proc'] and self.system == systems['WINDOWS']:
                                 url = default_pytorch_amd_url
                                 real_tag = tag.replace('win-', '')
