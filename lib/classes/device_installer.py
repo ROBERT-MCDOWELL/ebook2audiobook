@@ -1145,11 +1145,11 @@ class DeviceInstaller():
                             msg = legends['msg_cuda_no_torch_build'].format(version=version)
                 else:
                     msg = legends['msg_cuda_missing']
-                # 4) nvidia-smi header parsing, Docker image builds only
-                # Natively CUDA needs the CUDA runtime found above, else the GPU takes the +vulkan torch below.
-                # A Docker image brings its own runtime (the cu torch wheel's nvidia-* packages), so the host
-                # only needs the driver, which nvidia-smi answers for.
-                if mode == BUILD_DOCKER and not devices['CUDA']['found'] and has_cmd('nvidia-smi'):
+                # 4) nvidia-smi header parsing: the driver alone is enough. The cu torch wheels bring their own CUDA
+                # runtime, natively as in a Docker image (Linux: the nvidia-* packages, Windows: cudart/cublas/cudnn in
+                # torch/lib), so most NVIDIA users have no toolkit for steps 1-2 to find. It reads the driver, not the
+                # torch installed by an earlier run. Without it an NVIDIA GPU fell to the +vulkan torch below
+                if not devices['CUDA']['found'] and has_cmd('nvidia-smi'):
                     out = try_cmd('nvidia-smi')
                     # Header line: '| NVIDIA-SMI ...  Driver Version: ...  CUDA Version: 12.4 |'
                     m = re.search(r'cuda\s*version\s*:?\s*([0-9]+(?:\.[0-9]+)?)', out, re.IGNORECASE)
