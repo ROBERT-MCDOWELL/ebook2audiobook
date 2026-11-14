@@ -174,9 +174,9 @@ class SessionTracker:
 
     def start_session(self, session_id:str)->bool:
         with self.lock:
-            if session_id not in context.sessions:
-                return False
             session = context.get_session(session_id)
+            if not session:
+                return False
             session['status'] = status_tags['READY']
             return True
 
@@ -366,10 +366,13 @@ class SessionContext:
         return self.sessions[session_id]
 
     def get_session(self, session_id:str)->Any:
-        if session_id in self.sessions:
-            ui_language.set(self.sessions[session_id].get('ui_language') or system_language)
-            return self.sessions[session_id]
-        return {}
+        # one manager call: an 'in' test then a read are two, and another thread can end the session in between
+        # (end_session() on a closed tab or a finished task): KeyError on the read
+        session = self.sessions.get(session_id)
+        if session is None:
+            return {}
+        ui_language.set(session.get('ui_language') or system_language)
+        return session
 
     def find_id_by_hash(self, socket_hash:str)->str|None:
         for session_id, session in list(self.sessions.items()):
@@ -5121,6 +5124,9 @@ def on_unload(req:gr.Request)->None:
         session_id = context.find_id_by_hash(socket_hash)
         if session_id:
             session = context.get_session(session_id)
+            if not session:
+                # ended meanwhile by another thread
+                return
             # a running task (CONVERTING, or EDIT while a blocks preview is prepared) is cancelled, not ended under it
             if session['status'] == status_tags['CONVERTING'] or context_tracker.is_busy(session_id):
                 session['cancellation_requested'] = True
