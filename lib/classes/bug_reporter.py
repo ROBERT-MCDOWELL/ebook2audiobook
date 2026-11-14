@@ -102,7 +102,11 @@ print(json.dumps(out))
         self.voices_dir = os.path.abspath(voices_dir)
         flags = re.IGNORECASE if sys.platform == 'win32' else 0
         home = os.path.expanduser('~')
-        self.rules = [(re.compile(r'(?:[A-Za-z]:)?[^\s"\'<>|]*?[\\/](?:site|dist)-packages(?=[\\/])', flags), '<site>')]
+        # the app and home folders are matched whole as site-packages prefixes: they may hold spaces (C:\Users\First
+        # Last), where the generic part stops, and the start of the folder (a first name) stayed in the report
+        prefixes = sorted({v for p in (self.app_root, home) if len(p) >= 4 for v in (p, p.replace('\\', '/'), p.replace('/', '\\'))}, key=len, reverse=True)
+        known = ''.join(f'{re.escape(p)}|' for p in prefixes)
+        self.rules = [(re.compile(r'(?:' + known + r'(?:[A-Za-z]:)?)[^\s"\'<>|]*?[\\/](?:site|dist)-packages(?=[\\/])', flags), '<site>')]
         for path, label in sorted([(self.app_root, '<e2a>'), (home, '~')], key=lambda p: len(p[0]), reverse=True):
             for variant in {path, path.replace('\\', '/'), path.replace('/', '\\')} if len(path) >= 4 else []:
                 self.rules.append((re.compile(re.escape(variant) + r'(?=[\\/\s"\':,)\]]|$)', flags), label))
@@ -110,8 +114,10 @@ print(json.dumps(out))
             user = getpass.getuser()
         except Exception:
             user = os.path.basename(home)
-        if len(user) >= 3 and user.lower() not in ['root', 'user', 'admin', 'app', 'nobody', 'runner']:
-            self.rules.append((re.compile(r'(?<![\w])' + re.escape(user) + r'(?![\w])', flags), '<user>'))
+        # the profile folder's own name too: on Windows it can differ from the account name getuser() returns
+        for name in sorted({user, os.path.basename(home)}, key=len, reverse=True):
+            if len(name) >= 3 and name.lower() not in ['root', 'user', 'admin', 'app', 'nobody', 'runner']:
+                self.rules.append((re.compile(r'(?<![\w])' + re.escape(name) + r'(?![\w])', flags), '<user>'))
         self.rules += [
             (re.compile(r'[\w.+-]+@[\w-]+(?:\.[\w-]+)*\.[A-Za-z]{2,}\b'), '<email>'),
             (re.compile(r'hf_[A-Za-z0-9]{20,}'), '<token>'),
