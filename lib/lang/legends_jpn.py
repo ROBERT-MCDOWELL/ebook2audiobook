@@ -357,6 +357,7 @@ legends = {
     'msg_venv_reinstall': '「{env}」ディレクトリを削除して、インストーラーを再実行してください:\nLinux と Mac は "./ebook2audiobook.command"、Windows は "ebook2audiobook.cmd"',
     'error_uv_missing': '起動方法が正しくありません: uv が見つかりません。\nこのアプリは Python パッケージの管理に uv を必要とします。\nuv をインストールしてください: {url}\nその後、インストーラーを再実行してください。',
     'error_wrong_venv': '起動方法が正しくありません！ebook2audiobook は専用の仮想環境で実行する必要があります！',
+    'error_app_control_blocked': 'Windowsがebook2audiobookに必要なファイルをブロックしました：\n{error}\nスマートアプリコントロール、または管理者によって設定されたアプリコントロールポリシーは、Pythonやlibraries ebook2audiobookのインストールのように、署名されていないプログラムを拒否します。\n[Windowsセキュリティ] > [アプリとブラウザの制御] > [スマートアプリ制御の設定]で、スマートアプリ制御をオフにします（Windowsでは、リセットした場合にのみ再度オンになります）。\nまたは、管理者にebook2audiobookフォルダーとuvのPythonフォルダー（%APPDATA%\\uv）を許可するよう依頼してください。',
     'error_dirs_not_writable': '権限が正しくありません：ebook2audiobookは次の場所に書き込めません：\n{dirs}\nこれらのフォルダをユーザーが書き込み可能に設定してから、再起動してください。',
     'error_dirs_not_writable_docker': '権限が正しくありません： ebook2audiobookは、ホストからマウントされた次のフォルダに書き込めません：\n{dirs}\nSELinuxホスト（Fedora、RHELなど）では、--security-opt label=disableを指定してコンテナを実行するか、各-vマウントに:zを追加します。\nそれ以外の場合は、コンテナユーザーがホストフォルダに書き込めるようにしてから、再起動してください。',
     'error_launcher_required': '起動が正しくありません：ebook2audiobookは常に起動スクリプトで起動する必要があります。\nLinuxおよびMacの場合は"./e2a.sh"、Windowsの場合は"e2a.cmd"。\napp.pyを直接起動できるのは、ebook2audiobookがpython_envフォルダのPythonとともにインストールされている場合に限り、1回のみです。',

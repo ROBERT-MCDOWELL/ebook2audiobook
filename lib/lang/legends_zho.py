@@ -357,6 +357,7 @@ legends = {
     'msg_venv_reinstall': '请删除“{env}”目录并重新运行安装程序：\nLinux 和 Mac 使用 "./ebook2audiobook.command"，Windows 使用 "ebook2audiobook.cmd"',
     'error_uv_missing': '启动方式错误：未找到 uv 程序。\n本应用需要 uv 来管理 Python 包。\n请安装 uv：{url}\n然后重新运行安装程序。',
     'error_wrong_venv': '启动方式错误！ebook2audiobook 必须在其专属的虚拟环境中运行！',
+    'error_app_control_blocked': 'Windows 阻止了 ebook2audiobook 需要的一个文件：\n{error}\n智能应用控制或管理员设置的应用控制策略会拒绝未签名的程序，Python 和 ebook2audiobook 安装的库就是这种情况。\n在“Windows 安全中心”>“应用和浏览器控制”>“智能应用控制设置”中关闭智能应用控制（Windows 仅在重置时才会重新启用该功能），\n或要求您的管理员允许访问 ebook2audiobook 文件夹和 uv 的 Python 文件夹（%APPDATA%\\uv）。',
     'error_dirs_not_writable': '权限错误：ebook2audiobook 无法写入：\n{dirs}\n将这些文件夹设置为对您的用户可写，然后重新启动。',
     'error_dirs_not_writable_docker': '权限错误：ebook2audiobook 无法写入从主机挂载的以下文件夹：\n{dirs}\n在SELinux主机（Fedora、RHEL……）上，使用--security-opt label=disable运行容器，或在每个-v挂载中添加:z。\n否则，请将主机文件夹设置为可供容器用户写入，然后重新启动。',
     'error_launcher_required': '启动错误：ebook2audiobook 必须始终通过其启动脚本启动：\nLinux 和 Mac 为"./e2a.sh"，Windows 为"e2a.cmd"。\n只有在安装了 ebook2audiobook 之后，才能使用其python_env文件夹中的 Python 直接启动app.py。',
