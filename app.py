@@ -111,6 +111,29 @@ def check_python_version(script_mode:str)->bool:
 def is_running_in_container()->bool:
     return os.environ.get("IN_DOCKER") == "1"
 
+def check_data_dirs(script_mode:str)->bool:
+    # the folders e2a writes into, bind mounted from the host in Docker. One it cannot write to (SELinux label,
+    # owner, read-only mount) failed later at the first import writing there with a raw PermissionError.
+    # ebooks/ stays out: it is only read and may be mounted read-only on purpose
+    denied = []
+    for path in (models_dir, voices_dir, tmp_dir, os.path.abspath('audiobooks')):
+        try:
+            os.makedirs(path, exist_ok=True)
+            probe = os.path.join(path, f'.e2a_write_test_{os.getpid()}')
+            with open(probe, 'w', encoding='utf-8') as f:
+                f.write('')
+            os.remove(probe)
+        except OSError:
+            denied.append(path)
+    if not denied:
+        return True
+    legend_key = 'error_dirs_not_writable_docker' if script_mode == FULL_DOCKER else 'error_dirs_not_writable'
+    error = f'''***********
+{legends[legend_key].format(dirs=chr(10).join(denied))}
+***********'''
+    print(error)
+    return False
+
 def is_port_in_use(port:int)->bool:
     with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
         return s.connect_ex(('0.0.0.0',port))==0
@@ -329,6 +352,8 @@ valence, arousal (-1 to 1).""")
             print(error)
             sys.exit(1)
         elif (not check_virtual_env(args['script_mode'])) or (not check_python_version(args['script_mode'])):
+            sys.exit(1)
+        elif not check_data_dirs(args['script_mode']):
             sys.exit(1)
         from cryptography.fernet import Fernet
         os.environ['HF_TOKEN'] = Fernet(fernet_key.encode('utf-8')).decrypt(fernet_data).decode('utf-8')

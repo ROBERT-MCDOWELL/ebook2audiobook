@@ -65,6 +65,10 @@ services:
     stdin_open: true
     ports:
       - "7860:7860"
+    # SELinux hosts (Fedora, RHEL...) refuse the container any write to the bind mounts below without it,
+    # as podman-compose.yml already does
+    security_opt:
+      - label=disable
     volumes:
       - ./ebooks:/app/ebooks:rw
       - ./audiobooks:/app/audiobooks:rw
