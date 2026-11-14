@@ -16,7 +16,7 @@ from .conf import (
 )
 
 from .conf_lang import (
-    abbreviations_mapping, chapter_word_mapping, default_language_code,
+    abbreviations_mapping, chapter_word_mapping, default_language_code, language_separator,
     roman_numbers_tuples, emojis_list, install_info, session_info, ipa_mapping, language_mapping,
     language_math_phonemes, language_clock, punctuation_list, 
     punctuation_list_set, punctuation_split_hard, punctuation_split_hard_set,

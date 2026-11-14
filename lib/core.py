@@ -4509,7 +4509,7 @@ def convert_ebook(args:dict)->tuple:
                     args['language_iso1'] = None
             except Exception as e:
                 pass
-            if args['language'] not in language_mapping.keys():
+            if args['language'] not in language_mapping.keys() or args['language'] == language_separator:
                 error = legends['error_language_not_supported']
                 return error, False
             translate_to = args.get('translate') if args.get('translate') != args.get('language') else False
