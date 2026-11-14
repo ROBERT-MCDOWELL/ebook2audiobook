@@ -3339,6 +3339,17 @@ def convert_chapters2audio(session_id:str)->bool:
                     pass
             if disk_full:
                 session['tts_init_error'] = legends['error_disk_full_models'].format(dir=models_dir)
+            # out of memory while loading the model, in e2a or in a worker process (its error text comes back): the
+            # CUDA/ROCm/XPU allocators, cuDNN/cuBLAS workspaces, the CPU allocator. On a Jetson the GPU allocates from
+            # the RAM the CPU uses too (NvMap), so the advice is not the same
+            elif re.search(r'out of memory|OutOfMemoryError|MemoryError|can.t allocate memory|CUDNN_STATUS_ALLOC_FAILED|CUBLAS_STATUS_ALLOC_FAILED|hipErrorOutOfMemory|OUT_OF_DEVICE_MEMORY|NvMapMemAlloc', session['tts_init_error'], re.IGNORECASE):
+                if session['device'] == devices['JETSON']['proc']:
+                    legend = 'error_out_of_memory_jetson'
+                elif session['device'] == devices['CPU']['proc']:
+                    legend = 'error_out_of_memory_cpu'
+                else:
+                    legend = 'error_out_of_memory_gpu'
+                session['tts_init_error'] = legends[legend].format(engine=session['tts_engine'], device=session['device'])
             return False
         blocks_current = session['blocks_current']
         blocks = blocks_current['blocks']
