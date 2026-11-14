@@ -1821,24 +1821,56 @@ class DeviceInstaller():
         importlib.invalidate_caches()
         return 0
 
+    def pinned_heads(self)->set:
+        # the packages requirements.txt pins or caps (==, <, ~=): their version is e2a's choice, never raised for another
+        heads = set()
+        try:
+            with open(requirements_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    pkg = line.split('#', 1)[0].strip()
+                    if pkg and re.search(r'==|<|~=', pkg):
+                        heads.add(self.pkg_head(pkg))
+        except OSError:
+            pass
+        return heads
+
     def install_missing_dependencies(self)->int:
         # requirements.txt only lists the top packages: a dependency of theirs removed afterwards (uninstalled by
         # hand, interrupted install, antivirus) is never put back, and every start then fails at import (gradio
-        # without uvicorn). uv pip check lists them. Version conflicts are left alone (some are intended, see
-        # transformers_caps and sitecustomize.py), and so are the packages the device step installs from its own
+        # without uvicorn). uv pip check lists them. Of the version conflicts only a floor is raised (below), the others
+        # are left alone (some are intended, see transformers_caps and sitecustomize.py), and so are the packages the
+        # device step installs from its own
         # wheels or swaps (torch family, GPU runtimes, onnxruntime builds: onnxruntime-gpu stands for onnxruntime)
         try:
             result = subprocess.run(self._uv_pip('check'), capture_output=True, text=True, encoding='utf-8', errors='replace')
         except OSError:
             return 0
+        output = f'{result.stdout}\n{result.stderr}'
         missing = []
-        for req in re.findall(r"requires `([^`]+)`, but it's not installed", f'{result.stdout}\n{result.stderr}'):
+        for req in re.findall(r"requires `([^`]+)`, but it's not installed", output):
             if not self.dependency_skip_re.match(self.pkg_head(req)) and req not in missing:
                 missing.append(req)
-        if not missing:
+        # a dependency below a floor another package declares (anyio 4.16 needs typing_extensions>=4.16, an older one
+        # installed since fails at import): raised when only a floor is asked for and e2a neither pins it
+        # (requirements.txt), installs it per device (device_pkgs) nor leaves it to the device step. Upper bounds stay
+        outdated = []
+        pinned = self.pinned_heads()
+        for req, installed in re.findall(r"requires `([^`]+)`, but `([^`]+)` is installed", output):
+            # without its environment marker (" ; python_full_version < '3.15'"): uv only reports the ones that apply
+            spec = req.split(';', 1)[0].strip()
+            head = self.pkg_head(spec)
+            ops = set(re.findall(r'===|==|!=|~=|>=|<=|>|<', spec))
+            if ops and ops <= {'>=', '>'} and head not in pinned and head not in self.device_pkgs and not self.dependency_skip_re.match(head) and spec not in outdated:
+                outdated.append(spec)
+        if not missing and not outdated:
             return 0
-        msg = legends['msg_installing_missing_deps'].format(pkgs=', '.join(missing))
-        print(msg)
+        if missing:
+            msg = legends['msg_installing_missing_deps'].format(pkgs=', '.join(missing))
+            print(msg)
+        if outdated:
+            msg = legends['msg_upgrading_outdated_deps'].format(pkgs=', '.join(outdated))
+            print(msg)
+        missing = missing + outdated
         # a missing device package (transformers) comes back with its cap; the other pins stay out, they are not missing
         heads = {self.pkg_head(req) for req in missing}
         pins = []
