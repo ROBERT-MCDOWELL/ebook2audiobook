@@ -116,7 +116,9 @@ print(json.dumps(out))
             (re.compile(r'[\w.+-]+@[\w-]+(?:\.[\w-]+)*\.[A-Za-z]{2,}\b'), '<email>'),
             (re.compile(r'hf_[A-Za-z0-9]{20,}'), '<token>'),
             (re.compile(r'(?i)\b(token|api[_-]?key|secret|password|authorization)\b(["\']?\s*[:=]\s*["\']?)([^\s"\',;]+)'), r'\1\2<redacted>'),
-            (re.compile(r'\b(?!127\.0\.0\.1\b|0\.0\.0\.0\b)(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3}\b'), '<ip>')
+            # not glued to '-', '.' or a word char: a dotted version such as the WSL kernel in
+            # Linux-5.15.167.4-microsoft-standard-WSL2 is not an address (a trailing sentence dot is fine)
+            (re.compile(r'(?<![\w.-])(?!127\.0\.0\.1\b|0\.0\.0\.0\b)(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3}(?!\.?[\w-])'), '<ip>')
         ]
         sys.excepthook = self.on_uncaught
         threading.excepthook = self.on_thread
