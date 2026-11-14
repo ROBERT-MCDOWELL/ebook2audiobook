@@ -550,6 +550,7 @@ legends = {
     'msg_tts_loaded': 'TTS {model} dimuat!',
     'msg_tts_already_loaded': 'TTS {model} sudah dimuat',
     'error_disk_full_models': 'Disk penuh saat memuat model tts. Kosongkan folder {dir} dan mulai ulang ebook2audiobook, model akan diunduh lagi.',
+    'error_cuda_arch_unsupported': 'Torch {torch} yang diinstal tidak memiliki kernel CUDA untuk {gpu} Anda (kemampuan komputasi {cc}), torch ini dibuat untuk: {archs}.<br/>GPU di bawah kemampuan komputasi 7.5 (Maxwell, Pascal, Volta) memerlukan cu126 torch, RTX 50 (12.0) cu128 atau yang lebih baru: dengan Docker, gunakan image tersebut, atau mulai ulang ebook2audiobook, yang akan menginstal versi yang tepat.',
     'error_out_of_memory_gpu': 'Memori GPU tidak cukup untuk memuat {engine} di {device}. Tutup aplikasi lain yang menggunakan GPU, atau pilih perangkat CPU atau mesin TTS yang lebih ringan.',
     'error_out_of_memory_jetson': 'Memori tidak cukup untuk memuat {engine} di GPU Jetson: CPU dan GPU-nya menggunakan RAM yang sama. Tutup aplikasi lain (sesi desktop juga jika memungkinkan), atau pilih perangkat CPU atau mesin TTS yang lebih ringan.',
     'error_out_of_memory_cpu': 'RAM tidak cukup untuk memuat {engine}. Tutup aplikasi lain, atau pilih mesin TTS yang lebih ringan.',

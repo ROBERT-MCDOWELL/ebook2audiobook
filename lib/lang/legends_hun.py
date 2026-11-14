@@ -550,6 +550,7 @@ legends = {
     'msg_tts_loaded': 'A(z) {model} TTS betöltve!',
     'msg_tts_already_loaded': 'A(z) {model} TTS már be van töltve',
     'error_disk_full_models': 'A TTS modell betöltése közben a lemez megtelt. Ürítse ki a {dir} mappát, és indítsa újra az ebook2audiobook-ot, a modellek újra letöltődnek.',
+    'error_cuda_arch_unsupported': 'A telepített torch {torch} nem rendelkezik CUDA-kernelekkel az Ön {gpu} eszközéhez (számítási képesség: {cc}), mert a következőhöz készült: {archs}.<br/>A(z) 7.5 (Maxwell, Pascal, Volta) számítási képesség alatti GPU-khoz a cu126 torch, RTX 50 (12.0) cu128 vagy újabb verzió szükséges: Docker használata esetén használja ezt az image-t, ellenkező esetben indítsa újra az ebook2audiobook alkalmazást, amely telepíti a megfelelőt.',
     'error_out_of_memory_gpu': 'Nincs elég GPU-memória a(z) {engine} betöltéséhez a következőn: {device}. Zárja be a GPU-t használó többi alkalmazást, vagy válassza a CPU-eszközt, illetve egy egyszerűbb TTS-motort.',
     'error_out_of_memory_jetson': 'Nincs elég memória a(z) {engine} betöltéséhez a Jetson GPU-ra: a CPU-ja és a GPU-ja ugyanazt a RAM-ot használja. Zárja be a többi alkalmazást (ha lehetséges, az asztali munkamenetet is), vagy válassza a CPU-eszközt, illetve egy egyszerűbb szövegfelolvasó motort.',
     'error_out_of_memory_cpu': 'Nincs elég RAM a(z) {engine} betöltéséhez. Zárja be a többi alkalmazást, vagy válasszon egy egyszerűbb TTS-motort.',

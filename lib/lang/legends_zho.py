@@ -550,6 +550,7 @@ legends = {
     'msg_tts_loaded': 'TTS {model} 已加载！',
     'msg_tts_already_loaded': 'TTS {model} 已经加载',
     'error_disk_full_models': '加载TTS模型时磁盘已满。清空{dir}文件夹并重新启动ebook2audiobook ，模型将再次下载。',
+    'error_cuda_arch_unsupported': '已安装的torch {torch}没有适用于您的{gpu}（计算能力{cc}）的CUDA内核，它是为以下设备构建的：{archs}。<br/>计算能力低于7.5（Maxwell、Pascal、Volta）的 GPU 需要 cu126 torch，RTX 50（12.0）需要 cu128 或更高版本：使用 Docker 时请使用该镜像，否则请重启 ebook2audiobook，它会安装正确的版本。',
     'error_out_of_memory_gpu': 'GPU 内存不足，无法在 {device} 上加载 {engine}。关闭其他使用 GPU 的应用程序，或选择 CPU 设备或更轻量的 TTS 引擎。',
     'error_out_of_memory_jetson': '内存不足，无法在 Jetson GPU 上加载{engine}：其 CPU 和 GPU 共享同一块 RAM。请关闭其他应用程序（如果可以，也请关闭桌面会话），或者选择 CPU 设备或更轻量的 TTS 引擎。',
     'error_out_of_memory_cpu': 'RAM 不足，无法加载 {engine}。请关闭其他应用程序，或选择更轻量的 TTS 引擎。',

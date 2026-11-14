@@ -550,6 +550,7 @@ legends = {
     'msg_tts_loaded': 'A ti ṣí TTS {model}!',
     'msg_tts_already_loaded': 'TTS {model} ti ṣí tẹ́lẹ̀',
     'error_disk_full_models': 'Disk kíkún nígbà tí o ń gbé àwòṣe TTS. Kú àká-ẹ̀dà {dir} náà kí o sì tún bẹ̀rẹ̀ ebook2audiobook, àwọn àwòṣe náà yóò tún di gbígbé sílẹ̀.',
+    'error_cuda_arch_unsupported': 'Tọ́ọ́ṣì tí a fi sori ẹrọ {torch} kò ní àwọn kẹ́ńẹ́lì CUDA fún {gpu} rẹ (agbára ìṣirò {cc}), a kọ́ ọ fún: {archs}.<br/>Àwọn GPU tí ó wà ní ìsàlẹ̀ agbára ìṣirò 7.5 (Maxwell, Pascal, Volta) nílò cu126 torch, RTX 50 (12.0) cu128 tàbí tuntun: pẹ̀lú Docker lo àwòrán yẹn, bí bẹ́ẹ̀ kọ́ tún ebook2audiobook bẹ̀rẹ̀, èyí tí yóò fi èyí tí ó tọ̀nà sílẹ̀.',
     'error_out_of_memory_gpu': 'Ìrántí GPU kò tó láti gbé {engine} wọlé lórí {device}. Pa àwọn ohun èlò mìíràn tí ó ń lo GPU náà, tàbí kí o yan ẹ̀rọ CPU tàbí ẹ̀rọ TTS tí kò wúwo tó.',
     'error_out_of_memory_jetson': 'Ìrántí kò tó láti gbé {engine} sórí Jetson GPU: CPU àti GPU rẹ̀ ń lo RAM kan náà. Pa àwọn ohun èlò mìíràn (pẹ̀lú ìgbàsílẹ̀ ojú-iṣẹ́ náà tí o bá lè ṣe bẹ́ẹ̀), tàbí kí o yan ẹ̀rọ CPU tàbí ẹ̀rọ TTS tí kò wúwo púpọ̀.',
     'error_out_of_memory_cpu': 'RAM kò tó láti gbé {engine} wọlé. Pa àwọn ohun èlò mìíràn, tàbí kí o yan ẹ̀rọ TTS tí kò wúwo.',

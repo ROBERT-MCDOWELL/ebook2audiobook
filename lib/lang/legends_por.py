@@ -550,6 +550,7 @@ legends = {
     'msg_tts_loaded': 'TTS {model} carregado!',
     'msg_tts_already_loaded': 'TTS {model} já carregado',
     'error_disk_full_models': 'Disco cheio enquanto carrega o modelo TTS. Esvazie a pasta {dir} e reinicie o ebook2audiobook, os modelos serão baixados novamente.',
+    'error_cuda_arch_unsupported': 'O Torch {torch} instalado não tem kernels CUDA para o seu {gpu} (capacidade de computação {cc}). Ele foi desenvolvido para: {archs}.<br/>As GPUs com capacidade de computação inferior a 7.5 (Maxwell, Pascal, Volta) precisam do torch cu126, RTX 50 (12.0) cu128 ou mais recente: com o Docker, use essa imagem; caso contrário, reinicie o ebook2audiobook, que instalará a versão correta.',
     'error_out_of_memory_gpu': 'Não há memória de GPU suficiente para carregar {engine} em {device}. Feche os outros aplicativos que usam a GPU ou escolha o dispositivo CPU ou um mecanismo de TTS mais leve.',
     'error_out_of_memory_jetson': 'Memória insuficiente para carregar {engine} na GPU Jetson: sua CPU e GPU compartilham a mesma RAM. Feche os outros aplicativos (a sessão da área de trabalho também, se puder) ou escolha o dispositivo da CPU ou um mecanismo de TTS mais leve.',
     'error_out_of_memory_cpu': 'Não há RAM suficiente para carregar {engine}. Feche os outros aplicativos ou escolha um mecanismo de TTS mais leve.',
