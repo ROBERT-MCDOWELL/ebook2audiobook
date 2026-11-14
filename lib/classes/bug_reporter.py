@@ -132,9 +132,18 @@ print(json.dumps(out))
                 created = datetime.fromtimestamp(os.path.getmtime(path), timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
                 with open(path, 'r', encoding='utf-8', errors='replace') as f:
                     dump = f.read().strip()
-                if not dump or '0xc000013a' in dump.lower():
+                # faulthandler appends one record per exception it sees, on Windows first-chance ones the process
+                # survived too. The last record is what the process died on: Ctrl+C (0xC000013A) is the user quitting.
+                # 0xC0000139 (entry point not found) is raised and handled inside LoadLibrary, Python gets an OSError
+                # (a torchcodec built for another torch, caught by pyannote)
+                records = [r.strip() for r in re.split(r'(?m)^(?=Windows fatal exception:|Fatal Python error:)', dump) if r.strip()]
+                if records and '0xc000013a' in records[-1].splitlines()[0].lower():
+                    records = []
+                records = [r for r in records if '0xc0000139' not in r.splitlines()[0].lower()]
+                if not records:
                     os.remove(path)
                     continue
+                dump = records[-1]
             except Exception:
                 continue
             title = dump.splitlines()[0].strip()

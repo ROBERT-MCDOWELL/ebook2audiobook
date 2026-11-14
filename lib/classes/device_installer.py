@@ -1755,6 +1755,7 @@ class DeviceInstaller():
             # device build picked above, and both unpack into site-packages/onnxruntime/: keep onnx_pkg only.
             # runs on every pass, not only after an install, to also repair envs that already hold both
             self.finalize_exclusive_packages({'onnxruntime': onnx_pkg})
+            self.remove_unusable_torchcodec()
             if self.install_missing_dependencies() == 1:
                 return 1
         except Exception as e:
@@ -1762,6 +1763,23 @@ class DeviceInstaller():
             print(error)
             self.drop_pip_cache()
             return 1
+
+    def remove_unusable_torchcodec(self)->None:
+        # pyannote-audio 4 depends on torchcodec, so on torch < 2.9 (cu118/121/124, rocm <= 6.2.4, jetson5/6: no
+        # torchcodec matches them, see has_torchcodec_stack()) PyPI's newest one comes along, built for the newest
+        # torch: its library fails to load at every pyannote import (Windows: 0xC0000139 entry point not found).
+        # pyannote runs without it (soundfile, background_detector.pyannote_patch()), e2a never imports it, and
+        # install_missing_dependencies() skips torchcodec, so it stays out
+        try:
+            torchcodec_version = self.get_package_version('torchcodec')
+            if not torchcodec_version or self.has_torchcodec_stack() or not self.get_package_version('torch'):
+                return
+            msg = legends['msg_removing_unusable_torchcodec'].format(version=torchcodec_version, torch=self.get_package_version('torch'))
+            print(msg)
+            subprocess.call(self._uv_pip('uninstall', 'torchcodec'))
+        except Exception as e:
+            error = f'remove_unusable_torchcodec(): {e}'
+            print(error)
 
     def install_missing_dependencies(self)->int:
         # requirements.txt only lists the top packages: a dependency of theirs removed afterwards (uninstalled by
