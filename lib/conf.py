@@ -173,6 +173,10 @@ os.environ['TMPDIR'] = run_dir
 os.environ['GRADIO_DEBUG'] = '0'
 bug_report_env_opt_out = os.environ.get('DO_NOT_TRACK', '0').strip().lower() in ('1', 'true', 'yes') # the user's own opt-out, read before DO_NOT_TRACK is forced for third-party telemetry
 os.environ['DO_NOT_TRACK'] = 'TRUE'
+# third-party telemetry that ignores DO_NOT_TRACK: pyannote.audio 4 (OpenTelemetry traces to otel.pyannote.ai, on by
+# default) and gradio analytics (api.gradio.app)
+os.environ['PYANNOTE_METRICS_ENABLED'] = 'false'
+os.environ['GRADIO_ANALYTICS_ENABLED'] = 'False'
 os.environ['HF_HUB_CACHE'] = tts_dir
 os.environ['HUGGINGFACE_HUB_CACHE'] = tts_dir
 os.environ['HF_HOME'] = tts_dir
