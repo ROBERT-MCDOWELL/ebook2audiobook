@@ -7,7 +7,7 @@
 
 import argparse, asyncio, csv, difflib, errno, fnmatch, sqlite3, hashlib, io, json, math, os, gc
 import random, shutil, subprocess, sys, tempfile, threading, time, uvicorn, copy, base64, posixpath
-import traceback, socket, unicodedata, urllib.request, uuid, zipfile, multiprocessing
+import traceback, socket, unicodedata, codecs, urllib.request, uuid, zipfile, multiprocessing
 import ebooklib, psutil, requests, stanza, importlib, queue, pykakasi
 import regex as re, gradio as gr
 
@@ -1053,6 +1053,31 @@ def normalize_epub_zip(session_id:str, file_input:str)->str|None:
         exception_alert(session_id, error)
     return None
 
+def read_text_file(path:str)->str:
+    # a .txt is not always UTF-8: Windows Notepad's "Unicode" writes UTF-16 with a BOM (FF FE), older files use a
+    # local code page. Decode by BOM (UTF-32 LE before UTF-16 LE, both start with FF FE), then UTF-8, then
+    # charset_normalizer's guess (a requests dependency), then cp1252 and latin-1, which never fails
+    with open(path, 'rb') as f:
+        raw = f.read()
+    for bom, codec in ((codecs.BOM_UTF32_LE, 'utf-32'), (codecs.BOM_UTF32_BE, 'utf-32'), (codecs.BOM_UTF8, 'utf-8-sig'), (codecs.BOM_UTF16_LE, 'utf-16'), (codecs.BOM_UTF16_BE, 'utf-16')):
+        if raw.startswith(bom):
+            return raw.decode(codec)
+    try:
+        return raw.decode('utf-8')
+    except UnicodeDecodeError:
+        pass
+    try:
+        from charset_normalizer import from_bytes
+        best = from_bytes(raw).best()
+        if best is not None:
+            return str(best)
+    except Exception:
+        pass
+    try:
+        return raw.decode('cp1252')
+    except UnicodeDecodeError:
+        return raw.decode('latin-1')
+
 def convert2epub(session_id:str)->bool:
     session = context.get_session(session_id)
     if session and session.get('id', False):
@@ -1082,8 +1107,8 @@ def convert2epub(session_id:str)->bool:
                     return False
                 file_ext = '.epub'
             if file_ext == '.txt':
-                with open(file_input, 'r', encoding='utf-8') as f:
-                    text = f.read()
+                # written back below as plain UTF-8 for ebook-convert, whatever the source encoding
+                text = read_text_file(file_input)
                 text = text.replace('\r\n', '\n')
                 text = re.sub(r'\n{2,}', f".{TTS_SML['pause']['static']}", text)
                 with open(file_input, 'w', encoding='utf-8') as f:
