@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'গুরুতর: --reinstall-এর পরও {pkg} ইনস্টল হয়নি।',
     'msg_all_packages_ok': '\nসব প্রয়োজনীয় প্যাকেজ ইনস্টল আছে।',
     'msg_installing_missing_deps': 'অনুপস্থিত ডিপেন্ডেন্সিগুলি ইনস্টল করা হচ্ছে: {pkgs}',
+    'msg_reinstalling_incomplete': 'যেসব প্যাকেজে ফাইল নেই সেগুলি পুনরায় ইনস্টল করা হচ্ছে: {pkgs}',
     'msg_removing_unusable_torchcodec': 'torchcodec {version} অপসারণ করা হচ্ছে: torch {torch} (2.9 এর নিচে) এর সাথে কোনও torchcodec চলে না, pyannote এটি ছাড়াই কাজ করে।',
     'msg_removing_obsolete': 'পুরোনো প্যাকেজ {pkg} সরানো হচ্ছে…',
     'msg_remove_obsolete_failed': 'পুরোনো প্যাকেজ {pkg} সরানো যায়নি (গুরুতর নয়): {e}',

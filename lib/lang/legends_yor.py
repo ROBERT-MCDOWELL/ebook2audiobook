@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'PÀTÀKÌ: {pkg} ṣì kò sí lẹ́yìn --reinstall.',
     'msg_all_packages_ok': '\nGbogbo àwọn àpò tí a nílò ti wà.',
     'msg_installing_missing_deps': 'Fífi àwọn ìdíwọ̀n tí kò sí sí: {pkgs}',
+    'msg_reinstalling_incomplete': 'Fífi àwọn àkójọpọ̀ tí àwọn fáìlì wọn kò sí padà sí i: {pkgs}',
     'msg_removing_unusable_torchcodec': 'Yíyọ torchcodec {version} kúrò: kò sí torchcodec tí ó ń ṣiṣẹ́ pẹ̀lú torch {torch} (ní ìsàlẹ̀ 2.9), pyannote ń ṣiṣẹ́ láìsí i.',
     'msg_removing_obsolete': 'À ń yọ àpò àtijọ́ {pkg} kúrò…',
     'msg_remove_obsolete_failed': 'Yíyọ àpò àtijọ́ {pkg} kò ṣiṣẹ́ (kò léwu): {e}',

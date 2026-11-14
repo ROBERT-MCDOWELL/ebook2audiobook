@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'KRITIS: {pkg} isih durung dipasang sawisé --reinstall.',
     'msg_all_packages_ok': '\nKabèh paket sing dibutuhaké wis dipasang.',
     'msg_installing_missing_deps': 'Nginstal dependensi sing ora ana: {pkgs}',
+    'msg_reinstalling_incomplete': 'Nginstal maneh paket kanthi file sing ilang: {pkgs}',
     'msg_removing_unusable_torchcodec': 'Mbusak torchcodec {version}: ora ana torchcodec sing mlaku karo torch {torch} (ngisor 2.9), pyannote bisa digunakake tanpa kuwi.',
     'msg_removing_obsolete': 'Mbusak paket lawas {pkg}…',
     'msg_remove_obsolete_failed': 'Gagal mbusak paket lawas {pkg} (ora fatal): {e}',

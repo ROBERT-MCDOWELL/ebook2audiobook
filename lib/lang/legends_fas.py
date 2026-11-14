@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'بحرانی: {pkg} پس از --reinstall هنوز نصب نیست.',
     'msg_all_packages_ok': '\nهمه بسته‌های لازم نصب شده‌اند.',
     'msg_installing_missing_deps': 'در حال نصب وابستگی‌های موجود: {pkgs}',
+    'msg_reinstalling_incomplete': 'نصب مجدد بسته‌های دارای فایل‌های ناقص: {pkgs}',
     'msg_removing_unusable_torchcodec': 'در حال حذف torchcodec {version}: هیچ torchcodec با torch {torch} (کمتر از 2.9) اجرا نمی‌شود، pyannote بدون آن کار می‌کند.',
     'msg_removing_obsolete': 'در حال حذف بسته منسوخ {pkg}…',
     'msg_remove_obsolete_failed': 'حذف بسته منسوخ {pkg} ناموفق بود (غیربحرانی): {e}',

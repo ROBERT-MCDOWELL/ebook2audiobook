@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': '严重：--reinstall 后 {pkg} 仍未安装。',
     'msg_all_packages_ok': '\n所有必需的包均已安装。',
     'msg_installing_missing_deps': '正在安装缺少的依赖项：{pkgs}',
+    'msg_reinstalling_incomplete': '正在重新安装缺少文件的软件包：{pkgs}',
     'msg_removing_unusable_torchcodec': '正在移除 torchcodec {version}：没有 torchcodec 与 torch {torch}（低于 2.9）一起运行，pyannote 在没有它时也能正常工作。',
     'msg_removing_obsolete': '正在移除过时的包 {pkg}…',
     'msg_remove_obsolete_failed': '移除过时的包 {pkg} 失败（不影响运行）：{e}',

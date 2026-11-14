@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': '重大: --reinstall 後も {pkg} がインストールされていません。',
     'msg_all_packages_ok': '\n必要なパッケージはすべてインストールされています。',
     'msg_installing_missing_deps': '不足している依存関係をインストールしています：{pkgs}',
+    'msg_reinstalling_incomplete': 'ファイルが不足しているパッケージを再インストールしています：{pkgs}',
     'msg_removing_unusable_torchcodec': 'torchcodec {version}を削除しています：torch {torch}（2.9未満）ではtorchcodecは動作せず、pyannoteはtorchcodecなしで動作します。',
     'msg_removing_obsolete': '古いパッケージ {pkg} を削除中…',
     'msg_remove_obsolete_failed': '古いパッケージ {pkg} を削除できませんでした（致命的ではありません）: {e}',

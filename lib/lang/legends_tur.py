@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'KRİTİK: {pkg}, --reinstall sonrasında hâlâ kurulu değil.',
     'msg_all_packages_ok': '\nGerekli tüm paketler kurulu.',
     'msg_installing_missing_deps': 'Eksik bağımlılıklar yükleniyor: {pkgs}',
+    'msg_reinstalling_incomplete': 'Eksik dosyaları olan paketler yeniden yükleniyor: {pkgs}',
     'msg_removing_unusable_torchcodec': 'torchcodec {version} kaldırılıyor: torchcodec, torch {torch} (2.9\'nin altında) ile çalışmaz, pyannote onsuz çalışır.',
     'msg_removing_obsolete': 'Eski paket {pkg} kaldırılıyor…',
     'msg_remove_obsolete_failed': 'Eski paket {pkg} kaldırılamadı (kritik değil): {e}',
