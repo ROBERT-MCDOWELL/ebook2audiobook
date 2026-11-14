@@ -22,6 +22,18 @@ app_tree_items = [
 runtime_dirs = ['voices', 'models', 'ebooks', 'audiobooks', 'tmp', 'run']
 skip_dirs = ['__pycache__']
 skip_paths = ['lib/classes/tts_engines/venvs']
+# the symlinks of the repo
+link_items = ['e2a.sh', 'ebook2audiobook.sh', 'uninstall.sh']
+
+def resolve_link(root:str, rel:str)->str:
+    # a symlink unpacked without symlink support (pip from a .zip, git on Windows without core.symlinks) is a
+    # text file holding its target name: ship its target, or e2a.sh and uninstall.sh would not run
+    path = os.path.join(root, rel)
+    if rel not in link_items or os.path.islink(path) or os.path.getsize(path) > 255:
+        return path
+    with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+        target = os.path.join(os.path.dirname(path), f.read().strip())
+    return target if os.path.isfile(target) else path
 
 def list_app_tree(root:str)->list:
     files = []
@@ -53,7 +65,7 @@ class build_app_tree(build_py):
             dst = os.path.join(target, rel)
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             # copy2 follows symlinks: e2a.sh, ebook2audiobook.sh and uninstall.sh ship as copies of their target
-            shutil.copy2(os.path.join(here, rel), dst)
+            shutil.copy2(resolve_link(here, rel), dst)
 
 class sdist_app_tree(sdist):
     def make_distribution(self)->None:
