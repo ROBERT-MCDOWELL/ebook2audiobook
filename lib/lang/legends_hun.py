@@ -542,6 +542,7 @@ legends = {
     'msg_tts_loaded': 'A(z) {model} TTS betöltve!',
     'msg_tts_already_loaded': 'A(z) {model} TTS már be van töltve',
     'error_disk_full_models': 'A TTS modell betöltése közben a lemez megtelt. Ürítse ki a {dir} mappát, és indítsa újra az ebook2audiobook-ot, a modellek újra letöltődnek.',
+    'error_disk_full_audio': 'A lemez megtelt a hangfájl mentése közben a következő helyre: {dir}. Szabadítson fel némi helyet ezen a lemezen, majd folytassa az átalakítást.',
     'error_invalid_fine_tuned': 'Érvénytelen fine_tuned modell: {model}. Elérhető modellek: {models}',
     'error_fine_tuned_missing_key': 'A(z) {model} fine_tuned modellből hiányzik a szükséges kulcs: {key}.',
     'error_invalid_tts_engine': 'Érvénytelen tts_engine: {engine}.',

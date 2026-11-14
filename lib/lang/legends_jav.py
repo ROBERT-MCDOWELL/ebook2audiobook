@@ -542,6 +542,7 @@ legends = {
     'msg_tts_loaded': 'TTS {model} wis dimuat!',
     'msg_tts_already_loaded': 'TTS {model} wis dimuat sadurungé',
     'error_disk_full_models': 'Disk kebak nalika mbukak model TTS. Mbusak folder {dir} lan miwiti maneh ebook2audiobook, model bakal didownload maneh.',
+    'error_disk_full_audio': 'Disk kebak nalika nyimpen audio ing {dir}. Kosongna sawetara papan ing disk iki, banjur nerusake konversi.',
     'error_invalid_fine_tuned': 'Model fine_tuned {model} ora valid. Model sing kasedhiya: {models}',
     'error_fine_tuned_missing_key': 'Model fine_tuned {model} ora duwe kunci wajib {key}.',
     'error_invalid_tts_engine': 'tts_engine {engine} ora valid.',

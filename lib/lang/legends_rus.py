@@ -542,6 +542,7 @@ legends = {
     'msg_tts_loaded': 'TTS {model} загружен!',
     'msg_tts_already_loaded': 'TTS {model} уже загружен',
     'error_disk_full_models': 'Диск заполнен при загрузке модели TTS. Очистите папку {dir} и перезапустите ebook2audiobook, модели будут загружены снова.',
+    'error_disk_full_audio': 'Диск заполнен при сохранении аудио в {dir}. Освободите место на этом диске, а затем возобновите преобразование.',
     'error_invalid_fine_tuned': 'Недопустимая модель fine_tuned {model}. Доступные модели: {models}',
     'error_fine_tuned_missing_key': 'В модели fine_tuned {model} отсутствует обязательный ключ {key}.',
     'error_invalid_tts_engine': 'Недопустимый tts_engine {engine}.',

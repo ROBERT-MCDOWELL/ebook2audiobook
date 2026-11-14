@@ -542,6 +542,7 @@ legends = {
     'msg_tts_loaded': 'TTS {model} を読み込みました！',
     'msg_tts_already_loaded': 'TTS {model} はすでに読み込まれています',
     'error_disk_full_models': 'TTSモデルの読み込み中にディスクがいっぱいになりました。{dir}フォルダを空にしてebook 2 audiobookを再起動すると、モデルが再度ダウンロードされます。',
+    'error_disk_full_audio': '{dir}にオーディオを保存中にディスクがいっぱいになりました。このディスクの空き容量を増やしてから、変換を再開してください。',
     'error_invalid_fine_tuned': 'fine_tuned モデル {model} は無効です。利用可能なモデル: {models}',
     'error_fine_tuned_missing_key': 'fine_tuned モデル {model} に必須キー {key} がありません。',
     'error_invalid_tts_engine': 'tts_engine {engine} は無効です。',

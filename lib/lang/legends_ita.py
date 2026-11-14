@@ -542,6 +542,7 @@ legends = {
     'msg_tts_loaded': 'TTS {model} caricato!',
     'msg_tts_already_loaded': 'TTS {model} già caricato',
     'error_disk_full_models': 'Disco pieno durante il caricamento del modello TTS. Svuotare la cartella {dir} e riavviare ebook2audiobook, i modelli verranno nuovamente scaricati.',
+    'error_disk_full_audio': 'Disco pieno durante il salvataggio dell\'audio in {dir}. Libera spazio su questo disco, quindi riprendi la conversione.',
     'error_invalid_fine_tuned': 'Modello fine_tuned {model} non valido. Modelli disponibili: {models}',
     'error_fine_tuned_missing_key': 'Al modello fine_tuned {model} manca la chiave richiesta {key}.',
     'error_invalid_tts_engine': 'tts_engine {engine} non valido.',

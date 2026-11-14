@@ -542,6 +542,7 @@ legends = {
     'msg_tts_loaded': 'TTS {model} 已加载！',
     'msg_tts_already_loaded': 'TTS {model} 已经加载',
     'error_disk_full_models': '加载TTS模型时磁盘已满。清空{dir}文件夹并重新启动ebook2audiobook ，模型将再次下载。',
+    'error_disk_full_audio': '在{dir}中保存音频时磁盘已满。请在此磁盘上释放一些空间，然后恢复转换。',
     'error_invalid_fine_tuned': 'fine_tuned 模型 {model} 无效。可用模型：{models}',
     'error_fine_tuned_missing_key': 'fine_tuned 模型 {model} 缺少必需的键 {key}。',
     'error_invalid_tts_engine': 'tts_engine {engine} 无效。',

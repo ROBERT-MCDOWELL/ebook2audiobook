@@ -542,6 +542,7 @@ legends = {
     'msg_tts_loaded': 'TTS {model} dimuat!',
     'msg_tts_already_loaded': 'TTS {model} sudah dimuat',
     'error_disk_full_models': 'Disk penuh saat memuat model tts. Kosongkan folder {dir} dan mulai ulang ebook2audiobook, model akan diunduh lagi.',
+    'error_disk_full_audio': 'Disk penuh saat menyimpan audio di {dir}. Kosongkan sedikit ruang di disk ini, lalu lanjutkan konversi.',
     'error_invalid_fine_tuned': 'Model fine_tuned {model} tidak valid. Model tersedia: {models}',
     'error_fine_tuned_missing_key': 'Model fine_tuned {model} tidak memiliki kunci wajib {key}.',
     'error_invalid_tts_engine': 'tts_engine {engine} tidak valid.',

@@ -542,6 +542,7 @@ legends = {
     'msg_tts_loaded': 'تم تحميل TTS {model}!',
     'msg_tts_already_loaded': 'TTS {model} محمّل بالفعل',
     'error_disk_full_models': 'امتلأ القرص أثناء تحميل طراز TTS. قم بإفراغ المجلد {dir} وأعد تشغيل ebook2audiobook، وسيتم تنزيل الطرز مرة أخرى.',
+    'error_disk_full_audio': 'القرص ممتلئ أثناء حفظ الصوت في {dir}. حرّر بعض المساحة على هذا القرص، ثم استأنف التحويل.',
     'error_invalid_fine_tuned': 'نموذج fine_tuned {model} غير صالح. النماذج المتاحة: {models}',
     'error_fine_tuned_missing_key': 'نموذج fine_tuned {model} ينقصه المفتاح المطلوب {key}.',
     'error_invalid_tts_engine': 'tts_engine {engine} غير صالح.',

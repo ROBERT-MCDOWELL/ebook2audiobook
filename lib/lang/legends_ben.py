@@ -542,6 +542,7 @@ legends = {
     'msg_tts_loaded': 'TTS {model} লোড হয়েছে!',
     'msg_tts_already_loaded': 'TTS {model} আগেই লোড করা আছে',
     'error_disk_full_models': 'টিটিএস মডেল লোড করার সময় ডিস্ক পূর্ণ । {dir} ফোল্ডারটি খালি করুন এবং ebook2audiobook পুনরায় চালু করুন, মডেলগুলি আবার ডাউনলোড করা হবে ।',
+    'error_disk_full_audio': '{dir}-এ অডিও সেভ করার সময় ডিস্ক ভরে গেছে। এই ডিস্কে কিছু জায়গা খালি করুন, তারপর রূপান্তর পুনরায় শুরু করুন।',
     'error_invalid_fine_tuned': 'fine_tuned মডেল {model} অবৈধ। উপলব্ধ মডেল: {models}',
     'error_fine_tuned_missing_key': 'fine_tuned মডেল {model}-এ প্রয়োজনীয় কী {key} নেই।',
     'error_invalid_tts_engine': 'tts_engine {engine} অবৈধ।',

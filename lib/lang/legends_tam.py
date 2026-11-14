@@ -542,6 +542,7 @@ legends = {
     'msg_tts_loaded': 'TTS {model} ஏற்றப்பட்டது!',
     'msg_tts_already_loaded': 'TTS {model} ஏற்கனவே ஏற்றப்பட்டுள்ளது',
     'error_disk_full_models': 'டிடிஎஸ் மாடலை ஏற்றும்போது டிஸ்க் முழுதாக உள்ளது. {dir} கோப்புறையை காலி செய்து, ebook2 AudioBook ஐ மறுதொடக்கம் செய்யுங்கள், மாதிரிகள் மீண்டும் பதிவிறக்கப்படும்.',
+    'error_disk_full_audio': '{dir} இல் ஆடியோவைச் சேமிக்கும்போது வட்டு நிரம்பிவிட்டது. இந்த வட்டில் சிறிது இடத்தை விடுவித்து, பின்னர் மாற்றத்தை மீண்டும் தொடங்குங்கள்.',
     'error_invalid_fine_tuned': 'fine_tuned மாதிரி {model} செல்லாது. கிடைக்கும் மாதிரிகள்: {models}',
     'error_fine_tuned_missing_key': 'fine_tuned மாதிரி {model} இல் தேவையான விசை {key} இல்லை.',
     'error_invalid_tts_engine': 'tts_engine {engine} செல்லாது.',
