@@ -1,4 +1,4 @@
-import os, sys, re, ssl, json, glob, time, atexit, shutil, signal, struct, getpass, hashlib, platform, threading, traceback, subprocess, faulthandler, urllib.request, urllib.error
+import os, sys, re, ssl, json, glob, time, errno, atexit, shutil, signal, struct, getpass, hashlib, platform, threading, traceback, subprocess, faulthandler, urllib.request, urllib.error
 
 from datetime import datetime, timezone
 from importlib import metadata
@@ -176,7 +176,7 @@ print(json.dumps(out))
         exc_type, exc, tb = exc_info if exc_info else sys.exc_info()
         if not self.url or not isinstance(exc, Exception) or exc_type.__module__ == 'gradio.exceptions' or getattr(exc, '_e2a_reported', False):
             return
-        if self.quitting(exc):
+        if self.quitting(exc) or self.disk_full(exc):
             return
         try:
             exc._e2a_reported = True
@@ -522,6 +522,16 @@ print(json.dumps(out))
         cur, depth = exc, 0
         while cur is not None and depth < 8:
             if isinstance(cur, (KeyboardInterrupt, SystemExit)) or (isinstance(cur, subprocess.CalledProcessError) and cur.returncode in self.interrupt_codes):
+                return True
+            cur, depth = cur.__cause__ or cur.__context__, depth + 1
+        return False
+
+    def disk_full(self, exc:BaseException)->bool:
+        # a full disk is the user's machine, not a bug: OSError ENOSPC anywhere in the chain
+        # (Windows ERROR_DISK_FULL and ERROR_HANDLE_DISK_FULL map to it too)
+        cur, depth = exc, 0
+        while cur is not None and depth < 8:
+            if isinstance(cur, OSError) and cur.errno == errno.ENOSPC:
                 return True
             cur, depth = cur.__cause__ or cur.__context__, depth + 1
         return False

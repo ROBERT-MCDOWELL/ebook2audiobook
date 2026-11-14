@@ -1,4 +1,4 @@
-import os, sys, time, shutil, threading, gc, ctypes, tempfile, trainer.io, regex as re
+import os, sys, time, errno, shutil, threading, gc, ctypes, tempfile, trainer.io, regex as re
 
 from typing import Any, Iterator, TYPE_CHECKING
 from contextlib import contextmanager
@@ -1076,6 +1076,14 @@ class TTSUtils:
                     os.remove(path)
                 except OSError:
                     pass
+            # libsndfile reports a full disk as a bare "System error.": tell it by the space left on the target
+            # drive (a sentence file is a few MB at most, so below 100 MB the write failed for lack of space)
+            try:
+                disk_full = shutil.disk_usage(os.path.dirname(path)).free < 100 * 1024 ** 2
+            except OSError:
+                disk_full = False
+            if disk_full:
+                raise OSError(errno.ENOSPC, legends['error_disk_full_audio'].format(dir=os.path.dirname(path))) from e
             raise RuntimeError(f'audio_save({path}): {e}') from e
         return True
 
