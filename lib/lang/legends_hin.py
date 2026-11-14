@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'गंभीर: --reinstall के बाद भी {pkg} इंस्टॉल नहीं है।',
     'msg_all_packages_ok': '\nसभी आवश्यक पैकेज इंस्टॉल हैं।',
     'msg_installing_missing_deps': 'अनुपस्थित निर्भरताएँ इंस्टॉल की जा रही हैं: {pkgs}',
+    'msg_upgrading_outdated_deps': 'किसी अन्य पैकेज से पुराने डिपेंडेंसी को अपग्रेड करने के लिए ज़रूरी है: {pkgs}',
     'msg_vulkan_torch_libomp': 'इंस्टॉल किए गए वल्कन टॉर्च में {dll} नहीं है और इसे लोड नहीं किया जा सकता: इसे प्रकाशित व्हील से फिर से इंस्टॉल किया जा रहा है।',
     'msg_reinstalling_incomplete': 'जिन पैकेज में फ़ाइलें मौजूद नहीं हैं, उन्हें फिर से इंस्टॉल करना: {pkgs}',
     'msg_removing_unusable_torchcodec': 'torchcodec {version} को हटाया जा रहा है: torch {torch} (2.9 से नीचे) के साथ कोई torchcodec नहीं चलता है, pyannote इसके बिना काम करता है।',

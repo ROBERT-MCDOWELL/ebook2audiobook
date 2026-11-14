@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'КРИТИЧНО: {pkg} всё ещё не установлен после --reinstall.',
     'msg_all_packages_ok': '\nВсе необходимые пакеты установлены.',
     'msg_installing_missing_deps': 'Установка отсутствующих зависимостей: {pkgs}',
+    'msg_upgrading_outdated_deps': 'Для обновления зависимостей, более старых, чем другой пакет, требуется: {pkgs}',
     'msg_vulkan_torch_libomp': 'В установленном факеле Vulkan отсутствует {dll}, и его нельзя загрузить: выполните повторную установку из опубликованного пакета wheel.',
     'msg_reinstalling_incomplete': 'Повторная установка пакетов с отсутствующими файлами: {pkgs}',
     'msg_removing_unusable_torchcodec': 'Удаление torchcodec {version}: torchcodec не работает с torch {torch} (ниже 2.9), pyannote работает без него.',

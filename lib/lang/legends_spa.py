@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'CRÍTICO: {pkg} sigue sin instalarse tras --reinstall.',
     'msg_all_packages_ok': '\nTodos los paquetes necesarios están instalados.',
     'msg_installing_missing_deps': 'Instalando dependencias faltantes: {pkgs}',
+    'msg_upgrading_outdated_deps': 'Para actualizar dependencias anteriores a otro paquete, se requiere: {pkgs}',
     'msg_vulkan_torch_libomp': 'A la antorcha Vulkan instalada le falta {dll} y no se puede cargar: reinstalándola desde la rueda publicada.',
     'msg_reinstalling_incomplete': 'Reinstalando paquetes con archivos faltantes: {pkgs}',
     'msg_removing_unusable_torchcodec': 'Eliminando torchcodec {version}: ningún torchcodec se ejecuta con torch {torch} (inferior a 2.9), pyannote funciona sin él.',

@@ -490,6 +490,7 @@ legends = {
     'msg_pkg_still_missing': 'بحرانی: {pkg} پس از --reinstall هنوز نصب نیست.',
     'msg_all_packages_ok': '\nهمه بسته‌های لازم نصب شده‌اند.',
     'msg_installing_missing_deps': 'در حال نصب وابستگی‌های موجود: {pkgs}',
+    'msg_upgrading_outdated_deps': 'ارتقای وابستگی‌هایی که قدیمی‌تر از بسته دیگری هستند، مستلزم موارد زیر است: {pkgs}',
     'msg_vulkan_torch_libomp': 'مشعل Vulkan نصب‌شده فاقد {dll} است و نمی‌توان آن را بارگذاری کرد: در حال نصب مجدد آن از چرخ منتشر شده.',
     'msg_reinstalling_incomplete': 'نصب مجدد بسته‌های دارای فایل‌های ناقص: {pkgs}',
     'msg_removing_unusable_torchcodec': 'در حال حذف torchcodec {version}: هیچ torchcodec با torch {torch} (کمتر از 2.9) اجرا نمی‌شود، pyannote بدون آن کار می‌کند.',
