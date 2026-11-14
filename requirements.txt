@@ -40,7 +40,7 @@ mutagen
 PyOpenGL
 phonemizer-fork
 num2words2
-pydub
+pydub-lts
 tinytag
 soundfile
 unidecode
