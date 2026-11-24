@@ -10,7 +10,7 @@ CPU/GPU转换器从电子书转换为带有章节和元数据的有声读物<br/
 作者对本软件的任何滥用或由此产生的任何法律后果概不负责。<br>
 请负责任地使用此工具，并遵守所有适用法律。
 
-[![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/63Tv3F65k6)](https://discord.gg/63Tv3F65k6)
+[![Discord](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2F63Tv3F65k6%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&logo=discord&logoColor=white&color=5865F2&label=Discord&suffix=%20members)](https://discord.gg/63Tv3F65k6)
 
 ### 感谢支持ebook2audiobook开发者！
 <p>
@@ -102,6 +102,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
+  - [Check an audiobook for hallucinations](#check-audiobook-hallucinations)
   
 - [Cloned Voices](#cloned-voices)
 - [Fine Tuned TTS models](#fine-tuned-tts-models) 
@@ -118,7 +119,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 <a id="features"></a>
 ## 特点
-- 🔧 **支持的 TTS 引擎**：`XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos2, Zonos3, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS, ZipVoice (LuxTTS)`
+- 🔧 **支持的 TTS 引擎**：`XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos2, Zonos3, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS, ZipVoice (LuxTTS), KittenTTS`
 - 📚 **转换多种文件格式** ： `.epub`、`.mobi`、`.azw3`、`.fb2`、`.lrf`、`.rb`、`.snb`、`.tcr`、`.pdf`、`.txt`、`.rtf`、`.doc`、`.docx`、`.html`、`.odt`、`.azw`、`.tiff`、`.tif`、`.png`、`.jpg`、`.jpeg`、`.bmp`、 `.zip`
 - 💻 **TextArea**直接转换音频中的短文本
 - 🔍 **OCR扫描**用于将文本页面作为图像的文件
@@ -524,7 +525,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - 注意：MPS 未在 Docker 中开放，因此必须使用 CPU
-- 注意：命名卷`e2a_venvs`将TTS引擎安装在各自的虚拟环境中（GPT-SoVITS、Zonos2、Zonos3、OmniVoice、F5-TTS、ZipVoice、Orpheus、Spark-TTS、ChatTTS、OpenVoice、MeloTTS、CSM等）。
+- 注意：命名音量`e2a_venvs`将TTS引擎保留在其自己的虚拟环境中（GPT-SoVITS、Zonos2、Zonos3、OmniVoice、F5-TTS、ZipVoice、Orpheus、Spark-TTS、ChatTTS、OpenVoice、MeloTTS、CSM、KittenTTS等）。
   在多次运行容器之间保持不变，因此不会每次都重新安装。如需重置：`docker volume rm e2a_venvs`
 
 <a id="tools"></a>
@@ -564,8 +565,8 @@ options:
   -h, --help            show this help message and exit
   --only ONLY           Comma list of categories: common,xtts,bark,tortoise,vits,fairseq,glowtts,tacotron,yo
                         urtts,piper,zonos2,zonos3,audiocpp,audiocpp_server,gptsovits,f5tts,zipvoice,omnivoic
-                        e,orpheus,sparktts,chattts,csm,openvoice,melotts,phonon,stanza,pyannote,demucs,inter
-                        lude,argos,tessdata,jieba,voices
+                        e,orpheus,sparktts,chattts,csm,kittentts,openvoice,melotts,phonon,stanza,pyannote,de
+                        mucs,interlude,argos,tessdata,jieba,voices
   --skip SKIP           Comma list of categories to leave out
   --languages LANGUAGES
                         Comma list of e2a ISO-639-3 codes (eng,fra,ita...): single-language models and fine-
@@ -670,6 +671,77 @@ examples:
   translate_ebook.py @books.txt --to ita --mode bilingual
   translate_ebook.py --list
   translate_ebook.py --list --from eng
+```
+
+<a id="check-audiobook-hallucinations"></a>
+### 检查有声读物中是否存在幻觉：`tools/check_audiobook_hallucinations.py`
+列出已完成的 e2a 有声读物中未读出其文本的句子：嘟囔、重复读出某个单词或短语
+或被跳过、在文本之前或之后嘟囔、句子对于其文本来说过长或过短（XTTS 和其他
+自回归引擎偶尔会这样做）。仅报告：有声读物未更改，由您决定要重做的内容。
+它会读取每本有声读物旁边的`.vtt` e2a文字（每个句子一个提示），并使用
+`facebook/mms-1b-all`（1162种语言，约4 GB，首次使用时下载到`./models/tts`中），并比较
+两种文本的字母都进行了罗马化处理，因此任何文字都可以使用。限制来自书籍本身（其所有字母的中位数），
+句子）、名称或晦涩的文本会使整个书籍的这些问题加剧，而幻觉则会显得尤为突出。
+对于少于10个字母的句子和仍包含数字的句子，以及MMS无法识别的语言，仅进行长度检查。
+发现一个包含 5 个或更多字母的缺失单词（所有 19 个 XTTS 句子在朗读时都缺少一个单词），一次短暂的时间窗口
+周围的音频证实它不存在：识别器在长句的开头或结尾漏掉了一个词
+它自己听到的内容。3 或 4 个字母的缺失单词大多不是：即使在音频质量良好的情况下，识别器也会漏掉短单词。
+每个被标记的句子一经发现即被打印出来，所有句子在文末的表格中按其所在区块和
+句子编号与 e2a 的编号方式相同（从 0 开始）。每个句子都包含其问题、其文本、实际听到的内容以及
+其度量保存在`<audiobook>.hallucinations.json`中。在运行过程中，一个句子会根据其前面的句子进行判断。
+它，整本书的表格：前面打印的句子可以在最后清除，表格下面的行是这么说的。这些数字来自`.vtt`（e2a为每个提示命名为`block <n> sentence <n>`）；在之前制作的一本有声读物中，
+区块按其章节计数，转换中遗漏的区块将被剔除。
+   - **Linux/MacOS**
+     ```bash
+     ./python_env/bin/python tools/check_audiobook_hallucinations.py audiobooks/cli/book.m4b
+     ```
+   - **Windows**
+     ```bash
+     python_env\Scripts\python.exe tools\check_audiobook_hallucinations.py audiobooks\cli\book.m4b
+     ```
+   - 文件夹会检查其中的每本有`.vtt`（拆分有声读物的所有部分）的有声读物。
+   - 翻译书籍需要`--language`：其语言标签保留了电子书的语言。
+   - **设备**：`--device`采用 e2a 的名称，`cpu`、`cuda`、`rocm`、`xpu`、`mps` 或 `jetson`（半精度
+     GPU，但MPS除外）。默认情况下，它是安装 e2a 所用的设备，当该设备无法使用时，则为 CPU。
+   - **速度**：7.6 分钟的音频在 4 个 CPU 核心上需要 2.3 至 5.4 分钟，对于整本书来说，GPU 是更好的选择。
+
+```bash
+usage: check_audiobook_hallucinations.py [-h] [-l LANGUAGE] [--vtt VTT] [-o OUTPUT]
+                                         [--device {auto,cpu,cuda,rocm,xpu,mps,jetson}]
+                                         audiobooks [audiobooks ...]
+
+Report the sentences of an e2a audiobook that do not say their text: babble, a word or a phrase
+said twice or skipped, mumble before or after the text, a sentence too long or too short for its text.
+Report only: the audiobook is not changed.
+It reads the .vtt e2a writes beside each audiobook (one cue per sentence), transcribes each sentence with
+facebook/mms-1b-all (1162 languages, downloaded into models/tts on first use) and compares the letters of
+both texts, romanized (uroman, pykakasi for Japanese). The limits come from the book itself, from the
+medians of all its sentences: names or a hard text raise them for the whole book, a hallucination stands out.
+Each flagged sentence is printed as soon as it is found, all of them in a table at the end, by their block and
+sentence numbers as in e2a (from 0). Every sentence with its problem, its text, what was heard and its measures
+is saved in <audiobook>.hallucinations.json.
+
+positional arguments:
+  audiobooks            Audiobook files (m4b, mp3, flac...) with their .vtt beside them, or folders holding
+                        them
+
+options:
+  -h, --help            show this help message and exit
+  -l LANGUAGE, --language LANGUAGE
+                        Language spoken, e2a ISO-639-3 code (default: the audiobook's language tag; set it
+                        for a translated book, its tag keeps the ebook's language)
+  --vtt VTT             Subtitles of the audiobook, single audiobook only (default: <audiobook>.vtt)
+  -o OUTPUT, --output OUTPUT
+                        JSON report, single audiobook only (default: <audiobook>.hallucinations.json beside
+                        it)
+  --device {auto,cpu,cuda,rocm,xpu,mps,jetson}
+                        Device the speech recognizer runs on, named as in e2a (default: the one e2a was
+                        installed for, cpu when it cannot be used)
+
+examples:
+  check_audiobook_hallucinations.py audiobooks/cli/book.m4b
+  check_audiobook_hallucinations.py audiobooks/cli/book.m4b --language fra --device cuda
+  check_audiobook_hallucinations.py audiobooks/cli
 ```
 
 <a id="cloned-voices"></a>
@@ -804,6 +876,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] ChatTTS（https://github.com/2noise/ChatTTS)
 - [x] Spark-TTS (https://github.com/sparkaudio/spark-tts)
 - [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
+- [x] KittenTTS (https://github.com/KittenML/KittenTTS)
 - [x] CSM https://github.com/SesameAILabs/csm)
 
 #### 自述文件翻译
