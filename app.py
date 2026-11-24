@@ -557,7 +557,14 @@ valence, arousal (-1 to 1).""")
                 msg = legends['msg_import_missing_repair'].format(module=e.name)
                 print(msg)
                 if manager.install_python_packages() == 1:
-                    raise
+                    # this pass runs with lib.core's packages loaded (torch, numpy, gradio...): on Windows their files are
+                    # locked and cannot be reinstalled, and the env had lost more than e.name (crash report
+                    # fde84426e3e1c1ec: minisbd missing, no metadata left for torch, gradio nor argostranslate). A failed
+                    # install pass stops e2a with its own message, as the one before every start does, not with a bug
+                    # report: the next start's pass runs before anything is loaded
+                    error = legends['error_import_missing_restart'].format(module=e.name)
+                    print(error)
+                    sys.exit(1)
                 importlib.invalidate_caches()
                 import lib.core as c
         except ImportError as e:
