@@ -10,7 +10,7 @@ Supports voice cloning and 1696 languages!
 The authors are not responsible for any misuse of this software or any resulting legal consequences. <br>
 Use this tool responsibly and in accordance with all applicable laws.
 
-[![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/63Tv3F65k6)](https://discord.gg/63Tv3F65k6)
+[![Discord](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2F63Tv3F65k6%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&logo=discord&logoColor=white&color=5865F2&label=Discord&suffix=%20members)](https://discord.gg/63Tv3F65k6)
 
 ### Thanks to support ebook2audiobook developers!
 <p>
