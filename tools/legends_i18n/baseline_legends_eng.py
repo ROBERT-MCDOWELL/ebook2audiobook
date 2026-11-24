@@ -514,6 +514,7 @@ legends = {
     'msg_incomplete_after_reinstall': 'WARNING: {pkg} {version} is still missing files after a fresh download: {files}. Something on this computer deletes them as they are written, most often an antivirus: restore them from its quarantine or allow {path} and {cache} in it, then start ebook2audiobook again.',
     'msg_install_lock_wait': 'Another ebook2audiobook is installing packages in {env}, waiting for it to finish…',
     'msg_import_missing_repair': 'Module {module} went missing after the package check: checking the packages again…',
+    'error_import_missing_restart': 'The install step could not put {module} back while this start has its packages open (Windows locks the files a running program uses).\nClose every ebook2audiobook window, then start it again: the install step runs before anything is loaded.',
     'msg_removing_unusable_torchcodec': 'Removing torchcodec {version}: no torchcodec runs with torch {torch} (below 2.9), pyannote works without it.',
     'msg_removing_torchvision': 'Removing torchvision {version}: ebook2audiobook does not use it, and one built for another torch breaks transformers.',
     'msg_removing_obsolete': 'Removing obsolete package {pkg}…',

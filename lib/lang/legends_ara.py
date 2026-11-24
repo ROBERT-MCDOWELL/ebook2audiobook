@@ -514,6 +514,7 @@ legends = {
     'msg_incomplete_after_reinstall': 'تحذير: لا تزال ملفات {pkg} {version} مفقودة بعد تنزيل جديد: {files}. هناك شيء على هذا الكمبيوتر يحذفها أثناء كتابتها، غالبًا برنامج مكافحة الفيروسات: استعدها من الحجر الصحي أو اسمح بـ {path} و{cache} فيه، ثم شغّل ebook2audiobook مرة أخرى.',
     'msg_install_lock_wait': 'يقوم ebook2audiobook آخر بتثبيت الحزم في {env}، جارٍ الانتظار حتى ينتهي…',
     'msg_import_missing_repair': 'الوحدة {module} مفقودة بعد فحص الحزم: جارٍ فحص الحزم مرة أخرى…',
+    'error_import_missing_restart': 'تعذّر على خطوة التثبيت إعادة {module} بينما تكون حزم هذا البدء مفتوحة (يقوم نظام التشغيل Windows بقفل الملفات التي يستخدمها البرنامج قيد التشغيل).\nأغلق كل نافذة من نوافذ ebook2audiobook، ثم ابدأ تشغيله مرة أخرى: تُنفّذ خطوة التثبيت قبل تحميل أي شيء.',
     'msg_removing_unusable_torchcodec': 'إزالة torchcodec {version}: لا يعمل torchcodec مع torch {torch} (أقل من 2.9)، ويعمل pyannote بدونه.',
     'msg_removing_torchvision': 'إزالة torchvision {version}: لا يستخدمه ebook2audiobook، والإصدار المبني لنسخة torch أخرى يعطّل transformers.',
     'msg_removing_obsolete': 'جارٍ إزالة الحزمة القديمة {pkg}…',

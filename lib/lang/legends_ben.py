@@ -514,6 +514,7 @@ legends = {
     'msg_incomplete_after_reinstall': 'সতর্কতা: নতুন করে ডাউনলোডের পরেও {pkg} {version}-এর ফাইল অনুপস্থিত: {files}। এই কম্পিউটারে কিছু একটা লেখার সময়ই এগুলি মুছে ফেলছে, সাধারণত একটি অ্যান্টিভাইরাস: এর কোয়ারেন্টাইন থেকে এগুলি পুনরুদ্ধার করুন বা এতে {path} এবং {cache} অনুমোদন করুন, তারপর ebook2audiobook আবার চালু করুন।',
     'msg_install_lock_wait': 'আরেকটি ebook2audiobook {env}-এ প্যাকেজ ইনস্টল করছে, এটি শেষ হওয়ার জন্য অপেক্ষা করা হচ্ছে…',
     'msg_import_missing_repair': 'প্যাকেজ যাচাইয়ের পরে মডিউল {module} পাওয়া যাচ্ছে না: প্যাকেজগুলি আবার যাচাই করা হচ্ছে…',
+    'error_import_missing_restart': 'এই স্টার্টটি যখন তার প্যাকেজগুলি খোলা রাখে তখন ইনস্টল করার ধাপটি {module}-কে ফিরিয়ে দিতে পারেনি (Windows একটি চলমান প্রোগ্রাম যে ফাইলগুলি ব্যবহার করে সেগুলি লক করে দেয়)।\nপ্রতিটি ebook2audiobook উইন্ডো বন্ধ করুন, তারপর এটি আবার চালু করুন: কোনও কিছু লোড হওয়ার আগে ইনস্টল করার ধাপটি চলে।',
     'msg_removing_unusable_torchcodec': 'torchcodec {version} অপসারণ করা হচ্ছে: torch {torch} (2.9 এর নিচে) এর সাথে কোনও torchcodec চলে না, pyannote এটি ছাড়াই কাজ করে।',
     'msg_removing_torchvision': 'torchvision {version} সরানো হচ্ছে: ebook2audiobook এটি ব্যবহার করে না, এবং অন্য torch এর জন্য তৈরি সংস্করণ transformers ভেঙে দেয়।',
     'msg_removing_obsolete': 'পুরোনো প্যাকেজ {pkg} সরানো হচ্ছে…',

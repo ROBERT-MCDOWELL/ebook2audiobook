@@ -514,6 +514,7 @@ legends = {
     'msg_incomplete_after_reinstall': '경고: 새로 다운로드한 후에도 {pkg} {version}의 파일이 누락되어 있습니다: {files}. 이 컴퓨터의 무언가(대개 백신 프로그램)가 파일이 기록될 때 삭제하고 있습니다. 격리 항목에서 복원하거나 {path} 및 {cache}을(를) 허용한 다음 ebook2audiobook을 다시 시작하세요.',
     'msg_install_lock_wait': '다른 ebook2audiobook이 {env}에 패키지를 설치하는 중입니다. 완료될 때까지 기다리는 중…',
     'msg_import_missing_repair': '패키지 확인 후 모듈 {module}이(가) 사라졌습니다: 패키지를 다시 확인하는 중…',
+    'error_import_missing_restart': '이 시작 시 패키지가 열려 있는 동안 설치 단계에서 {module}을(를) 다시 배치할 수 없습니다(Windows는 실행 중인 프로그램이 사용하는 파일을 잠급니다).\n모든 ebook2audiobook 창을 닫은 다음 다시 시작하세요. 설치 단계는 다른 항목이 로드되기 전에 실행됩니다.',
     'msg_removing_unusable_torchcodec': 'torchcodec {version} 제거 중: torch {torch}(2.9 미만)에서는 torchcodec이 실행되지 않으며, pyannote는 torchcodec 없이 작동합니다.',
     'msg_removing_torchvision': 'torchvision {version} 제거 중: ebook2audiobook은 이를 사용하지 않으며, 다른 torch용으로 빌드된 버전은 transformers를 망가뜨립니다.',
     'msg_removing_obsolete': '오래된 패키지 {pkg}을(를) 제거하는 중…',

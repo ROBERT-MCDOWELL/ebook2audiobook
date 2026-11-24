@@ -514,6 +514,7 @@ legends = {
     'msg_incomplete_after_reinstall': '警告: 新たにダウンロードした後も {pkg} {version} のファイルが不足しています: {files}。このコンピューター上の何か（多くの場合ウイルス対策ソフト）が書き込み時にそれらを削除しています。隔離から復元するか、{path} と {cache} を許可してから、ebook2audiobook を再起動してください。',
     'msg_install_lock_wait': '別の ebook2audiobook が {env} にパッケージをインストール中です。完了を待っています…',
     'msg_import_missing_repair': 'パッケージ確認後にモジュール {module} が見つかりません: パッケージを再確認しています…',
+    'error_import_missing_restart': 'この起動時にパッケージが開いているため、インストール手順で{module}を元に戻すことができませんでした（Windowsは実行中のプログラムが使用するファイルをロックします）。\nすべてのebook2audiobookウィンドウを閉じてから、再度起動します。インストール手順は、何も読み込まれる前に実行されます。',
     'msg_removing_unusable_torchcodec': 'torchcodec {version}を削除しています：torch {torch}（2.9未満）ではtorchcodecは動作せず、pyannoteはtorchcodecなしで動作します。',
     'msg_removing_torchvision': 'torchvision {version} を削除しています: ebook2audiobook では使用しておらず、別の torch 向けにビルドされたものは transformers を壊します。',
     'msg_removing_obsolete': '古いパッケージ {pkg} を削除中…',

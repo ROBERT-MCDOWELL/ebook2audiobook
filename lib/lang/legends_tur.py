@@ -514,6 +514,7 @@ legends = {
     'msg_incomplete_after_reinstall': 'UYARI: {pkg} {version} paketinde yeni bir indirmeden sonra da eksik dosyalar var: {files}. Bu bilgisayardaki bir şey dosyaları yazılırken siliyor, çoğunlukla bir antivirüs: onları karantinasından geri yükleyin ya da içinde {path} ve {cache} konumlarına izin verin, ardından ebook2audiobook uygulamasını yeniden başlatın.',
     'msg_install_lock_wait': 'Başka bir ebook2audiobook {env} içine paket yüklüyor, bitmesi bekleniyor…',
     'msg_import_missing_repair': '{module} modülü paket denetiminden sonra kayboldu: paketler yeniden denetleniyor…',
+    'error_import_missing_restart': 'Bu başlatma işlemi paketleri açıkken yükleme adımı {module} öğesini geri koyamadı (Windows, çalışan bir programın kullandığı dosyaları kilitler).\nTüm ebook2audiobook pencerelerini kapatın, ardından programı tekrar başlatın: Yükleme adımı herhangi bir şey yüklenmeden önce çalışır.',
     'msg_removing_unusable_torchcodec': 'torchcodec {version} kaldırılıyor: torchcodec, torch {torch} (2.9\'nin altında) ile çalışmaz, pyannote onsuz çalışır.',
     'msg_removing_torchvision': 'torchvision {version} kaldırılıyor: ebook2audiobook bunu kullanmıyor ve başka bir torch için derlenmiş sürüm transformers kütüphanesini bozuyor.',
     'msg_removing_obsolete': 'Eski paket {pkg} kaldırılıyor…',

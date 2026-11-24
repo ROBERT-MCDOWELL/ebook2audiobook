@@ -514,6 +514,7 @@ legends = {
     'msg_incomplete_after_reinstall': 'PERINGATAN: {pkg} {version} masih kehilangan file setelah diunduh ulang: {files}. Ada sesuatu di komputer ini yang menghapusnya saat ditulis, biasanya antivirus: pulihkan dari karantinanya atau izinkan {path} dan {cache} di dalamnya, lalu jalankan ebook2audiobook lagi.',
     'msg_install_lock_wait': 'ebook2audiobook lain sedang memasang paket di {env}, menunggu hingga selesai…',
     'msg_import_missing_repair': 'Modul {module} hilang setelah pemeriksaan paket: memeriksa paket lagi…',
+    'error_import_missing_restart': 'Langkah instalasi tidak dapat mengembalikan {module} saat program ini memulai dengan paketnya terbuka (Windows mengunci file yang digunakan oleh program yang sedang berjalan).\nTutup setiap jendela ebook2audiobook, lalu mulai lagi: langkah instalasi berjalan sebelum apa pun dimuat.',
     'msg_removing_unusable_torchcodec': 'Menghapus torchcodec {version}: tidak ada torchcodec yang berjalan dengan torch {torch} (di bawah 2.9), pyannote berfungsi tanpa itu.',
     'msg_removing_torchvision': 'Menghapus torchvision {version}: ebook2audiobook tidak menggunakannya, dan versi yang dibuat untuk torch lain merusak transformers.',
     'msg_removing_obsolete': 'Menghapus paket usang {pkg}…',

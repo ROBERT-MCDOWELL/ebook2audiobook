@@ -514,6 +514,7 @@ legends = {
     'msg_incomplete_after_reinstall': 'هشدار: پس از دانلود مجدد، هنوز فایل‌هایی از {pkg} {version} وجود ندارند: {files}. چیزی در این رایانه آن‌ها را هنگام نوشتن حذف می‌کند، معمولاً یک آنتی‌ویروس: آن‌ها را از قرنطینه‌اش بازگردانید یا {path} و {cache} را در آن مجاز کنید، سپس ebook2audiobook را دوباره اجرا کنید.',
     'msg_install_lock_wait': 'یک ebook2audiobook دیگر در حال نصب بسته‌ها در {env} است، در انتظار پایان آن…',
     'msg_import_missing_repair': 'ماژول {module} پس از بررسی بسته‌ها ناپدید شد: بررسی دوباره بسته‌ها…',
+    'error_import_missing_restart': 'تا زمانی که این راه‌اندازی بسته‌های خود را باز دارد، مرحله نصب نمی‌تواند {module} را برگرداند (ویندوز فایل‌هایی را که یک برنامه در حال اجرا از آنها استفاده می‌کند، قفل می‌کند).\nهمه پنجره‌های ebook2audiobook را ببندید، سپس دوباره آن را راه‌اندازی کنید: مرحله نصب قبل از بارگذاری هر چیزی اجرا می‌شود.',
     'msg_removing_unusable_torchcodec': 'در حال حذف torchcodec {version}: هیچ torchcodec با torch {torch} (کمتر از 2.9) اجرا نمی‌شود، pyannote بدون آن کار می‌کند.',
     'msg_removing_torchvision': 'در حال حذف torchvision {version}: ebook2audiobook از آن استفاده نمی‌کند و نسخه‌ای که برای torch دیگری ساخته شده transformers را خراب می‌کند.',
     'msg_removing_obsolete': 'در حال حذف بسته منسوخ {pkg}…',

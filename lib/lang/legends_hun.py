@@ -514,6 +514,7 @@ legends = {
     'msg_incomplete_after_reinstall': 'FIGYELEM: a(z) {pkg} {version} csomagból friss letöltés után is hiányoznak fájlok: {files}. Valami ezen a számítógépen törli őket írás közben, leggyakrabban egy vírusirtó: állítsa vissza őket a karanténjából, vagy engedélyezze benne a(z) {path} és {cache} mappát, majd indítsa újra az ebook2audiobookot.',
     'msg_install_lock_wait': 'Egy másik ebook2audiobook csomagokat telepít ide: {env}, várakozás a befejezésére…',
     'msg_import_missing_repair': 'A(z) {module} modul eltűnt a csomagellenőrzés után: a csomagok újraellenőrzése…',
+    'error_import_missing_restart': 'A telepítési lépés nem tudta visszahelyezni a következőt: {module}, miközben ez az indítás nyitva tartja a csomagjait (a Windows zárolja a futó program által használt fájlokat).\nZárjon be minden ebook2audiobook ablakot, majd indítsa el újra a programot: a telepítési lépés minden más betöltése előtt lefut.',
     'msg_removing_unusable_torchcodec': 'A(z) {version} torchcodec eltávolítása: a torchcodec nem működik a(z) {torch} torch-csal (2.9 alatt), a pyannote nélküle működik.',
     'msg_removing_torchvision': 'A(z) {version} torchvision eltávolítása: az ebook2audiobook nem használja, és egy másik torch-hoz készült változat elrontja a transformers működését.',
     'msg_removing_obsolete': 'Az elavult {pkg} csomag eltávolítása…',

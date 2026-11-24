@@ -514,6 +514,7 @@ legends = {
     'msg_incomplete_after_reinstall': 'ÌKÌLỌ̀: àwọn fáìlì {pkg} {version} ṣì sọnù lẹ́yìn ìgbàsílẹ̀ tuntun: {files}. Nǹkan kan lórí kọ̀ǹpútà yìí ń pa wọ́n rẹ́ bí wọ́n ṣe ń kọ wọ́n, nígbà púpọ̀ antivirus ni: dá wọn padà láti inú quarantine rẹ̀ tàbí fàyè gba {path} àti {cache} nínú rẹ̀, lẹ́yìn náà bẹ̀rẹ̀ ebook2audiobook lẹ́ẹ̀kan sí i.',
     'msg_install_lock_wait': 'ebook2audiobook mìíràn ń fi àwọn package sí {env}, à ń dúró kí ó parí…',
     'msg_import_missing_repair': 'Módù {module} sọnù lẹ́yìn àyẹ̀wò àwọn package: ń ṣe àyẹ̀wò àwọn package lẹ́ẹ̀kan sí i…',
+    'error_import_missing_restart': 'Ìgbésẹ̀ ìfisí náà kò lè fi {module} padà nígbà tí ìbẹ̀rẹ̀ yìí ní àwọn àkójọpọ̀ rẹ̀ ṣí sílẹ̀ (Windows ń tì àwọn fáìlì tí ètò tí ó ń ṣiṣẹ́ ń lò mọ́lẹ̀).\nPa gbogbo fèrèsé ebook2audiobook, lẹ́yìn náà bẹ̀rẹ̀ sí i lẹ́ẹ̀kan sí i: ìgbésẹ̀ ìfisí ń ṣiṣẹ́ kí ohunkóhun tó di ìtúbọ̀.',
     'msg_removing_unusable_torchcodec': 'Yíyọ torchcodec {version} kúrò: kò sí torchcodec tí ó ń ṣiṣẹ́ pẹ̀lú torch {torch} (ní ìsàlẹ̀ 2.9), pyannote ń ṣiṣẹ́ láìsí i.',
     'msg_removing_torchvision': 'Ń yọ torchvision {version} kúrò: ebook2audiobook kò lò ó, ẹ̀yà tí a kọ́ fún torch mìíràn sì ń ba transformers jẹ́.',
     'msg_removing_obsolete': 'À ń yọ àpò àtijọ́ {pkg} kúrò…',

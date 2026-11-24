@@ -514,6 +514,7 @@ legends = {
     'msg_incomplete_after_reinstall': 'PÈNGET: {pkg} {version} isih kélangan file sawisé diundhuh anyar: {files}. Ana sing ing komputer iki mbusak file kasebut nalika lagi ditulis, biasané antivirus: balèkaké saka karantinané utawa idinaké {path} lan {cache} ing kono, banjur wiwiti ebook2audiobook maneh.',
     'msg_install_lock_wait': 'ebook2audiobook liyane lagi nginstal paket ing {env}, ngenteni nganti rampung…',
     'msg_import_missing_repair': 'Modul {module} ilang sawisé paket dipriksa: mriksa paket manèh…',
+    'error_import_missing_restart': 'Langkah instal ora bisa ngasilake {module} nalika wiwitan iki duwe paket sing kabukak (Windows ngunci file sing digunakake dening program sing lagi mlaku).\nTutup saben jendhela ebook2audiobook, banjur bukak maneh: langkah instalasi bakal dilakokake sadurunge apa-apa dimuat.',
     'msg_removing_unusable_torchcodec': 'Mbusak torchcodec {version}: ora ana torchcodec sing mlaku karo torch {torch} (ngisor 2.9), pyannote bisa digunakake tanpa kuwi.',
     'msg_removing_torchvision': 'Mbusak torchvision {version}: ebook2audiobook ora nggunakake, lan versi sing digawe kanggo torch liyane ngrusak transformers.',
     'msg_removing_obsolete': 'Mbusak paket lawas {pkg}…',
