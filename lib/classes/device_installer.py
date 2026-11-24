@@ -2807,7 +2807,12 @@ class DeviceInstaller():
         except Exception:
             return False
 
-    vulkan_libomp_marker = os.path.join(sys.prefix, '.e2a_vulkan_torch_libomp')
+    def vcredist_missing(self)->list:
+        # the VC++ runtime DLLs torch links (c10.dll: MSVCP140.dll) that are nowhere on the DLL search path: the
+        # Microsoft Visual C++ redistributable was never installed. No wheel carries them, so no reinstall helps
+        return [dll for dll in ('msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll') if self.system_dll_missing(dll)]
+
+    vulkan_libomp_marker =os.path.join(sys.prefix, '.e2a_vulkan_torch_libomp')
 
     def vulkan_torch_lacks_libomp(self, torch_url:str)->bool:
         # the Windows +vulkan torch links MSVC's LLVM OpenMP runtime (libomp140.x86_64.dll), which no VC++
@@ -3061,14 +3066,6 @@ class DeviceInstaller():
                 msg = legends['msg_reinstalling_incomplete'].format(pkgs=', '.join(incomplete))
                 print(msg)
                 return True
-            # a system DLL the torch family links is absent (WinError 126 at import): the VC++ redistributable was
-            # never installed. No wheel carries these files, so reinstalling alone fixes nothing -- prompt for it
-            # first, then fall through to the reinstall that lets e2a boot once the user has installed it
-            if self.system == systems['WINDOWS']:
-                missing = sorted({dep.lower() for dep in ('msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll') if self.system_dll_missing(dep)})
-                if missing:
-                    msg = legends['msg_vcredist_missing'].format(dlls=', '.join(missing), url=self.vcredist_url)
-                    print(msg)
             # Windows +vulkan torch published without the OpenMP runtime it links: same version as the fixed wheel
             if device_info['name'] == devices['VULKAN']['proc'] and self.system == systems['WINDOWS']:
                 py_major, py_minor = device_info['pyvenv']
