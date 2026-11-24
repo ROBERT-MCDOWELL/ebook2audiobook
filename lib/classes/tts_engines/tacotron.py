@@ -160,10 +160,14 @@ class Tacotron2(TTSUtils, TTSRegistry, name='tacotron'):
                                 tmp_out_wav = os.path.join(proc_dir, f'{uuid.uuid4()}.wav')
                                 # a voice conversion that speaks the text itself (task "tts", qwen3_tts) does not need the built-in voice
                                 if not self.engine_zs.resynthesis:
+                                    if not self._coqui_speakable(part):
+                                        self._unspeakable_silence()
+                                        continue
                                     with torch.inference_mode():
                                         with torch.autocast(self.device, dtype=self.amp_dtype, enabled=(self.amp_dtype != torch.float32)):
                                             self.engine.tts_to_file(
                                                 text=part,
+                                                split_sentences=False,
                                                 file_path=tmp_in_wav
                                             )
                                 # gender pitch pre-shift (sox), off: the voice conversion takes the pitch from the target voice
@@ -229,10 +233,14 @@ class Tacotron2(TTSUtils, TTSRegistry, name='tacotron'):
                                     audio_part = audio_part.mean(axis=1)
                                 self.params['samplerate'] = int(samplerate)
                             else:
+                                if not self._coqui_speakable(part):
+                                    self._unspeakable_silence()
+                                    continue
                                 with torch.inference_mode():
                                     with torch.autocast(self.device, dtype=self.amp_dtype, enabled=(self.amp_dtype != torch.float32)):
                                         audio_part = self.engine.tts(
-                                            text=part
+                                            text=part,
+                                            split_sentences=False
                                         )
                             if audio_part is not None and len(audio_part) > 0:
                                 if torch.is_tensor(audio_part):

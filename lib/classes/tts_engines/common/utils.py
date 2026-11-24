@@ -1019,7 +1019,29 @@ class TTSUtils:
                     error = f"_set_voice() error: Could not create the builtin speaker selected voice in {self.language}"
                     return None, error
         return current_voice, None
-        
+
+    def _coqui_speakable(self, text:str)->bool:
+        # the Coqui model's own tokenizer (its cleaner, phonemizer and vocabulary) keeps at least one symbol of text. A
+        # part with letters or digits none of which reach the vocabulary (a word in another script, phonemized to
+        # nothing) gave an empty sequence, and the encoder's first convolution died on it: "Kernel size can't be greater
+        # than actual input size" (crash report 07a7a42d3a4c36b3, GlowTTS; Tacotron2's encoder alike). Pad, blank, bos
+        # and eos are no symbol. A tokenizer that cannot be asked keeps the part
+        tokenizer = getattr(getattr(getattr(self.engine, 'synthesizer', None), 'tts_model', None), 'tokenizer', None)
+        if tokenizer is None:
+            return True
+        try:
+            chars = tokenizer.characters
+            specials = {chars.pad_id, chars.blank_id, chars.bos_id, chars.eos_id}
+            return any(token not in specials for token in tokenizer.text_to_ids(text))
+        except Exception:
+            return True
+
+    def _unspeakable_silence(self)->None:
+        # in place of a part _coqui_speakable() turned down: core.py expects an audio file for every sentence with a
+        # letter or a digit, and a sentence of such parts only would have none
+        import torch
+        self.audio_segments.append(torch.zeros(1, int(self.params['samplerate'] * 0.3)))
+
     def _split_sentence_on_sml(self, sentence:str)->list[str]:
         parts:list[str] = []
         last = 0
