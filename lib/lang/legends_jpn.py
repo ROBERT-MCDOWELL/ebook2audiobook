@@ -502,7 +502,7 @@ legends = {
     'msg_installing_missing_deps': '不足している依存関係をインストールしています：{pkgs}',
     'msg_upgrading_outdated_deps': '別のパッケージよりも古い依存関係をアップグレードするには、次のものが必要です：{pkgs}',
     'msg_vulkan_torch_libomp': 'インストールされているVulkanトーチに{dll}がなく、読み込めません。公開されているwheelから再インストールします。',
-    'msg_vcredist_missing': '警告：{dlls}が見つかりません。Microsoft Visual C++ 再頒布可能パッケージがインストールされていないため、torchを読み込めません（WinError 126）。{url}からダウンロードしてインストールし、ebook2audiobookを再度起動してください。',
+    'error_vcredist_missing': 'Microsoft Visual C++ 再配布可能パッケージがインストールされていません（{dlls}がありません）。これがないとtorchを読み込めません（WinError 126）。\n{url}からダウンロードしてインストールし、ebook2audiobookを再度起動してください。',
     'msg_probing_cuda_torch': 'torch {torch} ({tag})がこのNVIDIAドライバーで動作するかどうかをテストしています…',
     'msg_cuda_torch_unusable': '{tag}のtorchは、このNVIDIAドライバーではネイティブにクラッシュします（xttsが実行されるとアクセス違反が発生します）。代わりに、より低い{usable}のビルドをインストールします。ドライバーが変更されるまで、この判定は維持されます。',
     'msg_dev_build_installed': '{tag}の安定版ビルドはまだありません。ナイトリービルドがインストールされています：{pkgs}。ebook2audiobookは、安定版ビルドが公開されると、それに切り替わります。',

@@ -502,7 +502,7 @@ legends = {
     'msg_installing_missing_deps': 'Nginstal dependensi sing ora ana: {pkgs}',
     'msg_upgrading_outdated_deps': 'Nganyarke dependensi sing luwih lawas tinimbang paket liyane mbutuhake: {pkgs}',
     'msg_vulkan_torch_libomp': 'Vulkan torch sing wis diinstal ora duwe {dll} lan ora bisa dimuat: instal maneh saka wheel sing wis diterbitake.',
-    'msg_vcredist_missing': 'PÈNGET: {dlls} ora ana: Microsoft Visual C++ redistributable ora diinstal, mula torch ora bisa dimuat (WinError 126). Unduh lan instal saka {url}, banjur miwiti ebook2audiobook maneh.',
+    'error_vcredist_missing': 'Microsoft Visual C++ redistributable ora diinstal ({dlls} ora ana): torch ora bisa dimuat tanpa kuwi (WinError 126).\nUnduh lan instal saka {url}, banjur bukak maneh ebook2audiobook.',
     'msg_probing_cuda_torch': 'Nglakokake tes apa torch {torch} ({tag}) bisa digunakake ing driver NVIDIA iki…',
     'msg_cuda_torch_unusable': '{tag} torch krasa native karo driver NVIDIA iki (pelanggaran akses sawise xtts mlaku): nginstal build {usable} sing luwih ngisor minangka gantine. Putusan kasebut ditindakake nganti driver diganti.',
     'msg_dev_build_installed': 'Durung ana build stabil kanggo {tag}, build nightly wis diinstal: {pkgs}. ebook2audiobook bakal ganti menyang build stabil sawise diterbitake.',

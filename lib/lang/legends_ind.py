@@ -502,7 +502,7 @@ legends = {
     'msg_installing_missing_deps': 'Menginstal dependensi yang tidak ada: {pkgs}',
     'msg_upgrading_outdated_deps': 'Peningkatan dependensi yang lebih lama dari paket lain memerlukan: {pkgs}',
     'msg_vulkan_torch_libomp': 'Torch Vulkan yang diinstal tidak memiliki {dll} dan tidak dapat dimuat: menginstalnya ulang dari wheel yang dipublikasikan.',
-    'msg_vcredist_missing': 'PERINGATAN: {dlls} tidak ada: Microsoft Visual C++ redistributable tidak terinstal, sehingga torch tidak dapat dimuat (WinError 126). Unduh dan instal dari {url}, lalu mulai ulang ebook2audiobook.',
+    'error_vcredist_missing': 'Microsoft Visual C++ redistributable tidak terinstal ({dlls} tidak ada): torch tidak dapat dimuat tanpanya (WinError 126).\nUnduh dan instal dari {url}, lalu mulai lagi ebook2audiobook.',
     'msg_probing_cuda_torch': 'Menguji apakah torch {torch} ({tag}) berjalan pada driver NVIDIA ini…',
     'msg_cuda_torch_unusable': '{tag} torch mengalami crash secara native dengan driver NVIDIA ini (terjadi pelanggaran akses saat xtts berjalan): sebagai gantinya, instal build {usable} yang lebih rendah. Keputusan ini tetap berlaku hingga driver diubah.',
     'msg_dev_build_installed': 'Belum ada build stabil untuk {tag}, build harian diinstal: {pkgs}. ebook2audiobook beralih ke build stabil setelah dipublikasikan.',

@@ -502,7 +502,7 @@ legends = {
     'msg_installing_missing_deps': 'Hiányzó függőségek telepítése: {pkgs}',
     'msg_upgrading_outdated_deps': 'A másik csomagnál régebbi függőségek frissítéséhez a következőkre van szükség: {pkgs}',
     'msg_vulkan_torch_libomp': 'A telepített Vulkan Torchből hiányzik a(z) {dll}, és nem lehet betölteni: telepítse újra a közzétett wheelből.',
-    'msg_vcredist_missing': 'FIGYELMEZTETÉS: A(z) {dlls} hiányzik: a Microsoft Visual C++ újraterjeszthető csomag nincs telepítve, ezért a Torch nem tud betöltődni (WinError 126). Töltse le és telepítse a(z) {url} címről, majd indítsa el újra az ebook2audiobook alkalmazást.',
+    'error_vcredist_missing': 'A Microsoft Visual C++ újraterjeszthető csomagja nincs telepítve ({dlls} hiányzik): a Torch nem tud betöltődni nélküle (WinError 126).\nTöltse le és telepítse a(z) {url} webhelyről, majd indítsa el újra az ebook2audiobook alkalmazást.',
     'msg_probing_cuda_torch': 'Annak tesztelése, hogy a(z) {torch} ({tag}) fáklya működik-e ezen az NVIDIA-illesztőprogramon…',
     'msg_cuda_torch_unusable': 'A(z) {tag} torch natív módon összeomlik ezzel az NVIDIA-illesztőprogrammal (hozzáférési hiba, amint az xtts fut): ehelyett az alacsonyabb {usable} build kerül telepítésre. A döntés mindaddig érvényben marad, amíg az illesztőprogram nem változik.',
     'msg_dev_build_installed': 'Még nincs stabil verzió a következőhöz: {tag}. Éjszakai verzió telepítve: {pkgs}. Az ebook2audiobook átvált a stabil verzióra, amint az megjelenik.',

@@ -502,7 +502,7 @@ legends = {
     'msg_installing_missing_deps': 'Fífi àwọn ìdíwọ̀n tí kò sí sí: {pkgs}',
     'msg_upgrading_outdated_deps': 'Ìgbéga àwọn ohun tí ó nílò fún àwọn ohun tí ó ti pẹ́ ju àkójọ mìíràn lọ nílò: {pkgs}',
     'msg_vulkan_torch_libomp': 'Iná Vulkan tí a fi sori ẹrọ ko ni {dll} bẹ́ẹ̀ ni kò sì lè gba: a tún fi sori ẹrọ láti orí wheel tí a tẹ̀ jáde.',
-    'msg_vcredist_missing': 'ÌKÌLỌ̀: {dlls} kò sí: Microsoft Visual C++ redistributable kò fi sí ẹ̀rọ náà, nítorí náà torch kò lè wọlé (WinError 126). Ṣe ìgbàsílẹ̀ kí o sì fi sílẹ̀ láti {url}, lẹ́yìn náà tún ebook2audiobook bẹ̀rẹ̀.',
+    'error_vcredist_missing': 'A kò fi Microsoft Visual C++ redistributable sílẹ̀ ({dlls} kò sí): torch kò lè gba agbára láìsí i (WinError 126).\nṢe ìgbàsílẹ̀ kí o sì fi sílẹ̀ láti {url}, lẹ́yìn náà tún ebook2audiobook bẹ̀rẹ̀.',
     'msg_probing_cuda_torch': 'Ṣíṣe àyẹ̀wò bóyá torch {torch} ({tag}) ń ṣiṣẹ́ lórí awakọ̀ NVIDIA yìí…',
     'msg_cuda_torch_unusable': '{tag} torch náà ń ṣubú ní ìbẹ̀rẹ̀ pẹ̀lú awakọ̀ NVIDIA yìí (ìrúfin ìwọlé ní kété tí xtts bá bẹ̀rẹ̀ sí ṣiṣẹ́): fífi {usable} build tí ó kéré sí i sórí rẹ̀ dípò. Ìpinnu náà wà títí tí awakọ̀ náà yóò fi yí padà.',
     'msg_dev_build_installed': 'Kò sí àtòjọ ìkọ́lé tí ó dúró ṣinṣin fún {tag} síbẹ̀, àtòjọ ìkọ́lé alẹ́ ni a fi sori ẹrọ: {pkgs}. ebook2audiobook yí padà sí àtòjọ ìkọ́lé tí ó dúró ṣinṣin ní kété tí wọ́n bá ti gbé e jáde.',
