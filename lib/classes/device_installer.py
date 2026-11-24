@@ -115,8 +115,11 @@ class DeviceInstaller():
 
     uv_install_url = 'https://docs.astral.sh/uv/getting-started/installation/'
     # official download page of the Microsoft Visual C++ redistributables (msvcp140/vcruntime140: absent from every
-    # torch wheel, installed by no launcher; without them import torch dies with WinError 126)
+    # torch wheel; without them import torch dies with WinError 126). install_vcredist() takes the installer from
+    # Microsoft's permalink of the latest v14 one per architecture: a WiX Burn bundle running asInvoker, which raises
+    # the UAC prompt itself for its per-machine install
     vcredist_url = 'https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist'
+    vcredist_download_url = 'https://aka.ms/vc14/vc_redist.{arch}.exe'
 
     def __init__(self):
         self.system = sys.platform
@@ -2811,6 +2814,31 @@ class DeviceInstaller():
         # the VC++ runtime DLLs torch links (c10.dll: MSVCP140.dll) that are nowhere on the DLL search path: the
         # Microsoft Visual C++ redistributable was never installed. No wheel carries them, so no reinstall helps
         return [dll for dll in ('msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll') if self.system_dll_missing(dll)]
+
+    def install_vcredist(self, missing:list)->list:
+        # download Microsoft's VC++ redistributable for this python's architecture and run it passive: the UAC prompt is
+        # the only question, a progress bar shows, no reboot is forced (3010: the DLLs load without one). They land in
+        # System32, where this process finds them at its torch import. Returns what is still missing after it: all of
+        # it offline, with the prompt declined (1602) or the installer failing, and the caller stops on that
+        import sysconfig, urllib.request
+        arch = 'arm64' if sysconfig.get_platform() == 'win-arm64' else 'x64'
+        msg = legends['msg_vcredist_installing'].format(dlls=', '.join(missing))
+        print(msg)
+        installer_dir = tempfile.mkdtemp(prefix='e2a_vcredist_')
+        installer = os.path.join(installer_dir, f'vc_redist.{arch}.exe')
+        try:
+            urllib.request.urlretrieve(self.vcredist_download_url.format(arch=arch), installer)
+            proc = subprocess.run([installer, '/install', '/passive', '/norestart'], timeout=900)
+            reason = f'exit code {proc.returncode}'
+        except (OSError, ValueError, subprocess.TimeoutExpired) as e:
+            reason = str(e)
+        finally:
+            shutil.rmtree(installer_dir, ignore_errors=True)
+        still_missing = self.vcredist_missing()
+        if still_missing:
+            msg = legends['msg_vcredist_install_failed'].format(reason=reason)
+            print(msg)
+        return still_missing
 
     vulkan_libomp_marker =os.path.join(sys.prefix, '.e2a_vulkan_torch_libomp')
 

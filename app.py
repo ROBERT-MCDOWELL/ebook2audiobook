@@ -530,8 +530,11 @@ valence, arousal (-1 to 1).""")
             sys.exit(1)
         # torch is first imported by lib.core below: without the VC++ runtime it dies there with WinError 126 on
         # c10.dll, filed as a bug (crash report d5c773c53f18e682: MSVCP140.dll missing). The install step only warned
-        # and the start went on into that crash
+        # and the start went on into that crash. Installed from Microsoft here, behind a UAC prompt: still missing
+        # after it (offline, prompt declined), the start stops with where to get it
         vcredist_missing = manager.vcredist_missing()
+        if vcredist_missing:
+            vcredist_missing = manager.install_vcredist(vcredist_missing)
         if vcredist_missing:
             error = legends['error_vcredist_missing'].format(dlls=', '.join(vcredist_missing), url=manager.vcredist_url)
             print(error)
