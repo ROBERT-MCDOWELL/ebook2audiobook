@@ -155,7 +155,7 @@ class DeviceInstaller():
         # the --torch-backend values this uv accepts, from its own help ('[possible values: auto, cpu, cu132, …]'): uv
         # 0.11 stops at cu132 and rejects cu134 / cu135 outright. None when the help cannot be read
         try:
-            out = subprocess.run([self.uv_bin, 'pip', 'install', '--help'], capture_output=True, text=True, timeout=30).stdout
+            out = subprocess.run([self.uv_bin, 'pip', 'install', '--help'], capture_output=True, text=True, errors='replace', timeout=30).stdout
         except (subprocess.TimeoutExpired, OSError):
             return None
         m = re.search(r'--torch-backend\b.*?\[possible values: ([^\]]+)\]', out or '', re.S)
@@ -191,7 +191,7 @@ class DeviceInstaller():
         probe = 'import json; from cpuinfo import get_cpu_info; print(json.dumps(get_cpu_info().get("flags", [])))'
         try:
             subprocess.check_call(self._uv_pip('install', '--no-cache', 'py-cpuinfo'))
-            out = subprocess.check_output([python_exec, '-c', probe], text=True, timeout=60)
+            out = subprocess.check_output([python_exec, '-c', probe], text=True, errors='replace', timeout=60)
             flags = set(json.loads(out.strip().splitlines()[-1]))
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError, ValueError, IndexError) as e:
             # conservative verdict: numpy<2.4.0 runs on any x86_64, never abort provisioning here
@@ -404,7 +404,7 @@ class DeviceInstaller():
         ])
         driver, count = 0, 0
         try:
-            result = subprocess.run([sys.executable, '-I', '-c', probe], capture_output=True, text=True, timeout=60)
+            result = subprocess.run([sys.executable, '-I', '-c', probe], capture_output=True, text=True, errors='replace', timeout=60)
             if result.returncode == 0:
                 driver, count = (int(v) for v in result.stdout.split())
         except (OSError, subprocess.TimeoutExpired, ValueError):
@@ -760,7 +760,7 @@ class DeviceInstaller():
         if name not in (devices['CUDA']['proc'], devices['ROCM']['proc']):
             return
         try:
-            proc = subprocess.run([python_exec, '-c', 'import torch; print(torch.cuda.device_count())'], capture_output=True, text=True, timeout=120)
+            proc = subprocess.run([python_exec, '-c', 'import torch; print(torch.cuda.device_count())'], capture_output=True, text=True, errors='replace', timeout=120)
             count = int(proc.stdout.strip())
         except (OSError, ValueError, subprocess.TimeoutExpired):
             return
@@ -2622,7 +2622,7 @@ class DeviceInstaller():
         # the system libamdhip64 never loads in e2a's own process (check_hardware). {} when no candidate loads or the
         # child does not answer
         try:
-            proc = subprocess.run([python_exec, detect_gpu_script, '--hip-runtime', json.dumps(candidates)], capture_output=True, text=True, timeout=60)
+            proc = subprocess.run([python_exec, detect_gpu_script, '--hip-runtime', json.dumps(candidates)], capture_output=True, text=True, errors='replace', timeout=60)
         except (subprocess.TimeoutExpired, OSError):
             return {}
         answer = next((line.strip() for line in reversed(proc.stdout.splitlines()) if line.strip().startswith('{')), None)
@@ -2639,7 +2639,7 @@ class DeviceInstaller():
         # reconcile_gpu_choice(): a cold first import of a GPU torch (antivirus scanning its DLLs, a machine short of RAM
         # paging) took longer than the 30 s it had, so XPU stayed on unprobed (crash report 63aa7dc78e8ff6f6)
         try:
-            proc = subprocess.run([python_exec, detect_gpu_script], capture_output=True, text=True, timeout=120)
+            proc = subprocess.run([python_exec, detect_gpu_script], capture_output=True, text=True, errors='replace', timeout=120)
         except subprocess.TimeoutExpired as e:
             return {'count': 0, 'backend': None, 'error': f'no answer within {e.timeout:g} s'}
         except OSError as e:
@@ -2667,7 +2667,7 @@ class DeviceInstaller():
         # self-hosted macOS runner) runs under Rosetta / QEMU. The rocm7.2 image died there with no traceback at all
         # while the same wheels import natively: the build goes on with a warning
         marker = 'torchcodec import ok'
-        proc = subprocess.run([python_exec, '-c', f'from torchcodec.decoders import AudioDecoder; print({marker!r}, flush=True)'], capture_output=True, text=True)
+        proc = subprocess.run([python_exec, '-c', f'from torchcodec.decoders import AudioDecoder; print({marker!r}, flush=True)'], capture_output=True, text=True, errors='replace')
         if proc.returncode == 0:
             return True
         # POSIX reports a native crash as -signal, Windows as an NTSTATUS (0xc0000005 access violation)
@@ -2709,7 +2709,7 @@ class DeviceInstaller():
         # violation inside python312.dll kills the child without any usable traceback, so only a probe that runs early
         # can tell a working wheel from one that crashes natively on this driver
         try:
-            proc = subprocess.run([python_exec, detect_gpu_script], capture_output=True, text=True, timeout=60)
+            proc = subprocess.run([python_exec, detect_gpu_script], capture_output=True, text=True, errors='replace', timeout=60)
             if proc.returncode != 0:
                 return None
             data = json.loads(proc.stdout.strip() or '{}')
@@ -2738,7 +2738,7 @@ class DeviceInstaller():
                 return False
             env = {**os.environ, 'PYTHONPATH': probe_dir + os.pathsep + os.environ.get('PYTHONPATH', '')}
             try:
-                proc = subprocess.run([python_exec, detect_gpu_script], capture_output=True, text=True, timeout=120, env=env)
+                proc = subprocess.run([python_exec, detect_gpu_script], capture_output=True, text=True, errors='replace', timeout=120, env=env)
             except (subprocess.TimeoutExpired, OSError):
                 return False
             if proc.returncode != 0:

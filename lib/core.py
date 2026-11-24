@@ -496,7 +496,8 @@ def check_programs(prog_name:str, command:str, options:str)->bool:
             stderr=subprocess.PIPE,
             check=True,
             text=True,
-            encoding='utf-8'
+            encoding='utf-8',
+            errors='replace'
         )
         return True
     except FileNotFoundError:
@@ -1412,6 +1413,10 @@ def convert2epub(session_id:str)->bool:
                 stderr=subprocess.PIPE,
                 text=True,
                 encoding='utf-8',
+                # calibre is a frozen python that ignores PYTHONUTF8: on Windows its --verbose log (title, authors,
+                # paths) comes in the ANSI code page, and a strict decode killed subprocess' reader thread (crash
+                # report 9b817267de6f4244, Russian Windows: byte 0xc0, 'А' in cp1251), stdout and stderr then None
+                errors='replace',
                 env=env
             )
             if result.returncode != 0:
@@ -4080,7 +4085,7 @@ def combine_audio_chapters(session_id:str)->list[str]|None:
                 '-show_entries', 'stream=codec_name,sample_rate,sample_fmt',
                 '-of', 'default=nokey=1:noprint_wrappers=1', combined_audio
             ]
-            probe = subprocess.run(ffprobe_cmd, capture_output=True, text=True)
+            probe = subprocess.run(ffprobe_cmd, capture_output=True, text=True, errors='replace')
             if probe.returncode != 0:
                 error = f'ffprobe failed for {combined_audio}: {probe.stderr.strip()}'
                 print(error)
@@ -4327,7 +4332,7 @@ def combine_audio_chapters(session_id:str)->list[str]|None:
             mix_dir = os.path.join(concat_dir, f'interludes_mix{part_suffix}')
             shutil.rmtree(mix_dir, ignore_errors=True)
             os.makedirs(mix_dir, exist_ok=True)
-            probe = subprocess.run([ffprobe, '-v', 'error', '-select_streams', 'a:0', '-show_entries', 'stream=codec_name,sample_rate,channels,sample_fmt,bits_per_raw_sample', '-of', 'json', os.path.join(session['chapters_dir'], chapter_files[indices[0]])], capture_output=True, text=True)
+            probe = subprocess.run([ffprobe, '-v', 'error', '-select_streams', 'a:0', '-show_entries', 'stream=codec_name,sample_rate,channels,sample_fmt,bits_per_raw_sample', '-of', 'json', os.path.join(session['chapters_dir'], chapter_files[indices[0]])], capture_output=True, text=True, errors='replace')
             stream = (json.loads(probe.stdout or '{}').get('streams') or [{}])[0]
             voice_rate = int(stream.get('sample_rate', default_audio_proc_samplerate))
             voice_layout = 'mono' if int(stream.get('channels', 1)) == 1 else 'stereo'
@@ -4436,7 +4441,7 @@ def combine_audio_chapters(session_id:str)->list[str]|None:
                     fade_out = rnd.uniform(*interlude_fade_out_range)
                     # end of the last sentence = chapter end minus its trailing silence
                     window = min(20.0, durations[idx])
-                    detect = subprocess.run([ffmpeg, '-hide_banner', '-nostats', '-sseof', f'-{window:.3f}', '-i', str(chapter_path), '-af', 'silencedetect=noise=-50dB:d=0.3', '-f', 'null', '-'], capture_output=True, text=True)
+                    detect = subprocess.run([ffmpeg, '-hide_banner', '-nostats', '-sseof', f'-{window:.3f}', '-i', str(chapter_path), '-af', 'silencedetect=noise=-50dB:d=0.3', '-f', 'null', '-'], capture_output=True, text=True, errors='replace')
                     silence_starts = [float(v) for v in re.findall(r'silence_start: (-?[\d.]+)', detect.stderr)]
                     silence_ends = [float(v) for v in re.findall(r'silence_end: (-?[\d.]+)', detect.stderr)]
                     trailing = 0.0

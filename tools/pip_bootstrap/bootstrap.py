@@ -153,7 +153,7 @@ def is_running(home:str)->bool:
     else:
         cmd = ['ps', '-A', '-ww', '-o', 'args=']
     try:
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True, timeout=60)
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True, errors='replace', timeout=60)
     except (OSError, subprocess.SubprocessError):
         return False
     for line in result.stdout.splitlines():

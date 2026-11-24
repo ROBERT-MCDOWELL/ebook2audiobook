@@ -87,7 +87,7 @@ def main()->int:
         try:
             with open(pid_file, 'r') as f:
                 old_pid = int(f.read().strip())
-            comm = subprocess.run(['ps', '-p', str(old_pid), '-o', 'comm='], capture_output=True, text=True).stdout.strip()
+            comm = subprocess.run(['ps', '-p', str(old_pid), '-o', 'comm='], capture_output=True, text=True, errors='replace').stdout.strip()
             if comm.endswith('audiocpp_server'):
                 os.kill(old_pid, signal.SIGKILL)
         except Exception:
@@ -221,7 +221,7 @@ def main()->int:
             src = os.path.join(work_dir, f'ref_{len(refs)}_src.wav')
             dst = os.path.join(work_dir, f'ref_{len(refs)}.wav')
             # any format e2a accepts -> mono 16-bit (ffmpeg is on e2a's PATH); the server resamples per model
-            run = subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-i', voice, '-t', '120', '-ac', '1', '-ar', str(sr), '-sample_fmt', 's16', src], capture_output=True, text=True)
+            run = subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-i', voice, '-t', '120', '-ac', '1', '-ar', str(sr), '-sample_fmt', 's16', src], capture_output=True, text=True, errors='replace')
             if run.returncode != 0:
                 raise RuntimeError(f'ffmpeg cannot read {voice}: {run.stderr.strip()[-300:]}')
             with wave.open(src, 'rb') as w:
@@ -263,7 +263,7 @@ def main()->int:
                 if text_key not in transcripts:
                     # Qwen3-ASR reads 16 kHz mono; automatic language (the voice's language is not the book's)
                     dst_16k = os.path.join(work_dir, f'ref_{len(refs)}_16k.wav')
-                    run = subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-i', dst, '-ac', '1', '-ar', '16000', '-sample_fmt', 's16', dst_16k], capture_output=True, text=True)
+                    run = subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-i', dst, '-ac', '1', '-ar', '16000', '-sample_fmt', 's16', dst_16k], capture_output=True, text=True, errors='replace')
                     if run.returncode != 0:
                         raise RuntimeError(f'ffmpeg cannot resample {dst}: {run.stderr.strip()[-300:]}')
                     sys.stderr.write(f'audiocpp worker: transcribing the reference clip of {os.path.basename(voice)}\n')

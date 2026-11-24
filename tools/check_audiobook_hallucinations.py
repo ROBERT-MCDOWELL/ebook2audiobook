@@ -122,7 +122,7 @@ def number_from_chapters(cues:list, chapters:list)->None:
         counts[block] = cue['sentence'] + 1
 
 def probe(path:str)->dict:
-    out = subprocess.run([shutil.which('ffprobe'), '-v', 'error', '-show_chapters', '-show_format', '-show_streams', '-select_streams', 'a:0', '-of', 'json', path], capture_output=True, text=True, check=True).stdout
+    out = subprocess.run([shutil.which('ffprobe'), '-v', 'error', '-show_chapters', '-show_format', '-show_streams', '-select_streams', 'a:0', '-of', 'json', path], capture_output=True, text=True, errors='replace', check=True).stdout
     return json.loads(out)
 
 def tag_language(info:dict)->str:

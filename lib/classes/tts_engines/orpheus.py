@@ -291,7 +291,7 @@ class Orpheus(TTSUtils, TTSRegistry, name='orpheus'):
                         '    pins.append(name + " @ " + direct["url"] if direct and direct.get("url") else name + "==" + dist.version)',
                         'print(json.dumps({"pins": pins, "versions": versions}))'
                     ])
-                    probe = subprocess.run([self.venv_python, '-c', pins_script], env=fallback_env, capture_output=True, text=True, timeout=120)
+                    probe = subprocess.run([self.venv_python, '-c', pins_script], env=fallback_env, capture_output=True, text=True, errors='replace', timeout=120)
                     pins_info = json.loads(probe.stdout.strip() or '{}') if probe.returncode == 0 else {}
                     torch_pins = pins_info.get('pins', [])
                     fallback_torch = pins_info.get('versions', {}).get('torch')
@@ -341,7 +341,7 @@ class Orpheus(TTSUtils, TTSRegistry, name='orpheus'):
                     'from snac import SNAC',
                     'from transformers import AutoTokenizer, AutoModelForCausalLM'
                 ])
-                probe = subprocess.run([self.venv_python, '-c', probe_script], env=self.worker_env, capture_output=True, text=True, timeout=600)
+                probe = subprocess.run([self.venv_python, '-c', probe_script], env=self.worker_env, capture_output=True, text=True, errors='replace', timeout=600)
                 if probe.returncode != 0:
                     error = legends['error_venv_install_failed'].format(engine=tts_engine, step=f'import snac, transformers: {probe.stderr.strip()[-500:]}')
                     raise RuntimeError(error)

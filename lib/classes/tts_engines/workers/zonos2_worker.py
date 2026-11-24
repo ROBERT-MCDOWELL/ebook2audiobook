@@ -52,7 +52,7 @@ def main()->int:
         try:
             with open(pid_file, 'r') as f:
                 old_pid = int(f.read().strip())
-            comm = subprocess.run(['ps', '-p', str(old_pid), '-o', 'comm='], capture_output=True, text=True).stdout.strip()
+            comm = subprocess.run(['ps', '-p', str(old_pid), '-o', 'comm='], capture_output=True, text=True, errors='replace').stdout.strip()
             if comm.endswith('zonos2-server'):
                 os.kill(old_pid, signal.SIGKILL)
         except Exception:

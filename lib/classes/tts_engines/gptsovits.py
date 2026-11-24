@@ -253,7 +253,7 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                         '    pins.append(name + " @ " + direct["url"] if direct and direct.get("url") else name + "==" + dist.version)',
                         'print(json.dumps(pins))'
                     ])
-                    probe = subprocess.run([self.venv_python, '-c', pins_script], env=fallback_env, capture_output=True, text=True, timeout=120)
+                    probe = subprocess.run([self.venv_python, '-c', pins_script], env=fallback_env, capture_output=True, text=True, errors='replace', timeout=120)
                     torch_pins = json.loads(probe.stdout.strip() or '[]') if probe.returncode == 0 else []
                     index_args = []
                     for pin in torch_pins:
@@ -292,7 +292,7 @@ class GptSovits(TTSUtils, TTSRegistry, name='gptsovits'):
                     '            setattr(torch.distributed, attr, value)',
                     'import TTS_infer_pack.TTS'
                 ])
-                probe = subprocess.run([self.venv_python, '-c', probe_script], cwd=self.src_dir, env=self.worker_env, capture_output=True, text=True, timeout=600)
+                probe = subprocess.run([self.venv_python, '-c', probe_script], cwd=self.src_dir, env=self.worker_env, capture_output=True, text=True, errors='replace', timeout=600)
                 if probe.returncode != 0:
                     error = legends['error_venv_install_failed'].format(engine=tts_engine, step=f'import TTS_infer_pack.TTS: {probe.stderr.strip()[-500:]}')
                     raise RuntimeError(error)
