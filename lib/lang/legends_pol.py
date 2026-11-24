@@ -502,6 +502,8 @@ legends = {
     'msg_installing_missing_deps': 'Instalowanie brakujących zależności: {pkgs}',
     'msg_upgrading_outdated_deps': 'Aktualizacja zależności starszych niż inny pakiet wymaga: {pkgs}',
     'msg_vulkan_torch_libomp': 'Zainstalowana pochodnia Vulkan nie ma {dll} i nie można jej załadować: trwa ponowna instalacja z opublikowanego koła.',
+    'msg_vcredist_installing': 'Nie jest zainstalowany wymagany pakiet redystrybucyjny Microsoft Visual C++ (brak {dlls}): podczas instalowania go z witryny firmy Microsoft system Windows prosi o uprawnienia administratora…',
+    'msg_vcredist_install_failed': 'Instalacja pakietu redystrybucyjnego Microsoft Visual C++ nie została ukończona ({reason}).',
     'error_vcredist_missing': 'Pakiet redystrybucyjny Microsoft Visual C++ nie jest zainstalowany (brak {dlls}): bez niego nie można załadować biblioteki torch (WinError 126).\nPobierz i zainstaluj go ze strony {url}, a następnie ponownie uruchom aplikację ebook2audiobook.',
     'msg_probing_cuda_torch': 'Sprawdzanie, czy biblioteka torch {torch} ({tag}) działa z tym sterownikiem NVIDIA…',
     'msg_cuda_torch_unusable': '{tag} Torch ulega natywnej awarii z tym sterownikiem NVIDIA (naruszenie dostępu po uruchomieniu XTTS): zamiast tego instalowana jest niższa kompilacja {usable}. Decyzja pozostaje w mocy do czasu zmiany sterownika.',

@@ -502,6 +502,8 @@ legends = {
     'msg_installing_missing_deps': '正在安装缺少的依赖项：{pkgs}',
     'msg_upgrading_outdated_deps': '升级比另一个软件包更旧的依赖项需要：{pkgs}',
     'msg_vulkan_torch_libomp': '已安装的Vulkan Torch缺少{dll}，无法加载：请从发布的wheel重新安装。',
+    'msg_vcredist_installing': '未安装Microsoft Visual C++可再发行组件Torch所需组件（缺少{dlls}）：从Microsoft安装时，Windows会要求管理员权限……',
+    'msg_vcredist_install_failed': 'Microsoft Visual C++ 可再发行软件包的安装未完成 ({reason})。',
     'error_vcredist_missing': '未安装 Microsoft Visual C++ 可再发行软件包（缺少{dlls}）：没有该软件包，torch 无法加载（WinError 126）。\n从{url}下载并安装，然后再次启动 ebook2audiobook。',
     'msg_probing_cuda_torch': '正在测试Torch {torch} ({tag})是否在此NVIDIA驱动程序上运行……',
     'msg_cuda_torch_unusable': '{tag} torch在此NVIDIA驱动程序下发生原生崩溃（xtts运行后出现访问冲突）：改为安装较低的{usable}版本。该判定将一直保留，直至驱动程序发生变化。',

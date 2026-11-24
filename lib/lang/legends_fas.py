@@ -502,6 +502,8 @@ legends = {
     'msg_installing_missing_deps': 'در حال نصب وابستگی‌های موجود: {pkgs}',
     'msg_upgrading_outdated_deps': 'ارتقای وابستگی‌هایی که قدیمی‌تر از بسته دیگری هستند، مستلزم موارد زیر است: {pkgs}',
     'msg_vulkan_torch_libomp': 'مشعل Vulkan نصب‌شده فاقد {dll} است و نمی‌توان آن را بارگذاری کرد: در حال نصب مجدد آن از چرخ منتشر شده.',
+    'msg_vcredist_installing': 'نیازهای torch توزیع‌پذیر Microsoft Visual C++ نصب نشده است ({dlls} وجود ندارد): در حال نصب آن از مایکروسافت، ویندوز درخواست حقوق ادمین می‌کند…',
+    'msg_vcredist_install_failed': 'نصب Microsoft Visual C++ قابل توزیع مجدد تکمیل نشد ({reason}).',
     'error_vcredist_missing': 'Microsoft Visual C++ قابل توزیع مجدد نصب نیست ({dlls} وجود ندارد): torch بدون آن قابل بارگذاری نیست (WinError 126).\nآن را از {url} دانلود و نصب کنید، سپس ebook2audiobook را دوباره راه‌اندازی کنید.',
     'msg_probing_cuda_torch': 'در حال بررسی اینکه آیا torch {torch} ({tag}) با این درایور NVIDIA کار می‌کند…',
     'msg_cuda_torch_unusable': '{tag} torch به طور بومی با این درایور NVIDIA کرش می‌کند (نقض دسترسی پس از اجرای xtts): در عوض، نسخه {usable} پایین‌تر نصب می‌شود. این نتیجه تا زمان تغییر درایور حفظ می‌شود.',

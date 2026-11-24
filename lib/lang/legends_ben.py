@@ -502,6 +502,8 @@ legends = {
     'msg_installing_missing_deps': 'অনুপস্থিত ডিপেন্ডেন্সিগুলি ইনস্টল করা হচ্ছে: {pkgs}',
     'msg_upgrading_outdated_deps': 'অন্য প্যাকেজের চেয়ে পুরনো ডিপেন্ডেন্সিগুলি আপগ্রেড করার জন্য প্রয়োজন: {pkgs}',
     'msg_vulkan_torch_libomp': 'ইনস্টল করা Vulkan টর্চে {dll} নেই এবং এটি লোড করা যাচ্ছে না: প্রকাশিত হুইল থেকে এটি পুনরায় ইনস্টল করা হচ্ছে।',
+    'msg_vcredist_installing': 'Microsoft Visual C++ রিডিস্ট্রিবিউটেবল টর্চের যে প্রয়োজন তা ইনস্টল করা নেই ({dlls} অনুপস্থিত): এটি Microsoft থেকে ইনস্টল করার সময়, Windows অ্যাডমিনিস্ট্রেটর অধিকার চাইছে…',
+    'msg_vcredist_install_failed': 'Microsoft Visual C++ রিডিস্ট্রিবিউটেবল ইনস্টল সম্পূর্ণ হয়নি ({reason})।',
     'error_vcredist_missing': 'Microsoft Visual C++ রিডিস্ট্রিবিউটেবল ইনস্টল করা নেই ({dlls} অনুপস্থিত): এটি ছাড়া torch লোড করা যাবে না (WinError 126)।\n{url} থেকে এটি ডাউনলোড এবং ইনস্টল করুন, তারপর আবার ebook2audiobook চালু করুন।',
     'msg_probing_cuda_torch': 'এই NVIDIA ড্রাইভারটিতে torch {torch} ({tag}) চলে কিনা তা পরীক্ষা করা হচ্ছে…',
     'msg_cuda_torch_unusable': 'এই NVIDIA ড্রাইভারের সাথে {tag} torch নেটিভভাবে ক্র্যাশ করে (xtts চালানোর পরে অ্যাক্সেস লঙ্ঘন): এর পরিবর্তে নিম্ন {usable} বিল্ড ইনস্টল করা হচ্ছে। ড্রাইভার পরিবর্তন না হওয়া পর্যন্ত এই সিদ্ধান্ত বজায় রাখা হবে।',

@@ -502,6 +502,8 @@ legends = {
     'msg_installing_missing_deps': '누락된 종속성 설치 중: {pkgs}',
     'msg_upgrading_outdated_deps': '다른 패키지보다 오래된 종속성을 업그레이드하려면 다음이 필요합니다. {pkgs}',
     'msg_vulkan_torch_libomp': '설치된 Vulkan 토치가 {dll}을(를) 갖추지 않아 로드할 수 없습니다. 게시된 휠에서 다시 설치합니다.',
+    'msg_vcredist_installing': 'Microsoft Visual C++ 재배포 가능 Torch 요구 사항이 설치되어 있지 않습니다({dlls} 누락됨). Microsoft에서 설치하면 Windows에서 관리자 권한을 요청합니다...',
+    'msg_vcredist_install_failed': 'Microsoft Visual C++ 재배포 가능 설치가 완료되지 않았습니다({reason}).',
     'error_vcredist_missing': 'Microsoft Visual C++ 재배포 가능 패키지가 설치되어 있지 않습니다({dlls} 누락됨). 이 패키지가 없으면 torch를 로드할 수 없습니다(WinError 126).\n{url}에서 다운로드하여 설치한 다음 ebook2audiobook을 다시 시작하세요.',
     'msg_probing_cuda_torch': 'torch {torch}({tag})이(가) 이 NVIDIA 드라이버에서 실행되는지 테스트 중...',
     'msg_cuda_torch_unusable': '{tag} torch가 이 NVIDIA 드라이버와 함께 네이티브로 충돌합니다(xtts가 실행되면 액세스 위반 발생). 대신 이전 {usable} 빌드를 설치합니다. 드라이버가 변경될 때까지 이 결정이 유지됩니다.',

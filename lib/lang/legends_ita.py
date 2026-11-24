@@ -502,6 +502,8 @@ legends = {
     'msg_installing_missing_deps': 'Installazione delle dipendenze mancanti: {pkgs}',
     'msg_upgrading_outdated_deps': 'L\'aggiornamento delle dipendenze più vecchie di un altro pacchetto richiede: {pkgs}',
     'msg_vulkan_torch_libomp': 'La torcia Vulkan installata non dispone di {dll} e non può essere caricata: reinstallarla dal wheel pubblicato.',
+    'msg_vcredist_installing': 'Il componente ridistribuibile Microsoft Visual C++ necessario per Torch non è installato ({dlls} mancante): per installarlo da Microsoft, Windows richiede i diritti di amministratore…',
+    'msg_vcredist_install_failed': 'L\'installazione del pacchetto ridistribuibile di Microsoft Visual C++ non è stata completata ({reason}).',
     'error_vcredist_missing': 'Il componente ridistribuibile di Microsoft Visual C++ non è installato ({dlls} mancante): Torch non può essere caricato senza di esso (WinError 126).\nScaricalo e installalo da {url}, quindi riavvia ebook2audiobook.',
     'msg_probing_cuda_torch': 'Verifica in corso per stabilire se torch {torch} ({tag}) funziona con questo driver NVIDIA…',
     'msg_cuda_torch_unusable': '{tag} torch si blocca in modo nativo con questo driver NVIDIA (violazione di accesso all\'avvio di xtts): installazione della build {usable} inferiore in alternativa. Il verdetto viene mantenuto fino a quando il driver non viene modificato.',
