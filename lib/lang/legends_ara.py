@@ -502,7 +502,7 @@ legends = {
     'msg_installing_missing_deps': 'جارٍ تثبيت التبعيات المفقودة: {pkgs}',
     'msg_upgrading_outdated_deps': 'تتطلب ترقية التبعيات الأقدم من حزمة أخرى ما يلي: {pkgs}',
     'msg_vulkan_torch_libomp': 'يفتقر مشعل Vulkan المثبت إلى {dll} ولا يمكن تحميله: إعادة تثبيته من العجلة المنشورة.',
-    'msg_vcredist_missing': 'تحذير: {dlls} مفقود: لم يتم تثبيت Microsoft Visual C++ القابل لإعادة التوزيع، لذلك لا يمكن تحميل torch (WinError 126). قم بتنزيله وتثبيته من {url}، ثم شغّل ebook2audiobook مرة أخرى.',
+    'error_vcredist_missing': 'لم يتم تثبيت Microsoft Visual C++ القابل لإعادة التوزيع ({dlls} مفقود): لا يمكن تحميل torch بدونه (WinError 126).\nقم بتنزيله وتثبيته من {url}، ثم ابدأ تشغيل ebook2audiobook مرة أخرى.',
     'msg_probing_cuda_torch': 'جارٍ اختبار ما إذا كان torch {torch} ({tag}) يعمل على برنامج تشغيل NVIDIA هذا...',
     'msg_cuda_torch_unusable': 'يتعطل {tag} torch بشكل أصلي مع برنامج تشغيل NVIDIA هذا (انتهاك الوصول بمجرد تشغيل xtts): يتم تثبيت الإصدار {usable} الأقدم بدلاً من ذلك. يتم الاحتفاظ بالحكم حتى يتم تغيير برنامج التشغيل.',
     'msg_dev_build_installed': 'لا يوجد إصدار مستقر لـ {tag} حتى الآن، وتم تثبيت الإصدار الليلي: {pkgs}. سيتحول ebook2audiobook إلى الإصدار المستقر بمجرد نشره.',

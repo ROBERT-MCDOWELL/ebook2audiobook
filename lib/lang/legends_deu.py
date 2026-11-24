@@ -502,7 +502,7 @@ legends = {
     'msg_installing_missing_deps': 'Fehlende Abhängigkeiten werden installiert: {pkgs}',
     'msg_upgrading_outdated_deps': 'Das Upgrade von Abhängigkeiten, die älter als ein anderes Paket sind, erfordert: {pkgs}',
     'msg_vulkan_torch_libomp': 'Dem installierten Vulkan-Brenner fehlt {dll} und er kann nicht geladen werden: Neuinstallation aus dem veröffentlichten Wheel.',
-    'msg_vcredist_missing': 'WARNUNG: {dlls} fehlt: Die Microsoft Visual C++ Redistributable ist nicht installiert, daher kann Torch nicht geladen werden (WinError 126). Laden Sie es von {url} herunter und installieren Sie es, und starten Sie dann ebook2audiobook erneut.',
+    'error_vcredist_missing': 'Die Microsoft Visual C++ Redistributable ist nicht installiert ({dlls} fehlt): Torch kann ohne sie nicht geladen werden (WinError 126).\nLaden Sie es von {url} herunter und installieren Sie es, und starten Sie dann ebook2audiobook erneut.',
     'msg_probing_cuda_torch': 'Es wird geprüft, ob Torch {torch} ({tag}) mit diesem NVIDIA-Treiber funktioniert …',
     'msg_cuda_torch_unusable': 'Die {tag}-Torch stürzt mit diesem NVIDIA-Treiber nativ ab (Zugriffsverletzung, sobald XTTS ausgeführt wird): Stattdessen wird das niedrigere {usable}-Build installiert. Das Ergebnis bleibt gültig, bis sich der Treiber ändert.',
     'msg_dev_build_installed': 'Für {tag} gibt es noch keinen stabilen Build. Es wurde der Nightly-Build installiert: {pkgs}. ebook2audiobook wechselt zum stabilen Build, sobald dieser veröffentlicht wird.',

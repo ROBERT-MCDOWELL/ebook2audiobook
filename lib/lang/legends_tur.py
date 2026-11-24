@@ -502,7 +502,7 @@ legends = {
     'msg_installing_missing_deps': 'Eksik bağımlılıklar yükleniyor: {pkgs}',
     'msg_upgrading_outdated_deps': 'Başka bir paketten daha eski bağımlılıkların yükseltilmesi için şunlar gerekir: {pkgs}',
     'msg_vulkan_torch_libomp': 'Takılı Vulkan torch\'ta {dll} yok ve yüklenemiyor: Yayınlanan wheel\'den yeniden yükleniyor.',
-    'msg_vcredist_missing': 'UYARI: {dlls} eksik: Microsoft Visual C++ yeniden dağıtılabilir paketi yüklü değil, bu nedenle torch yüklenemiyor (WinError 126). {url} adresinden indirip yükleyin, ardından ebook2audiobook\'u tekrar başlatın.',
+    'error_vcredist_missing': 'Microsoft Visual C++ yeniden dağıtılabilir paketi yüklü değil ({dlls} eksik): Torch bu paket olmadan yüklenemez (WinError 126).\n{url} adresinden indirip yükleyin, ardından ebook2audiobook\'u tekrar başlatın.',
     'msg_probing_cuda_torch': '{torch} ({tag}) torch\'unun bu NVIDIA sürücüsü üzerinde çalışıp çalışmadığı test ediliyor…',
     'msg_cuda_torch_unusable': '{tag} torch, bu NVIDIA sürücüsüyle yerel olarak çöküyor (xtts çalıştıktan sonra erişim ihlali): Bunun yerine daha düşük {usable} sürümü yükleniyor. Karar, sürücü değişene kadar geçerliliğini korur.',
     'msg_dev_build_installed': '{tag} için henüz stabil bir sürüm yok, gece sürümü yüklendi: {pkgs}. ebook2audiobook, yayınlandığında stabil sürüme geçer.',

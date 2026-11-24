@@ -502,7 +502,7 @@ legends = {
     'msg_installing_missing_deps': 'Installing missing dependencies: {pkgs}',
     'msg_upgrading_outdated_deps': 'Upgrading dependencies older than another package requires: {pkgs}',
     'msg_vulkan_torch_libomp': 'The installed Vulkan torch lacks {dll} and cannot load: reinstalling it from the published wheel.',
-    'msg_vcredist_missing': 'WARNING: {dlls} is missing: the Microsoft Visual C++ redistributable is not installed, so torch cannot load (WinError 126). Download and install it from {url}, then start ebook2audiobook again.',
+    'error_vcredist_missing': 'The Microsoft Visual C++ redistributable is not installed ({dlls} missing): torch cannot load without it (WinError 126).\nDownload and install it from {url}, then start ebook2audiobook again.',
     'msg_probing_cuda_torch': 'Testing whether torch {torch} ({tag}) runs on this NVIDIA driver…',
     'msg_cuda_torch_unusable': 'The {tag} torch crashes natively with this NVIDIA driver (access violation once xtts runs): installing the lower {usable} build instead. The verdict is kept until the driver changes.',
     'msg_dev_build_installed': 'No stable build for {tag} yet, nightly build installed: {pkgs}. ebook2audiobook switches to the stable build once it is published.',
