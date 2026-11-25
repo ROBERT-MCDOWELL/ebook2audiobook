@@ -10,7 +10,7 @@ Podporuje klonování hlasu a 1696 jazyků!
 Autoři nenesou odpovědnost za jakékoli zneužití tohoto softwaru ani za případné právní následky. <br>
 Používejte tento nástroj zodpovědně a v souladu se všemi platnými zákony.
 
-[![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/63Tv3F65k6)](https://discord.gg/63Tv3F65k6)
+[![Discord](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2F63Tv3F65k6%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&logo=discord&logoColor=white&color=5865F2&label=Discord&suffix=%20members)](https://discord.gg/63Tv3F65k6)
 
 ### Díky podpoře vývojářů ebook2audiobook!
 <p>
@@ -102,6 +102,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
+  - [Check an audiobook for hallucinations](#check-audiobook-hallucinations)
   
 - [Cloned Voices](#cloned-voices)
 - [Fine Tuned TTS models](#fine-tuned-tts-models) 
@@ -118,7 +119,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 <a id="features"></a>
 ## Funkce
-- 🔧 **Podporované moduly TTS**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos2, Zonos3, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS, ZipVoice (LuxTTS)`
+- 🔧 **Podporované moduly TTS**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos2, Zonos3, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS, ZipVoice (LuxTTS), KittenTTS`
 - 📚 **Převod více formátů souborů**: `.epub`, `.mobi`, `.azw3`, `.fb2`, `.lrf`, `.rb`, `.snb`, `.tcr`, `.pdf`, `.txt`, `.rtf`, `.doc`, `.docx`, `.html`, `.odt`, `.azw`, `.tiff`, `.tif`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.zip`
 - 💻 **Textové pole** pro přímý převod krátkého textu na zvuk
 - 🔍 **OCR skenování** pro soubory s textovými stránkami ve formě obrázků
@@ -524,7 +525,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - POZNÁMKA: MPS není v Dockeru zpřístupněno, proto je nutné použít CPU
-- POZNÁMKA: Pojmenovaný svazek `e2a_venvs` uchovává moduly TTS nainstalované ve vlastním prostředí venv (GPT-SoVITS, Zonos2, Zonos3, OmniVoice, F5-TTS, ZipVoice, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM atd.)
+- POZNÁMKA: Pojmenovaný svazek `e2a_venvs` uchovává moduly TTS nainstalované ve vlastním virtuálním prostředí (GPT-SoVITS, Zonos2, Zonos3, OmniVoice, F5-TTS, ZipVoice, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM, KittenTTS atd.)
   mezi spuštěními kontejneru, takže se pokaždé znovu neinstalují. Pro jejich resetování: `docker volume rm e2a_venvs`
 
 <a id="tools"></a>
@@ -564,8 +565,8 @@ options:
   -h, --help            show this help message and exit
   --only ONLY           Comma list of categories: common,xtts,bark,tortoise,vits,fairseq,glowtts,tacotron,yo
                         urtts,piper,zonos2,zonos3,audiocpp,audiocpp_server,gptsovits,f5tts,zipvoice,omnivoic
-                        e,orpheus,sparktts,chattts,csm,openvoice,melotts,phonon,stanza,pyannote,demucs,inter
-                        lude,argos,tessdata,jieba,voices
+                        e,orpheus,sparktts,chattts,csm,kittentts,openvoice,melotts,phonon,stanza,pyannote,de
+                        mucs,interlude,argos,tessdata,jieba,voices
   --skip SKIP           Comma list of categories to leave out
   --languages LANGUAGES
                         Comma list of e2a ISO-639-3 codes (eng,fra,ita...): single-language models and fine-
@@ -670,6 +671,77 @@ examples:
   translate_ebook.py @books.txt --to ita --mode bilingual
   translate_ebook.py --list
   translate_ebook.py --list --from eng
+```
+
+<a id="check-audiobook-hallucinations"></a>
+### Zkontrolujte, zda v audioknize nejsou halucinace: `tools/check_audiobook_hallucinations.py`
+Uvádí věty dokončené audioknihy e2a, které neobsahují text: nesrozumitelná řeč, slovo nebo fráze vyslovená dvakrát
+nebo vynechána, mumlání před nebo po textu, věta příliš dlouhá nebo příliš krátká pro daný text (XTTS a ostatní
+autoregresivní modely to občas dělají). Pouze hlášení: Audiokniha se nemění, vy rozhodujete, co je třeba opravit.
+Čte `.vtt` e2a zápisy vedle každé audioknihy (jedna značka na větu), přepisuje každou větu s
+`facebook/mms-1b-all` (1 162 jazyků, přibližně 4 GB, při prvním použití staženo do `./models/tts`) a porovnává
+písmena obou textů, romanizovaná, takže funguje jakékoli písmo. Omezení vyplývají ze samotné knihy (mediány všech jejích
+věty), jména nebo obtížný text je zvyšují pro celou knihu, zatímco halucinace vyniká.
+U vět s méně než 10 písmeny a vět, které stále obsahují číslice, se provádí pouze kontrola délky, stejně jako u jazyka, který MMS nezná.
+Bylo zachyceno chybějící slovo o 5 nebo více písmenech (všech 19 vět XTTS přečtených s vynechaným slovem), jednou v krátkém časovém úseku
+zvuku kolem něj potvrzuje, že tam není: rozpoznávač vynechá slovo na začátku nebo na konci dlouhé věty
+které slyší samo od sebe. Chybějící slovo o 3 nebo 4 písmenech většinou není: rozpoznávač vynechává krátká slova i v případě kvalitního zvuku.
+Každá označená věta je vytištěna, jakmile je nalezena, a všechny věty jsou znovu uvedeny v tabulce na konci podle bloku a
+čísla vět podle číslování e2a (od 0). Každá věta se svým problémem, svým textem, tím, co bylo místo toho slyšeno, a
+jeho měření jsou uložena v `<audiobook>.hallucinations.json`. Během jeho běhu je věta posuzována podle předchozích vět
+to, tabulka pro celou knihu: věta vytištěná dříve může být na konci vymazána, jak uvádí řádek pod tabulkou. Čísla pocházejí z `.vtt` (e2a označuje každou narážku `block <n> sentence <n>`); v dříve vytvořené audioknize
+Bloky se počítají z kapitol, přičemž po každém vynechaném bloku se konverze ukončí.
+   - **Linux/MacOS**
+     ```bash
+     ./python_env/bin/python tools/check_audiobook_hallucinations.py audiobooks/cli/book.m4b
+     ```
+   - **Windows**
+     ```bash
+     python_env\Scripts\python.exe tools\check_audiobook_hallucinations.py audiobooks\cli\book.m4b
+     ```
+   - Složka kontroluje každou audioknihu, která v ní obsahuje `.vtt` (všechny části rozdělené audioknihy).
+   - `--language` je potřeba pro přeloženou knihu: její jazykový tag určuje jazyk e-knihy.
+   - **Zařízení**: `--device` přebírá názvy e2a, `cpu`, `cuda`, `rocm`, `xpu`, `mps` nebo `jetson` (poloviční přesnost na
+     grafické procesory, ale MPS). Ve výchozím nastavení je to ta, pro kterou byl e2a nainstalován, a CPU, pokud tuto nelze použít.
+   - **Rychlost**: Generování 7,6 minuty zvuku trvalo 2,3 až 5,4 minuty na 4 jádrech procesoru. Pro celou knihu je vhodnější použít grafický procesor.
+
+```bash
+usage: check_audiobook_hallucinations.py [-h] [-l LANGUAGE] [--vtt VTT] [-o OUTPUT]
+                                         [--device {auto,cpu,cuda,rocm,xpu,mps,jetson}]
+                                         audiobooks [audiobooks ...]
+
+Report the sentences of an e2a audiobook that do not say their text: babble, a word or a phrase
+said twice or skipped, mumble before or after the text, a sentence too long or too short for its text.
+Report only: the audiobook is not changed.
+It reads the .vtt e2a writes beside each audiobook (one cue per sentence), transcribes each sentence with
+facebook/mms-1b-all (1162 languages, downloaded into models/tts on first use) and compares the letters of
+both texts, romanized (uroman, pykakasi for Japanese). The limits come from the book itself, from the
+medians of all its sentences: names or a hard text raise them for the whole book, a hallucination stands out.
+Each flagged sentence is printed as soon as it is found, all of them in a table at the end, by their block and
+sentence numbers as in e2a (from 0). Every sentence with its problem, its text, what was heard and its measures
+is saved in <audiobook>.hallucinations.json.
+
+positional arguments:
+  audiobooks            Audiobook files (m4b, mp3, flac...) with their .vtt beside them, or folders holding
+                        them
+
+options:
+  -h, --help            show this help message and exit
+  -l LANGUAGE, --language LANGUAGE
+                        Language spoken, e2a ISO-639-3 code (default: the audiobook's language tag; set it
+                        for a translated book, its tag keeps the ebook's language)
+  --vtt VTT             Subtitles of the audiobook, single audiobook only (default: <audiobook>.vtt)
+  -o OUTPUT, --output OUTPUT
+                        JSON report, single audiobook only (default: <audiobook>.hallucinations.json beside
+                        it)
+  --device {auto,cpu,cuda,rocm,xpu,mps,jetson}
+                        Device the speech recognizer runs on, named as in e2a (default: the one e2a was
+                        installed for, cpu when it cannot be used)
+
+examples:
+  check_audiobook_hallucinations.py audiobooks/cli/book.m4b
+  check_audiobook_hallucinations.py audiobooks/cli/book.m4b --language fra --device cuda
+  check_audiobook_hallucinations.py audiobooks/cli
 ```
 
 <a id="cloned-voices"></a>
@@ -804,6 +876,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] ChatTTS (https://github.com/2noise/ChatTTS)
 - [x] Spark-TTS (https://github.com/sparkaudio/spark-tts)
 - [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
+- [x] KittenTTS (https://github.com/KittenML/KittenTTS)
 - [x] CSM (https://github.com/SesameAILabs/csm)
 
 #### Překlad souboru Readme
