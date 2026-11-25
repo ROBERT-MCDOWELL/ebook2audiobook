@@ -614,6 +614,7 @@ legends = {
     'error_zonos2_no_gpu_package': 'A(z) {engine} nem rendelkezik olyan GPU-csomaggal, amely ezen a gépen ({machine}) futna a(z) {device} használatával. Válassza a CPU-t eszközként a(z) {engine} futtatásához a CPU-n, ami sokkal lassabb.',
     'msg_audiocpp_offline_package': 'A {engine} szerver csomag {package} kicsomagolása az offline másolatból...',
     'msg_vc_model_fallback': 'A {vc_model}-s hangkonverzió nem tud {lang}: {fallback} arányban beszélni, ehelyett átalakítja a hangot.',
+    'msg_vc_slower': 'A(z) {engine} nem rendelkezik beépített hangklónozással: a(z) {vc_model} minden mondatnál klónozza a kiválasztott hangot, így az átalakítás hosszabb ideig tart, mint egy {engine} beépített hanggal.',
     'msg_vc_cpu_slow': 'A(z) {engine} beépített hangtól eltérő hang használata: a(z) {vc_model} hangkonverzió a CPU-n fut minden mondatnál, így az e-könyv konverziója sokkal lassabb, mint a beépített hanggal.',
     'msg_vc_device_switch': 'A(z) {engine} beépített hangtól eltérő hang használata: a(z) {vc_model} hangkonverzió nem futtatható a(z) {device} rendszeren, és átvált a(z) {new_device} hangra, így az e-könyv konverziója valamivel lassabb, mint a beépített hang használata esetén.',
     'msg_vc_device_switch_cpu': 'A(z) {engine} beépített hangtól eltérő hang használata: a(z) {vc_model} hangkonverzió nem futtatható a(z) {device} rendszeren, és átvált a(z) {new_device} rendszerre, így az e-könyv konverziója sokkal lassabb, mint a beépített hanggal.',

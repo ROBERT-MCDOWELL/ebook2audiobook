@@ -614,6 +614,7 @@ legends = {
     'error_zonos2_no_gpu_package': '{engine}, bu makinede ({machine}) {device} ile çalışan bir GPU paketine sahip değil. {engine} uygulamasını CPU\'da çalıştırmak için cihaz olarak CPU\'yu seçin. Bu işlem çok daha yavaştır.',
     'msg_audiocpp_offline_package': 'Çevrimdışı kopyadan {engine} sunucu paketi {package} açılıyor…',
     'msg_vc_model_fallback': 'Ses dönüştürme {vc_model} konuşamaz {lang}: {fallback} bunun yerine sesi dönüştürür.',
+    'msg_vc_slower': '{engine} yerleşik ses klonlamasına sahip değildir: {vc_model} seçilen sesi her cümlede klonlar, bu nedenle dönüştürme işlemi {engine} yerleşik sese göre daha uzun sürer.',
     'msg_vc_cpu_slow': '{engine} yerleşik ses dışında bir ses kullanma: {vc_model} ses dönüştürme işlemi her cümlede CPU üzerinde çalışır, bu nedenle e-kitap dönüştürme işlemi yerleşik bir sese göre çok daha yavaştır.',
     'msg_vc_device_switch': '{engine} yerleşik ses dışında bir ses kullanma: {vc_model} ses dönüştürme işlemi {device} üzerinde çalışamaz ve {new_device} sesine geçer, bu nedenle e-kitap dönüştürme işlemi yerleşik bir sese göre biraz daha yavaştır.',
     'msg_vc_device_switch_cpu': '{engine} yerleşik ses dışında bir ses kullanma: {vc_model} ses dönüştürme işlemi {device} üzerinde çalışamaz ve {new_device} sesine geçer, bu nedenle e-kitap dönüştürme işlemi yerleşik bir sese göre çok daha yavaştır.',

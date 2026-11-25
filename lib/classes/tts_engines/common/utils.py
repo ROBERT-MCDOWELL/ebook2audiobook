@@ -178,6 +178,25 @@ class TTSUtils:
     # never assign these; shared helpers may still read them.
     engine_zs = None
     tts_zs_key = None
+    vc_alerted = False
+
+    def _alert_vc(self, vc_model:str)->None:
+        # a voice file on an engine without built-in voice cloning: a TTS_VOICE_CONVERSION model clones it on every sentence
+        # (task "vc" converts the engine's output, task "tts" speaks the sentence again). Told once per conversion
+        # (core.py convert_chapters2audio() resets session['vc_alert']), once per session for the sentence previews, each
+        # of which loads a new engine. The engine's own flag spares the session proxy on later sentences
+        if self.vc_alerted:
+            return
+        self.vc_alerted = True
+        if self.session.get('vc_alert'):
+            return
+        self.session['vc_alert'] = True
+        msg = legends['msg_vc_slower'].format(engine=self.session['tts_engine'], vc_model=vc_model)
+        show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
+        if show_alert is not None:
+            show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
+        else:
+            print(msg)
 
     def cleanup_memory(self)->None:
         import torch
@@ -722,6 +741,8 @@ class TTSUtils:
                 # fallback for the others (VoiceConversion falls back the same way)
                 vc_cfg = TTS_VOICE_CONVERSION[self.tts_zs_key]
                 vc_model = self.tts_zs_key if vc_cfg['task'] == 'vc' or getattr(self, 'language', None) in default_engine_settings[vc_cfg['engine']]['languages'] else vc_cfg['fallback']
+                # every engine with a voice conversion stage loads it here, on its first sentence that needs it
+                self._alert_vc(vc_model)
                 # a VC worker that died (server crash, killed), or one running another model for this key (the cached one
                 # fell back for another language): started again below
                 if isinstance(engine_zs, SubprocessPipe) and (engine_zs.process is None or engine_zs.process.poll() is not None or getattr(engine_zs, 'vc_model', vc_model) != vc_model):

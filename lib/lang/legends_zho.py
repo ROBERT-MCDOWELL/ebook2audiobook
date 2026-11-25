@@ -614,6 +614,7 @@ legends = {
     'error_zonos2_no_gpu_package': '{engine}没有可在该计算机（{machine}）上使用{device}运行的GPU软件包。选择 CPU 作为设备，以便在 CPU 上运行{engine}，但速度会慢得多。',
     'msg_audiocpp_offline_package': '正在 从脱机副本中解压缩{engine}服务器包{package}…',
     'msg_vc_model_fallback': '语音转换{vc_model}不能说话{lang}: {fallback}转换语音。',
+    'msg_vc_slower': '{engine}没有内置语音克隆功能：{vc_model}会克隆每句话的所选语音，因此转换所需的时间比使用{engine}内置语音更长。',
     'msg_vc_cpu_slow': '使用{engine}内置语音以外的语音：{vc_model}语音转换在每句话上都由 CPU 运行，因此电子书的转换速度比使用内置语音慢得多。',
     'msg_vc_device_switch': '使用非{engine}内置语音：{vc_model}语音转换无法在{device}上运行，因此将切换至{new_device}，所以电子书转换速度比使用内置语音时略慢。',
     'msg_vc_device_switch_cpu': '使用非{engine}内置语音：{vc_model}语音转换无法在{device}上运行，并切换到{new_device}，因此电子书转换的速度比使用内置语音慢得多。',

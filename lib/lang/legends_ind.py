@@ -614,6 +614,7 @@ legends = {
     'error_zonos2_no_gpu_package': '{engine} tidak memiliki paket GPU yang berjalan di komputer ini ({machine}) dengan {device}. Pilih CPU sebagai perangkat untuk menjalankan {engine} di CPU, yang jauh lebih lambat.',
     'msg_audiocpp_offline_package': 'Membuka paket server {engine} {package} dari salinan offline…',
     'msg_vc_model_fallback': 'Konversi suara {vc_model} tidak dapat berbicara {lang}: {fallback} mengubah suara sebagai gantinya.',
+    'msg_vc_slower': '{engine} tidak memiliki kloning suara bawaan: {vc_model} mengkloning suara yang dipilih pada setiap kalimat, sehingga konversi memakan waktu lebih lama dibandingkan dengan suara bawaan {engine}.',
     'msg_vc_cpu_slow': 'Menggunakan suara selain {engine} suara bawaan: konversi suara {vc_model} berjalan di CPU untuk setiap kalimat, sehingga konversi ebook jauh lebih lambat dibandingkan dengan suara bawaan.',
     'msg_vc_device_switch': 'Menggunakan suara selain {engine} suara bawaan: konversi suara {vc_model} tidak dapat berjalan di {device} dan beralih ke {new_device}, sehingga konversi ebook sedikit lebih lambat dibandingkan dengan suara bawaan.',
     'msg_vc_device_switch_cpu': 'Menggunakan suara selain {engine} suara bawaan: konversi suara {vc_model} tidak dapat dijalankan di {device} dan beralih ke {new_device}, sehingga konversi ebook jauh lebih lambat dibandingkan dengan suara bawaan.',

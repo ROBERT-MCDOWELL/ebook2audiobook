@@ -75,8 +75,9 @@ class AudioCpp(TTSUtils):
             # the same server; one that speaks the text again (task "tts") would only replace this engine, so they take its
             # fallback then
             asr_files = audiocpp_asr['files'] if self.family_cfg['clone'] and self.family_cfg['ref_text'] else []
-            self.vc_cfg = TTS_VOICE_CONVERSION[default_vc_model.rsplit('/', 1)[-1]]
-            self.vc_cfg = self.vc_cfg if self.vc_cfg['task'] == 'vc' else TTS_VOICE_CONVERSION[self.vc_cfg['fallback']]
+            self.vc_model = default_vc_model.rsplit('/', 1)[-1]
+            self.vc_model = self.vc_model if TTS_VOICE_CONVERSION[self.vc_model]['task'] == 'vc' else TTS_VOICE_CONVERSION[self.vc_model]['fallback']
+            self.vc_cfg = TTS_VOICE_CONVERSION[self.vc_model]
             vc_preset = load_engine_presets(self.vc_cfg['engine'])['internal'] if self.vc_cfg.get('engine') else {'repo': audiocpp_repo, 'files': self.vc_cfg['files']}
             vc_files = vc_preset['files'] if not self.family_cfg['clone'] else []
             msg = legends['msg_zonos2_models'].format(engine=tts_engine, files=', '.join(os.path.basename(f) for f in model_files + asr_files + vc_files))
@@ -198,6 +199,8 @@ class AudioCpp(TTSUtils):
                         trim_audio_buffer = 0.002
                         # only the voice path crosses the pipe: the worker cuts one reference clip per voice file and keeps it.
                         # Built-in voice engines: voice None = their own voice (voice_id), a voice file = converted to it
+                        if not self.family_cfg['clone'] and self.params['current_voice'] is not None:
+                            self._alert_vc(self.vc_model)
                         reply = self.engine.send({
                             'op': 'tts',
                             'text': part,
