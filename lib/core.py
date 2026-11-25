@@ -50,7 +50,7 @@ from lib.classes.non_text_filter import NonTextFilter
 from lib.classes.argos_translator import ArgosTranslator
 from lib.classes.tts_manager import TTSManager
 from lib.classes.tts_engines.common.audio import get_audiolist_duration, get_audio_duration
-from lib.classes.tts_engines.common.utils import build_vtt_file, format_timestamp, gpu_fault, gpu_fault_alert
+from lib.classes.tts_engines.common.utils import build_vtt_file, format_timestamp, gpu_fault, gpu_fault_alert, XttsVoiceConverter
 
 from lib import *
 from lib.conf import no_proxy_host
@@ -5737,6 +5737,55 @@ def unload_tts_manager(tts_manager:Any)->None:
     except Exception as e:
         error = f'unload_tts_manager() error: {e}'
         print(error)
+
+voice_preview_lock = threading.Lock()
+
+def convert_voice_preview(session_id:str, voice:str|None)->str|None:
+    # the voice the GUI plays for an XTTS language: one listed from voices/eng (XTTS built-in speakers, library voices)
+    # is spoken in that language by XTTS, as the conversion does at its start (TTSUtils._set_voice()), so the user hears
+    # it in the language the book is read in. Once per voice and language: voices/<lang> keeps it, the voice list then
+    # offers it and the conversion reuses it. Any other voice plays as it is
+    session = context.get_session(session_id)
+    if not (session and session.get('id', False)) or not isinstance(voice, str) or not os.path.isfile(voice):
+        return voice
+    xtts = TTS_ENGINES['XTTS']
+    language = session['translate'] if session.get('translate_enabled') and session.get('translate') else session['language']
+    if language == 'eng' or language not in default_engine_settings[xtts].get('languages', {}):
+        return voice
+    try:
+        rel = Path(os.path.abspath(voice)).relative_to(voices_dir)
+    except ValueError:
+        return voice
+    # voices/__bark, voices/__piper (an engine's own speakers), voices/__sessions (the user's voices, in their language)
+    if len(rel.parts) < 2 or rel.parts[0].startswith('__') or rel.parts[0] == language:
+        return voice
+    if session['status'] not in [status_tags['READY'], status_tags['END']]:
+        # a conversion is running: no second XTTS beside it, the conversion converts the voice itself
+        return voice
+    key = f'{xtts}-internal'
+    # one XTTS at a time: the voice list change and the refresh after a language change ask for the same voice
+    # together, the second one then finds it converted
+    with voice_preview_lock:
+        was_loaded = key in loaded_tts
+        converter = None
+        try:
+            converter = XttsVoiceConverter(session)
+            converted = converter.convert(voice)
+            if converted:
+                return converted
+            msg = legends['error_voice_preview_conversion'].format(voice=Path(voice).stem, language=language_mapping.get(language, {}).get('name', language))
+            show_alert(session_id, {'type': 'warning', 'msg': msg})
+        except Exception as e:
+            error = f'convert_voice_preview() error: {e}'
+            print(error)
+        finally:
+            # the XTTS it loaded stays only for a session reading with it
+            if not was_loaded and not any(s.get('model_cache') == key for s in context.sessions.values()):
+                loaded_tts.pop(key, None)
+            if converter is not None:
+                converter.cleanup_memory()
+            converter = None
+    return voice
 
 def cleanup_models_cache()->None:
     try:

@@ -825,6 +825,21 @@ class TTSUtils:
             return result
         return False
 
+    def _voice_in_language(self, voice:str)->tuple:
+        # where the voice lives in the TTS language: the same path under voices/<lang> instead of voices/<its lang>
+        # (eng→fra, zho→fra...). Voices converted this way are always absolute paths under voices_dir
+        lang_dir = 'con-' if self.language == 'con' else self.language  # CON is a reserved name on windows
+        voices_root = Path(voices_dir)
+        try:
+            rel = Path(voice).relative_to(voices_root)
+        except ValueError:
+            error = f'_voice_in_language() error: {voice} is not under {voices_dir}'
+            return None, error
+        if len(rel.parts) < 2:
+            error = f'_voice_in_language() error: unexpected voice layout for {voice}'
+            return None, error
+        return str(voices_root.joinpath(lang_dir, *rel.parts[1:])), None
+
     def _check_xtts_builtin_speakers(self, current_voice:str, speaker:str)->str|bool:
         new_current_voice = ''
         proc_current_voice = ''
@@ -838,6 +853,14 @@ class TTSUtils:
                     return current_voice
             xtts = TTS_ENGINES['XTTS']
             if self.language in default_engine_settings[xtts].get('languages', {}):
+                target_voice, error = self._voice_in_language(current_voice)
+                if target_voice is None:
+                    print(error)
+                    return False
+                # converted before (the GUI voice preview, an earlier conversion): the same voice the user heard, not a
+                # new XTTS take of it (its sampling differs on every run)
+                if os.path.exists(target_voice):
+                    return target_voice
                 default_text_file = os.path.join(voices_dir, self.language, 'default.txt')
                 if os.path.exists(default_text_file):
                     msg = legends['msg_converting_builtin_voice'].format(lang=self.language)
@@ -931,23 +954,7 @@ class TTSUtils:
                             sourceTensor = self._tensor_type(audio_sentence)
                             audio_tensor = sourceTensor.clone().detach().unsqueeze(0).cpu()
                             if audio_tensor is not None and audio_tensor.numel() > 0:
-                                # CON is a reserved name on windows
-                                lang_dir = 'con-' if self.language == 'con' else self.language
-                                # Rebuild the path under the new language folder.
-                                # Works for any old-language → any new-language swap (eng→fra, zho→fra, …),
-                                # not just eng→X. xtts voices are always absolute paths under voices_dir.
-                                voices_root = Path(voices_dir)
-                                try:
-                                    rel = Path(current_voice).relative_to(voices_root)
-                                except ValueError:
-                                    error = f'_check_xtts_builtin_speakers() error: {current_voice} is not under {voices_dir}'
-                                    print(error)
-                                    return False
-                                if len(rel.parts) < 2:
-                                    error = f'_check_xtts_builtin_speakers() error: unexpected voice layout for {current_voice}'
-                                    print(error)
-                                    return False
-                                new_current_voice = str(voices_root.joinpath(lang_dir, *rel.parts[1:]))
+                                new_current_voice = target_voice
                                 os.makedirs(os.path.dirname(new_current_voice), exist_ok=True)
                                 proc_current_voice = new_current_voice.replace('.wav', '_temp.wav')
                                 #torchaudio.save(proc_current_voice, audio_tensor, default_engine_settings[xtts]['samplerate'])
@@ -1251,3 +1258,29 @@ class TTSUtils:
         if session is not None:
             gpu_fault(e, session.get('device'))
         return f'{where}: {e}'
+
+class XttsVoiceConverter(TTSUtils):
+    # the voice conversion a conversion runs at its start (TTSUtils._set_voice()), with no TTS engine loaded: the GUI
+    # voice preview speaks a voice listed for an XTTS language from voices/eng in that language, the file the
+    # conversion then reuses
+
+    def __init__(self, session:Any)->None:
+        self.session = session
+        self.cache_dir = tts_dir
+        self.tts_key = None
+        self.engine = None
+        self.language = session.get('language')
+        self.language_iso1 = session.get('language_iso1')
+        if session.get('translate_enabled'):
+            if session.get('translate'):
+                self.language = session['translate']
+            if session.get('translate_iso1'):
+                self.language_iso1 = session['translate_iso1']
+        self.xtts_speakers = self._load_xtts_builtin_list()
+
+    def load_engine(self)->None:
+        # no TTS engine to get back after the conversion
+        return None
+
+    def convert(self, voice:str)->str|bool:
+        return self._check_xtts_builtin_speakers(voice, Path(voice).stem)

@@ -1754,11 +1754,25 @@ def build_interface(args:dict)->gr.Blocks:
                         else:
                             session['voice'] = new_voice
                         visible_voice_buttons = new_voice is not None
-                        return gr.update(value=new_voice), gr.update(visible=visible_voice_buttons), gr.update(visible=visible_voice_buttons)
+                        # the player: the voice in the TTS language (an XTTS one from voices/eng is converted to it),
+                        # the voice list keeps the selected entry
+                        return gr.update(value=convert_voice_preview(session_id, new_voice)), gr.update(visible=visible_voice_buttons), gr.update(visible=visible_voice_buttons)
                 except Exception as e:
                     error = f'_change_gr_voice_list(): {e}'
                     exception_alert(session_id, error)
                 return tuple(gr.update() for _ in range(3))
+
+            def _refresh_gr_voice_player(session_id:str, selected:str|None)->dict:
+                # after a language or translation change the voice list may keep its entry (an eng voice listed for an
+                # XTTS language): no change event, the player still held the voice in the former language
+                try:
+                    session = context.get_session(session_id)
+                    if session and session.get('id', False) and selected is not None:
+                        return gr.update(value=convert_voice_preview(session_id, selected))
+                except Exception as e:
+                    error = f'_refresh_gr_voice_player(): {e}'
+                    exception_alert(session_id, error)
+                return gr.update()
 
             def _click_gr_voice_del_btn(session_id:str, selected:str)->tuple:
                 try:
@@ -4281,11 +4295,21 @@ def build_interface(args:dict)->gr.Blocks:
                 inputs=[gr_session],
                 outputs=[gr_voice_list],
                 show_progress_on=[gr_progress]
+            ).then(
+                fn=_refresh_gr_voice_player,
+                inputs=[gr_session, gr_voice_list],
+                outputs=[gr_voice_player_hidden],
+                show_progress_on=[gr_progress]
             )
             gr_translate_enabled.change(
                 fn=_click_gr_translate_enabled,
                 inputs=[gr_session, gr_translate_enabled],
                 outputs=[gr_translate, gr_tts_engine_list, gr_custom_model_list, gr_voice_list],
+                show_progress_on=[gr_progress]
+            ).then(
+                fn=_refresh_gr_voice_player,
+                inputs=[gr_session, gr_voice_list],
+                outputs=[gr_voice_player_hidden],
                 show_progress_on=[gr_progress]
             )
             gr_translate.change(
@@ -4302,6 +4326,11 @@ def build_interface(args:dict)->gr.Blocks:
                 fn=_update_gr_voice_list,
                 inputs=[gr_session],
                 outputs=[gr_voice_list],
+                show_progress_on=[gr_progress]
+            ).then(
+                fn=_refresh_gr_voice_player,
+                inputs=[gr_session, gr_voice_list],
+                outputs=[gr_voice_player_hidden],
                 show_progress_on=[gr_progress]
             )
             gr_tts_engine_list.change(
