@@ -10,7 +10,7 @@
 저작자는 이 소프트웨어의 어떠한 오용이나 그로 인한 법적 결과에 대해 책임지지 않습니다. <br>
 이 도구를 책임감 있게, 그리고 적용 가능한 모든 법률을 준수하여 사용하십시오.
 
-[![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/63Tv3F65k6)](https://discord.gg/63Tv3F65k6)
+[![Discord](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2F63Tv3F65k6%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&logo=discord&logoColor=white&color=5865F2&label=Discord&suffix=%20members)](https://discord.gg/63Tv3F65k6)
 
 ### Ebook2audiobook 개발자를 지원해 주셔서 감사합니다!
 <p>
@@ -102,6 +102,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
+  - [Check an audiobook for hallucinations](#check-audiobook-hallucinations)
   
 - [Cloned Voices](#cloned-voices)
 - [Fine Tuned TTS models](#fine-tuned-tts-models) 
@@ -118,7 +119,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 <a id="features"></a>
 ## 기능
-- 🔧 **지원되는 TTS 엔진**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos2, Zonos3, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS, ZipVoice (LuxTTS)`
+- 🔧 **지원되는 TTS 엔진**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos2, Zonos3, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS, ZipVoice (LuxTTS), KittenTTS`
 - 📚 **여러 파일 형식 변환**: `.epub`, `.mobi`, `.azw3`, `.fb2`, `.lrf`, `.rb`, `.snb`, `.tcr`, `.pdf`, `.txt`, `.rtf`, `.doc`, `.docx`, `.html`, `.odt`, `.azw`, `.tiff`, `.tif`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.zip`
 - 💻 짧은 텍스트를 직접 오디오로 변환하는 **텍스트 영역**
 - 🔍 이미지로 된 텍스트 페이지가 있는 파일을 위한 **OCR 스캔**
@@ -524,7 +525,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - 참고: MPS는 Docker에 노출되지 않으므로 CPU를 사용해야 합니다
-- 참고: 지정된 볼륨 `e2a_venvs`은 TTS 엔진을 자체 가상 환경(GPT-SoVITS, Zonos2, Zonos3, OmniVoice, F5-TTS, ZipVoice, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM 등)에 설치된 상태로 유지합니다.
+- 참고: 명명된 볼륨 `e2a_venvs`은 TTS 엔진을 자체 가상 환경(GPT-SoVITS, Zonos2, Zonos3, OmniVoice, F5-TTS, ZipVoice, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM, KittenTTS 등)에 설치된 상태로 유지합니다.
   컨테이너 실행 간에 유지하므로 매번 다시 설치되지 않습니다. 초기화하려면: `docker volume rm e2a_venvs`
 
 <a id="tools"></a>
@@ -564,8 +565,8 @@ options:
   -h, --help            show this help message and exit
   --only ONLY           Comma list of categories: common,xtts,bark,tortoise,vits,fairseq,glowtts,tacotron,yo
                         urtts,piper,zonos2,zonos3,audiocpp,audiocpp_server,gptsovits,f5tts,zipvoice,omnivoic
-                        e,orpheus,sparktts,chattts,csm,openvoice,melotts,phonon,stanza,pyannote,demucs,inter
-                        lude,argos,tessdata,jieba,voices
+                        e,orpheus,sparktts,chattts,csm,kittentts,openvoice,melotts,phonon,stanza,pyannote,de
+                        mucs,interlude,argos,tessdata,jieba,voices
   --skip SKIP           Comma list of categories to leave out
   --languages LANGUAGES
                         Comma list of e2a ISO-639-3 codes (eng,fra,ita...): single-language models and fine-
@@ -670,6 +671,77 @@ examples:
   translate_ebook.py @books.txt --to ita --mode bilingual
   translate_ebook.py --list
   translate_ebook.py --list --from eng
+```
+
+<a id="check-audiobook-hallucinations"></a>
+### 오디오북에서 환각 현상이 있는지 확인: `tools/check_audiobook_hallucinations.py`
+텍스트가 음성으로 재생되지 않는 완료된 e2a 오디오북의 문장을 나열합니다. 예: 더듬는 소리, 단어나 구가 두 번 반복되는 경우
+또는 생략되거나, 텍스트 전후에 중얼거림이 있거나, 텍스트에 비해 문장이 너무 길거나 너무 짧은 경우(XTTS 및 기타
+자동회귀 엔진은 가끔 그렇게 합니다). 보고만: 오디오북은 변경되지 않으며, 다시 작업할 부분을 사용자가 결정합니다.
+이 기능은 각 오디오북 옆에 있는 `.vtt` e2a를 읽고(문장당 하나의 큐), 모든 문장을
+`facebook/mms-1b-all`(1,162개 언어, 약 4GB, 최초 사용 시 `./models/tts`에 다운로드)을 다운로드하고
+두 텍스트의 문자가 로마자 표기되어 있으므로 모든 스크립트가 작동합니다. 제한은 책 자체(모든 단어의 중간값)에서 비롯됩니다.
+문장), 이름 또는 어려운 텍스트는 전체 책에서 이러한 문제를 야기하지만, 환각은 눈에 띕니다.
+10자 미만의 문장과 여전히 숫자를 포함하는 문장은 MMS가 인식하지 못하는 언어와 마찬가지로 길이만 확인됩니다.
+5자 이상의 누락된 단어가 한 번의 짧은 시간 동안 포착됩니다(단어가 누락된 채로 읽힌 XTTS 문장 19개 모두).
+주변의 오디오가 존재하지 않음을 확인합니다. 인식기는 긴 문장의 시작 또는 끝에서 단어를 생략합니다.
+스스로 듣는 단어. 3~4글자의 단어가 누락되는 경우는 대부분 그렇지 않습니다. 인식기는 음질이 좋은 오디오에서도 짧은 단어를 누락합니다.
+각 플래그가 지정된 문장은 발견되는 즉시 인쇄되며, 모든 문장은 끝부분의 표에 블록 및
+e2a가 문장을 번호 매기는 방식(0부터 시작)으로 문장 번호 매기기. 각 문장에는 문제, 텍스트, 대신 들은 내용, 그리고
+측정값은 `<audiobook>.hallucinations.json`에 저장됩니다. 실행되는 동안 문장은 이전 문장을 기준으로 평가됩니다.
+전체 책에 대한 표: 이전에 인쇄된 문장은 마지막에 지울 수 있습니다. 표 아래의 줄에 그렇게 나와 있습니다. 숫자는 `.vtt`에서 가져옵니다(e2a는 각 큐를 `block <n> sentence <n>`이라고 명명함). 이전에 제작된 오디오북에서는
+블록은 챕터에서 계산되며, 변환에서 제외된 블록 이후부터 계산됩니다.
+   - **Linux/MacOS**
+     ```bash
+     ./python_env/bin/python tools/check_audiobook_hallucinations.py audiobooks/cli/book.m4b
+     ```
+   - **Windows**
+     ```bash
+     python_env\Scripts\python.exe tools\check_audiobook_hallucinations.py audiobooks\cli\book.m4b
+     ```
+   - 폴더는 `.vtt`(분할된 오디오북의 모든 부분)이 있는 모든 오디오북을 확인합니다.
+   - 번역된 책에는 `--language`이(가) 필요합니다. 이 언어 태그는 전자책의 언어를 유지합니다.
+   - **디바이스**: `--device`이(가) e2a의 이름인 `cpu`, `cuda`, `rocm`, `xpu`, `mps` 또는 `jetson`을(를) 취합니다(반정밀도
+     GPU이지만 MPS). 기본적으로 e2a가 설치된 장치이며, 해당 장치를 사용할 수 없는 경우 CPU입니다.
+   - **속도**: 7.6분의 오디오를 생성하는 데 CPU 코어 4개에서 2.3~5.4분이 소요되었습니다. 책 전체를 생성하려면 GPU를 사용해야 합니다.
+
+```bash
+usage: check_audiobook_hallucinations.py [-h] [-l LANGUAGE] [--vtt VTT] [-o OUTPUT]
+                                         [--device {auto,cpu,cuda,rocm,xpu,mps,jetson}]
+                                         audiobooks [audiobooks ...]
+
+Report the sentences of an e2a audiobook that do not say their text: babble, a word or a phrase
+said twice or skipped, mumble before or after the text, a sentence too long or too short for its text.
+Report only: the audiobook is not changed.
+It reads the .vtt e2a writes beside each audiobook (one cue per sentence), transcribes each sentence with
+facebook/mms-1b-all (1162 languages, downloaded into models/tts on first use) and compares the letters of
+both texts, romanized (uroman, pykakasi for Japanese). The limits come from the book itself, from the
+medians of all its sentences: names or a hard text raise them for the whole book, a hallucination stands out.
+Each flagged sentence is printed as soon as it is found, all of them in a table at the end, by their block and
+sentence numbers as in e2a (from 0). Every sentence with its problem, its text, what was heard and its measures
+is saved in <audiobook>.hallucinations.json.
+
+positional arguments:
+  audiobooks            Audiobook files (m4b, mp3, flac...) with their .vtt beside them, or folders holding
+                        them
+
+options:
+  -h, --help            show this help message and exit
+  -l LANGUAGE, --language LANGUAGE
+                        Language spoken, e2a ISO-639-3 code (default: the audiobook's language tag; set it
+                        for a translated book, its tag keeps the ebook's language)
+  --vtt VTT             Subtitles of the audiobook, single audiobook only (default: <audiobook>.vtt)
+  -o OUTPUT, --output OUTPUT
+                        JSON report, single audiobook only (default: <audiobook>.hallucinations.json beside
+                        it)
+  --device {auto,cpu,cuda,rocm,xpu,mps,jetson}
+                        Device the speech recognizer runs on, named as in e2a (default: the one e2a was
+                        installed for, cpu when it cannot be used)
+
+examples:
+  check_audiobook_hallucinations.py audiobooks/cli/book.m4b
+  check_audiobook_hallucinations.py audiobooks/cli/book.m4b --language fra --device cuda
+  check_audiobook_hallucinations.py audiobooks/cli
 ```
 
 <a id="cloned-voices"></a>
@@ -804,6 +876,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] ChatTTS(https://github.com/2noise/ChatTTS)
 - [x] Spark-TTS(https://github.com/sparkaudio/spark-tts)
 - [x] MeloTTS(https://github.com/myshell-ai/MeloTTS)
+- [x] KittenTTS(https://github.com/KittenML/KittenTTS)
 - [x] CSM(https://github.com/SesameAILabs/csm)
 
 #### Readme 번역
