@@ -268,6 +268,7 @@ class SessionContext:
             "voice_dir": None,
             "voice_map": {},
             "voice_default_alert": None,
+            "vc_alert": False,
             "ebook_selected": None,
             "custom_model": None,
             # set from the start, never None: events of the same session can run while the GUI restores it
@@ -3712,6 +3713,8 @@ def convert_chapters2audio(session_id:str)->bool:
             msg = legends['msg_preparing_conversion']
             progress_bar(0.0, desc=msg)
         print(f'*********** Session: {session_id} **************\n{session_info}')
+        # each conversion tells again that the voice cloning on top of a built-in voice engine makes it longer
+        session['vc_alert'] = False
         try:
             tts_manager = TTSManager(session)
         except Exception as e:
