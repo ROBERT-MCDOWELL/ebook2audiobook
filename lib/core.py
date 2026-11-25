@@ -51,6 +51,7 @@ from lib.classes.argos_translator import ArgosTranslator
 from lib.classes.tts_manager import TTSManager
 from lib.classes.tts_engines.common.audio import get_audiolist_duration, get_audio_duration
 from lib.classes.tts_engines.common.utils import build_vtt_file, format_timestamp, gpu_fault, gpu_fault_alert, XttsVoiceConverter
+from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 
 from lib import *
 from lib.conf import no_proxy_host
@@ -5031,6 +5032,10 @@ def convert_ebook(args:dict)->tuple:
             session['custom_model'] =  args['custom_model']
             session['fine_tuned'] = str(args['fine_tuned'])
             session['voice'] = args.get('voice', None)
+            if session['voice'] is None:
+                # no voice given (headless without --voice): the engine's default one, set before the resume prompt
+                # compares it with the last conversion's and before the first step speaks it in the XTTS language
+                session['voice'] = engine_default_voice(session_id)
             session['xtts_temperature'] = float(args['xtts_temperature']) if args.get('xtts_temperature') not in (None, '') else default_engine_settings[TTS_ENGINES['XTTS']]['temperature']
             session['xtts_codec_temperature'] = float(args['xtts_codec_temperature']) if args.get('xtts_codec_temperature') not in (None, '') else default_engine_settings[TTS_ENGINES['XTTS']]['codec_temperature']
             session['xtts_length_penalty'] = float(args['xtts_length_penalty']) if args.get('xtts_length_penalty') not in (None, '') else default_engine_settings[TTS_ENGINES['XTTS']]['length_penalty']
@@ -5244,7 +5249,7 @@ def convert_ebook(args:dict)->tuple:
                     elif float(total_vram_gb) >= float(device_vram_required):
                         show_alert(session_id, {"type": "info", "msg": msg_extra})
                         # the voice first, before the ebook: in the XTTS language, then (CLI) cleaned into the session
-                        error = prepare_session_voice(session_id)
+                        error = prepare_session_voice(session_id, args.get('voice') is not None)
                         if error is not None:
                             return error, False
                         session['epub_path'] = os.path.join(session['process_dir'], f"__{session['filename_noext']}.epub")
@@ -5757,15 +5762,29 @@ def translate_voice(session_id:str, voice:str|None)->tuple:
                 converter.cleanup_memory()
             converter = None
 
-def prepare_session_voice(session_id:str)->str|None:
+def engine_default_voice(session_id:str)->str|None:
+    # the voice TTSUtils._set_voice() reads when none is given: the preset's. None for an engine speaking with its own
+    # speakers (tts_engines_with_inner_speaker) and for a custom model (its own voice file)
+    session = context.get_session(session_id)
+    if not (session and session.get('id', False)):
+        return None
+    if session.get('custom_model') is not None or session.get('tts_engine') in tts_engines_with_inner_speaker:
+        return None
+    try:
+        return load_engine_presets(session['tts_engine']).get(session.get('fine_tuned'), {}).get('voice')
+    except Exception:
+        return None
+
+def prepare_session_voice(session_id:str, is_voice_given:bool)->str|None:
     # the first thing a conversion does, once the device can run it: the voice spoken in the XTTS language, then on the
     # command line cleaned into the session voices (VoiceExtractor). In this order: voices/__sessions/voice-<id>/<lang>
     # names the language, a voice copied there in english was then read as that language's and never converted
+    session = context.get_session(session_id)
     error = translate_session_voice(session_id)
     if error is not None:
         return error
-    session = context.get_session(session_id)
-    if not session['is_gui_process'] and session.get('voice'):
+    # only a voice given on the command line: the engine's default one (no --voice) is a voice library file, never cleaned
+    if not session['is_gui_process'] and is_voice_given and session.get('voice'):
         voice_name = os.path.splitext(os.path.basename(session['voice']))[0].replace('&', 'And')
         voice_name = get_sanitized(voice_name)
         final_voice_file = os.path.join(session['voice_dir'], f'{voice_name}.wav')
@@ -5801,6 +5820,7 @@ def translate_block_voices(session_id:str)->str|None:
             holder['voice'] = voice_cache[old_voice]
             is_voice_changed = True
     if is_voice_changed:
+        blocks_current['blocks'] = blocks
         session['blocks_current'] = blocks_current
         save_db_blocks(session_id)
     return None
