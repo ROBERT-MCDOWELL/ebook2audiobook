@@ -651,6 +651,10 @@ audio:-moz-read-only {
 #gr_row_ui_right {
     justify-content: flex-end !important;
 }
+/* gradio renders min-width: 0 on a Markdown: on a narrow screen the sides squeezed the version out */
+#gr_version_markdown {
+    min-width: 160px !important;
+}
 #gr_tooltips,
 #gr_tooltips .wrap,
 #gr_tooltips .wrap-inner,

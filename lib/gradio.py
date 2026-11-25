@@ -735,7 +735,8 @@ def build_interface(args:dict)->gr.Blocks:
             blocks_voices = [c[2] for c in block_components]
             blocks_texts = [c[3] for c in block_components]
 
-            # left, center, right of the same scale: the version stays centered whatever each side holds
+            # left, center, right of the same scale: the version stays centered whatever each side holds, on a narrow
+            # screen #gr_version_markdown min-width (header.css) wraps the right side to a line of its own
             with gr.Row(elem_id='gr_row_ui_language', equal_height=True):
                 with gr.Row(elem_id='gr_row_ui_left', equal_height=True, scale=1):
                     gr_ui_language = gr.Dropdown(label=legends['gr_ui_language'], show_label=False, elem_id='gr_ui_language', choices=sorted([(language_mapping[lang]['native_name'] if lang in language_mapping else lang, lang) for lang in legends_langs]), value=system_language, type='value', interactive=True, scale=0, min_width=130)
