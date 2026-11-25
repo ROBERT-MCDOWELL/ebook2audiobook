@@ -623,6 +623,23 @@ audio:-moz-read-only {
     box-shadow: none !important;
     line-height: 1 !important;
 }
+/* Theme dropdown label beside the dropdown, not above */
+#gr_theme .container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+#gr_theme span[data-testid="block-info"] {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    font-size: var(--input-text-size) !important;
+    white-space: nowrap !important;
+}
+#gr_theme .wrap {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
 /* Remove any default gap spacing in its parent row if needed */
 #gr_row_ui_language {
     gap: 0 !important;

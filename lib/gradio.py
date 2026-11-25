@@ -57,7 +57,7 @@ def build_themes_head()->str:
                 return mode ? mode === 'dark' : !!window.matchMedia?.('(prefers-color-scheme: dark)').matches;
             }};
             // a dark or light theme keeps its mode on body.dark against gradio (system scheme change, ?__theme=),
-            // back to 'original' gradio's own mode is restored once
+            // back to 'classic' gradio's own mode is restored once
             const sync_mode = ()=>{{
                 const mode = themes[root.dataset.e2aTheme];
                 if(!mode && !forced){{
@@ -747,7 +747,7 @@ def build_interface(args:dict)->gr.Blocks:
                     ''', scale=1
                 )
                 with gr.Row(elem_id='gr_row_ui_right', equal_height=True, scale=1):
-                    gr_theme = gr.Dropdown(label=legends['gr_theme'], show_label=False, elem_id='gr_theme', choices=[(conf['label'], name) for name, conf in themes.items()], value=default_theme, type='value', interactive=True, scale=0, min_width=130)
+                    gr_theme = gr.Dropdown(label=legends['gr_theme'], show_label=True, elem_id='gr_theme', choices=[(conf['label'], name) for name, conf in themes.items()], value=default_theme, type='value', interactive=True, scale=0, min_width=190)
                     gr_tooltips = gr.Checkbox(label=legends['gr_tooltips'], elem_id='gr_tooltips', value=False, interactive=True, scale=0, min_width=130)
 
             gr_modal = gr.HTML(visible=False)

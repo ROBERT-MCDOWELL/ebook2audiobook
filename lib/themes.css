@@ -1,4 +1,4 @@
-/* Themes other than 'original' (lib/conf_themes.py). html[data-e2a-mode] is set by the theme switcher, only then.
+/* Themes other than 'classic' (lib/conf_themes.py). html[data-e2a-mode] is set by the theme switcher, only then.
    Maps the colors header.css and the GUI html hard-code to the --e2a-* vars of the theme. Layout stays header.css.
    Every declaration is !important inside a cascade layer: a layered !important wins over the unlayered !important
    of header.css and of the .gradio-container .contain copies gradio prefixes it with, whatever their specificity.

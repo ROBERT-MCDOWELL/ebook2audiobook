@@ -1,5 +1,5 @@
 # GUI themes picked from the theme dropdown (gr_theme), saved per browser in localStorage under theme_storage_key.
-# 'original' is the gradio theme of lib/gradio.py with lib/header.css as is, it follows the gradio light/dark mode.
+# 'classic' is the gradio theme of lib/gradio.py with lib/header.css as is, it follows the gradio light/dark mode.
 # The other themes keep lib/header.css for the layout, redefine the gradio theme variables over it and force their own
 # mode: flat surfaces, hairline borders, small radius, no gradient, no glow, one muted accent. lib/themes.css maps the
 # colors header.css and the GUI html hard-code to the --e2a-* vars below.
@@ -7,7 +7,7 @@
 # set: gradio theme values (gr.themes.Base.set), written once, applied to the theme mode
 # vars: --e2a-* css vars used by lib/themes.css
 
-default_theme = 'original'
+default_theme = 'classic'
 theme_storage_key = 'e2a_theme'
 
 font_sans = ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif']
@@ -95,8 +95,8 @@ themes_dark_set = dict(
 )
 
 themes = {
-    'original': dict(
-        label='Original',
+    'classic': dict(
+        label='Classic',
         mode=None
     ),
     # neutral charcoal, steel blue accent: a desktop tool / IDE look
