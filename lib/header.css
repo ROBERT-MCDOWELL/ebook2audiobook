@@ -30,12 +30,26 @@ button:disabled {
 button div.wrap span {
 	display: none !important;
 }
+/* gradio's "- or -" between "Drop File Here" and "Click to Upload": the rule above hid it with the icon span */
+button div.wrap span.or {
+	display: inline !important;
+	color: var(--body-text-color-subdued) !important;
+}
+/* upload text on one line, icon on the next: gradio stacks them in a column */
+button div.wrap {
+	flex-direction: row !important;
+	flex-wrap: wrap !important;
+	align-content: center !important;
+	column-gap: 0.35em !important;
+}
 button div.wrap::after {
 	content: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E90FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/></svg>") !important;
 	width: 24px !important;
 	height: 24px !important;
 	display: inline-block !important;
 	vertical-align: middle !important;
+	/* side margins fill the line: the icon wraps under the text, centered, without being stretched */
+	margin: 2px calc(50% - 12px) 0 calc(50% - 12px) !important;
 }
 table.file-preview tr {
 	padding: 0 !important;
@@ -56,9 +70,6 @@ span[data-testid="block-info"] {
 .selected {
 	color: var(--secondary-500) !important;
 	text-shadow: 0.3px 0.3px 0.3px #303030;
-}
-.overflow-menu {
-	display: none !important;
 }
 .gr-glass-mask {
 	z-index: 9999 !important;
@@ -231,6 +242,34 @@ span[data-testid="block-info"] {
 	padding-bottom: 4px !important;
 	white-space: nowrap !important;
 }
+/* TTS engine rating (lib/gradio.py _show_rating): on a narrow row the table goes on its own line above the
+   tab label instead of breaking each cell in two. wrap-reverse swaps the cross axis: flex-start is the bottom */
+.gr-rating {
+	flex-wrap: wrap-reverse !important;
+	align-items: flex-start !important;
+	row-gap: 4px !important;
+}
+.gr-rating table {
+	margin-left: auto !important;
+	max-width: 100% !important;
+}
+/* cells as a wrapping row: narrower than the table, the next cell goes to the line below, each cell kept whole */
+.gr-rating table, .gr-rating tbody, .gr-rating tr {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	justify-content: flex-end !important;
+	align-items: flex-end !important;
+}
+/* gradio's prose margins/padding on tr and td, inert in a table layout, not in a flex one */
+.gr-rating tr, .gr-rating td {
+	margin: 0 !important;
+}
+.gr-rating tr {
+	padding: 0 !important;
+}
+.gr-rating td {
+	white-space: nowrap !important;
+}
 .gr-voice-player {
 	margin: 0 !important;
 	padding: 0 !important;
@@ -383,6 +422,12 @@ span[data-testid="block-info"] {
 #gr_voice_selected_filename a, #gr_custom_model_train_link a {
 	text-decoration: none !important;
 }
+/* on a narrow screen the custom model upload label wraps on 2+ lines: above the drop zone, not over it */
+@media (max-width: 768px) {
+	#gr_custom_model_file label[data-testid="block-label"] {
+		position: static !important;
+	}
+}
 #gr_custom_model_file [aria-label="Clear"], #gr_voice_file [aria-label="Clear"] {
 	display: none !important;
 }               
@@ -466,9 +511,14 @@ span[data-testid="block-info"] {
 	padding: 20px 0 20px 30px !important;
 }
 #gr_blocks_preview {
-	align-self: center !important; 
+	align-self: center !important;
 	overflow: visible !important;
 	padding: 20px 0 20px 10px !important;
+}
+/* gradio gives them min-width 0: on a narrow row they clipped their label instead of wrapping to the next line.
+   min-content: at least their longest word, in any ui language (Kapitelvorschau, Zwischenspiel...) */
+#gr_blocks_preview, #gr_interlude_enabled, #gr_translate_enabled {
+	min-width: min-content !important;
 }
 #gr_group_output_split {
 	border-radius: 0 !important;

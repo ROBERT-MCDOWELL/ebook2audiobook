@@ -993,7 +993,7 @@ def build_interface(args:dict)->gr.Blocks:
             def _show_rating(tts_engine:str)->str:
                 rating = default_engine_settings[tts_engine]['rating']
                 return f'''
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                    <div class="gr-rating" style="display:flex; justify-content:space-between; align-items:flex-end;">
                         <span class="gr-markdown-span">{legends['gr_tts_rating']}</span>
                         <table style="
                             display:inline-block;

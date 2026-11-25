@@ -105,6 +105,10 @@
 		background: var(--e2a-danger) !important;
 	}
 	/* Html elements */
+	/* custom model upload: its label above the drop zone, not over it (3 lines on a phone with a wider font) */
+	html[data-e2a-mode] #gr_custom_model_file label[data-testid="block-label"] {
+		position: static !important;
+	}
 	html[data-e2a-mode] #gr_version_markdown b[style] {
 		color: var(--e2a-accent) !important;
 		text-shadow: none !important;
@@ -169,6 +173,32 @@
 	html[data-e2a-mode] .accordion-block-even:hover,
 	html[data-e2a-mode] .accordion-block-odd:hover {
 		background: color-mix(in srgb, var(--e2a-accent) 12%, var(--block-background-fill)) !important;
+	}
+	/* Sliders: gradio paints the unfilled track --neutral-200 in every mode and the thumb white with a glow */
+	html[data-e2a-mode="dark"] input[type="range"]::-webkit-slider-runnable-track {
+		background: linear-gradient(to right, var(--slider-color) var(--range_progress), var(--neutral-700) var(--range_progress)) !important;
+	}
+	html[data-e2a-mode="dark"] input[type="range"]::-moz-range-track {
+		background: var(--neutral-700) !important;
+	}
+	html[data-e2a-mode] input[type="range"]::-moz-range-progress {
+		background: var(--slider-color) !important;
+	}
+	html[data-e2a-mode="dark"] input[type="range"]::-webkit-slider-thumb {
+		background-color: var(--neutral-100) !important;
+		box-shadow: none !important;
+	}
+	html[data-e2a-mode="dark"] input[type="range"]::-moz-range-thumb {
+		background-color: var(--neutral-100) !important;
+		box-shadow: none !important;
+	}
+	html[data-e2a-mode="light"] input[type="range"]::-webkit-slider-thumb {
+		background-color: #ffffff !important;
+		box-shadow: 0 0 0 1px var(--neutral-500) !important;
+	}
+	html[data-e2a-mode="light"] input[type="range"]::-moz-range-thumb {
+		background-color: #ffffff !important;
+		box-shadow: 0 0 0 1px var(--neutral-500) !important;
 	}
 	html[data-e2a-mode] .spinner {
 		border-color: var(--border-color-primary) !important;
