@@ -614,6 +614,7 @@ legends = {
     'error_zonos2_no_gpu_package': '{engine} kò ní àkópọ̀ GPU tí ó ń ṣiṣẹ́ lórí ẹ̀rọ yìí ({machine}) pẹ̀lú {device}. Yan CPU gẹ́gẹ́ bí ẹ̀rọ láti ṣiṣẹ́ {engine} lórí CPU, èyí tí ó lọ́ra púpọ̀.',
     'msg_audiocpp_offline_package': 'Ṣíṣe àkójọpọ̀ {engine} package olupin {package} láti ẹ̀dà tí kò sí lórí ayélujára...',
     'msg_vc_model_fallback': 'Ìyípadà ohùn {vc_model} kò lè sọ {lang}: {fallback} yí ohùn náà padà dípò.',
+    'msg_vc_slower': '{engine} kò ní ìdá ohùn tí a kọ́ sílẹ̀: {vc_model} ń dá ohùn tí a yàn ní gbogbo gbolohun, nítorí náà ìyípadà náà máa gba àkókò tó pẹ́ ju ti {engine} ohùn tí a kọ́ sílẹ̀ lọ.',
     'msg_vc_cpu_slow': 'Lílo ohùn mìíràn yàtọ̀ sí àwọn ohùn {engine} tí ó wà tẹ́lẹ̀: ìyípadà ohùn {vc_model} ń ṣiṣẹ́ lórí CPU lórí gbogbo gbolohun, nítorí náà ìyípadà ìwé-kọ̀m̀pútà náà lọ́ra gan-an ju ti ohùn tí ó wà tẹ́lẹ̀ lọ.',
     'msg_vc_device_switch': 'Lílo ohùn mìíràn yàtọ̀ sí àwọn ohùn {engine} tí ó wà tẹ́lẹ̀: ìyípadà ohùn {vc_model} kò lè ṣiṣẹ́ lórí {device} ó sì yí padà sí {new_device}, nítorí náà ìyípadà ìwé-ẹlẹ́kìtrónìkì náà lọ́ra díẹ̀ ju ti ohùn tí ó wà tẹ́lẹ̀ lọ.',
     'msg_vc_device_switch_cpu': 'Lílo ohùn mìíràn tí kì í ṣe àwọn ohùn {engine} tí a fi sí inú rẹ̀: àyípadà ohùn {vc_model} kò lè ṣiṣẹ́ lórí {device} ó sì yí padà sí {new_device}, nítorí náà àyípadà ìwé-apoti-olódì ò lọ́ra jù bí ó ṣe ń lọ pẹ̀lú ohùn tí a fi sí inú rẹ̀.',

@@ -614,6 +614,7 @@ legends = {
     'error_zonos2_no_gpu_package': '{engine} nie ma pakietu GPU, który działa na tym komputerze ({machine}) z {device}. Wybierz procesor jako urządzenie do uruchomienia {engine} na procesorze, co jest znacznie wolniejsze.',
     'msg_audiocpp_offline_package': 'Rozpakowywanie pakietu {engine} serwerów {package} z kopii offline…',
     'msg_vc_model_fallback': 'Konwersja głosu {vc_model} nie może mówić {lang}: {fallback} zamiast tego konwertuje głos.',
+    'msg_vc_slower': '{engine} nie ma wbudowanej funkcji klonowania głosu: {vc_model} klonuje wybrany głos w każdym zdaniu, więc konwersja trwa dłużej niż w przypadku głosu wbudowanego w {engine}.',
     'msg_vc_cpu_slow': 'Korzystanie z głosu innego niż {engine} wbudowanych głosów: konwersja głosu {vc_model} odbywa się na procesorze dla każdego zdania, więc konwersja e-booka jest znacznie wolniejsza niż w przypadku wbudowanego głosu.',
     'msg_vc_device_switch': 'Korzystanie z głosu innego niż {engine} wbudowanych głosów: konwersja głosu {vc_model} nie może być wykonywana na urządzeniu {device} i zostanie przełączona na {new_device}, więc konwersja e-booka będzie przebiegać nieco wolniej niż w przypadku wbudowanego głosu.',
     'msg_vc_device_switch_cpu': 'Korzystanie z głosu innego niż {engine} wbudowanych głosów: konwersja głosu {vc_model} nie może być wykonywana na urządzeniu {device} i zostaje przełączona na {new_device}, dlatego konwersja e-booka jest znacznie wolniejsza niż w przypadku wbudowanego głosu.',

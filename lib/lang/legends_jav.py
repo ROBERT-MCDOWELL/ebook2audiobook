@@ -614,6 +614,7 @@ legends = {
     'error_zonos2_no_gpu_package': '{engine} ora duwe paket GPU sing mlaku ing mesin iki ({machine}) nganggo {device}. Pilih CPU minangka piranti kanggo mbukak {engine} ing CPU, sing luwih alon.',
     'msg_audiocpp_offline_package': 'Mbukak paket {engine} server {package} saka salinan offline...',
     'msg_vc_model_fallback': 'Konversi swara {vc_model} ora bisa ngomong {lang}: {fallback} ngowahi swara tinimbang.',
+    'msg_vc_slower': '{engine} ora duwe kloning swara sing dibangun ing njero: {vc_model} ngklon ing swara sing dipilih ing saben ukara, mula konversi mbutuhake wektu luwih suwe tinimbang nganggo swara sing dibangun ing njero {engine}.',
     'msg_vc_cpu_slow': 'Nggunakake swara liyane kajaba {engine} swara sing wis ana: konversi swara {vc_model} mlaku ing CPU saben ukara, mula konversi ebook luwih alon tinimbang nggunakake swara sing wis ana.',
     'msg_vc_device_switch': 'Nggunakake swara liya kajaba {engine} swara bawaan: konversi swara {vc_model} ora bisa digunakake ing {device} lan ganti dadi {new_device}, mula konversi ebook rada luwih alon tinimbang nggunakake swara bawaan.',
     'msg_vc_device_switch_cpu': 'Nggunakake swara liyane kajaba {engine} swara sing wis ana: konversi swara {vc_model} ora bisa dilakokake ing {device} lan ganti dadi {new_device}, mula konversi ebook luwih alon tinimbang nggunakake swara sing wis ana.',

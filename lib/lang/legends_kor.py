@@ -614,6 +614,7 @@ legends = {
     'error_zonos2_no_gpu_package': '{engine}에는 {device}을(를) 사용하여 이 기기({machine})에서 실행되는 GPU 패키지가 없습니다. CPU를 장치로 선택하여 {engine}을(를) CPU에서 실행하세요. CPU는 훨씬 느립니다.',
     'msg_audiocpp_offline_package': '포장 풀기 {engine} 서버 패키지 {package} 오프라인 사본에서...',
     'msg_vc_model_fallback': '음성 변환 {vc_model} Czukhjmh {lang}: {fallback} 대신 음성을 변환합니다.',
+    'msg_vc_slower': '{engine}에는 내장된 음성 복제 기능이 없습니다. {vc_model}은(는) 모든 문장에서 선택한 음성을 복제하므로 변환에 걸리는 시간이 {engine} 내장 음성을 사용할 때보다 더 깁니다.',
     'msg_vc_cpu_slow': '{engine} 내장 음성 이외의 음성 사용: {vc_model} 음성 변환은 모든 문장에 대해 CPU에서 실행되므로 전자책 변환 속도가 내장 음성을 사용할 때보다 훨씬 느립니다.',
     'msg_vc_device_switch': '{engine} 내장 음성 이외의 음성 사용: {vc_model} 음성 변환을 {device}에서 실행할 수 없어 {new_device}(으)로 전환되므로, 전자책 변환 속도가 내장 음성을 사용할 때보다 약간 느립니다.',
     'msg_vc_device_switch_cpu': '{engine} 내장 음성 이외의 음성 사용: {vc_model} 음성 변환을 {device}에서 실행할 수 없어 {new_device}(으)로 전환되므로, 전자책 변환 속도가 내장 음성을 사용할 때보다 훨씬 느립니다.',

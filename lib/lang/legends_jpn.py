@@ -614,6 +614,7 @@ legends = {
     'error_zonos2_no_gpu_package': '{engine}には、このマシン（{machine}）で{device}を使用して実行されるGPUパッケージがありません。CPUをデバイスとして選択して、{engine}をCPUで実行します。これははるかに低速です。',
     'msg_audiocpp_offline_package': 'の開梱 {engine} サーバーパッケージ {package} オフラインコピーから…',
     'msg_vc_model_fallback': '音声変換 {vc_model} 話すことができません {lang}: {fallback} 代わりに音声を変換します。',
+    'msg_vc_slower': '{engine}には組み込みの音声クローン機能がありません。{vc_model}は選択した音声をすべての文でクローンするため、変換には{engine}の組み込み音声よりも時間がかかります。',
     'msg_vc_cpu_slow': '{engine}の組み込み音声以外の音声を使用する場合：{vc_model}音声変換はすべての文でCPU上で実行されるため、電子書籍の変換は組み込み音声の場合よりもはるかに遅くなります。',
     'msg_vc_device_switch': '{engine}の組み込み音声以外の音声を使用する場合：{vc_model}音声変換は{device}では実行できず、{new_device}に切り替わるため、電子書籍の変換は組み込み音声の場合よりも若干遅くなります。',
     'msg_vc_device_switch_cpu': '{engine}の組み込み音声以外の音声を使用する場合：{vc_model}の音声変換は{device}では実行できず、{new_device}に切り替わるため、電子書籍の変換は組み込み音声の場合よりもはるかに遅くなります。',

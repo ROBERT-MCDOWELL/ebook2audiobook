@@ -614,6 +614,7 @@ legends = {
     'error_zonos2_no_gpu_package': '{engine} no tiene ningún paquete de GPU que se ejecute en este equipo ({machine}) con {device}. Seleccione la CPU como el dispositivo para ejecutar {engine} en la CPU, que es mucho más lenta.',
     'msg_audiocpp_offline_package': 'Desempaquetando el paquete {package} del servidor {engine} de la copia sin conexión...',
     'msg_vc_model_fallback': 'La conversión de voz {vc_model} no puede hablar {lang}: {fallback} convierte la voz en su lugar.',
+    'msg_vc_slower': '{engine} no tiene clonación de voz integrada: {vc_model} clona la voz seleccionada en cada frase, por lo que la conversión tarda más que con una voz integrada de {engine}.',
     'msg_vc_cpu_slow': 'Uso de una voz distinta de las {engine} voces integradas: la conversión de voz {vc_model} se ejecuta en la CPU en cada oración, por lo que la conversión del libro electrónico es mucho más lenta que con una voz integrada.',
     'msg_vc_device_switch': 'Uso de una voz distinta de las {engine} voces integradas: la conversión de voz {vc_model} no puede ejecutarse en {device} y cambia a {new_device}, por lo que la conversión del libro electrónico es ligeramente más lenta que con una voz integrada.',
     'msg_vc_device_switch_cpu': 'Uso de una voz distinta de las {engine} voces integradas: la conversión de voz {vc_model} no se puede ejecutar en {device} y cambia a {new_device}, por lo que la conversión del libro electrónico es mucho más lenta que con una voz integrada.',
