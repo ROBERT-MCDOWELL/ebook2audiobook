@@ -21,8 +21,5 @@ class TTSManager:
         self.engine = engine_cls(session)
         bug_reporter.note(f'{engine_name} loaded')
     
-    def set_voice(self, block_voice:str|None)->tuple:
-        return self.engine._set_voice(block_voice)
-
     def convert_sentence2audio(self, sentence_file:str, sentence:str, **kwargs)->tuple:
         return self.engine.convert(sentence_file, sentence, **kwargs)

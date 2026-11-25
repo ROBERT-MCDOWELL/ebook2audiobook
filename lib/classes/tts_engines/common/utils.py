@@ -936,13 +936,19 @@ class TTSUtils:
                             if self.session.get(key) is not None
                         }
                         fine_tuned_params = self._sanitize_sampling_params(fine_tuned_params)
+                        # back where it was after: CPU when loaded here, an XTTS cached on its GPU (a session reading with
+                        # it) stays there, the XTTS engine reuses it from loaded_tts without moving it
+                        try:
+                            found_device = next(engine.parameters()).device
+                        except Exception:
+                            found_device = devices['CPU']['proc']
                         if not own_engine:
                             engine.to(device)
                         try:
                             result = self._xtts_inference(engine, device, default_text.strip(), gpt_cond_latent, speaker_embedding, fine_tuned_params)
                         finally:
                             if not own_engine:
-                                engine.to(devices['CPU']['proc'])
+                                engine.to(found_device)
                         if not result:
                             error = f'_check_xtts_builtin_speakers() error: inference produced no usable audio for {speaker} in {self.language}'
                             print(error)
@@ -1260,9 +1266,8 @@ class TTSUtils:
         return f'{where}: {e}'
 
 class XttsVoiceConverter(TTSUtils):
-    # the voice conversion a conversion runs at its start (TTSUtils._set_voice()), with no TTS engine loaded: the GUI
-    # voice preview speaks a voice listed for an XTTS language from voices/eng in that language, the file the
-    # conversion then reuses
+    # the voice conversion of TTSUtils._set_voice() with no TTS engine loaded: the first step of a conversion
+    # (core.py translate_voice()) speaks an eng voice in the XTTS language before the ebook and the TTS engine
 
     def __init__(self, session:Any)->None:
         self.session = session
