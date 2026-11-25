@@ -522,6 +522,8 @@ legends = {
     'msg_remove_obsolete_failed': 'পুরোনো প্যাকেজ {pkg} সরানো যায়নি (গুরুতর নয়): {e}',
     'error_numpy_install_failed': 'numpy প্যাকেজ ইনস্টল ব্যর্থ: {e}',
     'error_numpy_install': 'numpy প্যাকেজ ইনস্টলের সময় ত্রুটি: {e}',
+    'msg_numpy_downgrade': 'ইনস্টল করা numpy এই CPU-তে (অবৈধ নির্দেশ): 2.4-এর নিচে এটি ডাউনগ্রেড করা, SSE4.2 প্রয়োজনীয়তা ছাড়াই সর্বশেষ x86-64 বিল্ড…',
+    'error_numpy_illegal_instruction': 'ত্রুটি: এই CPU-তে numpy চালানো যাবে না: এটি আমদানি করলে একটি অবৈধ নির্দেশ তৈরি হয়, এমনকি 2.4 ভার্সনের নিচেও।\\nএই মেশিনের প্রসেসর (বা এটি চালানোর জন্য ব্যবহৃত হাইপারভাইজার) numpy-এর কম্পাইল করা নির্দেশগুলির জন্য খুব পুরনো।\\nএকটি নতুন CPU-তে আবার ebook2audiobook চালু করুন, অথবা {python_exec}-এর পরিবেশে আপনার ডিস্ট্রিবিউশন থেকে numpy ইনস্টল করুন (apt install python3-numpy)।',
     'msg_removing_leftover': 'অবশিষ্ট {path} সরানো হচ্ছে…',
     'msg_resolving_pkg': '{pkg} সমাধান করা হচ্ছে: {keep} রাখা হচ্ছে, {remove} সরানো হচ্ছে…',
     'msg_broken_install': 'একটি ভাঙা ইনস্টলেশন',

@@ -522,6 +522,8 @@ legends = {
     'msg_remove_obsolete_failed': 'Échec de la suppression du paquet obsolète {pkg} (non bloquant) : {e}',
     'error_numpy_install_failed': 'Échec de l\'installation du paquet numpy : {e}',
     'error_numpy_install': 'Erreur lors de l\'installation du paquet numpy : {e}',
+    'msg_numpy_downgrade': 'La version installée de NumPy plante nativement lors de l’importation sur ce processeur (instruction illégale) : il faut la rétrograder en dessous de la version 2.4, la dernière version x86-64 sans l’exigence SSE4.2…',
+    'error_numpy_illegal_instruction': 'Erreur : numpy ne peut pas s\'exécuter sur ce processeur : son importation génère une instruction illégale, même en dessous de la version 2.4.\\nLe processeur de cette machine (ou l\'hyperviseur qui l\'exécute) est trop ancien pour les instructions avec lesquelles numpy est compilé.\\nRelancez ebook2audiobook sur un processeur plus récent ou installez numpy à partir de votre distribution (apt install python3-numpy) dans l\'environnement de {python_exec}.',
     'msg_removing_leftover': 'Suppression du reliquat {path}…',
     'msg_resolving_pkg': 'Résolution de {pkg} : conservation de {keep}, suppression de {remove}…',
     'msg_broken_install': 'une installation défectueuse',

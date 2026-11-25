@@ -522,6 +522,7 @@ legends = {
     'msg_remove_obsolete_failed': 'Nie można usunąć przestarzałego pakietu {pkg} (niekrytyczne): {e}',
     'error_numpy_install_failed': 'Nie można zainstalować pakietu numpy: {e}',
     'error_numpy_install': 'Błąd podczas instalacji pakietu numpy: {e}',
+    'msg_numpy_downgrade': 'Zainstalowany pakiet NumPy ulega natywnej awarii podczas importowania na tym procesorze (nieprawidłowa instrukcja): należy go obniżyć do wersji poniżej 2.4, ostatniej kompilacji x86-64 bez wymogu SSE4.2…',
     'msg_removing_leftover': 'Usuwanie pozostałości {path}…',
     'msg_resolving_pkg': 'Rozwiązywanie {pkg}: zachowuję {keep}, usuwam {remove}…',
     'msg_broken_install': 'uszkodzoną instalację',

@@ -522,6 +522,8 @@ legends = {
     'msg_remove_obsolete_failed': 'Az elavult {pkg} csomag eltávolítása sikertelen (nem kritikus): {e}',
     'error_numpy_install_failed': 'A numpy csomag telepítése sikertelen: {e}',
     'error_numpy_install': 'Hiba a numpy csomag telepítésekor: {e}',
+    'msg_numpy_downgrade': 'A telepített numpy natív módon összeomlik az importáláskor ezen a CPU-n (érvénytelen utasítás): downgradelése a(z) 2.4 verzió alá, az utolsó x86-64 build, amely nem igényel SSE4.2-t…',
+    'error_numpy_illegal_instruction': 'Hiba: A numpy nem futtatható ezen a CPU-n: az importálása érvénytelen utasítást eredményez, még a 2.4-es verziónál korábbi verziók esetén is.\\nA gép processzora (vagy az azt futtató hipervizor) túl régi ahhoz az utasításhoz, amellyel a numpy le van fordítva.\\nIndítsa el újra az ebook2audiobook alkalmazást egy újabb CPU-n, vagy telepítse a numpyt a disztribúciójából (apt install python3-numpy) a(z) {python_exec} környezetében.',
     'msg_removing_leftover': 'Maradvány eltávolítása: {path}…',
     'msg_resolving_pkg': '{pkg} rendezése: megtartva {keep}, eltávolítva {remove}…',
     'msg_broken_install': 'egy sérült telepítés',

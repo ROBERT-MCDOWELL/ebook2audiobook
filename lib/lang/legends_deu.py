@@ -522,6 +522,8 @@ legends = {
     'msg_remove_obsolete_failed': 'Entfernen des veralteten Pakets {pkg} fehlgeschlagen (nicht kritisch): {e}',
     'error_numpy_install_failed': 'Installation des numpy-Pakets fehlgeschlagen: {e}',
     'error_numpy_install': 'Fehler bei der Installation des numpy-Pakets: {e}',
+    'msg_numpy_downgrade': 'Das installierte NumPy stürzt beim Import auf dieser CPU nativ ab (ungültige Anweisung): Downgrade auf eine Version unter 2.4, dem letzten x86-64-Build ohne die SSE4.2-Anforderung …',
+    'error_numpy_illegal_instruction': 'Fehler: NumPy kann auf dieser CPU nicht ausgeführt werden: Der Import führt zu einer ungültigen Anweisung, selbst bei Versionen unter 2.4.\\nDer Prozessor dieses Geräts (oder der darauf laufende Hypervisor) ist zu alt für die Anweisungen, mit denen NumPy kompiliert wurde.\\nStarten Sie ebook2audiobook erneut auf einer neueren CPU oder installieren Sie NumPy aus Ihrer Distribution (apt install python3-numpy) in der Umgebung von {python_exec}.',
     'msg_removing_leftover': 'Überbleibsel {path} wird entfernt…',
     'msg_resolving_pkg': '{pkg} wird bereinigt: {keep} bleibt, {remove} wird entfernt…',
     'msg_broken_install': 'eine defekte Installation',

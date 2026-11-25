@@ -522,6 +522,8 @@ legends = {
     'msg_remove_obsolete_failed': 'Gagal menghapus paket usang {pkg} (tidak fatal): {e}',
     'error_numpy_install_failed': 'Gagal memasang paket numpy: {e}',
     'error_numpy_install': 'Kesalahan saat memasang paket numpy: {e}',
+    'msg_numpy_downgrade': 'Numpy yang diinstal mengalami crash secara native saat diimpor di CPU ini (perintah ilegal): menurunkan versinya di bawah 2.4, build x86-64 terakhir tanpa persyaratan SSE4.2…',
+    'error_numpy_illegal_instruction': 'Kesalahan: numpy tidak dapat dijalankan pada CPU ini: mengimpornya menimbulkan instruksi yang tidak sah, bahkan di bawah versi 2.4.\\nProsesor komputer ini (atau hypervisor yang menjalankannya) terlalu tua untuk instruksi yang digunakan untuk mengompilasi numpy.\\nJalankan ebook2audiobook lagi pada CPU yang lebih baru, atau instal numpy dari distribusi Anda (apt install python3-numpy) di lingkungan {python_exec}.',
     'msg_removing_leftover': 'Menghapus sisa {path}…',
     'msg_resolving_pkg': 'Menyelesaikan {pkg}: mempertahankan {keep}, menghapus {remove}…',
     'msg_broken_install': 'instalasi yang rusak',
