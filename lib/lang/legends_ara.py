@@ -522,6 +522,8 @@ legends = {
     'msg_remove_obsolete_failed': 'فشلت إزالة الحزمة القديمة {pkg} (غير حرج): {e}',
     'error_numpy_install_failed': 'فشل تثبيت حزمة numpy: {e}',
     'error_numpy_install': 'خطأ أثناء تثبيت حزمة numpy: {e}',
+    'msg_numpy_downgrade': 'تتعطل مكتبة numpy المثبتة بشكل أصلي عند الاستيراد على وحدة المعالجة المركزية (تعليمات غير قانونية): تخفيضها إلى ما دون 2.4، آخر إصدار x86-64 بدون متطلبات SSE4.2...',
+    'error_numpy_illegal_instruction': 'خطأ: لا يمكن تشغيل numpy على وحدة المعالجة المركزية (CPU) هذه: يؤدي استيراده إلى ظهور تعليمات غير قانونية، حتى في الإصدار الأقدم من 2.4.\\nمعالج هذا الجهاز (أو برنامج المراقبة الافتراضية الذي يشغله) قديم جدًا بالنسبة للتعليمات التي تم تجميع numpy بها.\\nقم بتشغيل ebook2audiobook مرة أخرى على وحدة معالجة مركزية (CPU) أحدث، أو قم بتثبيت numpy من التوزيعة الخاصة بك (apt install python3-numpy) في بيئة {python_exec}.',
     'msg_removing_leftover': 'جارٍ إزالة البقايا {path}…',
     'msg_resolving_pkg': 'جارٍ حل {pkg}: الإبقاء على {keep}، وإزالة {remove}…',
     'msg_broken_install': 'تثبيت معطوب',

@@ -522,6 +522,8 @@ legends = {
     'msg_remove_obsolete_failed': '移除过时的包 {pkg} 失败（不影响运行）：{e}',
     'error_numpy_install_failed': '安装 numpy 包失败：{e}',
     'error_numpy_install': '安装 numpy 包时出错：{e}',
+    'msg_numpy_downgrade': '在此CPU上导入时，已安装的numpy会以原生方式崩溃（非法指令）：将其降级到2.4以下，即最后一个不要求SSE4.2的x86-64版本……',
+    'error_numpy_illegal_instruction': '错误：numpy 无法在此 CPU 上运行：即使是 2.4 以下的版本，导入它也会引发非法指令。\\n这台机器的处理器（或运行它的虚拟机管理程序）对于 numpy 编译所用的指令来说太旧了。\\n请在较新的 CPU 上重新启动 ebook2audiobook，或在{python_exec}的环境中从您的发行版安装 numpy（apt install python3-numpy）。',
     'msg_removing_leftover': '正在移除残留的 {path}…',
     'msg_resolving_pkg': '正在处理 {pkg}：保留 {keep}，移除 {remove}…',
     'msg_broken_install': '一个损坏的安装',

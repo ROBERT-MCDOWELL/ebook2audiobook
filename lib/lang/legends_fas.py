@@ -522,6 +522,8 @@ legends = {
     'msg_remove_obsolete_failed': 'حذف بسته منسوخ {pkg} ناموفق بود (غیربحرانی): {e}',
     'error_numpy_install_failed': 'نصب بسته numpy ناموفق بود: {e}',
     'error_numpy_install': 'خطا هنگام نصب بسته numpy: {e}',
+    'msg_numpy_downgrade': 'Numpy نصب‌شده به طور ذاتی هنگام وارد کردن در این CPU از کار می‌افتد (دستور غیرمجاز): آن را به نسخه‌ای پایین‌تر از 2.4، آخرین نسخه x86-64 بدون نیاز به SSE4.2، تنزل دهید…',
+    'error_numpy_illegal_instruction': 'خطا: numpy نمی‌تواند روی این CPU اجرا شود: وارد کردن آن باعث ایجاد یک دستور غیرمجاز می‌شود، حتی در نسخه‌های پایین‌تر از نسخه 2.4.\\nپردازنده این دستگاه (یا هایپروایزری که آن را اجرا می‌کند) برای دستوراتی که numpy با آنها کامپایل شده است، خیلی قدیمی است.\\nebook2audiobook را دوباره روی یک CPU جدیدتر اجرا کنید یا numpy را از توزیع خود (apt install python3-numpy) در محیط {python_exec} نصب کنید.',
     'msg_removing_leftover': 'در حال حذف باقی‌مانده {path}…',
     'msg_resolving_pkg': 'در حال رفع {pkg}: نگه‌داشتن {keep}، حذف {remove}…',
     'msg_broken_install': 'یک نصب خراب',

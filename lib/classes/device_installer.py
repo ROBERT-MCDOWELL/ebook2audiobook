@@ -2426,6 +2426,18 @@ class DeviceInstaller():
                     numpy_pkg = 'numpy<2.4.0'
             if numpy_pkg is not None:
                 subprocess.check_call(self._uv_pip('install', '--no-cache', numpy_pkg))
+            # whatever the flags said, the installed numpy must import here: a CPU below its build's baseline dies with
+            # SIGILL at lib.core's first import (numpy >= 2.4 wheels are x86-64-v2). Downgrade it once; if it still dies
+            # (a numpy < 2.4 built for even older instructions than this OS reports), stop with a message instead of
+            # letting app.py crash into the same Illegal instruction further down (crash report 7e68d721bdce02be)
+            if not self.numpy_import_ok():
+                msg = legends['msg_numpy_downgrade']
+                print(msg)
+                subprocess.check_call(self._uv_pip('install', '--no-cache', 'numpy<2.4'))
+                if not self.numpy_import_ok():
+                    error = legends['error_numpy_illegal_instruction'].format(python_exec=python_exec)
+                    print(error)
+                    return False
             return True
         except subprocess.CalledProcessError as e:
             error = legends['error_numpy_install_failed'].format(e=e)
@@ -2435,6 +2447,24 @@ class DeviceInstaller():
             error = legends['error_numpy_install'].format(e=e)
             print(error)
             return False
+
+    def numpy_import_ok(self)->bool:
+        # does the installed numpy import in python_exec without dying natively? numpy >= 2.4 x86_64 wheels are built
+        # for x86-64-v2 (they run an SSE4.2 instruction at import, unconditionally): on a CPU below that baseline the
+        # kernel raises SIGILL inside _call_with_frames_removed and Python dies with 'Fatal Python error: Illegal
+        # instruction' before any traceback (crash report 7e68d721bdce02be: numpy 2.5.5, Debian on an old AMD APU whose
+        # only GPU is the iGPU no backend supports). cpu_baseline() reads py-cpuinfo's flags, which answers wrong when
+        # the OS masks them (Xen, lxc, a chroot); this is the same probe pattern as torchcodec_import_ok(): the import
+        # either prints its marker or it does not. POSIX reports a native crash as -signal (SIGILL is -4), Windows as
+        # an NTSTATUS (> 255). A python-level ImportError says nothing about the instructions: True, so the ModuleNotFound
+        # repair path of app.py stays in charge of it
+        try:
+            proc = subprocess.run([python_exec, '-c', 'import numpy; print("numpy import ok", flush=True)'], capture_output=True, text=True, errors='replace', timeout=120)
+        except (subprocess.TimeoutExpired, OSError):
+            return True
+        if proc.returncode != 0 and 'numpy import ok' not in proc.stdout:
+            return False
+        return True
 
     def has_directml_gpu(self)->bool:
         if self.system != systems['WINDOWS']:

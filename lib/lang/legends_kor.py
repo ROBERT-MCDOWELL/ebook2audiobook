@@ -522,6 +522,8 @@ legends = {
     'msg_remove_obsolete_failed': '오래된 패키지 {pkg} 제거 실패(치명적이지 않음): {e}',
     'error_numpy_install_failed': 'numpy 패키지 설치 실패: {e}',
     'error_numpy_install': 'numpy 패키지 설치 중 오류: {e}',
+    'msg_numpy_downgrade': '설치된 NumPy가 이 CPU에서 가져올 때 네이티브로 충돌합니다(잘못된 명령). SSE4.2 요구 사항이 없는 마지막 x86-64 빌드인 2.4 이전 버전으로 다운그레이드하세요…',
+    'error_numpy_illegal_instruction': '오류: 이 CPU에서는 NumPy를 실행할 수 없습니다. 버전 2.4 미만에서도 NumPy를 가져오면 잘못된 명령이 발생합니다.\\n이 기기의 프로세서(또는 이를 실행하는 하이퍼바이저)는 NumPy가 컴파일된 명령에 비해 너무 오래되었습니다.\\n더 최신 CPU에서 ebook2audiobook을 다시 시작하거나 {python_exec} 환경에서 배포판(apt install python3-numpy)을 통해 NumPy를 설치하세요.',
     'msg_removing_leftover': '남은 {path}을(를) 제거하는 중…',
     'msg_resolving_pkg': '{pkg} 정리 중: {keep} 유지, {remove} 제거…',
     'msg_broken_install': '손상된 설치',

@@ -523,6 +523,8 @@ legends = {
     'msg_remove_obsolete_failed': 'Failed to remove obsolete package {pkg} (non-fatal): {e}',
     'error_numpy_install_failed': 'Failed to install numpy package: {e}',
     'error_numpy_install': 'Error while installing numpy package: {e}',
+    'msg_numpy_downgrade': 'The installed numpy crashes natively at import on this CPU (illegal instruction): downgrading it below 2.4, the last x86-64 build without the SSE4.2 requirement…',
+    'error_numpy_illegal_instruction': 'Error: numpy cannot run on this CPU: importing it raises an illegal instruction, even below version 2.4.\\nThe processor of this machine (or the hypervisor running it) is too old for the instructions numpy is compiled with.\\nStart ebook2audiobook again on a newer CPU, or install numpy from your distribution (apt install python3-numpy) in {python_exec}\'s environment.',
     'msg_removing_leftover': 'Removing leftover {path}…',
     'msg_resolving_pkg': 'Resolving {pkg}: keeping {keep}, removing {remove}…',
     'msg_broken_install': 'a broken install',
