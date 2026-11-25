@@ -846,9 +846,13 @@ class TTSUtils:
                     if progress_bar is not None:
                         progress_bar(0.0, desc=msg)
                     key = f'{xtts}-internal'
+                    # the XTTS base model converting a voice with its own model (same cache key): already loaded on its
+                    # device, it stays there. Moved back to CPU it spoke the whole book on CPU, and reloaded when the
+                    # free VRAM had left it out of loaded_tts
+                    own_engine = key == self.tts_key
                     default_text = Path(default_text_file).read_text(encoding='utf-8')
                     self.cleanup_memory()
-                    engine = loaded_tts.get(key, False)
+                    engine = loaded_tts.get(key, False) or (self.engine if own_engine else False)
                     if not engine:
                         vram_dict = VRAMDetector().detect_vram(self.session['device'], self.session['script_mode'])
                         self.session['free_vram_gb'] = vram_dict.get('free_vram_gb', 0)
@@ -909,11 +913,13 @@ class TTSUtils:
                             if self.session.get(key) is not None
                         }
                         fine_tuned_params = self._sanitize_sampling_params(fine_tuned_params)
-                        engine.to(device)
+                        if not own_engine:
+                            engine.to(device)
                         try:
                             result = self._xtts_inference(engine, device, default_text.strip(), gpt_cond_latent, speaker_embedding, fine_tuned_params)
                         finally:
-                            engine.to(devices['CPU']['proc'])
+                            if not own_engine:
+                                engine.to(devices['CPU']['proc'])
                         if not result:
                             error = f'_check_xtts_builtin_speakers() error: inference produced no usable audio for {speaker} in {self.language}'
                             print(error)
@@ -954,9 +960,10 @@ class TTSUtils:
                                     del audio_sentence, sourceTensor, audio_tensor
                                     Path(proc_current_voice).unlink(missing_ok=True)
                                     gc.collect()
-                                    self.engine = loaded_tts.get(self.tts_key, False)
-                                    if not self.engine:
-                                        self.engine = self.load_engine()
+                                    if not own_engine:
+                                        self.engine = loaded_tts.get(self.tts_key, False)
+                                        if not self.engine:
+                                            self.engine = self.load_engine()
                                     return new_current_voice
                                 else:
                                     error = 'normalize_audio() error:'
@@ -1040,8 +1047,9 @@ class TTSUtils:
             speaker = Path(current_voice).stem
             xtts = TTS_ENGINES['XTTS']
             # an engine's own speakers (bark npz, piper onnx...) are not voice files to convert. The XTTS built-in ones
-            # are, for every engine but XTTS (it clones them in any language itself): voices/eng holds them in english
-            # only, _check_xtts_builtin_speakers() speaks them in the TTS language from speakers_xtts.pth
+            # are, for every engine but XTTS (it speaks them from speakers_xtts.pth in any language, xtts.py
+            # _builtin_latents()): voices/eng holds them in english only, _check_xtts_builtin_speakers() speaks them
+            # in the TTS language from speakers_xtts.pth
             engine_speakers = {k for engine, settings in default_engine_settings.items() if engine != xtts for k in settings['voices']}
             if self.session['tts_engine'] == xtts:
                 engine_speakers.update(default_engine_settings[xtts]['voices'].keys())

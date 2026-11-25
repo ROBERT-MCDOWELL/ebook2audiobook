@@ -1,6 +1,7 @@
 from lib.classes.tts_engines.common.headers import *
 from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 from lib.classes.tts_engines.common.hf_download import hf_download
+from lib.conf import voices_dir
 from lib.lang import legends
 
 #sys.stderr = StdoutFilter(sys.stdout)
@@ -12,7 +13,6 @@ class XTTS(TTSUtils, TTSRegistry, name='xtts'):
             self.session = session
             self.cache_dir = tts_dir
             self.speakers_path = None
-            self.speaker = None
             self.tts_key = self.session['model_cache']
             self.tts_zs_key = default_vc_model.rsplit('/',1)[-1]
             self.pth_voice_file = None
@@ -116,6 +116,38 @@ class XTTS(TTSUtils, TTSRegistry, name='xtts'):
             error = f'load_engine() error: {e}'
             raise RuntimeError(error) from e
 
+    def _builtin_latents(self, voice:str|None)->tuple|None:
+        # the base model speaks its built-in speakers from speakers_xtts.pth, the latents coqui made from their studio
+        # clips, the same in every language, not from the few seconds of voices/<lang> it would clone. Fine-tuned and
+        # custom models have their own conditioning encoder: they clone the file
+        import torch
+        if voice is None or self.session['custom_model'] is not None or self.session['fine_tuned'] != 'internal':
+            return None
+        xtts_voices = default_engine_settings[TTS_ENGINES['XTTS']]['voices']
+        speaker = Path(voice).stem
+        if speaker not in xtts_voices:
+            return None
+        # only the voice library's file (voices/<lang>/...): one uploaded under the same name (voices/__sessions,
+        # custom model dir) is the user's own voice
+        try:
+            rel = Path(os.path.abspath(voice)).relative_to(voices_dir)
+        except ValueError:
+            return None
+        if not rel.parts or rel.parts[0].startswith('__'):
+            return None
+        latents = self.xtts_speakers.get(xtts_voices[speaker])
+        if not latents:
+            return None
+        gpt_cond_latent, speaker_embedding = latents.values()
+        # speakers_xtts.pth ships CPU tensors, not guaranteed fp32: on the model's device in fp32, autocast does the rest
+        gpt_cond_latent = self._tensor_type(gpt_cond_latent).to(device=self.device, dtype=torch.float32)
+        speaker_embedding = self._tensor_type(speaker_embedding).to(device=self.device, dtype=torch.float32)
+        if not (torch.isfinite(gpt_cond_latent).all() and torch.isfinite(speaker_embedding).all()):
+            error = f'_builtin_latents() error: non-finite latents for {speaker}, cloning {voice} instead'
+            print(error)
+            return None
+        return gpt_cond_latent, speaker_embedding
+
     def _char_limit(self)->int:
         char_limits = getattr(getattr(self.engine, 'tokenizer', None), 'char_limits', {})
         return char_limits.get(str(self.language_iso1).split('-')[0], 250)
@@ -208,8 +240,9 @@ class XTTS(TTSUtils, TTSRegistry, name='xtts'):
                         else:
                             msg = legends['msg_computing_latents']
                             print(msg)
-                            if self.speaker in default_engine_settings[TTS_ENGINES['XTTS']]['voices'].keys():
-                                self.params['gpt_cond_latent'], self.params['speaker_embedding'] = self.xtts_speakers[default_engine_settings[TTS_ENGINES['XTTS']]['voices'][self.speaker]].values()
+                            builtin_latents = self._builtin_latents(self.params['current_voice'])
+                            if builtin_latents is not None:
+                                self.params['gpt_cond_latent'], self.params['speaker_embedding'] = builtin_latents
                             else:
                                 self.params['gpt_cond_latent'], self.params['speaker_embedding'] = self.engine.get_conditioning_latents(audio_path=[self.params['current_voice']], load_sr=24000, sound_norm_refs=True)
                             self.params['latent_embedding'][self.params['current_voice']] = self.params['gpt_cond_latent'], self.params['speaker_embedding']
