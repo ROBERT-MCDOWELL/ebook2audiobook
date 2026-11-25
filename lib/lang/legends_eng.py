@@ -488,6 +488,8 @@ legends = {
     'msg_rocm_unusable': 'AMD GPU found but torch cannot run on it (GPU not supported by ROCm, a driver or permission issue, see above). ROCm disabled for this run, it is probed again at the next start.',
     'msg_rocm_unusable_override': 'AMD GPU found but torch cannot run on it under HSA_OVERRIDE_GFX_VERSION={override}: the GPU does not run the code of that target. ROCm disabled for this run, unset HSA_OVERRIDE_GFX_VERSION (or set another value) and restart to probe it again.',
     'msg_rocm_probe_no_answer': 'AMD GPU found but torch gave no answer whether it can run on it. ROCm disabled for this run to keep conversions safe, it is probed again at the next start.',
+    'msg_rocm_gfx_family': 'AMD GPU {native} found, but HSA_OVERRIDE_GFX_VERSION={override} runs {target} code on it, of another ISA family ({native_family}, {target_family}): torch would crash on it. ROCm disabled for this run, it is checked again at the next start.',
+    'msg_rocm_try_vulkan': 'Vulkan sees this AMD GPU: start e2a with DEVICE_TAG=vulkan, at every start, to run on it the engines with Vulkan support ({engines}). The other engines run on the CPU.',
     'msg_gpu_runtime_silent': 'No GPU backend matched. {gpus} GPU on PCI but its runtime did not answer. Falling back to CPU.',
     'msg_no_gpu_pci': 'No GPU found on the PCI bus. Falling back to CPU.',
     'error_requirements_missing': 'Warning: File {file} not found. Skipping package check.',

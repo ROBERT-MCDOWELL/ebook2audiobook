@@ -7,6 +7,34 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPT_DIR)
 DEVICE_INFO_JSON = os.path.normpath(os.path.join(ROOT_DIR, '.device_info.json'))
 HSA_OVERRIDE_ENV = "HSA_OVERRIDE_GFX_VERSION"
+# LLVM's generic processors (AMDGPUUsage): the targets one ISA family shares, a single build runs on all its members.
+# An override inside a family runs (gfx1031 -> 10.3.0, gfx1103 -> 11.0.0); across families the ISA differs and torch's
+# code crashes the GPU (crash report 8a1a1c471e8f6852: gfx1013 under 10.3.0). A target in none of them gets no verdict
+GFX_FAMILIES = {
+    'gfx9-generic': {'gfx900', 'gfx902', 'gfx904', 'gfx906', 'gfx909', 'gfx90c'},
+    'gfx9-4-generic': {'gfx940', 'gfx941', 'gfx942'},
+    'gfx10-1-generic': {'gfx1010', 'gfx1011', 'gfx1012', 'gfx1013'},
+    'gfx10-3-generic': {'gfx1030', 'gfx1031', 'gfx1032', 'gfx1033', 'gfx1034', 'gfx1035', 'gfx1036'},
+    'gfx11-generic': {'gfx1100', 'gfx1101', 'gfx1102', 'gfx1103', 'gfx1150', 'gfx1151', 'gfx1152', 'gfx1153'},
+    'gfx12-generic': {'gfx1200', 'gfx1201'},
+}
+
+def gfx_family(target:str|None)->str|None:
+    return next((family for family, members in GFX_FAMILIES.items() if target in members), None)
+
+def crosses_family(native:str|None, target:str|None)->bool:
+    """True when both targets belong to known ISA families, different ones: code for target cannot run on native."""
+    native_family, target_family = gfx_family(native), gfx_family(target)
+    return bool(native_family and target_family and native_family != target_family)
+
+def override_target(override:str|None)->str|None:
+    """The gfx target an HSA_OVERRIDE_GFX_VERSION value runs ('10.3.0' -> 'gfx1030', '9.0.10' -> 'gfx90a'), None when
+    unset or malformed."""
+    try:
+        major, minor, step = map(int, str(override).split('.'))
+    except ValueError:
+        return None
+    return f'gfx{major}{minor}{step:x}'
 
 def rocm_arch_list()->set[str]|None:
     """GPU targets the installed ROCm torch was built for ('gfx1200', ...), read without starting the HIP runtime: HSA
@@ -55,7 +83,9 @@ def handle_rocm_override(arch_list:set[str]|None=None)->str|None:
                     has_unknown = True
                 elif arch_list is not None and info.get('gfx_target') in arch_list:
                     native_targets.add(info['gfx_target'])
-                elif info.get('override'):
+                # an entry overriding across ISA families (a gfx1010 put on 10.3.0) is never applied: the GPU runs as
+                # itself, and rocm_usable_count() tells whether torch has code for it
+                elif info.get('override') and not crosses_family(info.get('gfx_target'), override_target(info['override'])):
                     overrides.add(info['override'])
                 elif info.get('supported'):
                     native_targets.add(info['gfx_target'])
@@ -76,6 +106,52 @@ def handle_rocm_override(arch_list:set[str]|None=None)->str|None:
         return override
     except Exception:
         return None  # rocmfix missing, offline, or unwritable ~/.rocmfix: never block GPU detection
+
+def kfd_gpu_targets()->dict[tuple[int, int, int], str]:
+    """(PCI domain, bus, device) -> gfx target of each GPU the amdgpu kernel driver lists (KFD topology): the
+    hardware's own, HSA_OVERRIDE_GFX_VERSION only changes what the ROCm runtime reports above it. Read from sysfs,
+    without the runtime. {} off Linux, without KFD, or on a kernel too old to give gfx_target_version"""
+    targets:dict[tuple[int, int, int], str] = {}
+    for props_file in glob.glob('/sys/class/kfd/kfd/topology/nodes/*/properties'):
+        props:dict[str, str] = {}
+        try:
+            with open(props_file, encoding='utf-8') as f:
+                for line in f:
+                    key, _, value = line.strip().partition(' ')
+                    props[key] = value.strip()
+            # major * 10000 + minor * 100 + stepping, decimal: 100103 -> gfx1013, 90010 -> gfx90a. 0 on a CPU node
+            version = int(props.get('gfx_target_version') or 0)
+            location = int(props.get('location_id') or 0)
+            domain = int(props.get('domain') or 0)
+        except (OSError, ValueError):
+            continue
+        if version:
+            # location_id is the PCI id: bus << 8 | device << 3 | function
+            targets[(domain, location >> 8, (location >> 3) & 0x1f)] = f'gfx{version // 10000}{version // 100 % 100}{version % 100:x}'
+    return targets
+
+def rocm_gfx_mismatch(torch, count:int, override:str|None)->tuple[int, dict]|None:
+    """The first ROCm device HSA_OVERRIDE_GFX_VERSION puts on code of another ISA family, as (index, details), None
+    when none is. Decided from the kernel's target, before anything runs on the GPU: the GPU test would kill this child
+    (or pass on a small tensor and the model load crash later). A device is matched to its KFD node by PCI address; a
+    torch without those properties is matched only when both list a single GPU"""
+    target = override_target(override)
+    if not gfx_family(target):
+        return None
+    kfd = kfd_gpu_targets()
+    for index in range(count if kfd else 0):
+        try:
+            props = torch.cuda.get_device_properties(index)
+            address = (getattr(props, 'pci_domain_id', None), getattr(props, 'pci_bus_id', None), getattr(props, 'pci_device_id', None))
+        except Exception:
+            address = (None, None, None)
+        if None not in address:
+            native = kfd.get(address)
+        else:
+            native = next(iter(kfd.values())) if len(kfd) == 1 and count == 1 else None
+        if crosses_family(native, target):
+            return index, dict(device=f'cuda:{index}', native=native, native_family=gfx_family(native), override=override, target=target, target_family=gfx_family(target))
+    return None
 
 def rocm_usable_count(torch, count:int)->tuple[int, str|None]:
     """How many of the first ROCm devices run torch's code, and why the next one does not (None when all do).
@@ -159,7 +235,14 @@ def main()->None:
                     # wheel vendor must match the tag: a CUDA wheel on a rocm tag (or the reverse) keeps count at 0
                     result['count'] = torch.cuda.device_count()
                     if backend == 'rocm' and result['count'] > 0:
-                        result['count'], result['error'] = rocm_usable_count(torch, result['count'])
+                        # the family first: a device it rejects never runs anything, the ones before it get the GPU test
+                        if (mismatch := rocm_gfx_mismatch(torch, result['count'], result['hsa_override'])):
+                            result['count'], gfx = mismatch
+                            result['gfx'] = gfx
+                            result['error'] = f"{gfx['device']} is a {gfx['native']} ({gfx['native_family']}), {HSA_OVERRIDE_ENV}={gfx['override']} runs {gfx['target']} code ({gfx['target_family']}) on it: another ISA family"
+                        if result['count'] > 0:
+                            result['count'], error = rocm_usable_count(torch, result['count'])
+                            result['error'] = result['error'] or error
                 case 'xpu' if hasattr(torch, 'xpu') and torch.xpu.is_available():
                     result['count'] = torch.xpu.device_count()
         # mps, jetson, cpu → no torch import, count stays 0 (single-device or no-device)

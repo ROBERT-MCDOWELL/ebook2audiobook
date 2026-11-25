@@ -3331,11 +3331,22 @@ class DeviceInstaller():
                         user_override = os.environ.get('HSA_OVERRIDE_GFX_VERSION')
                         if not gpu_info.get('probed'):
                             msg = legends['msg_rocm_probe_no_answer']
+                        elif gpu_info.get('gfx'):
+                            # detect_gpu.rocm_gfx_mismatch(): the override runs code of another ISA family on the GPU
+                            msg = legends['msg_rocm_gfx_family'].format(**gpu_info['gfx'])
                         elif user_override:
                             msg = legends['msg_rocm_unusable_override'].format(override=user_override)
                         else:
                             msg = legends['msg_rocm_unusable']
                         print(msg)
+                        # Vulkan runs an AMD GPU without ROCm (Mesa's RADV): when its loader sees one and the +vulkan torch
+                        # applies here, say how to switch to it. Only the engines listing Vulkan in their devices use
+                        # the GPU there, the list follows default_engine_settings
+                        if any(self.gpu_pci_vendors.get(vendor_id) == devices['ROCM']['proc'] for vendor_id, _, _ in self.vulkan_devices()) and self.vulkan_torch_ok:
+                            from lib.conf_models import default_engine_settings
+                            engines = sorted(engine for engine, settings in default_engine_settings.items() if devices['VULKAN']['proc'] in settings.get('devices', []))
+                            msg = legends['msg_rocm_try_vulkan'].format(engines=', '.join(engines))
+                            print(msg)
                     if gpu_info['count'] > 0:
                         idx = ','.join(str(i) for i in range(gpu_info['count']))
                         if gpu_info['backend'] == 'cuda':
