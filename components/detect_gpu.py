@@ -177,7 +177,8 @@ def usable_devices(torch, backend:str, count:int, override:str|None, skip:set[in
     others (an unsupported iGPU listed before a working card). Returns (their indices, why each other one is not, the
     first ISA family mismatch, ROCm only). skip: devices whose GPU test killed an earlier probe or hung
     (DeviceInstaller.probe_gpus() runs it again without them). Each GPU test is announced on stdout first and its end
-    after, so a native crash or a GPU that hangs (no end within DeviceInstaller.gpu_test_timeout) tells which it was"""
+    after, so a native crash or a GPU that hangs (no end within DeviceInstaller.first_gpu_test_timeout for the first test,
+    gpu_test_timeout after) tells which it was"""
     accel, prefix = (torch.xpu, 'xpu') if backend == 'xpu' else (torch.cuda, 'cuda')
     try:
         # the runtime's own start-up, before the GPU tests and their time limit

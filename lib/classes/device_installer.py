@@ -107,8 +107,13 @@ class DeviceInstaller():
     gpu_choice_timeout = 60
     # PCI vendor id -> the device its runtime serves, for the GPU choice
     gpu_pci_vendors = {0x1002: devices['ROCM']['proc'], 0x10de: devices['CUDA']['proc'], 0x8086: devices['XPU']['proc']}
-    # seconds one GPU test of the ROCm probe may take (detect_gpu.rocm_gpu_test, a 16 MB tensor): past it the GPU hangs
+    # seconds the GPU probe may take outside its GPU tests (torch import, device count: a cold first import of a GPU
+    # torch took over 30 s), and one GPU test (detect_gpu.gpu_test, a 16 MB tensor): past it the GPU hangs. The first test
+    # of a probe process gets longer: it creates the GPU context and compiles its kernels on the fly when torch has no
+    # prebuilt code for the GPU (an NVIDIA GPU newer than the build: PTX; an Intel GPU without AOT code: SPIR-V)
+    gpu_probe_timeout = 120
     gpu_test_timeout = 12
+    first_gpu_test_timeout = 60
     # PCI vendors whose display adapters never run torch (_not_gpu): server BMC VGA (ASPEED, Matrox G200, Huawei iBMC),
     # emulated / paravirtual VGA (QEMU-Bochs, virtio-gpu, QXL, VMware SVGA, VirtualBox, Hyper-V, Parallels, Xen, Cirrus,
     # S3 Trio) and Silicon Motion's embedded / USB graphics. A BMC VGA counted as an add-in card stopped
@@ -2665,9 +2670,9 @@ class DeviceInstaller():
         # paging) took longer than the 30 s it had, so XPU stayed on unprobed (crash report 63aa7dc78e8ff6f6)
         # The child judges each GPU (detect_gpu.usable_devices); on ROCm it sees every one, without the GPU 0 pin
         # lib/conf.py sets when the user asked for none (rocm_visible_pinned). Each GPU test is announced on stdout and
-        # its end too: a test that kills the child, or does not end within gpu_test_timeout (a GPU that hangs instead of
-        # faulting), fails that device, and the child runs again without it (E2A_GPU_SKIP), so one GPU never hides the
-        # others
+        # its end too: a test that kills the child, or does not end in time (a GPU that hangs instead of faulting;
+        # first_gpu_test_timeout for the first test of a child, gpu_test_timeout after), fails that device, and the child
+        # runs again without it (E2A_GPU_SKIP), so one GPU never hides the others
         import queue, threading, time
         env = {key: value for key, value in os.environ.items() if not (rocm_visible_pinned and key in ('ROCR_VISIBLE_DEVICES', 'HIP_VISIBLE_DEVICES'))}
         failed:dict = {}
@@ -2690,11 +2695,14 @@ class DeviceInstaller():
             stderr_reader.start()
             lines:list = []
             testing = None
-            deadline = time.monotonic() + 120
+            deadline = time.monotonic() + self.gpu_probe_timeout
             test_deadline = None
+            # the probe's own limit pauses while a GPU test runs under its own: a long first test is no missing answer
+            paused = None
+            tests_started = 0
             hung = timed_out = False
             while True:
-                limit = min(deadline, test_deadline) if test_deadline else deadline
+                limit = test_deadline if test_deadline else deadline
                 try:
                     line = stdout_queue.get(timeout=max(0.0, limit - time.monotonic()))
                 except queue.Empty:
@@ -2712,10 +2720,16 @@ class DeviceInstaller():
                 except json.JSONDecodeError:
                     continue
                 if isinstance(data, dict) and isinstance(data.get('gpu_testing'), int) and isinstance(data.get('gpu_count'), int):
-                    testing = (data['gpu_testing'], data['gpu_count'], str(data.get('device') or f"gpu:{data['gpu_testing']}"), data.get('backend'))
-                    test_deadline = time.monotonic() + self.gpu_test_timeout
+                    test_limit = self.first_gpu_test_timeout if tests_started == 0 else self.gpu_test_timeout
+                    tests_started += 1
+                    testing = (data['gpu_testing'], data['gpu_count'], str(data.get('device') or f"gpu:{data['gpu_testing']}"), data.get('backend'), test_limit)
+                    paused = deadline - time.monotonic()
+                    test_deadline = time.monotonic() + test_limit
                 elif isinstance(data, dict) and 'gpu_tested' in data:
                     testing = test_deadline = None
+                    if paused is not None:
+                        deadline = time.monotonic() + paused
+                        paused = None
             if hung or timed_out:
                 proc.kill()
             try:
@@ -2724,7 +2738,7 @@ class DeviceInstaller():
                 # stuck in the GPU driver, the kill only lands once the GPU resets: left behind
                 returncode = None
             if timed_out:
-                return {'count': 0, 'backend': None, 'error': 'no answer within 120 s'}
+                return {'count': 0, 'backend': None, 'error': f'no answer within {self.gpu_probe_timeout} s'}
             stderr_reader.join(timeout=5)
             stderr = ''.join(stderr_parts).strip()
             if hung or returncode != 0:
@@ -2732,9 +2746,9 @@ class DeviceInstaller():
                 code = 'none' if returncode is None else f'{returncode:#x}' if returncode > 255 else str(returncode)
                 if testing is None or testing[0] in failed:
                     return {'count': 0, 'backend': None, 'probed': True, 'error': stderr or f'exit code {code}'}
-                index, count, device, backend = testing
+                index, count, device, backend, test_limit = testing
                 if hung:
-                    failed[index] = f'{device} GPU test did not end within {self.gpu_test_timeout} s'
+                    failed[index] = f'{device} GPU test did not end within {test_limit} s'
                 else:
                     stderr_tail = stderr.splitlines()[-1] if stderr else ''
                     failed[index] = f"{device} GPU test killed the probe (exit code {code}{': ' + stderr_tail if stderr_tail else ''})"
