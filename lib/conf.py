@@ -192,7 +192,7 @@ multiprocessing_tempdir_patch()
 # cannot load everywhere: FFmpeg 8 on Windows, ROCm builds) and allowlists coqui's config for torch.load. When this
 # interpreter did not run it (copy missing, app.py started another way), it runs here, before torch/torchaudio import.
 # The launchers refresh the copy only when they run: started another way, app.py can run an older one, missing the
-# patches added since (E2A_XPU_UNUSABLE). This one then runs too, its hook goes first in sys.meta_path and takes
+# patches added since (E2A_XPU_UNUSABLE, E2A_ROCM_UNUSABLE). This one then runs too, its hook goes first in sys.meta_path and takes
 # torch/torchaudio over from the old one
 def sitecustomize_patch()->None:
     sitecustomize_src = os.path.join(os.path.dirname(root_dir), 'components', 'sitecustomize.py')
@@ -216,6 +216,8 @@ def sitecustomize_patch()->None:
             module.patch_torchaudio(sys.modules['torchaudio'])
         if 'torch' in sys.modules and hasattr(module, 'patch_torch_xpu'):
             module.patch_torch_xpu(sys.modules['torch'])
+        if 'torch' in sys.modules and hasattr(module, 'patch_torch_rocm'):
+            module.patch_torch_rocm(sys.modules['torch'])
     except Exception as e:
         error = f'sitecustomize_patch(): {e}'
         print(error)

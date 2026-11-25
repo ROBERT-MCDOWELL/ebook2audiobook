@@ -251,8 +251,9 @@ class DeviceInstaller():
 
     def sync_sitecustomize(self, env_dir:str)->None:
         # components/sitecustomize.py in an engine's venv (torchaudio.load -> soundfile, coqui's config allowlisted for
-        # torch.load, torch.xpu off under E2A_XPU_UNUSABLE). Copied when missing or different, an identical copy is left
-        # alone: cheap enough to run at every engine start, so a venv installed before gets the patches added since
+        # torch.load, torch.xpu off under E2A_XPU_UNUSABLE, torch.cuda off under E2A_ROCM_UNUSABLE). Copied when missing
+        # or different, an identical copy is left alone: cheap enough to run at every engine start, so a venv installed
+        # before gets the patches added since
         sitecustomize_src = os.path.join(components_dir, 'sitecustomize.py')
         if self.system == systems['WINDOWS']:
             site_dirs = [os.path.join(env_dir, 'Lib', 'site-packages')]
@@ -3293,6 +3294,7 @@ class DeviceInstaller():
                     # an inherited one would make sitecustomize.py answer 0 for torch in the probe too: it asks torch
                     # itself, and the verdict below sets it again
                     os.environ.pop('E2A_XPU_UNUSABLE', None)
+                    os.environ.pop('E2A_ROCM_UNUSABLE', None)
                     gpu_info = self.probe_gpus()
                     device_info_dict['gpu_count'] = gpu_info['count']
                     device_info_dict['gpu_backend'] = gpu_info['backend']
@@ -3314,6 +3316,25 @@ class DeviceInstaller():
                         devices['XPU']['found'] = False
                         os.environ['E2A_XPU_UNUSABLE'] = '1'
                         msg = legends['msg_xpu_unusable'] if gpu_info.get('probed') else legends['msg_xpu_probe_no_answer']
+                        print(msg)
+                    # the same for ROCm: check_hardware() set devices['ROCM']['found'] from the system HIP runtime
+                    # counting an AMD GPU, which HSA_OVERRIDE_GFX_VERSION makes it do for a GPU of a target torch has no
+                    # code for. detect_gpu.py ran torch on it (rocm_usable_count): a device that fails is not counted,
+                    # a native fault kills the child. Kept on, the first model moved to it killed e2a mid-conversion
+                    # (crash report 8a1a1c471e8f6852). With E2A_ROCM_UNUSABLE set, components/sitecustomize.py makes
+                    # torch.cuda report no device, so third-party code that picks 'cuda' on its own stays on the CPU too
+                    if device_info['name'] == devices['ROCM']['proc'] and gpu_info['count'] == 0:
+                        devices['ROCM']['found'] = False
+                        os.environ['E2A_ROCM_UNUSABLE'] = '1'
+                        # a value in this process's env is the user's (shell, launcher): the probe's DB override is
+                        # exported below only with a GPU that answered
+                        user_override = os.environ.get('HSA_OVERRIDE_GFX_VERSION')
+                        if not gpu_info.get('probed'):
+                            msg = legends['msg_rocm_probe_no_answer']
+                        elif user_override:
+                            msg = legends['msg_rocm_unusable_override'].format(override=user_override)
+                        else:
+                            msg = legends['msg_rocm_unusable']
                         print(msg)
                     if gpu_info['count'] > 0:
                         idx = ','.join(str(i) for i in range(gpu_info['count']))
@@ -3337,7 +3358,7 @@ class DeviceInstaller():
                         if device_info['name'] == devices['XPU']['proc']:
                             probe += f", E2A_XPU_UNUSABLE={os.environ.get('E2A_XPU_UNUSABLE', '0')}"
                         elif device_info['name'] == devices['ROCM']['proc']:
-                            probe += f", HSA_OVERRIDE_GFX_VERSION={os.environ.get('HSA_OVERRIDE_GFX_VERSION') or 'unset'}"
+                            probe += f", HSA_OVERRIDE_GFX_VERSION={os.environ.get('HSA_OVERRIDE_GFX_VERSION') or 'unset'}, E2A_ROCM_UNUSABLE={os.environ.get('E2A_ROCM_UNUSABLE', '0')}"
                         bug_reporter.fact('gpu_probe', probe)
                     return 0
                 else:

@@ -13,6 +13,8 @@ DLL load failures on PyTorch ROCm/Windows builds).
 It configures PyTorch safe globals for Coqui-TTS compatibility.
 It makes torch.xpu report no device when E2A_XPU_UNUSABLE=1 (Intel GPU torch xpu
 cannot run on: its device count is a Windows access violation).
+It makes torch.cuda report no device when E2A_ROCM_UNUSABLE=1 (AMD GPU torch ROCm
+cannot run on: the first tensor copied to it kills the process).
 """
 
 import sys, os, importlib
@@ -95,6 +97,32 @@ def patch_torch_xpu(mod: ModuleType)->None:
     xpu.is_available = _no_xpu_is_available
     warn('torch.xpu reports no device (E2A_XPU_UNUSABLE=1)')
 
+def patch_torch_rocm(mod: ModuleType)->None:
+    """No ROCm device once DeviceInstaller set E2A_ROCM_UNUSABLE=1.
+
+    It does when detect_gpu.py, in its own process, found torch cannot run on the AMD GPU: the runtime lists it, but
+    its first tensor copy or kernel fails or kills the process natively (a GPU no ROCm supports, run under an
+    HSA_OVERRIDE_GFX_VERSION of another ISA family). Third-party code picks 'cuda' on its own whenever
+    torch.cuda.is_available() says yes, CPU sessions included: it answers from here instead. A ROCm torch only, a CUDA
+    GPU is never hidden."""
+    if os.environ.get('E2A_ROCM_UNUSABLE') != '1':
+        return
+    cuda = getattr(mod, 'cuda', None)
+    if cuda is None or not getattr(getattr(mod, 'version', None), 'hip', None):
+        return
+    if getattr(cuda.device_count, '__name__', '') == '_no_rocm_device_count':
+        return
+
+    def _no_rocm_device_count()->int:
+        return 0
+
+    def _no_rocm_is_available()->bool:
+        return False
+
+    cuda.device_count = _no_rocm_device_count
+    cuda.is_available = _no_rocm_is_available
+    warn('torch.cuda reports no device (E2A_ROCM_UNUSABLE=1)')
+
 def patch_torch(mod: ModuleType)->None:
     """Allowlist Coqui-TTS classes for PyTorch 2.6+ weights_only=True loading."""
     try:
@@ -130,6 +158,7 @@ if patch_enabled:
             elif name == 'torch':
                 # first, before patch_torch() runs any third-party import
                 patch_torch_xpu(module)
+                patch_torch_rocm(module)
                 patch_torch(module)
 
     class LazyPatchHook:

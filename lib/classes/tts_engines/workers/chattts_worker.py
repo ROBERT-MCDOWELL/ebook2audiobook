@@ -59,6 +59,11 @@ def main()->int:
         if os.environ.get('E2A_XPU_UNUSABLE') == '1' and hasattr(torch, 'xpu'):
             torch.xpu.device_count = lambda: 0
             torch.xpu.is_available = lambda: False
+        # E2A_ROCM_UNUSABLE: e2a found torch ROCm cannot run on this AMD GPU (its first tensor copy killed the probe).
+        # Code that picks 'cuda' whenever torch.cuda.is_available() says yes stays on the CPU. Set here too, like above
+        if os.environ.get('E2A_ROCM_UNUSABLE') == '1' and getattr(torch.version, 'hip', None):
+            torch.cuda.device_count = lambda: 0
+            torch.cuda.is_available = lambda: False
         import torch.distributed
         if not torch.distributed.is_available():
             # torch built without distributed support (USE_DISTRIBUTED=0: the jetson wheels, e2a's macOS builds):

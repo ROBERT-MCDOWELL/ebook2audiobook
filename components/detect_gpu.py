@@ -77,6 +77,27 @@ def handle_rocm_override(arch_list:set[str]|None=None)->str|None:
     except Exception:
         return None  # rocmfix missing, offline, or unwritable ~/.rocmfix: never block GPU detection
 
+def rocm_usable_count(torch, count:int)->tuple[int, str|None]:
+    """How many of the first ROCm devices run torch's code, and why the next one does not (None when all do).
+    A device count never runs GPU code: a GPU the runtime lists but cannot run passed with count 1, and the first model
+    moved to it killed e2a (crash report 8a1a1c471e8f6852: a BC-250, gfx1013, which no ROCm supports, under the user's
+    HSA_OVERRIDE_GFX_VERSION=10.3.0, the gfx1030 code of another ISA family; Aborted in a ROCm thread at XTTS
+    module.to()). Each device here gets what a model load starts with: a host tensor copied over (Module.to()), kernels
+    on it, the result read back. A native fault kills this child, which is the answer: probe_gpus() reads its exit code.
+    Devices are kept from index 0 (HIP_VISIBLE_DEVICES is set to range(count)), up to the first that fails."""
+    size = 1 << 22
+    for index in range(count):
+        try:
+            on_gpu = torch.ones(size).to(f'cuda:{index}')
+            # 3 * 2**22 stays below 2**24: every partial sum of the reduction is exact in float32
+            total = (on_gpu * 2 + 1).sum().item()
+            torch.cuda.synchronize(index)
+        except Exception as e:
+            return index, f'cuda:{index} GPU test failed: {type(e).__name__}: {e}'
+        if total != 3 * size:
+            return index, f'cuda:{index} GPU test failed: computed {total:g} instead of {3 * size}'
+    return count, None
+
 def rocm_denied_nodes()->list[str]:
     """Returns the ROCm device nodes this process cannot open read/write.
     ROCm opens /dev/kfd plus the render node of every amdgpu device, and udev rules can put them in different groups."""
@@ -137,6 +158,8 @@ def main()->None:
                 case 'cuda' | 'rocm' if torch.cuda.is_available() and bool(getattr(torch.version, 'hip', None)) == (backend == 'rocm'):
                     # wheel vendor must match the tag: a CUDA wheel on a rocm tag (or the reverse) keeps count at 0
                     result['count'] = torch.cuda.device_count()
+                    if backend == 'rocm' and result['count'] > 0:
+                        result['count'], result['error'] = rocm_usable_count(torch, result['count'])
                 case 'xpu' if hasattr(torch, 'xpu') and torch.xpu.is_available():
                     result['count'] = torch.xpu.device_count()
         # mps, jetson, cpu → no torch import, count stays 0 (single-device or no-device)
