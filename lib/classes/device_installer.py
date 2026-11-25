@@ -107,6 +107,8 @@ class DeviceInstaller():
     gpu_choice_timeout = 60
     # PCI vendor id -> the device its runtime serves, for the GPU choice
     gpu_pci_vendors = {0x1002: devices['ROCM']['proc'], 0x10de: devices['CUDA']['proc'], 0x8086: devices['XPU']['proc']}
+    # seconds one GPU test of the ROCm probe may take (detect_gpu.rocm_gpu_test, a 16 MB tensor): past it the GPU hangs
+    gpu_test_timeout = 12
     # PCI vendors whose display adapters never run torch (_not_gpu): server BMC VGA (ASPEED, Matrox G200, Huawei iBMC),
     # emulated / paravirtual VGA (QEMU-Bochs, virtio-gpu, QXL, VMware SVGA, VirtualBox, Hyper-V, Parallels, Xen, Cirrus,
     # S3 Trio) and Silicon Motion's embedded / USB graphics. A BMC VGA counted as an add-in card stopped
@@ -1364,7 +1366,14 @@ class DeviceInstaller():
                             msg = legends['msg_rocm_no_torch_build'].format(version=version_str)
                 else:
                     msg = legends['msg_rocm_runtime_missing']
-                if tag and (reason := self.rocm_verdict_reason(tag)) is not None:
+                if tag and (gfx := self.rocm_override_mismatch()):
+                    # the user's override runs another ISA family's code on every AMD GPU: no ROCm torch is installed,
+                    # gpu_candidates() takes Vulkan for them when it can, else the CPU fallback. Checked at every start,
+                    # unset or changed the override and ROCm is tried
+                    devices['ROCM']['found'] = False
+                    name, tag = None, None
+                    msg = legends['msg_rocm_gfx_family'].format(**gfx)
+                elif tag and (reason := self.rocm_verdict_reason(tag)) is not None:
                     # an earlier probe found torch cannot run on these GPUs under this torch row and override
                     # (rocm_verdict_save): ROCm is no way to run them, gpu_candidates() takes Vulkan for them when it
                     # can, else the CPU fallback. DEVICE_TAG forcing ROCm skips this detection: the probe runs again
@@ -2650,45 +2659,120 @@ class DeviceInstaller():
         # reconcile_gpu_choice(): a cold first import of a GPU torch (antivirus scanning its DLLs, a machine short of RAM
         # paging) took longer than the 30 s it had, so XPU stayed on unprobed (crash report 63aa7dc78e8ff6f6)
         # ROCm: the child sees every GPU, without the GPU 0 pin lib/conf.py sets when the user asked for none
-        # (rocm_visible_pinned), and judges each one. A GPU test that kills it announced its device on stdout first:
-        # the child runs again without that device (E2A_ROCM_SKIP), so one GPU crashing never hides the others
+        # (rocm_visible_pinned), and judges each one. Each GPU test is announced on stdout and its end too: a test that
+        # kills the child, or does not end within gpu_test_timeout (a GPU that hangs instead of faulting), fails that
+        # device, and the child runs again without it (E2A_ROCM_SKIP), so one GPU never hides the others
+        import queue, threading, time
         env = {key: value for key, value in os.environ.items() if not (rocm_visible_pinned and key in ('ROCR_VISIBLE_DEVICES', 'HIP_VISIBLE_DEVICES'))}
-        crashed:dict = {}
+        failed:dict = {}
         while True:
-            if crashed:
-                env['E2A_ROCM_SKIP'] = ','.join(str(index) for index in crashed)
+            if failed:
+                env['E2A_ROCM_SKIP'] = ','.join(str(index) for index in failed)
             try:
-                proc = subprocess.run([python_exec, detect_gpu_script], capture_output=True, text=True, errors='replace', timeout=120, env=env)
-            except subprocess.TimeoutExpired as e:
-                return {'count': 0, 'backend': None, 'error': f'no answer within {e.timeout:g} s'}
+                proc = subprocess.Popen([python_exec, detect_gpu_script], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='replace', env=env)
             except OSError as e:
                 return {'count': 0, 'backend': None, 'error': str(e)}
-            lines = [line.strip() for line in proc.stdout.splitlines() if line.strip().startswith('{')]
-            if proc.returncode != 0:
-                # Windows reports a native crash as an NTSTATUS (0xc0000005 access violation), POSIX as -signal
-                code = f'{proc.returncode:#x}' if proc.returncode > 255 else str(proc.returncode)
-                stderr_tail = proc.stderr.strip().splitlines()[-1:] if proc.stderr.strip() else []
+            stdout_queue = queue.Queue()
+            stderr_parts:list = []
+            def read_stdout()->None:
+                for line in proc.stdout:
+                    stdout_queue.put(line)
+                stdout_queue.put(None)
+            # daemons: a child stuck in the GPU driver keeps its pipes open after the kill
+            threading.Thread(target=read_stdout, daemon=True).start()
+            stderr_reader = threading.Thread(target=lambda: stderr_parts.append(proc.stderr.read()), daemon=True)
+            stderr_reader.start()
+            lines:list = []
+            testing = None
+            deadline = time.monotonic() + 120
+            test_deadline = None
+            hung = timed_out = False
+            while True:
+                limit = min(deadline, test_deadline) if test_deadline else deadline
                 try:
-                    testing = json.loads(lines[-1]) if lines else {}
-                except json.JSONDecodeError:
-                    testing = {}
-                index, count = testing.get('rocm_testing'), testing.get('rocm_count')
-                if not isinstance(index, int) or not isinstance(count, int) or index in crashed:
-                    return {'count': 0, 'backend': None, 'probed': True, 'error': proc.stderr.strip() or f'exit code {code}'}
-                crashed[index] = f"cuda:{index} GPU test killed the probe (exit code {code}{': ' + stderr_tail[0] if stderr_tail else ''})"
-                if len(crashed) < count:
+                    line = stdout_queue.get(timeout=max(0.0, limit - time.monotonic()))
+                except queue.Empty:
+                    hung = test_deadline is not None and time.monotonic() >= test_deadline
+                    timed_out = not hung
+                    break
+                if line is None:
+                    break
+                line = line.strip()
+                if not line.startswith('{'):
                     continue
-                return {'count': 0, 'backend': devices['ROCM']['proc'], 'probed': True, 'rocm_listed': count, 'devices': [], 'error': '; '.join(crashed.values())}
+                lines.append(line)
+                try:
+                    data = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(data, dict) and isinstance(data.get('rocm_testing'), int) and isinstance(data.get('rocm_count'), int):
+                    testing = (data['rocm_testing'], data['rocm_count'])
+                    test_deadline = time.monotonic() + self.gpu_test_timeout
+                elif isinstance(data, dict) and 'rocm_tested' in data:
+                    testing = test_deadline = None
+            if hung or timed_out:
+                proc.kill()
+            try:
+                returncode = proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                # stuck in the GPU driver, the kill only lands once the GPU resets: left behind
+                returncode = None
+            if timed_out:
+                return {'count': 0, 'backend': None, 'error': 'no answer within 120 s'}
+            stderr_reader.join(timeout=5)
+            stderr = ''.join(stderr_parts).strip()
+            if hung or returncode != 0:
+                # Windows reports a native crash as an NTSTATUS (0xc0000005 access violation), POSIX as -signal
+                code = 'none' if returncode is None else f'{returncode:#x}' if returncode > 255 else str(returncode)
+                if testing is None or testing[0] in failed:
+                    return {'count': 0, 'backend': None, 'probed': True, 'error': stderr or f'exit code {code}'}
+                index, count = testing
+                if hung:
+                    failed[index] = f'cuda:{index} GPU test did not end within {self.gpu_test_timeout} s'
+                else:
+                    stderr_tail = stderr.splitlines()[-1] if stderr else ''
+                    failed[index] = f"cuda:{index} GPU test killed the probe (exit code {code}{': ' + stderr_tail if stderr_tail else ''})"
+                if len(failed) < count:
+                    continue
+                return {'count': 0, 'backend': devices['ROCM']['proc'], 'probed': True, 'rocm_listed': count, 'devices': [], 'error': '; '.join(failed.values())}
             # the answer is detect_gpu.py's last line: torch or a driver may print to stdout before it
             try:
                 data = json.loads(lines[-1]) if lines else None
             except json.JSONDecodeError:
                 data = None
-            if not isinstance(data, dict):
-                return {'count': 0, 'backend': None, 'error': f'no answer on stdout: {proc.stdout.strip()[-200:]!r}'}
-            if crashed:
-                data['error'] = '; '.join(list(crashed.values()) + ([data['error']] if data.get('error') else []))
+            if not isinstance(data, dict) or 'count' not in data:
+                return {'count': 0, 'backend': None, 'error': f'no answer on stdout: {lines[-1][-200:] if lines else ""!r}'}
+            if failed:
+                data['error'] = '; '.join(list(failed.values()) + ([data['error']] if data.get('error') else []))
             return {'count': 0, 'backend': None, **data, 'probed': True}
+
+    @cached_property
+    def detect_gpu_module(self):
+        # components/detect_gpu.py as a module, for its ISA families and the kernel's GPU targets: it imports no torch,
+        # and nothing in it starts the ROCm runtime unless called for
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('e2a_detect_gpu', detect_gpu_script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def rocm_override_mismatch(self)->Union[dict, None]:
+        # the details when the user's HSA_OVERRIDE_GFX_VERSION puts every AMD GPU the kernel lists on code of another
+        # ISA family: ROCm runs none of them, decided before its torch is installed (crash report 8a1a1c471e8f6852, a
+        # gfx1013 under 10.3.0, got the ROCm torch downloaded for nothing). One GPU of the override's family and ROCm
+        # stays: the probe judges each GPU (detect_gpu.rocm_usable_devices). None too when nothing can tell
+        override = os.environ.get('HSA_OVERRIDE_GFX_VERSION')
+        if not override:
+            return None
+        try:
+            module = self.detect_gpu_module
+            target = module.override_target(override)
+            natives = sorted(set(module.kfd_gpu_targets().values()))
+        except Exception:
+            return None
+        if not natives or not all(module.crosses_family(native, target) for native in natives):
+            return None
+        return dict(native=', '.join(natives), native_family=', '.join(sorted({module.gfx_family(native) for native in natives})), override=override, target=target, target_family=module.gfx_family(target))
 
     def vulkan_amd_ok(self)->bool:
         # Vulkan can run an AMD GPU here without ROCm (Mesa's RADV): its loader sees one and the +vulkan torch applies,

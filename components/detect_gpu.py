@@ -174,7 +174,13 @@ def rocm_usable_devices(torch, count:int, override:str|None, skip:set[int])->tup
     """The ROCm devices torch runs on, each judged alone: a rejected one never hides the others (an unsupported iGPU
     listed before a working card). Returns (their indices, why each other one is not, the first ISA family mismatch).
     skip: devices whose GPU test killed an earlier probe (DeviceInstaller.probe_gpus() runs it again without them). Each
-    GPU test is announced on stdout first, so a native crash tells which device it was"""
+    GPU test is announced on stdout first and its end after, so a native crash or a GPU that hangs (no end within
+    DeviceInstaller.gpu_test_timeout) tells which device it was"""
+    try:
+        # the runtime's own start-up, before the GPU tests and their time limit
+        torch.cuda.init()
+    except Exception as e:
+        return [], [f'torch.cuda.init() failed: {type(e).__name__}: {e}'], None
     kfd = kfd_gpu_targets() if gfx_family(override_target(override)) else {}
     usable:list[int] = []
     reasons:list[str] = []
@@ -187,7 +193,9 @@ def rocm_usable_devices(torch, count:int, override:str|None, skip:set[int])->tup
             reasons.append(f"{gfx['device']} is a {gfx['native']} ({gfx['native_family']}), {HSA_OVERRIDE_ENV}={gfx['override']} runs {gfx['target']} code ({gfx['target_family']}) on it: another ISA family")
             continue
         print(json.dumps({'rocm_testing': index, 'rocm_count': count}), flush=True)
-        if (reason := rocm_gpu_test(torch, index)):
+        reason = rocm_gpu_test(torch, index)
+        print(json.dumps({'rocm_tested': index}), flush=True)
+        if reason:
             reasons.append(reason)
             continue
         usable.append(index)
