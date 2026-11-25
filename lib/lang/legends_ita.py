@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} clona solo un file vocale che parla inglese o cinese e nessun discorso è stato ascoltato in {voice}. Seleziona un altro file vocale.',
     'gr_ui_language': 'Lingua dell\'interfaccia',
     'gr_ui_language_auto': 'Auto (browser)',
+    'gr_theme': 'Tema',
     'gr_tooltips': 'Suggerimenti',
     'tooltip_gr_voice_play': 'Riproduci la voce selezionata',
     'tooltip_gr_voice_del_btn': 'Elimina la voce selezionata',

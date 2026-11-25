@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} клонирует только голосовой файл, говорящий по-английски или по-китайски, и в {voice} не было слышно речи. Выберите другой голосовой файл.',
     'gr_ui_language': 'Язык интерфейса',
     'gr_ui_language_auto': 'Авто (браузер)',
+    'gr_theme': 'Тема',
     'gr_tooltips': 'Подсказки',
     'tooltip_gr_voice_play': 'Прослушать выбранный голос',
     'tooltip_gr_voice_del_btn': 'Удалить выбранный голос',

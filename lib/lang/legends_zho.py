@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} 仅克隆讲英语或中文的语音文件，并且没有听到语音 {voice}请选择另外一个文件。',
     'gr_ui_language': '界面语言',
     'gr_ui_language_auto': '自动（浏览器）',
+    'gr_theme': '主题',
     'gr_tooltips': '工具提示',
     'tooltip_gr_voice_play': '播放所选语音',
     'tooltip_gr_voice_del_btn': '删除所选语音',

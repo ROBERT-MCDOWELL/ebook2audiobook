@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} ఇంగ్లీష్ లేదా చైనీస్ మాట్లాడే వాయిస్ ఫైల్ ‌ ను మాత్రమే క్లోన్ చేస్తుంది మరియు {voice} లో ప్రసంగం వినబడలేదు. దయచేసి మరొక వాయిస్ ఫైల్ ‌ ను ఎంచుకోండి.',
     'gr_ui_language': 'ఇంటర్‌ఫేస్ భాష',
     'gr_ui_language_auto': 'ఆటోమేటిక్ (బ్రౌజర్)',
+    'gr_theme': '@ title: column',
     'gr_tooltips': 'టూల్‌టిప్‌లు',
     'tooltip_gr_voice_play': 'ఎంచుకున్న స్వరాన్ని ప్లే చేయండి',
     'tooltip_gr_voice_del_btn': 'ఎంచుకున్న స్వరాన్ని తొలగించండి',

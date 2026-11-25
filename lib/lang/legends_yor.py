@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} kàn ń ṣe àbùdá fáìlì ohùn kan tí ó ń sọ èdè Gẹ̀ẹ́sì tàbí èdè Ṣáínà, kò sì sí àsọyé kankan tí a gbọ́ ní {voice}. Jọ̀wọ́ yan fáìlì ohùn mìíràn.',
     'gr_ui_language': 'Èdè ojú-iṣẹ́',
     'gr_ui_language_auto': 'Aládàáṣe (aṣàwákiri)',
+    'gr_theme': 'Àkòrí',
     'gr_tooltips': 'Àlàyé kúkúrú',
     'tooltip_gr_voice_play': 'Ẹ gbọ́ ohùn tí ẹ yàn',
     'tooltip_gr_voice_del_btn': 'Pa ohùn tí ẹ yàn rẹ́',

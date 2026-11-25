@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} 영어 또는 중국어로 말하는 음성 파일만 복제하고 연설은 들리지 않았습니다. {voice}다른 파일을 선택하십시오.',
     'gr_ui_language': '인터페이스 언어',
     'gr_ui_language_auto': '자동(브라우저)',
+    'gr_theme': '테마',
     'gr_tooltips': '도움말 풍선',
     'tooltip_gr_voice_play': '선택한 음성 재생',
     'tooltip_gr_voice_del_btn': '선택한 음성 삭제',

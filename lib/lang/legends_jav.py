@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} mung klon file swara nganggo basa Inggris utawa Cina, lan ora ana pidato sing dirungokake ing {voice}. Mangga pilih file swara liyane.',
     'gr_ui_language': 'Basa antarmuka',
     'gr_ui_language_auto': 'Otomatis (peramban)',
+    'gr_theme': 'Tema',
     'gr_tooltips': 'Pitulung',
     'tooltip_gr_voice_play': 'Puter swara sing dipilih',
     'tooltip_gr_voice_del_btn': 'Busak swara sing dipilih',

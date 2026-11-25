@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} يستنسخ فقط ملفًا صوتيًا يتحدث الإنجليزية أو الصينية، ولم يتم سماع أي خطاب في {voice}. يرجى تحديد ملف صوتي آخر.',
     'gr_ui_language': 'لغة الواجهة',
     'gr_ui_language_auto': 'تلقائي (المتصفح)',
+    'gr_theme': 'الموضوع',
     'gr_tooltips': 'تلميحات',
     'tooltip_gr_voice_play': 'تشغيل الصوت المحدد',
     'tooltip_gr_voice_del_btn': 'حذف الصوت المحدد',

@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} hanya mengkloning file suara yang berbicara bahasa Inggris atau Cina, dan tidak ada pidato yang terdengar dalam {voice}. Silakan pilih file suara lain.',
     'gr_ui_language': 'Bahasa antarmuka',
     'gr_ui_language_auto': 'Otomatis (peramban)',
+    'gr_theme': 'Tema',
     'gr_tooltips': 'Keterangan alat',
     'tooltip_gr_voice_play': 'Putar suara yang dipilih',
     'tooltip_gr_voice_del_btn': 'Hapus suara yang dipilih',

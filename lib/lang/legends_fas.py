@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '‎{engine} فقط یک فایل صوتی به زبان انگلیسی یا چینی را شبیه‌سازی می‌کند و هیچ گفتاری در ‎{voice} شنیده نشد. لطفاً فایل صوتی دیگری را انتخاب کنید.',
     'gr_ui_language': 'زبان رابط کاربری',
     'gr_ui_language_auto': 'خودکار (مرورگر)',
+    'gr_theme': 'پوسته',
     'gr_tooltips': 'راهنمای ابزار',
     'tooltip_gr_voice_play': 'پخش صدای انتخاب‌شده',
     'tooltip_gr_voice_del_btn': 'حذف صدای انتخاب‌شده',

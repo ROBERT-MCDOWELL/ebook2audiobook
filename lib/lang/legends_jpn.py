@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} 英語または中国語を話す音声ファイルのみをクローンし、音声は聞こえませんでした {voice}別のファイルを選択してください。',
     'gr_ui_language': '表示言語',
     'gr_ui_language_auto': '自動（ブラウザー）',
+    'gr_theme': 'テーマ',
     'gr_tooltips': 'ツールチップ',
     'tooltip_gr_voice_play': '選択した音声を再生',
     'tooltip_gr_voice_del_btn': '選択した音声を削除',

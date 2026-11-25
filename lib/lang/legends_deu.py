@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} klont nur eine Sprachdatei, die Englisch oder Chinesisch spricht, und in {voice} wurde keine Sprache gehört. Bitte wählen Sie eine andere Sprachdatei.',
     'gr_ui_language': 'Sprache der Oberfläche',
     'gr_ui_language_auto': 'Auto (Browser)',
+    'gr_theme': 'Theme',
     'gr_tooltips': 'Tooltips',
     'tooltip_gr_voice_play': 'Ausgewählte Stimme abspielen',
     'tooltip_gr_voice_del_btn': 'Ausgewählte Stimme löschen',

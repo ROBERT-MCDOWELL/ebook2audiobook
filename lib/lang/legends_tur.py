@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} sadece İngilizce veya Çince konuşan bir ses dosyasını klonlar ve {voice} \'de hiçbir konuşma duyulmamıştır. Lütfen başka bir ses dosyası seçin.',
     'gr_ui_language': 'Arayüz dili',
     'gr_ui_language_auto': 'Otomatik (tarayıcı)',
+    'gr_theme': 'Tema',
     'gr_tooltips': 'İpuçları',
     'tooltip_gr_voice_play': 'Seçilen sesi oynat',
     'tooltip_gr_voice_del_btn': 'Seçilen sesi sil',

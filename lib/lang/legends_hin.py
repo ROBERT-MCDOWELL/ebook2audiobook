@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} केवल अंग्रेजी या चीनी बोलने वाली एक वॉयस फ़ाइल क्लोन करता है, और {voice} में कोई भाषण नहीं सुना गया था। कृपया कोई दूसरी वॉयस फ़ाइल चुनें।',
     'gr_ui_language': 'इंटरफ़ेस भाषा',
     'gr_ui_language_auto': 'स्वचालित (ब्राउज़र)',
+    'gr_theme': 'इंडेफिनिट',
     'gr_tooltips': 'टूलटिप',
     'tooltip_gr_voice_play': 'चुनी गई आवाज़ चलाएँ',
     'tooltip_gr_voice_del_btn': 'चुनी गई आवाज़ हटाएँ',

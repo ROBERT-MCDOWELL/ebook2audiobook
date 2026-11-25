@@ -642,6 +642,7 @@ legends = {
     'error_chattts_voice_no_speech': '{engine} csak egy hangfájlt klónoz, amely angolul vagy kínaiul beszél, és az {voice}-ben nem hallható beszéd. Válasszon másik hangfájlt.',
     'gr_ui_language': 'Felület nyelve',
     'gr_ui_language_auto': 'Automatikus (böngésző)',
+    'gr_theme': 'Téma',
     'gr_tooltips': 'Súgók',
     'tooltip_gr_voice_play': 'A kiválasztott hang lejátszása',
     'tooltip_gr_voice_del_btn': 'A kiválasztott hang törlése',
