@@ -362,6 +362,7 @@ legends = {
     'error_wrong_venv': '잘못된 실행! ebook2audiobook은 전용 가상 환경에서 실행해야 합니다!',
     'error_session_manager_denied': '시스템에서 ebook2audiobook 프로세스 간 연결을 거부했습니다.\n{error}\n보안 프로그램(바이러스 백신, 샌드박스, 격리 또는 보호 실행)이 {python}을(를) 제한하고 있습니다.\n해당 프로그램에서 ebook2audiobook 폴더 전체를 허용하거나 샌드박스 외부에서 ebook2audiobook을 실행한 다음 다시 시작하세요.',
     'error_app_control_blocked': 'Windows가 ebook2audiobook에 필요한 파일을 차단했습니다.\n{error}\n스마트 앱 제어 또는 관리자가 설정한 앱 제어 정책은 Python 및 ebook2audiobook 라이브러리 설치와 같이 서명되지 않은 프로그램을 거부합니다.\nWindows 보안 > 앱 및 브라우저 제어 > 스마트 앱 제어 설정에서 스마트 앱 제어를 끕니다(Windows는 재설정 시에만 다시 켭니다).\n또는 관리자에게 ebook2audiobook 폴더와 uv의 Python 폴더(%APPDATA%\\uv)를 허용하도록 요청하세요.',
+    'error_file_in_use': '이 변환의 파일이 다른 프로그램에서 열려 있어 삭제할 수 없습니다.\n{file}\n해당 프로그램(오디오 플레이어, 탐색기 미리 보기 창...)을 닫거나 바이러스 백신 검사가 끝날 때까지 기다린 다음 변환을 다시 시작하세요.',
     'error_dirs_not_writable': '권한 오류: ebook2audiobook이(가) 다음 위치에 쓸 수 없습니다.\n{dirs}\n사용자가 이 폴더에 쓸 수 있도록 설정한 다음 다시 시작하세요.',
     'error_dirs_deleted_docker': 'ebook2audiobook이 실행되는 동안 호스트에서 마운트된 다음 폴더가 삭제되었습니다.\n{dirs}\n컨테이너가 더 이상 해당 파일에 쓸 수 없습니다. 필요한 경우 호스트에서 다시 생성한 다음 컨테이너를 다시 시작하세요.',
     'error_dirs_not_writable_docker': '권한 오류: ebook2audiobook이 호스트에서 마운트된 다음 폴더에 쓸 수 없습니다.\n{dirs}\nSELinux 호스트(Fedora, RHEL...)에서 --security-opt label=disable로 컨테이너를 실행하거나 각 -v 마운트에 :z를 추가합니다.\n그렇지 않으면 컨테이너 사용자가 호스트 폴더에 쓸 수 있도록 설정한 다음 다시 시작하세요.',

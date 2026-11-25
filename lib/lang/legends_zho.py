@@ -362,6 +362,7 @@ legends = {
     'error_wrong_venv': '启动方式错误！ebook2audiobook 必须在其专属的虚拟环境中运行！',
     'error_session_manager_denied': '系统拒绝了 ebook2audiobook 进程之间的连接：\n{error}\n安全程序（防病毒软件、沙盒、隔离或受保护的运行）正在限制{python}。\n在该程序中允许它，或允许整个 ebook2audiobook 文件夹，然后在任何沙盒之外运行 ebook2audiobook，然后重新启动它。',
     'error_app_control_blocked': 'Windows 阻止了 ebook2audiobook 需要的一个文件：\n{error}\n智能应用控制或管理员设置的应用控制策略会拒绝未签名的程序，Python 和 ebook2audiobook 安装的库就是这种情况。\n在“Windows 安全中心”>“应用和浏览器控制”>“智能应用控制设置”中关闭智能应用控制（Windows 仅在重置时才会重新启用该功能），\n或要求您的管理员允许访问 ebook2audiobook 文件夹和 uv 的 Python 文件夹（%APPDATA%\\uv）。',
+    'error_file_in_use': '此转换的文件在另一个程序中打开，无法删除：\n{file}\n关闭该程序（音频播放器、资源管理器预览窗格……）或等待防病毒扫描结束，然后恢复转换。',
     'error_dirs_not_writable': '权限错误：ebook2audiobook 无法写入：\n{dirs}\n将这些文件夹设置为对您的用户可写，然后重新启动。',
     'error_dirs_deleted_docker': '在 ebook2audiobook 运行时，从主机挂载的以下文件夹已在那里被删除：\n{dirs}\n容器无法再写入它们。如果需要，请在主机上重新创建它们，然后重启容器。',
     'error_dirs_not_writable_docker': '权限错误：ebook2audiobook 无法写入从主机挂载的以下文件夹：\n{dirs}\n在SELinux主机（Fedora、RHEL……）上，使用--security-opt label=disable运行容器，或在每个-v挂载中添加:z。\n否则，请将主机文件夹设置为可供容器用户写入，然后重新启动。',
