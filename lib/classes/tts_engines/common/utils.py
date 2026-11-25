@@ -1195,7 +1195,11 @@ class TTSUtils:
                     disk_full = False
                 if disk_full:
                     raise OSError(errno.ENOSPC, legends['error_disk_full_audio'].format(dir=os.path.dirname(path))) from e
-                raise RuntimeError(f'audio_save({path}): {e}') from e
+                # soundfile's short-write guard raises a bare AssertionError('') (the assert has no message), so
+                # f'... {e}' alone reaches the bug tracker as an empty 'audio_save(...): '. Name the exception type
+                # and add a hint when it carries no message of its own; str(e) is kept verbatim when it does
+                detail = str(e).strip() or f'{type(e).__name__}: libsndfile wrote fewer bytes than expected (disk full, quota, or a truncated/temp filesystem)'
+                raise RuntimeError(f'audio_save({path}): {detail}') from e
             os.replace(tmp_path, path)
         except OSError as e:
             # the rename failing is still the save failing: keep the temp file cleanup and the same error classes

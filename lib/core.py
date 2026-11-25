@@ -4856,7 +4856,10 @@ def get_compatible_tts_engines(language:str)->list[str]:
 
 def get_compatible_devices(tts_engine:str)->list[tuple]:
     # the devices the engine runs on that this machine has, in the devices order, as (label, proc) dropdown choices
-    engine_devices = default_engine_settings[tts_engine]['devices']
+    # .get(): a session may carry an engine name no longer in default_engine_settings (a renamed or removed engine
+    # restored from a persisted Gradio state after an update): without "devices" here it would raise KeyError and
+    # crash _update_gr_device_list() instead of offering an empty device list
+    engine_devices = default_engine_settings.get(tts_engine, {}).get('devices', [])
     return [
         (name, device['proc'])
         for name, device in devices.items()
@@ -5172,7 +5175,7 @@ def convert_ebook(args:dict)->tuple:
                     # CPU (or another GPU) behind the user's back. The engine's own devices first (default_engine_settings
                     # "devices", the same list gradio's device dropdown offers), then the machine
                     device_error = None
-                    engine_devices = default_engine_settings[session['tts_engine']]['devices']
+                    engine_devices = default_engine_settings.get(session['tts_engine'], {}).get('devices', [])
                     if session['device'] not in engine_devices:
                         device_error = legends['error_device_engine'].format(engine=session['tts_engine'], device=session['device'].upper(), devices=', '.join(d.upper() for d in engine_devices))
                     # a GPU fault earlier in this process (illegal memory access...) lost its GPU context: nothing loads
