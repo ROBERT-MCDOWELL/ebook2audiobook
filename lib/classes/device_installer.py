@@ -1364,6 +1364,13 @@ class DeviceInstaller():
                             msg = legends['msg_rocm_no_torch_build'].format(version=version_str)
                 else:
                     msg = legends['msg_rocm_runtime_missing']
+                if tag and (reason := self.rocm_verdict_reason(tag)) is not None:
+                    # an earlier probe found torch cannot run on these GPUs under this torch row and override
+                    # (rocm_verdict_save): ROCm is no way to run them, gpu_candidates() takes Vulkan for them when it
+                    # can, else the CPU fallback. DEVICE_TAG forcing ROCm skips this detection: the probe runs again
+                    devices['ROCM']['found'] = False
+                    name, tag = None, None
+                    msg = legends['msg_rocm_verdict_saved'].format(reason=reason or '-', file=rocm_verdict_file)
                 gpu_results[devices['ROCM']['proc']] = (name, tag, msg)
             # ============================================================
             # CUDA
@@ -2642,25 +2649,108 @@ class DeviceInstaller():
         # could not run (missing python, no answer in time, no answer on stdout) says nothing about the GPU. 120 s like
         # reconcile_gpu_choice(): a cold first import of a GPU torch (antivirus scanning its DLLs, a machine short of RAM
         # paging) took longer than the 30 s it had, so XPU stayed on unprobed (crash report 63aa7dc78e8ff6f6)
+        # ROCm: the child sees every GPU, without the GPU 0 pin lib/conf.py sets when the user asked for none
+        # (rocm_visible_pinned), and judges each one. A GPU test that kills it announced its device on stdout first:
+        # the child runs again without that device (E2A_ROCM_SKIP), so one GPU crashing never hides the others
+        env = {key: value for key, value in os.environ.items() if not (rocm_visible_pinned and key in ('ROCR_VISIBLE_DEVICES', 'HIP_VISIBLE_DEVICES'))}
+        crashed:dict = {}
+        while True:
+            if crashed:
+                env['E2A_ROCM_SKIP'] = ','.join(str(index) for index in crashed)
+            try:
+                proc = subprocess.run([python_exec, detect_gpu_script], capture_output=True, text=True, errors='replace', timeout=120, env=env)
+            except subprocess.TimeoutExpired as e:
+                return {'count': 0, 'backend': None, 'error': f'no answer within {e.timeout:g} s'}
+            except OSError as e:
+                return {'count': 0, 'backend': None, 'error': str(e)}
+            lines = [line.strip() for line in proc.stdout.splitlines() if line.strip().startswith('{')]
+            if proc.returncode != 0:
+                # Windows reports a native crash as an NTSTATUS (0xc0000005 access violation), POSIX as -signal
+                code = f'{proc.returncode:#x}' if proc.returncode > 255 else str(proc.returncode)
+                stderr_tail = proc.stderr.strip().splitlines()[-1:] if proc.stderr.strip() else []
+                try:
+                    testing = json.loads(lines[-1]) if lines else {}
+                except json.JSONDecodeError:
+                    testing = {}
+                index, count = testing.get('rocm_testing'), testing.get('rocm_count')
+                if not isinstance(index, int) or not isinstance(count, int) or index in crashed:
+                    return {'count': 0, 'backend': None, 'probed': True, 'error': proc.stderr.strip() or f'exit code {code}'}
+                crashed[index] = f"cuda:{index} GPU test killed the probe (exit code {code}{': ' + stderr_tail[0] if stderr_tail else ''})"
+                if len(crashed) < count:
+                    continue
+                return {'count': 0, 'backend': devices['ROCM']['proc'], 'probed': True, 'rocm_listed': count, 'devices': [], 'error': '; '.join(crashed.values())}
+            # the answer is detect_gpu.py's last line: torch or a driver may print to stdout before it
+            try:
+                data = json.loads(lines[-1]) if lines else None
+            except json.JSONDecodeError:
+                data = None
+            if not isinstance(data, dict):
+                return {'count': 0, 'backend': None, 'error': f'no answer on stdout: {proc.stdout.strip()[-200:]!r}'}
+            if crashed:
+                data['error'] = '; '.join(list(crashed.values()) + ([data['error']] if data.get('error') else []))
+            return {'count': 0, 'backend': None, **data, 'probed': True}
+
+    def vulkan_amd_ok(self)->bool:
+        # Vulkan can run an AMD GPU here without ROCm (Mesa's RADV): its loader sees one and the +vulkan torch applies,
+        # the conditions gpu_candidates() takes Vulkan for a GPU without a vendor runtime under
+        return any(self.gpu_pci_vendors.get(vendor_id) == devices['ROCM']['proc'] for vendor_id, _, _ in self.vulkan_devices()) and self.vulkan_torch_ok
+
+    def amd_gpu_ids(self)->list:
+        # the AMD GPUs a ROCm verdict holds for: PCI ids from sysfs ('1002:13fe'), stable across driver and Mesa updates.
+        # Windows: their names
+        sysfs = '/sys/bus/pci/devices'
+        if self.system == systems['WINDOWS'] or not os.path.isdir(sysfs):
+            return sorted(model for vendor_id, model, _ in self.system_gpus(self.vulkan_devices()) if self.gpu_pci_vendors.get(vendor_id) == devices['ROCM']['proc'])
+        ids = []
+        for dev in os.listdir(sysfs):
+            try:
+                with open(os.path.join(sysfs, dev, 'vendor')) as f:
+                    vendor = f.read().strip().lower()
+                with open(os.path.join(sysfs, dev, 'class')) as f:
+                    pci_class = f.read().strip().lower()
+                with open(os.path.join(sysfs, dev, 'device')) as f:
+                    device = f.read().strip().lower()
+            except OSError:
+                continue
+            # display controllers only (VGA 0x0300, 3D 0x0302, other 0x0380): AMD's audio and bridges share the vendor
+            if vendor == '0x1002' and pci_class.startswith('0x03'):
+                ids.append(f'1002:{device[2:]}')
+        return sorted(ids)
+
+    def rocm_verdict_key(self, tag:str)->dict:
+        # what a ROCm verdict holds for: the ROCm torch row, the AMD GPUs, the user's HSA_OVERRIDE_GFX_VERSION (this
+        # process exports the probe's DB override only after a GPU answered). Any change and ROCm is probed again
+        return {'tag': tag, 'gpus': self.amd_gpu_ids(), 'override': os.environ.get('HSA_OVERRIDE_GFX_VERSION') or ''}
+
+    def rocm_verdict_save(self, tag:str, reason:str)->None:
+        from datetime import datetime, timezone
         try:
-            proc = subprocess.run([python_exec, detect_gpu_script], capture_output=True, text=True, errors='replace', timeout=120)
-        except subprocess.TimeoutExpired as e:
-            return {'count': 0, 'backend': None, 'error': f'no answer within {e.timeout:g} s'}
+            with open(rocm_verdict_file, 'w', encoding='utf-8') as f:
+                json.dump({'key': self.rocm_verdict_key(tag), 'reason': reason, 'date': datetime.now(timezone.utc).isoformat(timespec='seconds')}, f)
         except OSError as e:
-            return {'count': 0, 'backend': None, 'error': str(e)}
-        if proc.returncode != 0:
-            # Windows reports a native crash as an NTSTATUS (0xc0000005 access violation), POSIX as -signal
-            code = f'{proc.returncode:#x}' if proc.returncode > 255 else str(proc.returncode)
-            return {'count': 0, 'backend': None, 'probed': True, 'error': proc.stderr.strip() or f'exit code {code}'}
-        # the answer is detect_gpu.py's last line: torch or a driver may print to stdout before it
-        answer = next((line.strip() for line in reversed(proc.stdout.splitlines()) if line.strip().startswith('{')), None)
+            error = legends['msg_device_info_write_failed'].format(e=e)
+            print(error, file=sys.stderr)
+
+    def rocm_verdict_reason(self, tag:str)->Union[str, None]:
+        # why ROCm failed on these GPUs under this torch row and override, None without such a verdict (none saved, or
+        # saved for another torch row, other GPUs, another override)
         try:
-            data = json.loads(answer) if answer else None
-        except json.JSONDecodeError:
-            data = None
-        if not isinstance(data, dict):
-            return {'count': 0, 'backend': None, 'error': f'no answer on stdout: {proc.stdout.strip()[-200:]!r}'}
-        return {'count': 0, 'backend': None, **data, 'probed': True}
+            with open(rocm_verdict_file, 'r', encoding='utf-8') as f:
+                verdict = json.load(f)
+        except (OSError, ValueError):
+            return None
+        if not isinstance(verdict, dict) or verdict.get('key') != self.rocm_verdict_key(tag):
+            return None
+        return str(verdict.get('reason') or '')
+
+    def rocm_verdict_clear(self)->None:
+        try:
+            os.remove(rocm_verdict_file)
+        except FileNotFoundError:
+            pass
+        except OSError as e:
+            error = legends['msg_device_info_write_failed'].format(e=e)
+            print(error, file=sys.stderr)
 
     def torchcodec_import_ok(self)->bool:
         # torchcodec's own import in python_exec (the interpreter _uv_pip installs into), a marker on stdout once it is
@@ -3319,10 +3409,10 @@ class DeviceInstaller():
                         print(msg)
                     # the same for ROCm: check_hardware() set devices['ROCM']['found'] from the system HIP runtime
                     # counting an AMD GPU, which HSA_OVERRIDE_GFX_VERSION makes it do for a GPU of a target torch has no
-                    # code for. detect_gpu.py ran torch on it (rocm_usable_count): a device that fails is not counted,
-                    # a native fault kills the child. Kept on, the first model moved to it killed e2a mid-conversion
-                    # (crash report 8a1a1c471e8f6852). With E2A_ROCM_UNUSABLE set, components/sitecustomize.py makes
-                    # torch.cuda report no device, so third-party code that picks 'cuda' on its own stays on the CPU too
+                    # code for. detect_gpu.py judged each GPU (rocm_usable_devices): the ISA family, then a GPU test.
+                    # Kept on, the first model moved to it killed e2a mid-conversion (crash report 8a1a1c471e8f6852).
+                    # With E2A_ROCM_UNUSABLE set, components/sitecustomize.py makes torch.cuda report no device, so
+                    # third-party code that picks 'cuda' on its own stays on the CPU too
                     if device_info['name'] == devices['ROCM']['proc'] and gpu_info['count'] == 0:
                         devices['ROCM']['found'] = False
                         os.environ['E2A_ROCM_UNUSABLE'] = '1'
@@ -3339,20 +3429,43 @@ class DeviceInstaller():
                         else:
                             msg = legends['msg_rocm_unusable']
                         print(msg)
-                        # Vulkan runs an AMD GPU without ROCm (Mesa's RADV): when its loader sees one and the +vulkan torch
-                        # applies here, say how to switch to it. Only the engines listing Vulkan in their devices use
-                        # the GPU there, the list follows default_engine_settings
-                        if any(self.gpu_pci_vendors.get(vendor_id) == devices['ROCM']['proc'] for vendor_id, _, _ in self.vulkan_devices()) and self.vulkan_torch_ok:
-                            from lib.conf_models import default_engine_settings
-                            engines = sorted(engine for engine, settings in default_engine_settings.items() if devices['VULKAN']['proc'] in settings.get('devices', []))
-                            msg = legends['msg_rocm_try_vulkan'].format(engines=', '.join(engines))
+                        # torch listed the GPUs and every one failed: a verdict about them, saved so the next starts skip
+                        # ROCm (check_hardware) and take Vulkan, or the CPU. Not when torch saw no GPU (the user out
+                        # of the render group, a ROCm runtime that does not start) nor gave no answer: probed again
+                        if gpu_info.get('probed') and gpu_info.get('rocm_listed'):
+                            self.rocm_verdict_save(device_info['tag'], gpu_info.get('error') or '')
+                            if self.vulkan_amd_ok():
+                                # only the engines listing Vulkan in their devices run on the GPU there, the list
+                                # follows default_engine_settings
+                                from lib.conf_models import default_engine_settings
+                                engines = sorted(engine for engine, settings in default_engine_settings.items() if devices['VULKAN']['proc'] in settings.get('devices', []))
+                                msg = legends['msg_rocm_next_vulkan'].format(engines=', '.join(engines), file=rocm_verdict_file)
+                            else:
+                                msg = legends['msg_rocm_next_cpu'].format(file=rocm_verdict_file)
                             print(msg)
+                        elif gpu_info.get('probed'):
+                            msg = legends['msg_rocm_probed_again']
+                            print(msg)
+                    elif device_info['name'] == devices['ROCM']['proc'] and gpu_info['count'] > 0:
+                        # ROCm runs here (DEVICE_TAG forcing it after a failure, a fixed driver): no verdict stands
+                        self.rocm_verdict_clear()
                     if gpu_info['count'] > 0:
                         idx = ','.join(str(i) for i in range(gpu_info['count']))
                         if gpu_info['backend'] == 'cuda':
                             os.environ['CUDA_VISIBLE_DEVICES'] = idx
                         elif gpu_info['backend'] == 'rocm':
-                            os.environ['HIP_VISIBLE_DEVICES'] = idx
+                            # the devices torch runs on, in the probe's numbering: every GPU when lib/conf.py pinned GPU
+                            # 0 itself (rocm_visible_pinned), e2a then runs on the first working one alone, the pin
+                            # moved there. Else within the user's own list, kept to its working entries (HIP reads
+                            # CUDA_VISIBLE_DEVICES when HIP_VISIBLE_DEVICES is unset)
+                            usable = gpu_info.get('devices') or list(range(gpu_info['count']))
+                            if rocm_visible_pinned:
+                                os.environ.pop('ROCR_VISIBLE_DEVICES', None)
+                                os.environ['HIP_VISIBLE_DEVICES'] = str(usable[0])
+                            else:
+                                visible = os.environ.get('HIP_VISIBLE_DEVICES') or os.environ.get('CUDA_VISIBLE_DEVICES')
+                                entries = [entry.strip() for entry in visible.split(',')] if visible else []
+                                os.environ['HIP_VISIBLE_DEVICES'] = ','.join(entries[i] if i < len(entries) else str(i) for i in usable)
                             # detect_gpu.py resolved it in its own child process against the installed torch's GPU
                             # targets, count > 0 means torch found the GPU under it. The only override this process gets
                             if gpu_info.get('hsa_override') and not os.environ.get('HSA_OVERRIDE_GFX_VERSION'):
@@ -3369,7 +3482,7 @@ class DeviceInstaller():
                         if device_info['name'] == devices['XPU']['proc']:
                             probe += f", E2A_XPU_UNUSABLE={os.environ.get('E2A_XPU_UNUSABLE', '0')}"
                         elif device_info['name'] == devices['ROCM']['proc']:
-                            probe += f", HSA_OVERRIDE_GFX_VERSION={os.environ.get('HSA_OVERRIDE_GFX_VERSION') or 'unset'}, E2A_ROCM_UNUSABLE={os.environ.get('E2A_ROCM_UNUSABLE', '0')}"
+                            probe += f", devices {gpu_info.get('devices')}, HIP_VISIBLE_DEVICES={os.environ.get('HIP_VISIBLE_DEVICES') or 'unset'}, HSA_OVERRIDE_GFX_VERSION={os.environ.get('HSA_OVERRIDE_GFX_VERSION') or 'unset'}, E2A_ROCM_UNUSABLE={os.environ.get('E2A_ROCM_UNUSABLE', '0')}"
                         bug_reporter.fact('gpu_probe', probe)
                     return 0
                 else:

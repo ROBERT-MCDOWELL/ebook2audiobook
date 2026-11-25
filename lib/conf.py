@@ -81,6 +81,9 @@ vulkan_loader = os.path.join(os.environ.get('SystemRoot', r'C:\Windows'), 'Syste
 device_info_json = '.device_info.json'
 # the GPU the user picked when several can run e2a (DeviceInstaller.choose_gpu)
 gpu_choice_file = '.gpu_choice'
+# the ROCm probe's verdict that torch cannot run on this AMD GPU (DeviceInstaller.rocm_verdict_save): the next starts
+# skip ROCm and take Vulkan or the CPU, until the torch build, the GPUs or HSA_OVERRIDE_GFX_VERSION change
+rocm_verdict_file = '.rocm_unusable'
 device_info_dict = {"gpu_count": 0, "gpu_backend": None}
 
 default_device = devices['CPU']['proc']
@@ -287,7 +290,10 @@ os.environ['OMP_NUM_THREADS'] = '1'
 os.environ['SYCL_IN_MEM_CACHE_EVICTION_THRESHOLD'] = str(512 * 1024 * 1024)
 if DEVICE_SYSTEM == systems['WINDOWS']:
     os.environ['ESPEAK_DATA_PATH'] = os.path.expandvars(r"%USERPROFILE%\scoop\apps\espeak-ng\current\espeak-ng-data")
-if not any(_v in os.environ for _v in ('ROCR_VISIBLE_DEVICES', 'HIP_VISIBLE_DEVICES', 'CUDA_VISIBLE_DEVICES')):
+# no GPU visibility asked: e2a runs on GPU 0 alone. e2a's own pin, not the user's: install_device_packages() lets the
+# ROCm probe see every GPU and moves it to the first one torch runs on
+rocm_visible_pinned = not any(_v in os.environ for _v in ('ROCR_VISIBLE_DEVICES', 'HIP_VISIBLE_DEVICES', 'CUDA_VISIBLE_DEVICES'))
+if rocm_visible_pinned:
     os.environ['ROCR_VISIBLE_DEVICES'] = '0'
     os.environ['HIP_VISIBLE_DEVICES'] = '0'
 
