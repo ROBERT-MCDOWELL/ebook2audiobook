@@ -151,7 +151,7 @@ def build_interface(args:dict)->gr.Blocks:
                             with gr.Column(elem_id='gr_col_1', elem_classes=['gr-col'], scale=3):
                                 with gr.Group(elem_id='gr_group_ebook_src', elem_classes=['gr-group']):
                                     gr_import_markdown = gr.Markdown(elem_id='gr_import_markdown', elem_classes=['gr-markdown'], value=legends['gr_import_markdown'])
-                                    gr_ebook_src = gr.File(show_label=False, label='-', elem_id='gr_ebook_src', visible=True, file_types=ebook_formats, file_count=ebook_modes['SINGLE'], allow_reordering=True, height=100)
+                                    gr_ebook_src = gr.File(show_label=False, label='-', elem_id='gr_ebook_src', visible=True, file_types=ebook_formats, file_count=ebook_modes['SINGLE'], allow_reordering=True, height=56)
                                     gr_voice_highlight_css = gr.HTML(value='', elem_classes=['gr-voice-highlight-css'])
                                     gr_ebook_textarea = gr.Textbox(show_label=True, label=legends['gr_ebook_textarea'], elem_id='gr_ebook_textarea', visible=False, lines=8, max_length=max_ebook_textarea_length)
                                     with gr.Row(elem_id='gr_row_ebook_mode') as gr_row_ebook_mode:
@@ -167,7 +167,7 @@ def build_interface(args:dict)->gr.Blocks:
                                 gr_group_voice_file = gr.Group(elem_id='gr_group_voice_file', elem_classes=['gr-group'], visible=visible_gr_group_voice_file)
                                 with gr_group_voice_file:
                                     gr_voice_markdown = gr.Markdown(elem_id='gr_voice_markdown', elem_classes=['gr-markdown'], value=legends['gr_voice_markdown'])
-                                    gr_voice_file = gr.File(show_label=False, label=legends['gr_voice_file'], elem_id='gr_voice_file', file_types=voice_formats, value=None, height=100)
+                                    gr_voice_file = gr.File(show_label=False, label=legends['gr_voice_file'], elem_id='gr_voice_file', file_types=voice_formats, value=None, height=56)
                                     with gr.Row(elem_id='gr_row_voice_player') as gr_row_voice_player:
                                         gr_voice_player_hidden = gr.Audio(elem_id='gr_voice_player_hidden', type='filepath', interactive=False, waveform_options=gr.WaveformOptions(show_recording_waveform=False), container=False, visible=True, show_label=False, scale=0, min_width=60)
                                         gr_voice_play = gr.Button('▶', elem_id='gr_voice_play', elem_classes=['small-btn-green'], variant='secondary', interactive=True, visible=False, scale=0, min_width=60)
@@ -185,7 +185,7 @@ def build_interface(args:dict)->gr.Blocks:
                                     gr_models_markdown = gr.Markdown(elem_id='gr_models_markdown', elem_classes=['gr-markdown'], value=legends['gr_models_markdown'])
                                     gr_group_custom_model = gr.Group(visible=False)
                                     with gr_group_custom_model:
-                                        gr_custom_model_file = gr.File(show_label=True, label=legends['gr_custom_model_file'], elem_id='gr_custom_model_file', value=None, file_types=['.zip'], height=100)
+                                        gr_custom_model_file = gr.File(show_label=True, label=legends['gr_custom_model_file'], elem_id='gr_custom_model_file', value=None, file_types=['.zip'], height=56)
                                     gr_row_custom_model_list = gr.Row(elem_id='gr_row_custom_model_list')
                                     with gr_row_custom_model_list:
                                         gr_custom_model_list = gr.Dropdown(label='', elem_id='gr_custom_model_list', choices=custom_model_options, type='value', interactive=True, scale=2)
@@ -211,7 +211,7 @@ def build_interface(args:dict)->gr.Blocks:
 
                         with gr.Group(elem_id='gr_group_progress', elem_classes=['gr-group-no-col']):
                             gr_progress_markdown = gr.Markdown(elem_id='gr_progress_markdown', elem_classes=['gr-markdown'], value=legends['gr_progress_markdown'])
-                            gr_progress = gr.Textbox(elem_id='gr_progress', label='', interactive=False, visible=True)
+                            gr_progress = gr.Textbox(elem_id='gr_progress', label='', placeholder=' ', interactive=False, visible=True)
                             gr_progress_bar = gr.Progress(track_tqdm=True)
 
                         with gr.Group(elem_id='gr_group_audiobook_list', elem_classes=['gr-group-no-col'], visible=True) as gr_group_audiobook_list:
@@ -239,7 +239,7 @@ def build_interface(args:dict)->gr.Blocks:
                             gr_audiobook_files_state = gr.State(False)
 
                         with gr.Group(elem_id='gr_group_convert_btn', elem_classes=['gr-group-convert-btn']) as gr_group_convert_btn:
-                            gr_convert_btn = gr.Button(elem_id='gr_convert_btn', value='📚', elem_classes='gr-convert-btn', variant='primary', interactive=False)
+                            gr_convert_btn = gr.Button(elem_id='gr_convert_btn', value=legends['gr_convert_btn'], elem_classes='gr-convert-btn', variant='primary', interactive=False)
 
                     with gr.Tab(legends['gr_tab_xtts_params'], elem_id='gr_tab_xtts_params', elem_classes='gr-tab', visible=False) as gr_tab_xtts_params:
                         with gr.Group(elem_id='gr_group_xtts_params', elem_classes=['gr-group']):
@@ -633,7 +633,7 @@ def build_interface(args:dict)->gr.Blocks:
                         with gr.Group(elem_id='gr_group_abs_upload_btn', elem_classes=['gr-group-abs-upload-btn']):
                             gr_abs_audiobook = gr.Textbox(elem_id='gr_abs_audiobook', label=legends['gr_abs_audiobook'], lines=1, max_lines=1, interactive=False, visible=True)
                             gr_abs_status = gr.Textbox(elem_id='gr_abs_status', label=legends['gr_abs_status'], lines=1, max_lines=1, interactive=False, visible=True)
-                            gr_abs_upload_btn = gr.Button(elem_id='gr_abs_upload_btn', value='🡅', elem_classes=['gr-abs-upload-btn'], variant='secondary', interactive=False)
+                            gr_abs_upload_btn = gr.Button(elem_id='gr_abs_upload_btn', value=legends['gr_abs_upload_btn'], elem_classes=['gr-abs-upload-btn'], variant='secondary', interactive=False)
 
             gr_blocks_page = gr.Number(value=0, visible=False, precision=0)
             gr_blocks_data = gr.State([])
@@ -1290,6 +1290,8 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(label=legends['gr_abs_api_token']),
                             gr.update(label=legends['gr_abs_audiobook']),
                             gr.update(label=legends['gr_abs_status']),
+                            gr.update(value=legends['gr_convert_btn']),
+                            gr.update(value=legends['gr_abs_upload_btn']),
                             gr.update(value=session.get('ui_language') or system_language),
                             gr.update(label=legends['gr_theme']),
                             gr.update(label=legends['gr_tooltips'], value=bool(session.get('tooltips'))),
@@ -4027,7 +4029,7 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_markdown_tab_sparktts_params, gr_sparktts_temperature, gr_sparktts_top_k, gr_sparktts_top_p,
                 gr_markdown_tab_chattts_params, gr_chattts_temperature, gr_chattts_top_k, gr_chattts_top_p, gr_chattts_repetition_penalty, gr_chattts_speed,
                 gr_markdown_tab_csm_params, gr_csm_temperature, gr_csm_top_k,
-                gr_abs_url, gr_abs_api_token, gr_abs_audiobook, gr_abs_status, gr_ui_language,
+                gr_abs_url, gr_abs_api_token, gr_abs_audiobook, gr_abs_status, gr_convert_btn, gr_abs_upload_btn, gr_ui_language,
                 gr_theme, gr_tooltips, gr_tooltips_data
             ]
             tooltips_buttons = [

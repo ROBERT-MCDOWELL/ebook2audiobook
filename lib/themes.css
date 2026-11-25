@@ -21,8 +21,8 @@
 	html[data-e2a-mode] button div.wrap::after {
 		content: "" !important;
 		background-color: var(--e2a-accent) !important;
-		-webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/></svg>") center / 24px 24px no-repeat !important;
-		mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/></svg>") center / 24px 24px no-repeat !important;
+		-webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/></svg>") center / contain no-repeat !important;
+		mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/></svg>") center / contain no-repeat !important;
 	}
 	/* Classes */
 	html[data-e2a-mode] .wrap-inner {
@@ -105,10 +105,6 @@
 		background: var(--e2a-danger) !important;
 	}
 	/* Html elements */
-	/* custom model upload: its label above the drop zone, not over it (3 lines on a phone with a wider font) */
-	html[data-e2a-mode] #gr_custom_model_file label[data-testid="block-label"] {
-		position: static !important;
-	}
 	html[data-e2a-mode] #gr_version_markdown b[style] {
 		color: var(--e2a-accent) !important;
 		text-shadow: none !important;
@@ -203,6 +199,13 @@
 	html[data-e2a-mode] .spinner {
 		border-color: var(--border-color-primary) !important;
 		border-top-color: var(--e2a-accent) !important;
+	}
+	/* icon color readable on the hover colors above */
+	html[data-e2a-mode] :is(.small-btn-red, .small-btn-purple, .small-btn-orange, .small-btn-blue, .micro-btn, .gr-abs-search-btn):hover:not(:active) {
+		color: var(--e2a-on-color) !important;
+	}
+	html[data-e2a-mode] .gr-abs-search-btn:not(:hover) {
+		color: var(--button-secondary-text-color) !important;
 	}
 	/* Pressed state last: the :hover colors above would otherwise hide the header.css :active ones */
 	html[data-e2a-mode] :is(.small-btn-green, .small-btn-red, .small-btn-purple, .small-btn-orange, .small-btn-blue, .micro-btn, .gr-convert-btn, .gr-abs-search-btn, .gr-abs-upload-btn, .gr-blocks-buttons):active,

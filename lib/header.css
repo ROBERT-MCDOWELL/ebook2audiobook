@@ -35,7 +35,7 @@ button div.wrap span.or {
 	display: inline !important;
 	color: var(--body-text-color-subdued) !important;
 }
-/* upload text on one line, icon on the next: gradio stacks them in a column */
+/* upload icon and text on one line: gradio stacks them in a column */
 button div.wrap {
 	flex-direction: row !important;
 	flex-wrap: wrap !important;
@@ -44,12 +44,13 @@ button div.wrap {
 }
 button div.wrap::after {
 	content: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E90FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/></svg>") !important;
-	width: 24px !important;
-	height: 24px !important;
+	width: 20px !important;
+	height: 20px !important;
 	display: inline-block !important;
 	vertical-align: middle !important;
-	/* side margins fill the line: the icon wraps under the text, centered, without being stretched */
-	margin: 2px calc(50% - 12px) 0 calc(50% - 12px) !important;
+	/* on the text line, before the text: the drop zones are one line high */
+	order: -1 !important;
+	margin: 0 0.25em 0 0 !important;
 }
 table.file-preview tr {
 	padding: 0 !important;
@@ -102,27 +103,31 @@ span[data-testid="block-info"] {
 }
 .small-btn-green:hover {
 	background: var(--button-primary-background-fill-hover) !important;
-	font-size: 24px !important;
 }
 .small-btn-red:hover {
 	background: #ff5050 !important;
-	font-size: 24px !important;
 }
 .small-btn-purple:hover {
 	background: #752eb2 !important;
-	font-size: 24px !important;
 }
 .small-btn-orange:hover {
 	background: #ff8c1a !important;
-	font-size: 24px !important;
 }
 .small-btn-blue:hover {
 	background: #2e7bff !important;
-	font-size: 24px !important;
+}
+/* icon color readable on each hover color (the emoji had their own colors) */
+.small-btn-green:hover:not(:active) {
+	color: var(--button-primary-text-color) !important;
+}
+.small-btn-purple:hover:not(:active), .small-btn-blue:hover:not(:active) {
+	color: #ffffff !important;
+}
+.small-btn-orange:hover:not(:active), .gr-abs-search-btn:not(:active) {
+	color: #1f2937 !important;
 }
 .small-btn-green:active, .small-btn-red:active, .small-btn-purple:active, .small-btn-orange:active, .small-btn-blue:active {
 	background: var(--body-text-color) !important;
-	font-size: 24px !important;
 	color: var(--body-background-fill) !important;
 }
 .micro-btn{
@@ -307,7 +312,10 @@ span[data-testid="block-info"] {
 	transform: scale(1.2) !important;
 }
 .gr-convert-btn {
-	font-size: 30px !important;
+	gap: 10px !important;
+	font-size: 18px !important;
+	font-weight: 600 !important;
+	letter-spacing: 0.02em !important;
 }
 .gr-convert-btn:hover { background-color: #34d058 !important; }
 .gr-convert-btn:active{
@@ -324,15 +332,16 @@ span[data-testid="block-info"] {
 }
 .gr-abs-search-btn:hover {
 	background-color: #FF950D !important;
-	font-size: 20px !important;
 }
 .gr-abs-search-btn:active {
 	background: var(--body-text-color) !important;
-	font-size: 20px !important;
 	color: var(--body-background-fill) !important;
 }
 .gr-abs-upload-btn {
-	font-size: 30px !important;
+	gap: 10px !important;
+	font-size: 18px !important;
+	font-weight: 600 !important;
+	letter-spacing: 0.02em !important;
 }
 .gr-abs-upload-btn:hover { background-color: #34d058 !important; }
 .gr-abs-upload-btn:active{
@@ -370,7 +379,7 @@ span[data-testid="block-info"] {
 }
 #gr_ebook_src, #gr_custom_model_file, #gr_voice_file {
 	height: auto !important;
-	min-height: 100px !important;
+	min-height: 56px !important;
 	display: flex !important;
 	flex-direction: column !important;
 	align-items: center !important;
@@ -378,12 +387,12 @@ span[data-testid="block-info"] {
 	border-style: none !important;
 }
 #gr_ebook_src button>div, #gr_ebook_textarea button>div, #gr_custom_model_file button>div, #gr_voice_file button>div {
-	font-size: 12px !important;
+	font-size: 14px !important;
 }
 #gr_ebook_src .empty, #gr_ebook_textarea .empty, #gr_custom_model_file .empty, #gr_voice_file .empty,
 #gr_ebook_src .wrap, #gr_ebook_textarea .wrap, #gr_custom_model_file .wrap, #gr_voice_file .wrap {
 	height: 100% !important;
-	min-height: 100px !important;
+	min-height: 56px !important;
 	display: flex !important;
 	align-items: center !important;
 	justify-content: center !important;
@@ -422,20 +431,16 @@ span[data-testid="block-info"] {
 #gr_voice_selected_filename a, #gr_custom_model_train_link a {
 	text-decoration: none !important;
 }
-/* on a narrow screen the custom model upload label wraps on 2+ lines: above the drop zone, not over it */
-@media (max-width: 768px) {
-	#gr_custom_model_file label[data-testid="block-label"] {
-		position: static !important;
-	}
+/* the custom model upload label above its one line drop zone, not over it, at the left as before */
+#gr_custom_model_file label[data-testid="block-label"] {
+	position: static !important;
+	align-self: flex-start !important;
 }
 #gr_custom_model_file [aria-label="Clear"], #gr_voice_file [aria-label="Clear"] {
 	display: none !important;
 }               
 #gr_voice_list {
 	height: 60px !important;
-}
-#gr_output_format_list {
-	height: 103px !important;
 }
 #gr_row_output_split_hours {
 	border-radius: 0 !important;
@@ -484,6 +489,12 @@ span[data-testid="block-info"] {
 	max-height: 100px !important;
 	resize: none;
 }
+/* idle (no message, no task running): one line, a message or a running task gives it back its 100px.
+   :placeholder-shown needs the placeholder gr_progress has (a space) */
+#gr_progress:has(textarea:placeholder-shown):not(:has([data-testid="status-tracker"]:not(.hide))) {
+	height: auto !important;
+	min-height: 0 !important;
+}
 #gr_session textarea::-webkit-scrollbar, #gr_progress textarea::-webkit-scrollbar {
 	display: none !important; 
 }
@@ -523,6 +534,20 @@ span[data-testid="block-info"] {
 #gr_group_output_split {
 	border-radius: 0 !important;
 }
+/* split file as high as format and channel beside it (it left a gap under it) */
+#gr_row_output_format {
+	align-items: stretch !important;
+}
+#gr_group_output_split > div, #gr_group_output_split .styler, #gr_group_output_split .styler > .form, #gr_output_split {
+	flex-grow: 1 !important;
+}
+#gr_output_split {
+	display: flex !important;
+	align-items: center !important;
+	align-self: stretch !important;
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+}
 #gr_tts_rating {
 	overflow: hidden !important;
 }
@@ -534,15 +559,6 @@ span[data-testid="block-info"] {
 }
 #gr_row_audiobook_edit {
 	align-items: center !important;
-}
-#gr_audiobook_edit_btn, #gr_audiobook_edit_save_btn, #gr_audiobook_edit_cancel_btn {
-	font-size: 18px !important;
-}
-#gr_audiobook_edit_btn:hover, #gr_audiobook_edit_save_btn:hover, #gr_audiobook_edit_cancel_btn:hover {
-	font-size: 22px !important;
-}
-#gr_audiobook_edit_btn:active, #gr_audiobook_edit_save_btn:active, #gr_audiobook_edit_cancel_btn:active {
-	font-size: 24px !important;
 }
 #gr_audiobook_sentence textarea:not(:disabled) {
 	outline: 2px solid var(--button-primary-background-fill-hover) !important;
@@ -673,20 +689,24 @@ audio:-moz-read-only {
     box-shadow: none !important;
     line-height: 1 !important;
 }
-/* Theme dropdown label beside the dropdown, not above */
-#gr_theme .container {
+/* Labels beside their dropdown, not above (theme, output format and channel): at the size of the value beside them,
+   the labels above a field (sliders...) stay small */
+#gr_theme .container, #gr_output_format_list .container, #gr_output_channel_list .container {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     gap: 6px !important;
 }
-#gr_theme span[data-testid="block-info"] {
+#gr_output_format_list .container, #gr_output_channel_list .container {
+    gap: 10px !important;
+}
+#gr_theme span[data-testid="block-info"], #gr_output_format_list span[data-testid="block-info"], #gr_output_channel_list span[data-testid="block-info"] {
     flex: 0 0 auto !important;
     margin: 0 !important;
     font-size: var(--input-text-size) !important;
     white-space: nowrap !important;
 }
-#gr_theme .wrap {
+#gr_theme .wrap, #gr_output_format_list .container > .wrap, #gr_output_channel_list .container > .wrap {
     flex: 1 1 auto !important;
     min-width: 0 !important;
 }
@@ -846,4 +866,88 @@ audio:-moz-read-only {
 @keyframes spin {
 	0% { transform: rotate(0deg); }
 	100% { transform: rotate(360deg); }
+}
+/* Icons: header.js gives a glyph button (▶ 🗑 🔒 ✔...) its data-icon and keeps it in step when the glyph changes.
+   The glyph stays the button text (screen readers) but is hidden, the icon is a mask in the button text color,
+   so it follows every theme. Last in the file: same specificity as the font sizes above, it comes after them */
+button[data-icon], .confirm-buttons .btn[data-icon] {
+	font-size: 0 !important;
+}
+button[data-icon]::before, .confirm-buttons .btn[data-icon]::before, .gr-convert-btn::before, .gr-abs-upload-btn::before {
+	content: "" !important;
+	display: inline-block !important;
+	flex: 0 0 auto !important;
+	width: 22px !important;
+	height: 22px !important;
+	background-color: currentColor !important;
+	-webkit-mask: var(--e2a-icon) center / contain no-repeat !important;
+	mask: var(--e2a-icon) center / contain no-repeat !important;
+}
+.micro-btn[data-icon]::before {
+	width: 14px !important;
+	height: 14px !important;
+}
+.accordion-block-reset[data-icon]::before, #gr_blocks_nav button[data-icon]::before {
+	width: 18px !important;
+	height: 18px !important;
+}
+.gr-convert-btn {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 16v-4a8 8 0 0 1 16 0v4'/><rect x='3' y='15' width='4' height='6' rx='1.5'/><rect x='17' y='15' width='4' height='6' rx='1.5'/></svg>");
+}
+.gr-abs-upload-btn {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 20V9M7 14l5-5 5 5M5 4h14'/></svg>");
+}
+[data-icon="play"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7 4.5v15l12-7.5z'/></svg>");
+}
+[data-icon="pause"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 5v14M15 5v14'/></svg>");
+}
+[data-icon="trash"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 7h16M10 4h4M6 7l1 13h10l1-13M10 11v6M14 11v6'/></svg>");
+}
+[data-icon="lock"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='5' y='11' width='14' height='9' rx='2'/><path d='M8 11V8a4 4 0 0 1 8 0v3'/></svg>");
+}
+[data-icon="key"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='8' cy='16' r='4'/><path d='M11 13l9-9M16 8l3 3M14 10l2 2'/></svg>");
+}
+[data-icon="preview"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><path d='M10 8.5v7l6-3.5z'/></svg>");
+}
+[data-icon="check"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12.5l4.5 4.5L19 7.5'/></svg>");
+}
+[data-icon="x"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 6l12 12M18 6L6 18'/></svg>");
+}
+[data-icon="download"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 4v11M7 10l5 5 5-5M5 20h14'/></svg>");
+}
+[data-icon="edit"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 20h4L19 9l-4-4L4 16z'/><path d='M13 7l4 4'/></svg>");
+}
+[data-icon="rebuild"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4'/></svg>");
+}
+[data-icon="reset"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6'/></svg>");
+}
+[data-icon="search"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='6.5'/><path d='M16 16l4 4'/></svg>");
+}
+[data-icon="upload"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 20V9M7 14l5-5 5 5M5 4h14'/></svg>");
+}
+[data-icon="arrow-left"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M19 12H5M11 6l-6 6 6 6'/></svg>");
+}
+[data-icon="arrow-right"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12h14M13 6l6 6-6 6'/></svg>");
+}
+[data-icon="chevron-left"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M15 6l-6 6 6 6'/></svg>");
+}
+[data-icon="chevron-right"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 6l6 6-6 6'/></svg>");
 }
