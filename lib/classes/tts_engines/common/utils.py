@@ -181,9 +181,10 @@ class TTSUtils:
     vc_alerted = False
 
     def _alert_vc(self, vc_model:str)->None:
-        # a voice file on a built-in voice engine: the voice cloning runs on top of it for every sentence. Told once per
-        # conversion (core.py convert_chapters2audio() resets session['vc_alert']), once per session for the sentence
-        # previews, each of which loads a new engine. The engine's own flag spares the session proxy on later sentences
+        # a voice file on an engine without built-in voice cloning: a TTS_VOICE_CONVERSION model clones it on every sentence
+        # (task "vc" converts the engine's output, task "tts" speaks the sentence again). Told once per conversion
+        # (core.py convert_chapters2audio() resets session['vc_alert']), once per session for the sentence previews, each
+        # of which loads a new engine. The engine's own flag spares the session proxy on later sentences
         if self.vc_alerted:
             return
         self.vc_alerted = True
