@@ -1,4 +1,5 @@
 from lib.core import *
+from lib.conf_themes import themes, themes_dark_set, default_theme, theme_storage_key
 
 theme = gr.themes.Origin(
     primary_hue='green',
@@ -8,7 +9,100 @@ theme = gr.themes.Origin(
     font_mono=['JetBrains Mono', 'monospace', 'Consolas', 'Menlo', 'Liberation Mono']
 )
 header_css = os.path.join(root_dir, 'header.css')
+themes_css = os.path.join(root_dir, 'themes.css')
 progress_bar = gr.Progress(track_tqdm=False)
+
+def build_themes_head()->str:
+    # launch(head=...) html: the gradio variables of each theme scoped to html[data-e2a-theme="<name>"], lib/themes.css,
+    # and the theme switcher. In <head> so the saved theme is set before the first paint of the interface. Not css_paths:
+    # gradio's prefix_css() would drop the @layer of themes.css, and the variables must beat its :root / .dark ones
+    try:
+        css_blocks = []
+        theme_modes = {}
+        for name, conf in themes.items():
+            theme_modes[name] = conf['mode']
+            if conf['mode'] is None:
+                continue
+            gr_theme = gr.themes.Base(
+                primary_hue=gr.themes.Color(*conf['primary'], name=f'{name}_primary'),
+                secondary_hue=gr.themes.Color(*conf['secondary'], name=f'{name}_secondary'),
+                neutral_hue=gr.themes.Color(*conf['neutral'], name=f'{name}_neutral'),
+                radius_size=conf['radius_size'],
+                font=conf['font'],
+                font_mono=conf['font_mono']
+            )
+            is_dark = conf['mode'] == 'dark'
+            values = {**themes_dark_set, **conf['set']} if is_dark else dict(conf['set'])
+            # dark themes read the gradio dark block: their values go to the *_dark variant when gradio has one
+            gr_theme.set(**{(f'{key}_dark' if is_dark and hasattr(gr_theme, f'{key}_dark') else key): value for key, value in values.items()})
+            pattern = r':root\.dark, :root \.dark \{(.*?)\n\}' if is_dark else r':root \{(.*?)\n\}'
+            found = re.search(pattern, gr_theme._get_theme_css(), re.S)
+            if not found:
+                print(f'build_themes_head(): no gradio variables found for theme {name}, skipped')
+                continue
+            declarations = [line.strip() for line in found.group(1).splitlines() if line.strip() and not line.strip().startswith(('--name:', '--custom-css:'))]
+            declarations += [f"--e2a-{key.replace('_', '-')}: {value};" for key, value in conf['vars'].items()]
+            # body gets .dark from gradio: .dark redefines the variables there, so it is scoped too
+            selector = f'html[data-e2a-theme="{name}"]'
+            css_blocks.append(f"{selector}, {selector} .dark {{color-scheme: {conf['mode']}; {' '.join(declarations)}}}")
+        themes_css_code = Path(themes_css).read_text(encoding='utf-8')
+        themes_js = f'''(()=>{{
+            const themes = {json.dumps(theme_modes)};
+            const default_theme = '{default_theme}';
+            const storage_key = '{theme_storage_key}';
+            const root = document.documentElement;
+            let forced = false;
+            const gradio_dark = ()=>{{
+                const mode = new URL(window.location.href).searchParams.get('__theme');
+                return mode ? mode === 'dark' : !!window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+            }};
+            // a dark or light theme keeps its mode on body.dark against gradio (system scheme change, ?__theme=),
+            // back to 'original' gradio's own mode is restored once
+            const sync_mode = ()=>{{
+                const mode = themes[root.dataset.e2aTheme];
+                if(!mode && !forced){{
+                    return;
+                }}
+                forced = !!mode;
+                const dark = mode ? mode === 'dark' : gradio_dark();
+                if(document.body && document.body.classList.contains('dark') !== dark){{
+                    document.body.classList.toggle('dark', dark);
+                }}
+            }};
+            window.e2a_get_theme = ()=>{{
+                let name = null;
+                try{{
+                    name = localStorage.getItem(storage_key);
+                }}catch(e){{}}
+                return Object.hasOwn(themes, name) ? name : default_theme;
+            }};
+            window.e2a_set_theme = (name)=>{{
+                name = Object.hasOwn(themes, name) ? name : default_theme;
+                root.dataset.e2aTheme = name;
+                if(themes[name]){{
+                    root.dataset.e2aMode = themes[name];
+                }}else{{
+                    delete root.dataset.e2aMode;
+                }}
+                try{{
+                    localStorage.setItem(storage_key, name);
+                }}catch(e){{}}
+                sync_mode();
+                return name;
+            }};
+            window.e2a_set_theme(window.e2a_get_theme());
+            if(document.body && !window.e2a_theme_observer){{
+                window.e2a_theme_observer = new MutationObserver(sync_mode);
+                window.e2a_theme_observer.observe(document.body, {{attributes: true, attributeFilter: ['class']}});
+            }}
+        }})();'''
+        return '<style id="e2a_themes">\n' + '\n'.join(css_blocks) + f'\n{themes_css_code}\n</style>\n<script>{themes_js}</script>'
+    except Exception as e:
+        error = f'build_themes_head(): {e}'
+        print(error)
+    return ''
+
+themes_head = build_themes_head()
 
 def build_interface(args:dict)->gr.Blocks:
     from lib.classes.tts_engines.common.preset_loader import load_engine_presets
@@ -641,8 +735,10 @@ def build_interface(args:dict)->gr.Blocks:
             blocks_voices = [c[2] for c in block_components]
             blocks_texts = [c[3] for c in block_components]
 
+            # left, center, right of the same scale: the version stays centered whatever each side holds
             with gr.Row(elem_id='gr_row_ui_language', equal_height=True):
-                gr_ui_language = gr.Dropdown(label=legends['gr_ui_language'], show_label=False, elem_id='gr_ui_language', choices=sorted([(language_mapping[lang]['native_name'] if lang in language_mapping else lang, lang) for lang in legends_langs]), value=system_language, type='value', interactive=True, scale=0, min_width=130)
+                with gr.Row(elem_id='gr_row_ui_left', equal_height=True, scale=1):
+                    gr_ui_language = gr.Dropdown(label=legends['gr_ui_language'], show_label=False, elem_id='gr_ui_language', choices=sorted([(language_mapping[lang]['native_name'] if lang in language_mapping else lang, lang) for lang in legends_langs]), value=system_language, type='value', interactive=True, scale=0, min_width=130)
                 gr_version_markdown = gr.Markdown(elem_id='gr_version_markdown', value=f'''
                     <div style="right:0;margin:auto;padding:10px;text-align:center">
                         <a href="https://github.com/DrewThomasson/ebook2audiobook" style="text-decoration:none; font-size:14px; white-space:nowrap" target="_blank">
@@ -650,7 +746,9 @@ def build_interface(args:dict)->gr.Blocks:
                     </div>
                     ''', scale=1
                 )
-                gr_tooltips = gr.Checkbox(label=legends['gr_tooltips'], elem_id='gr_tooltips', value=False, interactive=True, scale=0, min_width=130)
+                with gr.Row(elem_id='gr_row_ui_right', equal_height=True, scale=1):
+                    gr_theme = gr.Dropdown(label=legends['gr_theme'], show_label=False, elem_id='gr_theme', choices=[(conf['label'], name) for name, conf in themes.items()], value=default_theme, type='value', interactive=True, scale=0, min_width=130)
+                    gr_tooltips = gr.Checkbox(label=legends['gr_tooltips'], elem_id='gr_tooltips', value=False, interactive=True, scale=0, min_width=130)
 
             gr_modal = gr.HTML(visible=False)
             gr_glassmask = gr.HTML(gr_glassmask_msg, elem_id='gr_glassmask', elem_classes=['gr-glass-mask'])
@@ -876,17 +974,20 @@ def build_interface(args:dict)->gr.Blocks:
 
             def _yellow_stars(n:int):
                 return "".join(
-                    "<span style='color:#f0bc00; font-size:12px'>★</span>" for _ in range(n)
+                    "<span class='gr-rating-star' style='color:#f0bc00; font-size:12px'>★</span>" for _ in range(n)
                 )
 
             def _color_box(value:int)->str:
                 if value <= 4:
                     color = "#4CAF50"  # Green = low
+                    level = 'low'
                 elif value <= 8:
                     color = "#FF9800"  # Orange = medium
+                    level = 'medium'
                 else:
                     color = "#F44336"  # Red = high
-                return f"<span style='background:{color};color:white; padding: 0 3px 0 3px; border-radius:3px; font-size:11px; white-space: nowrap'>{str(value)} GB</span>"
+                    level = 'high'
+                return f"<span class='gr-rating-{level}' style='background:{color};color:white; padding: 0 3px 0 3px; border-radius:3px; font-size:11px; white-space: nowrap'>{str(value)} GB</span>"
 
             def _show_rating(tts_engine:str)->str:
                 rating = default_engine_settings[tts_engine]['rating']
@@ -1189,6 +1290,7 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(label=legends['gr_abs_audiobook']),
                             gr.update(label=legends['gr_abs_status']),
                             gr.update(value=session.get('ui_language') or system_language),
+                            gr.update(label=legends['gr_theme']),
                             gr.update(label=legends['gr_tooltips'], value=bool(session.get('tooltips'))),
                             gr.update(value={elem_id: legends[f'tooltip_{elem_id}'] for elem_id in tooltips_buttons}),
                         )
@@ -3925,7 +4027,7 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_markdown_tab_chattts_params, gr_chattts_temperature, gr_chattts_top_k, gr_chattts_top_p, gr_chattts_repetition_penalty, gr_chattts_speed,
                 gr_markdown_tab_csm_params, gr_csm_temperature, gr_csm_top_k,
                 gr_abs_url, gr_abs_api_token, gr_abs_audiobook, gr_abs_status, gr_ui_language,
-                gr_tooltips, gr_tooltips_data
+                gr_theme, gr_tooltips, gr_tooltips_data
             ]
             tooltips_buttons = [
                 'gr_voice_play', 'gr_voice_del_btn', 'gr_custom_model_del_btn', 'gr_session_switch_btn',
@@ -4968,21 +5070,26 @@ def build_interface(args:dict)->gr.Blocks:
             gr_save_session.change(
                 fn=None,
                 inputs=[gr_save_session],
-                js='''
-                    (data)=>{
-                        try{
-                            if(data){
+                js=f'''
+                    (data)=>{{
+                        try{{
+                            if(data){{
+                                // the theme of the theme dropdown outlives the clear
+                                const theme = localStorage.getItem("{theme_storage_key}");
                                 localStorage.clear();
+                                if(theme){{
+                                    localStorage.setItem("{theme_storage_key}", theme);
+                                }}
                                 data.playback_time = Number(window.session_storage.playback_time);
                                 data.playback_volume = parseFloat(window.session_storage.playback_volume);
                                 localStorage.setItem("data", JSON.stringify(data));
-                            }
-                        }catch(e){
+                            }}
+                        }}catch(e){{
                             console.warn("gr_save_session.change error: "+e);
-                        }
-                    }
+                        }}
+                    }}
                 '''
-            )       
+            )
             gr_tooltips.input(
                 fn=_change_gr_tooltips,
                 inputs=[gr_session, gr_tooltips],
@@ -4999,6 +5106,13 @@ def build_interface(args:dict)->gr.Blocks:
                 inputs=[gr_tooltips, gr_tooltips_data],
                 outputs=None,
                 js=tooltips_js
+            )
+            # browser side only: the theme is saved in localStorage by the switcher of themes_head
+            gr_theme.input(
+                fn=None,
+                inputs=[gr_theme],
+                outputs=None,
+                js='(theme)=>{window.e2a_set_theme?.(theme);}'
             )
             gr_ui_language.input(
                 fn=_change_gr_ui_language,
@@ -5085,6 +5199,11 @@ def build_interface(args:dict)->gr.Blocks:
                 fn=None,
                 js=header_js,
                 outputs=[gr_restore_session],
+            )
+            app.load(
+                fn=None,
+                js=f"()=>(window.e2a_get_theme ? window.e2a_get_theme() : '{default_theme}')",
+                outputs=[gr_theme]
             )
             app.unload(on_unload)
             all_ips = get_all_ip_addresses()

@@ -1,0 +1,198 @@
+/* Themes other than 'original' (lib/conf_themes.py). html[data-e2a-mode] is set by the theme switcher, only then.
+   Maps the colors header.css and the GUI html hard-code to the --e2a-* vars of the theme. Layout stays header.css.
+   Every declaration is !important inside a cascade layer: a layered !important wins over the unlayered !important
+   of header.css and of the .gradio-container .contain copies gradio prefixes it with, whatever their specificity.
+   Loaded as is through launch(head=...): gradio's prefix_css() drops @layer blocks from css and css_paths. */
+@layer e2a_themes {
+	/* Scrollbars */
+	html[data-e2a-mode] {
+		scrollbar-color: var(--e2a-scrollbar) transparent !important;
+	}
+	html[data-e2a-mode]::-webkit-scrollbar-thumb,
+	html[data-e2a-mode] ::-webkit-scrollbar-thumb {
+		background: var(--e2a-scrollbar) !important;
+		border-radius: var(--radius-sm) !important;
+	}
+	html[data-e2a-mode]::-webkit-scrollbar-thumb:hover,
+	html[data-e2a-mode] ::-webkit-scrollbar-thumb:hover {
+		background: var(--e2a-accent) !important;
+	}
+	/* Upload icon: same svg as header.css, as a mask so it takes the accent color */
+	html[data-e2a-mode] button div.wrap::after {
+		content: "" !important;
+		background-color: var(--e2a-accent) !important;
+		-webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/></svg>") center / 24px 24px no-repeat !important;
+		mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/></svg>") center / 24px 24px no-repeat !important;
+	}
+	/* Classes */
+	html[data-e2a-mode] .wrap-inner {
+		border-color: var(--border-color-primary) !important;
+	}
+	html[data-e2a-mode] .selected {
+		color: var(--e2a-accent) !important;
+		text-shadow: none !important;
+	}
+	html[data-e2a-mode] .gr-glass-mask {
+		background: var(--e2a-mask) !important;
+		color: var(--e2a-mask-text) !important;
+	}
+	/* header.js borders the checkboxes inline from the OS/url mode, not from the theme */
+	html[data-e2a-mode] input[type="checkbox"]:not(:checked),
+	html[data-e2a-mode] input[type="radio"]:not(:checked) {
+		border: 1px solid var(--checkbox-border-color) !important;
+	}
+	html[data-e2a-mode] input[type="checkbox"]:checked,
+	html[data-e2a-mode] input[type="radio"]:checked {
+		border-color: var(--checkbox-border-color-selected) !important;
+	}
+	html[data-e2a-mode] .small-btn-red:hover,
+	html[data-e2a-mode] .micro-btn:hover {
+		background: var(--e2a-danger) !important;
+	}
+	html[data-e2a-mode] .small-btn-purple:hover {
+		background: var(--e2a-purple) !important;
+	}
+	html[data-e2a-mode] .small-btn-orange:hover {
+		background: var(--e2a-orange) !important;
+	}
+	html[data-e2a-mode] .small-btn-blue:hover {
+		background: var(--e2a-blue) !important;
+	}
+	html[data-e2a-mode] .play-pause-button:hover svg {
+		fill: var(--e2a-accent) !important;
+		stroke: var(--e2a-accent) !important;
+	}
+	html[data-e2a-mode] .gr-convert-btn:hover,
+	html[data-e2a-mode] .gr-abs-upload-btn:hover,
+	html[data-e2a-mode] .gr-blocks-buttons:hover {
+		background: var(--button-primary-background-fill-hover) !important;
+	}
+	html[data-e2a-mode] .gr-abs-search-btn {
+		background: var(--block-background-fill) !important;
+	}
+	html[data-e2a-mode] .gr-abs-search-btn:hover {
+		background: var(--e2a-orange) !important;
+	}
+	html[data-e2a-mode] [id^="block_"]:has(input[type="checkbox"]:checked) {
+		border-left-color: var(--e2a-ok) !important;
+	}
+	html[data-e2a-mode] [id^="block_"]:has(input[type="checkbox"]:checked) > div {
+		background-color: color-mix(in srgb, var(--e2a-ok) 8%, transparent) !important;
+	}
+	html[data-e2a-mode] [id^="block_"]:has(input[type="checkbox"]:not(:checked)) {
+		border-left-color: var(--e2a-danger) !important;
+	}
+	html[data-e2a-mode] [id^="block_"]:has(input[type="checkbox"]:not(:checked)) > div {
+		background-color: color-mix(in srgb, var(--e2a-danger) 8%, transparent) !important;
+	}
+	/* Rating (lib/gradio.py _show_rating) */
+	html[data-e2a-mode] .gr-rating-star {
+		color: var(--e2a-star) !important;
+	}
+	html[data-e2a-mode] .gr-rating-low,
+	html[data-e2a-mode] .gr-rating-medium,
+	html[data-e2a-mode] .gr-rating-high {
+		color: var(--e2a-on-color) !important;
+		border-radius: var(--radius-sm) !important;
+	}
+	html[data-e2a-mode] .gr-rating-low {
+		background: var(--e2a-ok) !important;
+	}
+	html[data-e2a-mode] .gr-rating-medium {
+		background: var(--e2a-orange) !important;
+	}
+	html[data-e2a-mode] .gr-rating-high {
+		background: var(--e2a-danger) !important;
+	}
+	/* Html elements */
+	html[data-e2a-mode] #gr_version_markdown b[style] {
+		color: var(--e2a-accent) !important;
+		text-shadow: none !important;
+	}
+	html[data-e2a-mode] #gr_group_progress .progress-bar,
+	html[data-e2a-mode] #gr_group_progress [role="progressbar"] > div {
+		background-color: var(--e2a-accent) !important;
+	}
+	html[data-e2a-mode] #gr_audiobook_sentence textarea:not(:disabled) {
+		outline-color: var(--e2a-accent) !important;
+		caret-color: var(--e2a-accent) !important;
+	}
+	html[data-e2a-mode] #gr_audiobook_sentence textarea:not(:disabled),
+	html[data-e2a-mode] #gr_audiobook_sentence:has(textarea:not(:disabled)),
+	html[data-e2a-mode] #gr_audiobook_sentence:has(textarea:not(:disabled)) label,
+	html[data-e2a-mode] #gr_row_audiobook_edit,
+	html[data-e2a-mode] #gr_row_audiobook_edit :is(.small-btn-green, .small-btn-red):not(:hover):not(:active) {
+		background: color-mix(in srgb, var(--block-background-fill) 86%, var(--e2a-accent)) !important;
+	}
+	html[data-e2a-mode] #gr_audiobook_player audio,
+	html[data-e2a-mode] #gr_audiobook_edit_player audio,
+	html[data-e2a-mode] #gr_audiobook_player audio::-webkit-media-controls-panel,
+	html[data-e2a-mode] #gr_audiobook_edit_player audio::-webkit-media-controls-panel {
+		background-color: var(--e2a-audio-bg) !important;
+		color: var(--body-text-color) !important;
+	}
+	/* Modal */
+	html[data-e2a-mode] .gr-modal {
+		background-color: var(--e2a-mask) !important;
+	}
+	html[data-e2a-mode] .gr-modal-content {
+		background-color: var(--background-fill-primary) !important;
+		color: var(--body-text-color) !important;
+		border: 1px solid var(--border-color-primary) !important;
+		border-top: 3px solid var(--e2a-accent) !important;
+		border-radius: var(--radius-sm) !important;
+		box-shadow: var(--shadow-drop-lg) !important;
+	}
+	html[data-e2a-mode] .gr-modal-content p {
+		color: var(--body-text-color) !important;
+	}
+	html[data-e2a-mode] .confirm-buttons .btn,
+	html[data-e2a-mode] .confirm-buttons button,
+	html[data-e2a-mode] .gr-blocks-buttons button,
+	html[data-e2a-mode] .accordion-block-reset {
+		border-radius: var(--radius-sm) !important;
+	}
+	html[data-e2a-mode] .confirm-buttons .btn-red {
+		background-color: var(--e2a-danger) !important;
+		color: var(--e2a-on-color) !important;
+	}
+	html[data-e2a-mode] .confirm-buttons .btn-red:hover {
+		background-color: color-mix(in srgb, var(--e2a-danger) 82%, #ffffff) !important;
+	}
+	html[data-e2a-mode] .confirm-buttons .btn-green {
+		background-color: var(--e2a-ok) !important;
+		color: var(--e2a-on-color) !important;
+	}
+	html[data-e2a-mode] .confirm-buttons .btn-green:hover {
+		background-color: color-mix(in srgb, var(--e2a-ok) 82%, #ffffff) !important;
+	}
+	html[data-e2a-mode] .accordion-block-even:hover,
+	html[data-e2a-mode] .accordion-block-odd:hover {
+		background: color-mix(in srgb, var(--e2a-accent) 12%, var(--block-background-fill)) !important;
+	}
+	html[data-e2a-mode] .spinner {
+		border-color: var(--border-color-primary) !important;
+		border-top-color: var(--e2a-accent) !important;
+	}
+	/* Pressed state last: the :hover colors above would otherwise hide the header.css :active ones */
+	html[data-e2a-mode] :is(.small-btn-green, .small-btn-red, .small-btn-purple, .small-btn-orange, .small-btn-blue, .micro-btn, .gr-convert-btn, .gr-abs-search-btn, .gr-abs-upload-btn, .gr-blocks-buttons):active,
+	html[data-e2a-mode] .confirm-buttons .btn:active {
+		background: var(--body-text-color) !important;
+		color: var(--body-background-fill) !important;
+	}
+	/* Phosphor: terminal labels */
+	html[data-e2a-theme="phosphor"] .gr-markdown p,
+	html[data-e2a-theme="phosphor"] .gr-markdown-span,
+	html[data-e2a-theme="phosphor"] #gr_tabs button[role="tab"] {
+		text-transform: uppercase !important;
+		letter-spacing: 0.06em !important;
+		font-size: 12px !important;
+	}
+	/* Inkwell: small caps labels */
+	html[data-e2a-theme="inkwell"] .gr-markdown p,
+	html[data-e2a-theme="inkwell"] .gr-markdown-span,
+	html[data-e2a-theme="inkwell"] #gr_tabs button[role="tab"] {
+		font-variant: small-caps !important;
+		letter-spacing: 0.04em !important;
+	}
+}
