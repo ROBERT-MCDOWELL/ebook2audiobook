@@ -891,6 +891,11 @@ def build_interface(args:dict)->gr.Blocks:
                             elif session['ebook_mode'] == ebook_modes['TEXT']:
                                 enabled_convert_btn = True
                             outputs[outputs_enable_components.index(gr_convert_btn)] = gr.update(interactive=enabled_convert_btn)
+                            # the conversion first spoke an eng voice in the XTTS language (core.py translate_session_voice()):
+                            # the voice list offers it now, selected, the player plays it in that language
+                            voice_list_update = _update_gr_voice_list(session_id)
+                            voice_list_update['interactive'] = True
+                            outputs[outputs_enable_components.index(gr_voice_list)] = voice_list_update
                             audiobook = session.get('audiobook')
                             enabled_upload_btn = bool(
                                 audiobook

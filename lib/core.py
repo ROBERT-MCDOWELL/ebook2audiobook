@@ -50,7 +50,8 @@ from lib.classes.non_text_filter import NonTextFilter
 from lib.classes.argos_translator import ArgosTranslator
 from lib.classes.tts_manager import TTSManager
 from lib.classes.tts_engines.common.audio import get_audiolist_duration, get_audio_duration
-from lib.classes.tts_engines.common.utils import build_vtt_file, format_timestamp, gpu_fault, gpu_fault_alert
+from lib.classes.tts_engines.common.utils import build_vtt_file, format_timestamp, gpu_fault, gpu_fault_alert, XttsVoiceConverter
+from lib.classes.tts_engines.common.preset_loader import load_engine_presets
 
 from lib import *
 from lib.conf import no_proxy_host
@@ -3715,6 +3716,15 @@ def convert_chapters2audio(session_id:str)->bool:
         print(f'*********** Session: {session_id} **************\n{session_info}')
         # each conversion tells again that the voice cloning on top of a built-in voice engine makes it longer
         session['vc_alert'] = False
+        # the voices first, before the TTS engine loads: the session voice and the blocks' in the XTTS language
+        # (translate_voice()), its XTTS gone from memory by then. convert_ebook() did the session voice, this one catches
+        # the voices picked in the blocks editor since and the blocks of a resumed conversion still in english
+        error = translate_session_voice(session_id)
+        if error is None:
+            error = translate_block_voices(session_id)
+        if error is not None:
+            show_alert(session_id, {'type': 'warning', 'msg': error})
+            return False
         try:
             tts_manager = TTSManager(session)
         except Exception as e:
@@ -3764,33 +3774,6 @@ def convert_chapters2audio(session_id:str)->bool:
         blocks_saved = session['blocks_saved']
         prev_blocks_list = blocks_saved.get('blocks', [])
         prev_blocks = {b['id']: b for b in prev_blocks_list} if isinstance(prev_blocks_list, list) else prev_blocks_list
-        xtts_languages = default_engine_settings[TTS_ENGINES['XTTS']].get('languages', {})
-        _lang = session['language']
-        if session.get('translate_enabled') and session.get('translate'):
-            _lang = session['translate']
-        if _lang != 'eng' and _lang in xtts_languages:
-            is_voice_changed = False
-            voice_cache = {}
-            for block in blocks:
-                old_voice = block.get('voice')
-                if old_voice in voice_cache:
-                    new_voice = voice_cache[old_voice]
-                else:
-                    if old_voice is None:
-                        new_voice = None
-                    else:
-                        new_voice, error = tts_manager.set_voice(old_voice)
-                        if new_voice is None and error is not None:
-                            show_alert(session_id, {'type': 'warning', 'msg': error})
-                            return False
-                    voice_cache[old_voice] = new_voice
-                if new_voice != old_voice:
-                    is_voice_changed = True
-                    block['voice'] = new_voice
-            if is_voice_changed:
-                blocks_current['blocks'] = blocks
-                session['blocks_current'] = blocks_current
-                save_db_blocks(session_id)
         total_chapters = sum(1 for b in blocks if b['keep'] and b['text'].strip())
         if total_chapters == 0:
             show_alert(session_id, {'type': 'warning', 'msg': legends['msg_no_chapters_found']})
@@ -5049,6 +5032,10 @@ def convert_ebook(args:dict)->tuple:
             session['custom_model'] =  args['custom_model']
             session['fine_tuned'] = str(args['fine_tuned'])
             session['voice'] = args.get('voice', None)
+            if session['voice'] is None:
+                # no voice given (headless without --voice): the engine's default one, set before the resume prompt
+                # compares it with the last conversion's and before the first step speaks it in the XTTS language
+                session['voice'] = engine_default_voice(session_id)
             session['xtts_temperature'] = float(args['xtts_temperature']) if args.get('xtts_temperature') not in (None, '') else default_engine_settings[TTS_ENGINES['XTTS']]['temperature']
             session['xtts_codec_temperature'] = float(args['xtts_codec_temperature']) if args.get('xtts_codec_temperature') not in (None, '') else default_engine_settings[TTS_ENGINES['XTTS']]['codec_temperature']
             session['xtts_length_penalty'] = float(args['xtts_length_penalty']) if args.get('xtts_length_penalty') not in (None, '') else default_engine_settings[TTS_ENGINES['XTTS']]['length_penalty']
@@ -5150,17 +5137,6 @@ def convert_ebook(args:dict)->tuple:
                                     error = legends['error_custom_model_invalid'].format(name=os.path.basename(f))
                             except ModuleNotFoundError as e:
                                 error = legends['error_no_presets_module'].format(engine=session['tts_engine'], e=e)
-                    if session.get('voice'):
-                        voice_name = os.path.splitext(os.path.basename(session['voice']))[0].replace('&', 'And')
-                        voice_name = get_sanitized(voice_name)
-                        final_voice_file = os.path.join(session['voice_dir'], f'{voice_name}.wav')
-                        if not os.path.exists(final_voice_file):
-                            extractor = VoiceExtractor(session, session['voice'], voice_name)
-                            voice_status, msg = extractor.extract_voice()
-                            if voice_status:
-                                session['voice'] = final_voice_file
-                            else:
-                                error = f'VoiceExtractor.extract_voice() failed! {msg}'
             if error is None:
                 if prepare_dirs(session_id):
                     session['ebook'] = os.path.join(session['process_dir'], ebook_file)
@@ -5272,6 +5248,10 @@ def convert_ebook(args:dict)->tuple:
                         error = device_error
                     elif float(total_vram_gb) >= float(device_vram_required):
                         show_alert(session_id, {"type": "info", "msg": msg_extra})
+                        # the voice first, before the ebook: in the XTTS language, then (CLI) cleaned into the session
+                        error = prepare_session_voice(session_id, args.get('voice') is not None)
+                        if error is not None:
+                            return error, False
                         session['epub_path'] = os.path.join(session['process_dir'], f"__{session['filename_noext']}.epub")
                         session['blocks_orig_json'] = os.path.join(session['process_dir'], f"{file_prefixes['clone']}{session['filename_noext']}.json")
                         session['blocks_saved_json']   = os.path.join(session['process_dir'], f"{file_prefixes['saved']}{session['filename_noext']}.json")
@@ -5737,6 +5717,129 @@ def unload_tts_manager(tts_manager:Any)->None:
     except Exception as e:
         error = f'unload_tts_manager() error: {e}'
         print(error)
+
+voice_translation_lock = threading.Lock()
+
+def translate_voice(session_id:str, voice:str|None)->tuple:
+    # an eng voice (XTTS built-in speakers, library voices) listed for an XTTS language is spoken in it by XTTS, the first
+    # thing a conversion does, before the ebook and the TTS engine: voices/<lang> keeps it, the conversion reads with it
+    # and the voice list offers it after, so the user can listen to it in that language. Once per voice and language,
+    # then reused. Any other voice is read as it is. Returns (the voice to read with, error)
+    session = context.get_session(session_id)
+    if not (session and session.get('id', False)) or not isinstance(voice, str) or not os.path.isfile(voice):
+        return voice, None
+    xtts = TTS_ENGINES['XTTS']
+    language = session['translate'] if session.get('translate_enabled') and session.get('translate') else session['language']
+    if language == 'eng' or language not in default_engine_settings[xtts].get('languages', {}):
+        return voice, None
+    try:
+        rel = Path(os.path.abspath(voice)).relative_to(voices_dir)
+    except ValueError:
+        return voice, None
+    # voices/__bark, voices/__piper (an engine's own speakers), voices/__sessions (the user's voices, in their language)
+    if len(rel.parts) < 2 or rel.parts[0].startswith('__') or rel.parts[0] == language:
+        return voice, None
+    key = f'{xtts}-internal'
+    # one XTTS at a time: sessions converting together with the same voice, the second one then finds it converted
+    with voice_translation_lock:
+        was_loaded = key in loaded_tts
+        converter = None
+        try:
+            converter = XttsVoiceConverter(session)
+            converted = converter.convert(voice)
+            if converted:
+                return converted, None
+            error = legends['error_voice_translation'].format(voice=Path(voice).stem, language=language_mapping.get(language, {}).get('name', language))
+            return None, error
+        except Exception as e:
+            error = f'translate_voice() error: {e}'
+            return None, error
+        finally:
+            # an XTTS loaded here is left on CPU: freed, the TTS engine (XTTS too) loads its own on its device
+            if not was_loaded:
+                loaded_tts.pop(key, None)
+            if converter is not None:
+                converter.cleanup_memory()
+            converter = None
+
+def engine_default_voice(session_id:str)->str|None:
+    # the voice TTSUtils._set_voice() reads when none is given: the preset's. None for an engine speaking with its own
+    # speakers (tts_engines_with_inner_speaker) and for a custom model (its own voice file)
+    session = context.get_session(session_id)
+    if not (session and session.get('id', False)):
+        return None
+    if session.get('custom_model') is not None or session.get('tts_engine') in tts_engines_with_inner_speaker:
+        return None
+    try:
+        return load_engine_presets(session['tts_engine']).get(session.get('fine_tuned'), {}).get('voice')
+    except Exception:
+        return None
+
+def prepare_session_voice(session_id:str, is_voice_given:bool)->str|None:
+    # the first thing a conversion does, once the device can run it: the voice spoken in the XTTS language, then on the
+    # command line cleaned into the session voices (VoiceExtractor). In this order: voices/__sessions/voice-<id>/<lang>
+    # names the language, a voice copied there in english was then read as that language's and never converted
+    session = context.get_session(session_id)
+    error = translate_session_voice(session_id)
+    if error is not None:
+        return error
+    # only a voice given on the command line: the engine's default one (no --voice) is a voice library file, never cleaned
+    if not session['is_gui_process'] and is_voice_given and session.get('voice'):
+        voice_name = os.path.splitext(os.path.basename(session['voice']))[0].replace('&', 'And')
+        voice_name = get_sanitized(voice_name)
+        final_voice_file = os.path.join(session['voice_dir'], f'{voice_name}.wav')
+        if not os.path.exists(final_voice_file):
+            extractor = VoiceExtractor(session, session['voice'], voice_name)
+            voice_status, msg = extractor.extract_voice()
+            if voice_status:
+                session['voice'] = final_voice_file
+            else:
+                error = f'VoiceExtractor.extract_voice() failed! {msg}'
+                return error
+    return None
+
+def translate_block_voices(session_id:str)->str|None:
+    # the blocks' voices and their global voice (sync_globals_to_blocks() anchor) in the XTTS language (translate_voice())
+    session = context.get_session(session_id)
+    if not (session and session.get('id', False)):
+        return None
+    blocks_current = session.get('blocks_current') or {}
+    blocks = blocks_current.get('blocks') or []
+    voice_cache = {}
+    is_voice_changed = False
+    for holder in [blocks_current, *blocks]:
+        if 'voice' not in holder:
+            continue
+        old_voice = holder['voice']
+        if old_voice not in voice_cache:
+            new_voice, error = translate_voice(session_id, old_voice)
+            if error is not None:
+                return error
+            voice_cache[old_voice] = new_voice
+        if voice_cache[old_voice] != old_voice:
+            holder['voice'] = voice_cache[old_voice]
+            is_voice_changed = True
+    if is_voice_changed:
+        blocks_current['blocks'] = blocks
+        session['blocks_current'] = blocks_current
+        save_db_blocks(session_id)
+    return None
+
+def translate_session_voice(session_id:str)->str|None:
+    # the session voice in the XTTS language (translate_voice()), and the ebooks of a directory read with it
+    session = context.get_session(session_id)
+    if not (session and session.get('id', False)):
+        return None
+    voice = session.get('voice')
+    translated, error = translate_voice(session_id, voice)
+    if error is not None:
+        return error
+    if translated != voice:
+        session['voice'] = translated
+        voice_map = dict(session.get('voice_map') or {})
+        if voice in voice_map.values():
+            session['voice_map'] = {ebook: (translated if ebook_voice == voice else ebook_voice) for ebook, ebook_voice in voice_map.items()}
+    return None
 
 def cleanup_models_cache()->None:
     try:
