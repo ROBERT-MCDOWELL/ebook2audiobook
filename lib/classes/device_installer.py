@@ -1373,13 +1373,10 @@ class DeviceInstaller():
                     devices['ROCM']['found'] = False
                     name, tag = None, None
                     msg = legends['msg_rocm_gfx_family'].format(**gfx)
-                elif tag and (reason := self.rocm_verdict_reason(tag)) is not None:
+                elif (skipped := self.gpu_verdict_skip(devices['ROCM']['proc'], tag)):
                     # an earlier probe found torch cannot run on these GPUs under this torch row and override
-                    # (rocm_verdict_save): ROCm is no way to run them, gpu_candidates() takes Vulkan for them when it
-                    # can, else the CPU fallback. DEVICE_TAG forcing ROCm skips this detection: the probe runs again
                     devices['ROCM']['found'] = False
-                    name, tag = None, None
-                    msg = legends['msg_rocm_verdict_saved'].format(reason=reason or '-', file=rocm_verdict_file)
+                    name, tag, msg = None, None, skipped
                 gpu_results[devices['ROCM']['proc']] = (name, tag, msg)
             # ============================================================
             # CUDA
@@ -1522,6 +1519,10 @@ class DeviceInstaller():
                                     msg = legends['msg_cuda_smi_driver_only'].format(version=smi_version)
                             else:
                                 msg = legends['msg_cuda_no_torch_build'].format(version=smi_version)
+                if (skipped := self.gpu_verdict_skip(devices['CUDA']['proc'], tag)):
+                    # an earlier probe found torch cannot run on these GPUs under this torch row and driver
+                    devices['CUDA']['found'] = False
+                    name, tag, msg = None, None, skipped
                 gpu_results[devices['CUDA']['proc']] = (name, tag, msg)
             # ============================================================
             # INTEL XPU
@@ -1735,6 +1736,10 @@ class DeviceInstaller():
                         msg = legends['msg_intel_sycl_no_l0'].format(kmd=kmd)
                     else:
                         msg = legends['msg_intel_l0_no_device'].format(kmd=kmd, status=ze_status)
+                if (skipped := self.gpu_verdict_skip(devices['XPU']['proc'], tag)):
+                    # an earlier probe found torch cannot run on these GPUs under this torch row and driver
+                    devices['XPU']['found'] = False
+                    name, tag, msg = None, None, skipped
                 gpu_results[devices['XPU']['proc']] = (name, tag, msg)
             # ============================================================
             # GPU CHOICE
@@ -2658,16 +2663,17 @@ class DeviceInstaller():
         # could not run (missing python, no answer in time, no answer on stdout) says nothing about the GPU. 120 s like
         # reconcile_gpu_choice(): a cold first import of a GPU torch (antivirus scanning its DLLs, a machine short of RAM
         # paging) took longer than the 30 s it had, so XPU stayed on unprobed (crash report 63aa7dc78e8ff6f6)
-        # ROCm: the child sees every GPU, without the GPU 0 pin lib/conf.py sets when the user asked for none
-        # (rocm_visible_pinned), and judges each one. Each GPU test is announced on stdout and its end too: a test that
-        # kills the child, or does not end within gpu_test_timeout (a GPU that hangs instead of faulting), fails that
-        # device, and the child runs again without it (E2A_ROCM_SKIP), so one GPU never hides the others
+        # The child judges each GPU (detect_gpu.usable_devices); on ROCm it sees every one, without the GPU 0 pin
+        # lib/conf.py sets when the user asked for none (rocm_visible_pinned). Each GPU test is announced on stdout and
+        # its end too: a test that kills the child, or does not end within gpu_test_timeout (a GPU that hangs instead of
+        # faulting), fails that device, and the child runs again without it (E2A_GPU_SKIP), so one GPU never hides the
+        # others
         import queue, threading, time
         env = {key: value for key, value in os.environ.items() if not (rocm_visible_pinned and key in ('ROCR_VISIBLE_DEVICES', 'HIP_VISIBLE_DEVICES'))}
         failed:dict = {}
         while True:
             if failed:
-                env['E2A_ROCM_SKIP'] = ','.join(str(index) for index in failed)
+                env['E2A_GPU_SKIP'] = ','.join(str(index) for index in failed)
             try:
                 proc = subprocess.Popen([python_exec, detect_gpu_script], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors='replace', env=env)
             except OSError as e:
@@ -2705,10 +2711,10 @@ class DeviceInstaller():
                     data = json.loads(line)
                 except json.JSONDecodeError:
                     continue
-                if isinstance(data, dict) and isinstance(data.get('rocm_testing'), int) and isinstance(data.get('rocm_count'), int):
-                    testing = (data['rocm_testing'], data['rocm_count'])
+                if isinstance(data, dict) and isinstance(data.get('gpu_testing'), int) and isinstance(data.get('gpu_count'), int):
+                    testing = (data['gpu_testing'], data['gpu_count'], str(data.get('device') or f"gpu:{data['gpu_testing']}"), data.get('backend'))
                     test_deadline = time.monotonic() + self.gpu_test_timeout
-                elif isinstance(data, dict) and 'rocm_tested' in data:
+                elif isinstance(data, dict) and 'gpu_tested' in data:
                     testing = test_deadline = None
             if hung or timed_out:
                 proc.kill()
@@ -2726,15 +2732,15 @@ class DeviceInstaller():
                 code = 'none' if returncode is None else f'{returncode:#x}' if returncode > 255 else str(returncode)
                 if testing is None or testing[0] in failed:
                     return {'count': 0, 'backend': None, 'probed': True, 'error': stderr or f'exit code {code}'}
-                index, count = testing
+                index, count, device, backend = testing
                 if hung:
-                    failed[index] = f'cuda:{index} GPU test did not end within {self.gpu_test_timeout} s'
+                    failed[index] = f'{device} GPU test did not end within {self.gpu_test_timeout} s'
                 else:
                     stderr_tail = stderr.splitlines()[-1] if stderr else ''
-                    failed[index] = f"cuda:{index} GPU test killed the probe (exit code {code}{': ' + stderr_tail if stderr_tail else ''})"
+                    failed[index] = f"{device} GPU test killed the probe (exit code {code}{': ' + stderr_tail if stderr_tail else ''})"
                 if len(failed) < count:
                     continue
-                return {'count': 0, 'backend': devices['ROCM']['proc'], 'probed': True, 'rocm_listed': count, 'devices': [], 'error': '; '.join(failed.values())}
+                return {'count': 0, 'backend': backend, 'probed': True, 'listed': count, 'devices': [], 'error': '; '.join(failed.values())}
             # the answer is detect_gpu.py's last line: torch or a driver may print to stdout before it
             try:
                 data = json.loads(lines[-1]) if lines else None
@@ -2774,17 +2780,19 @@ class DeviceInstaller():
             return None
         return dict(native=', '.join(natives), native_family=', '.join(sorted({module.gfx_family(native) for native in natives})), override=override, target=target, target_family=module.gfx_family(target))
 
-    def vulkan_amd_ok(self)->bool:
-        # Vulkan can run an AMD GPU here without ROCm (Mesa's RADV): its loader sees one and the +vulkan torch applies,
-        # the conditions gpu_candidates() takes Vulkan for a GPU without a vendor runtime under
-        return any(self.gpu_pci_vendors.get(vendor_id) == devices['ROCM']['proc'] for vendor_id, _, _ in self.vulkan_devices()) and self.vulkan_torch_ok
+    def vulkan_vendor_ok(self, backend:str)->bool:
+        # Vulkan can run the GPU of this backend's vendor here without its runtime (Mesa's RADV / ANV / NVK, NVIDIA's
+        # own driver): its loader sees one and the +vulkan torch applies, the conditions gpu_candidates() takes Vulkan
+        # for a GPU without a usable vendor runtime under
+        return any(self.gpu_pci_vendors.get(vendor_id) == backend for vendor_id, _, _ in self.vulkan_devices()) and self.vulkan_torch_ok
 
-    def amd_gpu_ids(self)->list:
-        # the AMD GPUs a ROCm verdict holds for: PCI ids from sysfs ('1002:13fe'), stable across driver and Mesa updates.
-        # Windows: their names
+    def vendor_gpu_ids(self, backend:str)->list:
+        # the GPUs of this backend's vendor a verdict holds for: PCI ids from sysfs ('1002:13fe'), stable across driver
+        # and Mesa updates. Windows: their names. WSL2 lists no PCI GPU: [] there, the same at every start
+        vendor_hex = next((f'{vendor_id:#06x}' for vendor_id, proc in self.gpu_pci_vendors.items() if proc == backend), None)
         sysfs = '/sys/bus/pci/devices'
         if self.system == systems['WINDOWS'] or not os.path.isdir(sysfs):
-            return sorted(model for vendor_id, model, _ in self.system_gpus(self.vulkan_devices()) if self.gpu_pci_vendors.get(vendor_id) == devices['ROCM']['proc'])
+            return sorted(model for vendor_id, model, _ in self.system_gpus(self.vulkan_devices()) if self.gpu_pci_vendors.get(vendor_id) == backend)
         ids = []
         for dev in os.listdir(sysfs):
             try:
@@ -2796,45 +2804,123 @@ class DeviceInstaller():
                     device = f.read().strip().lower()
             except OSError:
                 continue
-            # display controllers only (VGA 0x0300, 3D 0x0302, other 0x0380): AMD's audio and bridges share the vendor
-            if vendor == '0x1002' and pci_class.startswith('0x03'):
-                ids.append(f'1002:{device[2:]}')
+            # display controllers only (VGA 0x0300, 3D 0x0302, other 0x0380): the vendor's audio and bridges share its id
+            if vendor == vendor_hex and pci_class.startswith('0x03'):
+                ids.append(f'{vendor[2:]}:{device[2:]}')
         return sorted(ids)
 
-    def rocm_verdict_key(self, tag:str)->dict:
-        # what a ROCm verdict holds for: the ROCm torch row, the AMD GPUs, the user's HSA_OVERRIDE_GFX_VERSION (this
-        # process exports the probe's DB override only after a GPU answered). Any change and ROCm is probed again
-        return {'tag': tag, 'gpus': self.amd_gpu_ids(), 'override': os.environ.get('HSA_OVERRIDE_GFX_VERSION') or ''}
+    def gpu_driver_version(self, backend:str)->str:
+        # the driver a CUDA or XPU verdict holds for: a new one can run what the old one could not, and probes again.
+        # NVIDIA: the kernel module's version, else nvidia-smi's (WSL2, Windows). Intel: the Level Zero GPU driver's
+        # file version (Linux), the display driver's (Windows). ROCm: '' (the kernel's amdgpu changes with every kernel
+        # update, HSA_OVERRIDE_GFX_VERSION is its key)
+        if backend == devices['CUDA']['proc']:
+            try:
+                with open('/sys/module/nvidia/version', 'r', encoding='utf-8') as f:
+                    return f.read().strip()
+            except OSError:
+                pass
+            if shutil.which('nvidia-smi'):
+                try:
+                    out = subprocess.run(['nvidia-smi', '--query-gpu=driver_version', '--format=csv,noheader'], capture_output=True, text=True, errors='replace', timeout=20).stdout
+                except (OSError, subprocess.TimeoutExpired):
+                    return ''
+                return ','.join(sorted(set(out.split())))
+            return ''
+        if backend == devices['XPU']['proc']:
+            if self.system == systems['WINDOWS']:
+                try:
+                    out = subprocess.run(['powershell', '-NoProfile', '-NonInteractive', '-Command', "Get-CimInstance Win32_VideoController | ForEach-Object { [string]$_.PNPDeviceID + '|' + $_.DriverVersion }"], capture_output=True, text=True, errors='replace', timeout=20).stdout
+                except (OSError, subprocess.TimeoutExpired):
+                    return ''
+                return ','.join(sorted({version.strip() for pnp, _, version in (line.partition('|') for line in out.splitlines()) if 'VEN_8086' in pnp.upper()}))
+            # 'libze_intel_gpu.so.1' links to the versioned file ('libze_intel_gpu.so.1.6.32224.5')
+            for lib_dir in ('/usr/lib/x86_64-linux-gnu', '/usr/lib64', '/usr/lib', '/usr/local/lib'):
+                path = os.path.join(lib_dir, 'libze_intel_gpu.so.1')
+                if os.path.exists(path):
+                    return os.path.basename(os.path.realpath(path))
+        return ''
 
-    def rocm_verdict_save(self, tag:str, reason:str)->None:
-        from datetime import datetime, timezone
+    def gpu_verdict_key(self, backend:str, tag:str)->dict:
+        # what a verdict holds for: the torch row, the vendor's GPUs, then per backend the user's HSA_OVERRIDE_GFX_VERSION
+        # (ROCm: this process exports the probe's DB override only after a GPU answered) or the driver. Any change and
+        # the backend is probed again
+        key = {'tag': tag, 'gpus': self.vendor_gpu_ids(backend)}
+        if backend == devices['ROCM']['proc']:
+            key['override'] = os.environ.get('HSA_OVERRIDE_GFX_VERSION') or ''
+        else:
+            key['driver'] = self.gpu_driver_version(backend)
+        return key
+
+    def gpu_verdicts(self)->dict:
         try:
-            with open(rocm_verdict_file, 'w', encoding='utf-8') as f:
-                json.dump({'key': self.rocm_verdict_key(tag), 'reason': reason, 'date': datetime.now(timezone.utc).isoformat(timespec='seconds')}, f)
+            with open(gpu_verdict_file, 'r', encoding='utf-8') as f:
+                verdicts = json.load(f)
+        except (OSError, ValueError):
+            return {}
+        return verdicts if isinstance(verdicts, dict) else {}
+
+    def gpu_verdicts_write(self, verdicts:dict)->None:
+        try:
+            if verdicts:
+                with open(gpu_verdict_file, 'w', encoding='utf-8') as f:
+                    json.dump(verdicts, f)
+            elif os.path.exists(gpu_verdict_file):
+                os.remove(gpu_verdict_file)
         except OSError as e:
             error = legends['msg_device_info_write_failed'].format(e=e)
             print(error, file=sys.stderr)
 
-    def rocm_verdict_reason(self, tag:str)->Union[str, None]:
-        # why ROCm failed on these GPUs under this torch row and override, None without such a verdict (none saved, or
-        # saved for another torch row, other GPUs, another override)
-        try:
-            with open(rocm_verdict_file, 'r', encoding='utf-8') as f:
-                verdict = json.load(f)
-        except (OSError, ValueError):
-            return None
-        if not isinstance(verdict, dict) or verdict.get('key') != self.rocm_verdict_key(tag):
+    def gpu_verdict_save(self, backend:str, tag:str, reason:str)->None:
+        from datetime import datetime, timezone
+        verdicts = self.gpu_verdicts()
+        verdicts[backend] = {'key': self.gpu_verdict_key(backend, tag), 'reason': reason, 'date': datetime.now(timezone.utc).isoformat(timespec='seconds')}
+        self.gpu_verdicts_write(verdicts)
+
+    def gpu_verdict_reason(self, backend:str, tag:str)->Union[str, None]:
+        # why torch failed on this backend's GPUs under this torch row and override / driver, None without such a
+        # verdict (none saved, or saved for another row, other GPUs, another override or driver). The key is only
+        # computed when a verdict is saved: the Intel driver version costs a powershell call on Windows
+        verdict = self.gpu_verdicts().get(backend)
+        if not isinstance(verdict, dict) or verdict.get('key') != self.gpu_verdict_key(backend, tag):
             return None
         return str(verdict.get('reason') or '')
 
-    def rocm_verdict_clear(self)->None:
-        try:
-            os.remove(rocm_verdict_file)
-        except FileNotFoundError:
-            pass
-        except OSError as e:
-            error = legends['msg_device_info_write_failed'].format(e=e)
-            print(error, file=sys.stderr)
+    def gpu_verdict_clear(self, backend:str)->None:
+        verdicts = self.gpu_verdicts()
+        if verdicts.pop(backend, None) is not None:
+            self.gpu_verdicts_write(verdicts)
+
+    def gpu_verdict_skip(self, backend:str, tag:str)->Union[str, None]:
+        # check_hardware(): the message that drops a backend whose saved verdict holds here, None when it does not.
+        # gpu_candidates() then takes Vulkan for its GPU when it can, else the CPU fallback. DEVICE_TAG forcing the
+        # backend skips this detection: the probe runs again
+        reason = self.gpu_verdict_reason(backend, tag) if tag else None
+        if reason is None:
+            return None
+        vendor, runtime = gpu_runtime_names[backend]
+        return legends['msg_gpu_verdict_saved'].format(runtime=runtime, vendor=vendor, reason=reason or '-', file=gpu_verdict_file)
+
+    def visible_subset(self, visible:Union[str, None], usable:list)->str:
+        # a CUDA_VISIBLE_DEVICES / HIP_VISIBLE_DEVICES value kept to the usable GPUs: the probe counted them within the
+        # user's own list when there was one ('2,3' with GPU 1 usable -> '3'), from 0 without
+        entries = [entry.strip() for entry in visible.split(',')] if visible else []
+        return ','.join(entries[i] if i < len(entries) else str(i) for i in usable)
+
+    def xpu_visible(self, usable:list)->None:
+        # Level Zero's mask kept to the usable Intel GPUs, the SYCL selector counting within it. The probe counted them
+        # under the user's own selector ('level_zero:1,2') and mask, when set: an index there is the selector's entry,
+        # within the mask's. A selector of another form ('*:gpu', 'opencl:*') is left as the user set it
+        selector = os.environ.get('ONEAPI_DEVICE_SELECTOR')
+        mask = os.environ.get('ZE_AFFINITY_MASK')
+        listed = re.fullmatch(r'level_zero:(\d+(?:,\d+)*)', selector) if selector else None
+        if selector and not listed:
+            return
+        within_mask = [listed.group(1).split(',')[i] if listed and i < len(listed.group(1).split(',')) else str(i) for i in usable]
+        mask_entries = [entry.strip() for entry in mask.split(',')] if mask else []
+        physical = [mask_entries[int(i)] if int(i) < len(mask_entries) else i for i in within_mask]
+        os.environ['ZE_AFFINITY_MASK'] = ','.join(physical)
+        os.environ['ONEAPI_DEVICE_SELECTOR'] = 'level_zero:' + ','.join(str(i) for i in range(len(physical)))
 
     def torchcodec_import_ok(self)->bool:
         # torchcodec's own import in python_exec (the interpreter _uv_pip installs into), a marker on stdout once it is
@@ -2887,10 +2973,10 @@ class DeviceInstaller():
         # violation inside python312.dll kills the child without any usable traceback, so only a probe that runs early
         # can tell a working wheel from one that crashes natively on this driver
         try:
-            proc = subprocess.run([python_exec, detect_gpu_script], capture_output=True, text=True, errors='replace', timeout=60)
+            proc = subprocess.run([python_exec, detect_gpu_script], capture_output=True, text=True, errors='replace', timeout=60, env={**os.environ, 'E2A_GPU_TEST': '0'})
             if proc.returncode != 0:
                 return None
-            data = json.loads(proc.stdout.strip() or '{}')
+            data = json.loads(next((line.strip() for line in reversed(proc.stdout.splitlines()) if line.strip().startswith('{')), '{}'))
             return data if isinstance(data, dict) else None
         except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError, ValueError):
             return None
@@ -2914,7 +3000,9 @@ class DeviceInstaller():
                                '--index-strategy', 'unsafe-best-match')
             if subprocess.call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) != 0:
                 return False
-            env = {**os.environ, 'PYTHONPATH': probe_dir + os.pathsep + os.environ.get('PYTHONPATH', '')}
+            # E2A_GPU_TEST=0: the count alone, as this probe always judged the wheels; the GPU test of probe_gpus() judges
+            # the GPUs once torch is installed, a GPU failing it would make every row here look crashed and be downloaded
+            env = {**os.environ, 'PYTHONPATH': probe_dir + os.pathsep + os.environ.get('PYTHONPATH', ''), 'E2A_GPU_TEST': '0'}
             try:
                 proc = subprocess.run([python_exec, detect_gpu_script], capture_output=True, text=True, errors='replace', timeout=120, env=env)
             except (subprocess.TimeoutExpired, OSError):
@@ -2922,8 +3010,10 @@ class DeviceInstaller():
             if proc.returncode != 0:
                 # nonzero exit: an import error prints it, a native crash (access violation) leaves nothing but the code
                 return True
+            # the answer is detect_gpu.py's last line: torch or a driver may print to stdout before it
+            answer = next((line.strip() for line in reversed(proc.stdout.splitlines()) if line.strip().startswith('{')), '{}')
             try:
-                data = json.loads(proc.stdout.strip() or '{}')
+                data = json.loads(answer)
             except json.JSONDecodeError:
                 return True
             return int(data.get('count') or 0) == 0
@@ -3467,106 +3557,102 @@ class DeviceInstaller():
                     self.link_os_libgomp('python_env', device_info)
                     # an inherited one would make sitecustomize.py answer 0 for torch in the probe too: it asks torch
                     # itself, and the verdict below sets it again
-                    os.environ.pop('E2A_XPU_UNUSABLE', None)
-                    os.environ.pop('E2A_ROCM_UNUSABLE', None)
+                    for flag in gpu_unusable_flags.values():
+                        os.environ.pop(flag, None)
+                    backend = device_info['name']
                     gpu_info = self.probe_gpus()
                     device_info_dict['gpu_count'] = gpu_info['count']
                     device_info_dict['gpu_backend'] = gpu_info['backend']
                     if gpu_info.get('error'):
                         error = legends['error_gpu_detection_warning'].format(e=gpu_info['error'])
                         print(error)
-                    # check_hardware() set devices['XPU']['found'] from Level Zero listing an Intel GPU, which does not
-                    # mean torch xpu runs on it: on an iGPU it does not support or an old driver, torch.xpu.is_available()
-                    # answers 0 or kills the process (Windows access violation in device_count()). Only this probe, in
-                    # its own process, can ask safely: XPU off, so nothing in the app (the device dropdown,
-                    # VoiceExtractor, the session device check) asks torch.xpu again. Third-party code still asks it
-                    # on its own (transformers at import, CPU conversions included): with E2A_XPU_UNUSABLE set,
-                    # components/sitecustomize.py makes torch.xpu report no device in this process, torch not imported
-                    # yet, and in every child that inherits it.
-                    # Only a count torch gave keeps XPU on. A probe without an answer turns it off too: it used to leave
-                    # XPU on unguarded, and the next CPU conversion died in transformers' own probe (crash report
-                    # 63aa7dc78e8ff6f6). Worst case a working Intel GPU sits this run out, with a message saying why
-                    if device_info['name'] == devices['XPU']['proc'] and gpu_info['count'] == 0:
-                        devices['XPU']['found'] = False
-                        os.environ['E2A_XPU_UNUSABLE'] = '1'
-                        msg = legends['msg_xpu_unusable'] if gpu_info.get('probed') else legends['msg_xpu_probe_no_answer']
-                        print(msg)
-                    # the same for ROCm: check_hardware() set devices['ROCM']['found'] from the system HIP runtime
-                    # counting an AMD GPU, which HSA_OVERRIDE_GFX_VERSION makes it do for a GPU of a target torch has no
-                    # code for. detect_gpu.py judged each GPU (rocm_usable_devices): the ISA family, then a GPU test.
-                    # Kept on, the first model moved to it killed e2a mid-conversion (crash report 8a1a1c471e8f6852).
-                    # With E2A_ROCM_UNUSABLE set, components/sitecustomize.py makes torch.cuda report no device, so
-                    # third-party code that picks 'cuda' on its own stays on the CPU too
-                    if device_info['name'] == devices['ROCM']['proc'] and gpu_info['count'] == 0:
-                        devices['ROCM']['found'] = False
-                        os.environ['E2A_ROCM_UNUSABLE'] = '1'
-                        # a value in this process's env is the user's (shell, launcher): the probe's DB override is
-                        # exported below only with a GPU that answered
-                        user_override = os.environ.get('HSA_OVERRIDE_GFX_VERSION')
-                        if not gpu_info.get('probed'):
-                            msg = legends['msg_rocm_probe_no_answer']
-                        elif gpu_info.get('gfx'):
-                            # detect_gpu.rocm_gfx_mismatch(): the override runs code of another ISA family on the GPU
-                            msg = legends['msg_rocm_gfx_family'].format(**gpu_info['gfx'])
-                        elif user_override:
-                            msg = legends['msg_rocm_unusable_override'].format(override=user_override)
+                    # check_hardware() set devices[...]['found'] from the vendor runtime listing a GPU (Level Zero, the
+                    # system HIP runtime, the CUDA runtime or nvidia-smi), which does not mean torch runs on it: an iGPU
+                    # torch xpu does not support kills the process in device_count() (Windows access violation), a GPU
+                    # HSA_OVERRIDE_GFX_VERSION puts on another ISA family's code aborted at the first model moved to it
+                    # (crash report 8a1a1c471e8f6852). detect_gpu.py, in its own process, judged each GPU
+                    # (usable_devices: ISA family on ROCm, then a GPU test). Only a GPU it passed keeps the backend on:
+                    # off, nothing in the app (the device dropdown, VoiceExtractor, the session device check) asks torch
+                    # for it again, and with E2A_<BACKEND>_UNUSABLE components/sitecustomize.py makes torch report no
+                    # device in this process and every child, for third-party code that asks on its own (transformers at
+                    # import, CPU conversions included). A probe without an answer turns it off too: XPU left on
+                    # unguarded killed the next CPU conversion in transformers' own probe (crash report 63aa7dc78e8ff6f6)
+                    if backend in gpu_unusable_flags and gpu_info['count'] == 0:
+                        vendor, runtime = gpu_runtime_names[backend]
+                        devices[backend.upper()]['found'] = False
+                        os.environ[gpu_unusable_flags[backend]] = '1'
+                        if backend == devices['ROCM']['proc']:
+                            # a value in this process's env is the user's (shell, launcher): the probe's DB override is
+                            # exported below only with a GPU that answered
+                            user_override = os.environ.get('HSA_OVERRIDE_GFX_VERSION')
+                            if not gpu_info.get('probed'):
+                                msg = legends['msg_rocm_probe_no_answer']
+                            elif gpu_info.get('gfx'):
+                                # detect_gpu.rocm_gfx_mismatch(): the override runs code of another ISA family on the GPU
+                                msg = legends['msg_rocm_gfx_family'].format(**gpu_info['gfx'])
+                            elif user_override:
+                                msg = legends['msg_rocm_unusable_override'].format(override=user_override)
+                            else:
+                                msg = legends['msg_rocm_unusable']
+                        elif backend == devices['XPU']['proc']:
+                            msg = legends['msg_xpu_unusable'] if gpu_info.get('probed') else legends['msg_xpu_probe_no_answer']
                         else:
-                            msg = legends['msg_rocm_unusable']
+                            msg = legends['msg_cuda_unusable'] if gpu_info.get('probed') else legends['msg_cuda_probe_no_answer']
                         print(msg)
                         # torch listed the GPUs and every one failed: a verdict about them, saved so the next starts skip
-                        # ROCm (check_hardware) and take Vulkan, or the CPU. Not when torch saw no GPU (the user out
-                        # of the render group, a ROCm runtime that does not start) nor gave no answer: probed again
-                        if gpu_info.get('probed') and gpu_info.get('rocm_listed'):
-                            self.rocm_verdict_save(device_info['tag'], gpu_info.get('error') or '')
-                            if self.vulkan_amd_ok():
+                        # this backend (check_hardware) and take Vulkan, or the CPU. Not when torch saw no GPU (the user
+                        # out of the render group, a runtime that does not start, a device count that crashed) nor gave
+                        # no answer: probed again
+                        if gpu_info.get('probed') and gpu_info.get('listed'):
+                            self.gpu_verdict_save(backend, device_info['tag'], gpu_info.get('error') or '')
+                            if self.vulkan_vendor_ok(backend):
                                 # only the engines listing Vulkan in their devices run on the GPU there, the list
                                 # follows default_engine_settings
                                 from lib.conf_models import default_engine_settings
                                 engines = sorted(engine for engine, settings in default_engine_settings.items() if devices['VULKAN']['proc'] in settings.get('devices', []))
-                                msg = legends['msg_rocm_next_vulkan'].format(engines=', '.join(engines), file=rocm_verdict_file)
+                                msg = legends['msg_gpu_next_vulkan'].format(vendor=vendor, runtime=runtime, engines=', '.join(engines), file=gpu_verdict_file)
                             else:
-                                msg = legends['msg_rocm_next_cpu'].format(file=rocm_verdict_file)
+                                msg = legends['msg_gpu_next_cpu'].format(runtime=runtime, file=gpu_verdict_file)
                             print(msg)
                         elif gpu_info.get('probed'):
-                            msg = legends['msg_rocm_probed_again']
+                            msg = legends['msg_gpu_probed_again'].format(runtime=runtime)
                             print(msg)
-                    elif device_info['name'] == devices['ROCM']['proc'] and gpu_info['count'] > 0:
-                        # ROCm runs here (DEVICE_TAG forcing it after a failure, a fixed driver): no verdict stands
-                        self.rocm_verdict_clear()
+                    elif backend in gpu_unusable_flags:
+                        # the backend runs here (DEVICE_TAG forcing it after a failure, a fixed driver): no verdict stands
+                        self.gpu_verdict_clear(backend)
                     if gpu_info['count'] > 0:
-                        idx = ','.join(str(i) for i in range(gpu_info['count']))
+                        # the GPUs torch runs on, in the probe's numbering, which counts within the user's own list
+                        usable = gpu_info.get('devices') or list(range(gpu_info['count']))
                         if gpu_info['backend'] == 'cuda':
-                            os.environ['CUDA_VISIBLE_DEVICES'] = idx
+                            os.environ['CUDA_VISIBLE_DEVICES'] = self.visible_subset(os.environ.get('CUDA_VISIBLE_DEVICES'), usable)
                         elif gpu_info['backend'] == 'rocm':
-                            # the devices torch runs on, in the probe's numbering: every GPU when lib/conf.py pinned GPU
-                            # 0 itself (rocm_visible_pinned), e2a then runs on the first working one alone, the pin
-                            # moved there. Else within the user's own list, kept to its working entries (HIP reads
-                            # CUDA_VISIBLE_DEVICES when HIP_VISIBLE_DEVICES is unset)
-                            usable = gpu_info.get('devices') or list(range(gpu_info['count']))
+                            # every GPU when lib/conf.py pinned GPU 0 itself (rocm_visible_pinned): e2a then runs on the
+                            # first working one alone, the pin moved there. Else the user's own list, kept to its working
+                            # entries (HIP reads CUDA_VISIBLE_DEVICES when HIP_VISIBLE_DEVICES is unset)
                             if rocm_visible_pinned:
                                 os.environ.pop('ROCR_VISIBLE_DEVICES', None)
                                 os.environ['HIP_VISIBLE_DEVICES'] = str(usable[0])
                             else:
-                                visible = os.environ.get('HIP_VISIBLE_DEVICES') or os.environ.get('CUDA_VISIBLE_DEVICES')
-                                entries = [entry.strip() for entry in visible.split(',')] if visible else []
-                                os.environ['HIP_VISIBLE_DEVICES'] = ','.join(entries[i] if i < len(entries) else str(i) for i in usable)
+                                os.environ['HIP_VISIBLE_DEVICES'] = self.visible_subset(os.environ.get('HIP_VISIBLE_DEVICES') or os.environ.get('CUDA_VISIBLE_DEVICES'), usable)
                             # detect_gpu.py resolved it in its own child process against the installed torch's GPU
                             # targets, count > 0 means torch found the GPU under it. The only override this process gets
                             if gpu_info.get('hsa_override') and not os.environ.get('HSA_OVERRIDE_GFX_VERSION'):
                                 os.environ['HSA_OVERRIDE_GFX_VERSION'] = gpu_info['hsa_override']
                         elif gpu_info['backend'] == 'xpu':
-                            os.environ['ONEAPI_DEVICE_SELECTOR'] = f'level_zero:{idx}'
-                            os.environ['ZE_AFFINITY_MASK'] = idx
+                            self.xpu_visible(usable)
                     # read back with a native crash of this process (bug_reporter.note()): which way the probe went and
-                    # what torch runs under (XPU guard, HSA override), which the report of the next launch cannot tell
-                    if device_info['name'] in [devices['CUDA']['proc'], devices['ROCM']['proc'], devices['XPU']['proc']]:
+                    # what torch runs under (the guards, the visible GPUs, the HSA override), which the report of the
+                    # next launch cannot tell
+                    if backend in gpu_unusable_flags:
                         from lib.classes.bug_reporter import bug_reporter
                         answer = 'answered' if gpu_info.get('probed') else 'no answer'
-                        probe = f"{device_info['name']} count {gpu_info['count']} ({answer})"
-                        if device_info['name'] == devices['XPU']['proc']:
-                            probe += f", E2A_XPU_UNUSABLE={os.environ.get('E2A_XPU_UNUSABLE', '0')}"
-                        elif device_info['name'] == devices['ROCM']['proc']:
-                            probe += f", devices {gpu_info.get('devices')}, HIP_VISIBLE_DEVICES={os.environ.get('HIP_VISIBLE_DEVICES') or 'unset'}, HSA_OVERRIDE_GFX_VERSION={os.environ.get('HSA_OVERRIDE_GFX_VERSION') or 'unset'}, E2A_ROCM_UNUSABLE={os.environ.get('E2A_ROCM_UNUSABLE', '0')}"
+                        probe = f"{backend} count {gpu_info['count']} ({answer}), devices {gpu_info.get('devices')}, {gpu_unusable_flags[backend]}={os.environ.get(gpu_unusable_flags[backend], '0')}"
+                        if backend == devices['CUDA']['proc']:
+                            probe += f", CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES') or 'unset'}"
+                        elif backend == devices['ROCM']['proc']:
+                            probe += f", HIP_VISIBLE_DEVICES={os.environ.get('HIP_VISIBLE_DEVICES') or 'unset'}, HSA_OVERRIDE_GFX_VERSION={os.environ.get('HSA_OVERRIDE_GFX_VERSION') or 'unset'}"
+                        else:
+                            probe += f", ZE_AFFINITY_MASK={os.environ.get('ZE_AFFINITY_MASK') or 'unset'}"
                         bug_reporter.fact('gpu_probe', probe)
                     return 0
                 else:

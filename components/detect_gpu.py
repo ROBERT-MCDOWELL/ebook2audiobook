@@ -84,7 +84,7 @@ def handle_rocm_override(arch_list:set[str]|None=None)->str|None:
                 elif arch_list is not None and info.get('gfx_target') in arch_list:
                     native_targets.add(info['gfx_target'])
                 # an entry overriding across ISA families (a gfx1010 put on 10.3.0) is never applied: the GPU runs as
-                # itself, and rocm_gpu_test() tells whether torch has code for it
+                # itself, and gpu_test() tells whether torch has code for it
                 elif info.get('override') and not crosses_family(info.get('gfx_target'), override_target(info['override'])):
                     overrides.add(info['override'])
                 elif info.get('supported'):
@@ -151,50 +151,54 @@ def rocm_gfx_mismatch(torch, index:int, count:int, override:str|None, kfd:dict[t
         return None
     return dict(device=f'cuda:{index}', native=native, native_family=gfx_family(native), override=override, target=target, target_family=gfx_family(target))
 
-def rocm_gpu_test(torch, index:int)->str|None:
-    """Why ROCm device index does not run torch's code, None when it does.
+def gpu_test(torch, accel, prefix:str, index:int)->str|None:
+    """Why GPU index of a torch backend (accel: torch.cuda for CUDA and ROCm, torch.xpu, prefix their device type)
+    does not run torch's code, None when it does.
     A device count never runs GPU code: a GPU the runtime lists but cannot run passed with count 1, and the first model
     moved to it killed e2a (crash report 8a1a1c471e8f6852: a BC-250, gfx1013, which no ROCm supports, under the user's
     HSA_OVERRIDE_GFX_VERSION=10.3.0, the gfx1030 code of another ISA family; Aborted in a ROCm thread at XTTS
     module.to()). The device gets what a model load starts with: a host tensor copied over (Module.to()), kernels on it,
-    the result read back. A native fault kills this child: rocm_usable_devices() says which device it tests first"""
+    the result read back. A native fault kills this child: usable_devices() says which device it tests first"""
     size = 1 << 22
+    device = f'{prefix}:{index}'
     try:
-        on_gpu = torch.ones(size).to(f'cuda:{index}')
+        on_gpu = torch.ones(size).to(device)
         # 3 * 2**22 stays below 2**24: every partial sum of the reduction is exact in float32
         total = (on_gpu * 2 + 1).sum().item()
-        torch.cuda.synchronize(index)
+        accel.synchronize(index)
     except Exception as e:
-        return f'cuda:{index} GPU test failed: {type(e).__name__}: {e}'
+        return f'{device} GPU test failed: {type(e).__name__}: {e}'
     if total != 3 * size:
-        return f'cuda:{index} GPU test failed: computed {total:g} instead of {3 * size}'
+        return f'{device} GPU test failed: computed {total:g} instead of {3 * size}'
     return None
 
-def rocm_usable_devices(torch, count:int, override:str|None, skip:set[int])->tuple[list[int], list[str], dict|None]:
-    """The ROCm devices torch runs on, each judged alone: a rejected one never hides the others (an unsupported iGPU
-    listed before a working card). Returns (their indices, why each other one is not, the first ISA family mismatch).
-    skip: devices whose GPU test killed an earlier probe (DeviceInstaller.probe_gpus() runs it again without them). Each
-    GPU test is announced on stdout first and its end after, so a native crash or a GPU that hangs (no end within
-    DeviceInstaller.gpu_test_timeout) tells which device it was"""
+def usable_devices(torch, backend:str, count:int, override:str|None, skip:set[int])->tuple[list[int], list[str], dict|None]:
+    """The GPUs of backend ('cuda', 'rocm', 'xpu') torch runs on, each judged alone: a rejected one never hides the
+    others (an unsupported iGPU listed before a working card). Returns (their indices, why each other one is not, the
+    first ISA family mismatch, ROCm only). skip: devices whose GPU test killed an earlier probe or hung
+    (DeviceInstaller.probe_gpus() runs it again without them). Each GPU test is announced on stdout first and its end
+    after, so a native crash or a GPU that hangs (no end within DeviceInstaller.gpu_test_timeout) tells which it was"""
+    accel, prefix = (torch.xpu, 'xpu') if backend == 'xpu' else (torch.cuda, 'cuda')
     try:
         # the runtime's own start-up, before the GPU tests and their time limit
-        torch.cuda.init()
+        if (init := getattr(accel, 'init', None)):
+            init()
     except Exception as e:
-        return [], [f'torch.cuda.init() failed: {type(e).__name__}: {e}'], None
-    kfd = kfd_gpu_targets() if gfx_family(override_target(override)) else {}
+        return [], [f'torch.{prefix}.init() failed: {type(e).__name__}: {e}'], None
+    kfd = kfd_gpu_targets() if backend == 'rocm' and gfx_family(override_target(override)) else {}
     usable:list[int] = []
     reasons:list[str] = []
     first_gfx:dict|None = None
     for index in range(count):
         if index in skip:
             continue
-        if (gfx := rocm_gfx_mismatch(torch, index, count, override, kfd)):
+        if backend == 'rocm' and (gfx := rocm_gfx_mismatch(torch, index, count, override, kfd)):
             first_gfx = first_gfx or gfx
             reasons.append(f"{gfx['device']} is a {gfx['native']} ({gfx['native_family']}), {HSA_OVERRIDE_ENV}={gfx['override']} runs {gfx['target']} code ({gfx['target_family']}) on it: another ISA family")
             continue
-        print(json.dumps({'rocm_testing': index, 'rocm_count': count}), flush=True)
-        reason = rocm_gpu_test(torch, index)
-        print(json.dumps({'rocm_tested': index}), flush=True)
+        print(json.dumps({'gpu_testing': index, 'gpu_count': count, 'device': f'{prefix}:{index}', 'backend': backend}), flush=True)
+        reason = gpu_test(torch, accel, prefix, index)
+        print(json.dumps({'gpu_tested': index}), flush=True)
         if reason:
             reasons.append(reason)
             continue
@@ -261,18 +265,19 @@ def main()->None:
                 case 'cuda' | 'rocm' if torch.cuda.is_available() and bool(getattr(torch.version, 'hip', None)) == (backend == 'rocm'):
                     # wheel vendor must match the tag: a CUDA wheel on a rocm tag (or the reverse) keeps count at 0
                     result['count'] = torch.cuda.device_count()
-                    if backend == 'rocm' and result['count'] > 0:
-                        # torch's own count, before the tests: a verdict about these GPUs, not about a ROCm that sees none
-                        result['rocm_listed'] = result['count']
-                        skip = {int(index) for index in os.environ.get('E2A_ROCM_SKIP', '').split(',') if index.strip().isdigit()}
-                        usable, reasons, gfx = rocm_usable_devices(torch, result['count'], result['hsa_override'], skip)
-                        result['count'] = len(usable)
-                        result['devices'] = usable
-                        result['error'] = '; '.join(reasons) or None
-                        if gfx:
-                            result['gfx'] = gfx
                 case 'xpu' if hasattr(torch, 'xpu') and torch.xpu.is_available():
                     result['count'] = torch.xpu.device_count()
+            # E2A_GPU_TEST=0: the count alone (DeviceInstaller.cuda_torch_crashes, which judges wheels, not GPUs)
+            if result['count'] > 0 and os.environ.get('E2A_GPU_TEST') != '0':
+                # torch's own count, before the tests: a verdict about these GPUs, not about a runtime that sees none
+                result['listed'] = result['count']
+                skip = {int(index) for index in os.environ.get('E2A_GPU_SKIP', '').split(',') if index.strip().isdigit()}
+                usable, reasons, gfx = usable_devices(torch, backend, result['count'], result['hsa_override'], skip)
+                result['count'] = len(usable)
+                result['devices'] = usable
+                result['error'] = '; '.join(reasons) or None
+                if gfx:
+                    result['gfx'] = gfx
         # mps, jetson, cpu → no torch import, count stays 0 (single-device or no-device)
     except Exception as e:
         result['error'] = str(e)

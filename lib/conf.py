@@ -81,9 +81,14 @@ vulkan_loader = os.path.join(os.environ.get('SystemRoot', r'C:\Windows'), 'Syste
 device_info_json = '.device_info.json'
 # the GPU the user picked when several can run e2a (DeviceInstaller.choose_gpu)
 gpu_choice_file = '.gpu_choice'
-# the ROCm probe's verdict that torch cannot run on this AMD GPU (DeviceInstaller.rocm_verdict_save): the next starts
-# skip ROCm and take Vulkan or the CPU, until the torch build, the GPUs or HSA_OVERRIDE_GFX_VERSION change
-rocm_verdict_file = '.rocm_unusable'
+# the GPU probe's verdicts that torch cannot run on this machine's GPUs, one per backend (DeviceInstaller.gpu_verdict_save):
+# the next starts skip that backend and take Vulkan or the CPU, until the torch row, the GPUs, the driver (CUDA, XPU)
+# or HSA_OVERRIDE_GFX_VERSION (ROCm) change
+gpu_verdict_file = '.gpu_unusable'
+# per GPU backend: the env flag that makes torch report no device once the probe found torch cannot run on its GPUs
+# (components/sitecustomize.py, the engines' workers), and its vendor and runtime names for the messages
+gpu_unusable_flags = {devices['CUDA']['proc']: 'E2A_CUDA_UNUSABLE', devices['ROCM']['proc']: 'E2A_ROCM_UNUSABLE', devices['XPU']['proc']: 'E2A_XPU_UNUSABLE'}
+gpu_runtime_names = {devices['CUDA']['proc']: ('NVIDIA', 'CUDA'), devices['ROCM']['proc']: ('AMD', 'ROCm'), devices['XPU']['proc']: ('Intel', 'XPU')}
 device_info_dict = {"gpu_count": 0, "gpu_backend": None}
 
 default_device = devices['CPU']['proc']
@@ -195,7 +200,7 @@ multiprocessing_tempdir_patch()
 # cannot load everywhere: FFmpeg 8 on Windows, ROCm builds) and allowlists coqui's config for torch.load. When this
 # interpreter did not run it (copy missing, app.py started another way), it runs here, before torch/torchaudio import.
 # The launchers refresh the copy only when they run: started another way, app.py can run an older one, missing the
-# patches added since (E2A_XPU_UNUSABLE, E2A_ROCM_UNUSABLE). This one then runs too, its hook goes first in sys.meta_path and takes
+# patches added since (E2A_XPU_UNUSABLE, E2A_CUDA_UNUSABLE, E2A_ROCM_UNUSABLE). This one then runs too, its hook goes first in sys.meta_path and takes
 # torch/torchaudio over from the old one
 def sitecustomize_patch()->None:
     sitecustomize_src = os.path.join(os.path.dirname(root_dir), 'components', 'sitecustomize.py')
@@ -219,8 +224,8 @@ def sitecustomize_patch()->None:
             module.patch_torchaudio(sys.modules['torchaudio'])
         if 'torch' in sys.modules and hasattr(module, 'patch_torch_xpu'):
             module.patch_torch_xpu(sys.modules['torch'])
-        if 'torch' in sys.modules and hasattr(module, 'patch_torch_rocm'):
-            module.patch_torch_rocm(sys.modules['torch'])
+        if 'torch' in sys.modules and hasattr(module, 'patch_torch_cuda'):
+            module.patch_torch_cuda(sys.modules['torch'])
     except Exception as e:
         error = f'sitecustomize_patch(): {e}'
         print(error)

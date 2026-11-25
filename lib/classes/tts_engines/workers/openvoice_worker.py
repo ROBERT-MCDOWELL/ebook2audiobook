@@ -132,9 +132,10 @@ def main()->int:
         if os.environ.get('E2A_XPU_UNUSABLE') == '1' and hasattr(torch, 'xpu'):
             torch.xpu.device_count = lambda: 0
             torch.xpu.is_available = lambda: False
-        # E2A_ROCM_UNUSABLE: e2a found torch ROCm cannot run on this AMD GPU (its first tensor copy killed the probe).
-        # Code that picks 'cuda' whenever torch.cuda.is_available() says yes stays on the CPU. Set here too, like above
-        if os.environ.get('E2A_ROCM_UNUSABLE') == '1' and getattr(torch.version, 'hip', None):
+        # E2A_CUDA_UNUSABLE / E2A_ROCM_UNUSABLE: e2a found torch cannot run on the NVIDIA / AMD GPUs (their GPU test
+        # failed, hung or killed the probe). Code that picks 'cuda' whenever torch.cuda.is_available() says yes stays on
+        # the CPU. Set here too, like above; each flag hides only the torch it was set for
+        if os.environ.get('E2A_ROCM_UNUSABLE' if getattr(torch.version, 'hip', None) else 'E2A_CUDA_UNUSABLE') == '1':
             torch.cuda.device_count = lambda: 0
             torch.cuda.is_available = lambda: False
         import torch.distributed
