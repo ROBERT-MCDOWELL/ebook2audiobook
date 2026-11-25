@@ -10,7 +10,7 @@ Inasaidia kupiga picha za sauti na lugha 1696!
 Waandishi hawawajibikii matumizi mabaya yoyote ya programu hii au matokeo yoyote ya kisheria yanayotokana nayo. <br>
 Tumia zana hii kwa uwajibikaji na kwa kufuata sheria zote zinazotumika.
 
-[![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/63Tv3F65k6)](https://discord.gg/63Tv3F65k6)
+[![Discord](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2F63Tv3F65k6%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&logo=discord&logoColor=white&color=5865F2&label=Discord&suffix=%20members)](https://discord.gg/63Tv3F65k6)
 
 ### Shukrani kwa watengenezaji wa ebook2audiobook wanaosaidia!
 <p>
@@ -102,6 +102,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
+  - [Check an audiobook for hallucinations](#check-audiobook-hallucinations)
   
 - [Cloned Voices](#cloned-voices)
 - [Fine Tuned TTS models](#fine-tuned-tts-models) 
@@ -118,7 +119,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 <a id="features"></a>
 ## Vipengele
-- 🔧 **Injini za TTS zinazotumika**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos2, Zonos3, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS, ZipVoice (LuxTTS)`
+- 🔧 **Injini za TTS zinazotumika**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos2, Zonos3, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS, ZipVoice (LuxTTS), KittenTTS`
 - 📚 **Badilisha miundo mingi ya faili**: `.epub`, `.mobi`, `.azw3`, `.fb2`, `.lrf`, `.rb`, `.snb`, `.tcr`, `.pdf`, `.txt`, `.rtf`, `.doc`, `.docx`, `.html`, `.odt`, `.azw`, `.tiff`, `.tif`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.zip`
 - 💻 **Eneo la Maandishi** ili kubadilisha moja kwa moja maandishi mafupi kuwa sauti
 - 🔍 **Uchanganuzi wa OCR** kwa faili zenye kurasa za maandishi kama picha
@@ -524,7 +525,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - KUMBUKA: MPS haipatikani ndani ya Docker kwa hiyo lazima CPU itumike
-- KUMBUKA: Kiasi kilichotajwa `e2a_venvs` kinahifadhi injini za TTS zilizosakinishwa katika venv yao wenyewe (GPT-SoVITS, Zonos2, Zonos3, OmniVoice, F5-TTS, ZipVoice, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM n.k.)
+- KUMBUKA: Kiasi kilichotajwa `e2a_venvs` kinahifadhi injini za TTS zilizosakinishwa katika venv yao wenyewe (GPT-SoVITS, Zonos2, Zonos3, OmniVoice, F5-TTS, ZipVoice, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM, KittenTTS n.k.)
   kati ya uendeshaji mmoja wa kontena na mwingine, kwa hiyo hazisakinishwi upya kila mara. Ili kuziweka upya: `docker volume rm e2a_venvs`
 
 <a id="tools"></a>
@@ -564,8 +565,8 @@ options:
   -h, --help            show this help message and exit
   --only ONLY           Comma list of categories: common,xtts,bark,tortoise,vits,fairseq,glowtts,tacotron,yo
                         urtts,piper,zonos2,zonos3,audiocpp,audiocpp_server,gptsovits,f5tts,zipvoice,omnivoic
-                        e,orpheus,sparktts,chattts,csm,openvoice,melotts,phonon,stanza,pyannote,demucs,inter
-                        lude,argos,tessdata,jieba,voices
+                        e,orpheus,sparktts,chattts,csm,kittentts,openvoice,melotts,phonon,stanza,pyannote,de
+                        mucs,interlude,argos,tessdata,jieba,voices
   --skip SKIP           Comma list of categories to leave out
   --languages LANGUAGES
                         Comma list of e2a ISO-639-3 codes (eng,fra,ita...): single-language models and fine-
@@ -670,6 +671,77 @@ examples:
   translate_ebook.py @books.txt --to ita --mode bilingual
   translate_ebook.py --list
   translate_ebook.py --list --from eng
+```
+
+<a id="check-audiobook-hallucinations"></a>
+### Kagua kitabu cha sauti ili kuona ikiwa kuna sauti zisizotarajiwa: `tools/check_audiobook_hallucinations.py`
+Inaorodhesha sentensi za kitabu cha sauti cha e2a kilichokamilika ambazo hazisomi maandishi yake: maneno yasiyoeleweka, neno au kirai kilichosemwa mara mbili
+au kurukwa, kunong'ona kabla au baada ya maandishi, sentensi ndefu sana au fupi sana kwa maandishi yake (XTTS na
+injini za kujirejeshia hufanya hivyo mara kwa mara). Ripoti pekee: kitabu cha sauti hakijabadilishwa, unaamua nini cha kufanya upya.
+Inasoma `.vtt` e2a inaandika kando ya kila kitabu cha sauti (ishara moja kwa kila sentensi), inanakili kila sentensi kwa
+`facebook/mms-1b-all` (lugha 1162, takribani GB 4, zinapakuliwa kwenye `./models/tts` wakati wa matumizi ya kwanza) na hulinganisha
+herufi za maandishi yote mawili, zimeandikwa kwa herufi za Kilatini, kwa hivyo maandishi yoyote yanafaa. Mipaka inatokana na kitabu chenyewe (wastani wa
+sentensi), majina au maandishi magumu huyaongeza kwa kitabu kizima huku udanganyifu wa akili ukionekana.
+Sentensi zenye herufi chini ya 10 na zile ambazo bado zina tarakimu hufanyiwa ukaguzi wa urefu pekee, vivyo hivyo kwa lugha ambayo MMS haijui.
+Neno linalokosekana lenye herufi 5 au zaidi linagunduliwa (yote 19 katika sentensi za XTTS zilizosomwa huku neno moja likiachwa), mara moja katika kipindi kifupi
+ya sauti inayouzunguka inathibitisha kwamba haupo: kitambuzi kinaacha neno mwanzoni au mwishoni mwa sentensi ndefu
+ambayo inasikia yenyewe. Neno linalokosekana lenye herufi 3 au 4 kwa kawaida halipo: kipengele cha kutambua huacha maneno mafupi hata katika sauti nzuri.
+Kila sentensi iliyowekewa alama inachapishwa mara tu inavyopatikana, zote tena katika jedwali mwishoni, kulingana na kifungu chake na
+nambari za sentensi kama e2a inavyozipatia nambari (kuanzia 0). Kila sentensi na tatizo lake, maandishi yake, kile kilichosikika badala yake na
+vipimo vyake huhifadhiwa katika `<audiobook>.hallucinations.json`. Wakati inafanya kazi, sentensi inahukumiwa kulingana na sentensi zilizotangulia
+hicho, jedwali kwenye kitabu kizima: sentensi iliyochapishwa mapema inaweza kufutwa mwishoni, mstari ulio chini ya jedwali unasema hivyo. Nambari zinatoka kwenye `.vtt` (e2a inataja kila kidokezi `block <n> sentence <n>`); katika kitabu cha sauti kilichotengenezwa hapo awali,
+vitalu vinahesabiwa kutoka kwenye sura zake, baada ya kitengo kuachwa nje ya ubadilishaji.
+   - **Linux/MacOS**
+     ```bash
+     ./python_env/bin/python tools/check_audiobook_hallucinations.py audiobooks/cli/book.m4b
+     ```
+   - **Windows**
+     ```bash
+     python_env\Scripts\python.exe tools\check_audiobook_hallucinations.py audiobooks\cli\book.m4b
+     ```
+   - Folda huangalia kila kitabu cha sauti kilicho ndani yake ambacho kina `.vtt` yake (sehemu zote za kitabu cha sauti kilichogawanywa).
+   - `--language` inahitajika kwa ajili ya kitabu kilichotafsiriwa: lebo yake ya lugha inadumisha lugha ya kitabu cha kielektroniki.
+   - **Kifaa**: `--device` inachukua majina ya e2a, `cpu`, `cuda`, `rocm`, `xpu`, `mps` au `jetson` (usahihi wa nusu kwenye
+     GPU lakini MPS). Kwa chaguo-msingi, ni ile ambayo e2a iliwekwa kwa ajili yake na cpu wakati ile haiwezi kutumika.
+   - **Kasi**: Dakika 7.6 za sauti zilichukua dakika 2.3 hadi 5.4 kwenye kokotoa 4 za CPU, GPU ndiyo njia ya kutumia kwa kitabu kizima.
+
+```bash
+usage: check_audiobook_hallucinations.py [-h] [-l LANGUAGE] [--vtt VTT] [-o OUTPUT]
+                                         [--device {auto,cpu,cuda,rocm,xpu,mps,jetson}]
+                                         audiobooks [audiobooks ...]
+
+Report the sentences of an e2a audiobook that do not say their text: babble, a word or a phrase
+said twice or skipped, mumble before or after the text, a sentence too long or too short for its text.
+Report only: the audiobook is not changed.
+It reads the .vtt e2a writes beside each audiobook (one cue per sentence), transcribes each sentence with
+facebook/mms-1b-all (1162 languages, downloaded into models/tts on first use) and compares the letters of
+both texts, romanized (uroman, pykakasi for Japanese). The limits come from the book itself, from the
+medians of all its sentences: names or a hard text raise them for the whole book, a hallucination stands out.
+Each flagged sentence is printed as soon as it is found, all of them in a table at the end, by their block and
+sentence numbers as in e2a (from 0). Every sentence with its problem, its text, what was heard and its measures
+is saved in <audiobook>.hallucinations.json.
+
+positional arguments:
+  audiobooks            Audiobook files (m4b, mp3, flac...) with their .vtt beside them, or folders holding
+                        them
+
+options:
+  -h, --help            show this help message and exit
+  -l LANGUAGE, --language LANGUAGE
+                        Language spoken, e2a ISO-639-3 code (default: the audiobook's language tag; set it
+                        for a translated book, its tag keeps the ebook's language)
+  --vtt VTT             Subtitles of the audiobook, single audiobook only (default: <audiobook>.vtt)
+  -o OUTPUT, --output OUTPUT
+                        JSON report, single audiobook only (default: <audiobook>.hallucinations.json beside
+                        it)
+  --device {auto,cpu,cuda,rocm,xpu,mps,jetson}
+                        Device the speech recognizer runs on, named as in e2a (default: the one e2a was
+                        installed for, cpu when it cannot be used)
+
+examples:
+  check_audiobook_hallucinations.py audiobooks/cli/book.m4b
+  check_audiobook_hallucinations.py audiobooks/cli/book.m4b --language fra --device cuda
+  check_audiobook_hallucinations.py audiobooks/cli
 ```
 
 <a id="cloned-voices"></a>
@@ -804,6 +876,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] ChatTTS (https://github.com/2noise/ChatTTS)
 - [x] Spark-TTS (https://github.com/sparkaudio/spark-tts)
 - [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
+- [x] KittenTTS (https://github.com/KittenML/KittenTTS)
 - [x] CSM (https://github.com/SesameAILabs/csm)
 
 #### Tafsiri ya Readme

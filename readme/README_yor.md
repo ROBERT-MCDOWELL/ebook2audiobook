@@ -10,7 +10,7 @@ ní lílo àwọn ẹ̀rọ TTS tó ní ìlọsíwájú àti púpọ̀ síi.<br/
 Àwọn òǹkọ̀wé kò ní jẹ́jọ́ fún ìlòkulò èyíkéyìí ti software yìí tàbí àbájáde òfin èyíkéyìí tí ó bá yọrí sí. <br>
 Lo ọ̀pá-ìṣẹ́ yìí pẹ̀lú ojúṣe àti ní ìbámu pẹ̀lú gbogbo àwọn òfin tó wà ní agbára.
 
-[![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/63Tv3F65k6)](https://discord.gg/63Tv3F65k6)
+[![Discord](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2F63Tv3F65k6%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&logo=discord&logoColor=white&color=5865F2&label=Discord&suffix=%20members)](https://discord.gg/63Tv3F65k6)
 
 ### O ṣeun fún àtìlẹyìn fún àwọn olùṣèwádìí ebook2audiobook!
 <p>
@@ -102,6 +102,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 - [Tools](#tools)
   - [Preload models for offline installs](#preload-models)
   - [Translate ebooks out of e2a](#translate-ebooks)
+  - [Check an audiobook for hallucinations](#check-audiobook-hallucinations)
   
 - [Cloned Voices](#cloned-voices)
 - [Fine Tuned TTS models](#fine-tuned-tts-models) 
@@ -118,7 +119,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 <a id="features"></a>
 ## Àwọn Ẹ̀yà
-- 🔧 **Àwọn Ẹ̀rọ TTS tí a ṣe àtìlẹyìn**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos2, Zonos3, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS, ZipVoice (LuxTTS)`
+- 🔧 **Àwọn Ẹ̀rọ TTS tí a ṣe àtìlẹyìn**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos2, Zonos3, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS, ZipVoice (LuxTTS), KittenTTS`
 - 📚 **Yí àwọn ọ̀nà fáìlì púpọ̀ padà**: `.epub`, `.mobi`, `.azw3`, `.fb2`, `.lrf`, `.rb`, `.snb`, `.tcr`, `.pdf`, `.txt`, `.rtf`, `.doc`, `.docx`, `.html`, `.odt`, `.azw`, `.tiff`, `.tif`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.zip`
 - 💻 **Agbègbè Ọ̀rọ̀** láti yí ọ̀rọ̀ kúkúrú padà tààrà sí ohùn
 - 🔍 **Àyẹ̀wò OCR** fún àwọn fáìlì tó ní àwọn ojú-ìwé ọ̀rọ̀ gẹ́gẹ́ bí àwòrán
@@ -524,7 +525,7 @@ Podman Compose (i.e. cuda 12.8:
                DEVICE_TAG=cu128 podman-compose -f podman-compose.yml --profile cuda run --rm ebook2audiobook-cuda --headless --ebook "/app/ebooks/myfile.pdf" --voice /app/voices/eng/adult/female/some_voice.wav etc..
 ```
 - ÀKÍYÈSÍ: MPS kò sí ní àrọ́wọ́tó nínú Docker, nítorí náà a gbọ́dọ̀ lo CPU
-- ÀKÍYÉSÍ: ìwọ̀n `e2a_venvs` tí a dárúkọ máa ń tọ́jú àwọn ẹ̀rọ TTS tí a fi sori ẹrọ ní venv tiwọn (GPT-SoVITS, Zonos2, Zonos3, OmniVoice, F5-TTS, ZipVoice, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM àti bẹ́ẹ̀ bẹ́ẹ̀ lọ.)
+- ÀKÍYÉSÍ: ìwọ̀n tí a dárúkọ `e2a_venvs` ń tọ́jú àwọn ẹ̀rọ TTS tí a fi sori ẹrọ ní venv tiwọn (GPT-SoVITS, Zonos2, Zonos3, OmniVoice, F5-TTS, ZipVoice, Orpheus, Spark-TTS, ChatTTS, OpenVoice, MeloTTS, CSM, KittenTTS àti bẹ́ẹ̀ bẹ́ẹ̀ lọ.)
   láti ìgbà kan tí container bá ṣiṣẹ́ sí òmíràn, kí a má baà tún wọn fi sori ẹ̀rọ ní gbogbo ìgbà. Láti tún wọn ṣètò: `docker volume rm e2a_venvs`
 
 <a id="tools"></a>
@@ -564,8 +565,8 @@ options:
   -h, --help            show this help message and exit
   --only ONLY           Comma list of categories: common,xtts,bark,tortoise,vits,fairseq,glowtts,tacotron,yo
                         urtts,piper,zonos2,zonos3,audiocpp,audiocpp_server,gptsovits,f5tts,zipvoice,omnivoic
-                        e,orpheus,sparktts,chattts,csm,openvoice,melotts,phonon,stanza,pyannote,demucs,inter
-                        lude,argos,tessdata,jieba,voices
+                        e,orpheus,sparktts,chattts,csm,kittentts,openvoice,melotts,phonon,stanza,pyannote,de
+                        mucs,interlude,argos,tessdata,jieba,voices
   --skip SKIP           Comma list of categories to leave out
   --languages LANGUAGES
                         Comma list of e2a ISO-639-3 codes (eng,fra,ita...): single-language models and fine-
@@ -670,6 +671,77 @@ examples:
   translate_ebook.py @books.txt --to ita --mode bilingual
   translate_ebook.py --list
   translate_ebook.py --list --from eng
+```
+
+<a id="check-audiobook-hallucinations"></a>
+### Ṣàyẹwò ìwé tí wọ́n kà fún àwọn ohun tí kò sí: `tools/check_audiobook_hallucinations.py`
+Ó ṣe àkójọ àwọn gbolohun tí ó wà nínú ìwé ohùn e2a tí ó ti parí tí kò sọ ọ̀rọ̀ wọn: ọ̀rọ̀ tí kò yé ẹnikẹ́ni, ọ̀rọ̀ kan tàbí gbólóhùn kan tí a sọ lẹ́ẹ̀mejì
+tábi tí a fò ju lọ, sọ̀rọ̀ pẹ̀lú ohùn kékeré ṣáájú tàbí lẹ́yìn ọ̀rọ̀ náà, gbolohun tí ó gùn jù tàbí tí ó kúkú kúrú jù fún ọ̀rọ̀ rẹ̀ (XTTS àti àwọn ìlànà
+àwọn ẹ̀rọ ìdápadà-ara-ẹni máa ń ṣe é nígbà mìíràn). Ijabọ nikan: a ko yi iwe ohun naa pada, iwọ ni o pinnu ohun ti o fẹ ṣe lẹẹkansi.
+Ó kà àwọn `.vtt` e2a tí ó kọ sí ẹ̀gbẹ́ gbogbo ìwé-ohùn (àkíyèsí kan fún gbogbo gbolohun), ó kọ gbogbo gbolohun náà sílẹ̀ pẹ̀lú
+`facebook/mms-1b-all` (àwọn èdè 1162, tó tó 4 GB, tí a gba sí `./models/tts` ní ìgbà àkọ́kọ́ tí a lò ó) ó sì fi wé
+àwọn lẹ́tà àwọn ọ̀rọ̀ méjèèjì, tí a sọ di èdè Látìnì, nítorí náà ìwé èyíkéyìí lè ṣiṣẹ́. Àwọn ìlà ààlà náà wá láti inú ìwé náà fúnra rẹ̀ (àwọn àárín gbogbo
+àwọn gbolohun), àwọn orúkọ tàbí ọ̀rọ̀ tí ó le máa mú wọn dìde fún gbogbo ìwé náà nígbà tí ìrísí àrùn kan bá yàtọ̀.
+Àwọn gbolohun tí ó kéré ju lẹ́tà mẹ́wàá lọ àti àwọn tí ó ṣì ní àwọn nọ́ḿbà ni a ó ṣe àyẹ̀wò gígùn fún nìkan, bákan náà ni èdè tí MMS kò mọ̀.
+A ti rí ọ̀rọ̀ tí ó ṣaláìsí tí ó ní lẹ́tà 5 tàbí jù bẹ́ẹ̀ lọ (gbogbo 19 nínú àwọn gbolohun XTTS tí a kà pẹ̀lú ọ̀rọ̀ kan tí ó ṣaláìsí), lẹ́ẹ̀kan nínú àkókò kékeré kan
+ohùn tí ó wà ní àyíká rẹ̀ fi hàn pé kò sí níbẹ̀: ẹ̀rọ ìdámọ̀ náà yọ ọ̀rọ̀ kan kúrò ní ìbẹ̀rẹ̀ tàbí ní òpin gbogbo gbolohun náà
+tí ó gbọ́ fúnra rẹ̀. Ọ̀rọ̀ tí ó ṣaláìsí tí ó ní lẹ́tà 3 tàbí 4 kò kì í jẹ́ bẹ́ẹ̀: ẹ̀rọ ìdámọ̀ máa ń yọ àwọn ọ̀rọ̀ kúkúrú kúrò nínú ohùn tí ó dára náà pẹ̀lú.
+A máa tẹ gbogbo gbolohun tí a fi àmì sí lẹ́sẹ̀kẹsẹ̀ tí a bá rí i, gbogbo wọn ní a tún máa tẹ sí inú tábìlì kan ní òpin, gẹ́gẹ́ bí àkójọ wọn àti
+àwọn nọ́ḿbà gbolohun bí e2a ṣe ka wọn (láti 0). Gbogbo gbolohun pẹlu ìṣòro rẹ̀, ọ̀rọ̀ rẹ̀, ohun tí a gbọ́ dípò rẹ̀ àti
+a fi àwọn ìwọ̀n rẹ̀ pamọ́ sínú `<audiobook>.hallucinations.json`. Bí ó ti ń ṣiṣẹ́, a máa ń ṣe ìdájọ́ gbolohun kan lórí àwọn gbolohun tí ó ṣáájú
+ó, tábìlì lórí gbogbo ìwé náà: gbolohun tí a tẹ jáde ní ìbẹ̀rẹ̀ ni a lè pa mọ́ ní òpin, ìlà tí ó wà lábẹ́ tábìlì náà sọ bẹ́ẹ̀. Àwọn nọ́ḿbà náà wá láti `.vtt` (e2a ń sọ orúkọ olúkúlùkù àmì ìtọ́sọ́nà `block <n> sentence <n>`); nínú ìwé tí wọ́n fi ohùn ṣe ṣáájú,
+A ka àwọn ìdènà náà láti inú àwọn orí rẹ̀, lẹ́yìn ìdènà kan tí a kò fi sí inú ìyípadà náà.
+   - **Linux/MacOS**
+     ```bash
+     ./python_env/bin/python tools/check_audiobook_hallucinations.py audiobooks/cli/book.m4b
+     ```
+   - **Windows**
+     ```bash
+     python_env\Scripts\python.exe tools\check_audiobook_hallucinations.py audiobooks\cli\book.m4b
+     ```
+   - Fóòlà kan ṣàyẹwò gbogbo ìwé-ohùn tí ó wà nínú rẹ̀ tí ó ní `.vtt` rẹ̀ (gbogbo àwọn apá ti ìwé-ohùn tí a pín).
+   - A nílò `--language` fún ìwé tí a ti túmọ̀: àmì èdè rẹ̀ ń pa èdè ìwé kọ̀m̀pútà mọ́.
+   - **Ẹrọ**: `--device` gba awọn orukọ e2a, `cpu`, `cuda`, `rocm`, `xpu`, `mps` tabi `jetson` (ìdámẹ́wàá ìwọ̀n lórí
+     àwọn GPU ṣùgbọ́n MPS). Ní àkọlé, òun ni e2a tí a fi sori ẹrọ fún, àti cpu nígbà tí èyí kò bá lè ṣiṣẹ́.
+   - **Ìyára**: Ìṣẹ́jú 7.6 ti ohùn gba ìṣẹ́jú 2.3 sí 5.4 lórí àwọn kọ́ọ̀rù CPU 4, GPU ni ọ̀nà fún gbogbo ìwé náà.
+
+```bash
+usage: check_audiobook_hallucinations.py [-h] [-l LANGUAGE] [--vtt VTT] [-o OUTPUT]
+                                         [--device {auto,cpu,cuda,rocm,xpu,mps,jetson}]
+                                         audiobooks [audiobooks ...]
+
+Report the sentences of an e2a audiobook that do not say their text: babble, a word or a phrase
+said twice or skipped, mumble before or after the text, a sentence too long or too short for its text.
+Report only: the audiobook is not changed.
+It reads the .vtt e2a writes beside each audiobook (one cue per sentence), transcribes each sentence with
+facebook/mms-1b-all (1162 languages, downloaded into models/tts on first use) and compares the letters of
+both texts, romanized (uroman, pykakasi for Japanese). The limits come from the book itself, from the
+medians of all its sentences: names or a hard text raise them for the whole book, a hallucination stands out.
+Each flagged sentence is printed as soon as it is found, all of them in a table at the end, by their block and
+sentence numbers as in e2a (from 0). Every sentence with its problem, its text, what was heard and its measures
+is saved in <audiobook>.hallucinations.json.
+
+positional arguments:
+  audiobooks            Audiobook files (m4b, mp3, flac...) with their .vtt beside them, or folders holding
+                        them
+
+options:
+  -h, --help            show this help message and exit
+  -l LANGUAGE, --language LANGUAGE
+                        Language spoken, e2a ISO-639-3 code (default: the audiobook's language tag; set it
+                        for a translated book, its tag keeps the ebook's language)
+  --vtt VTT             Subtitles of the audiobook, single audiobook only (default: <audiobook>.vtt)
+  -o OUTPUT, --output OUTPUT
+                        JSON report, single audiobook only (default: <audiobook>.hallucinations.json beside
+                        it)
+  --device {auto,cpu,cuda,rocm,xpu,mps,jetson}
+                        Device the speech recognizer runs on, named as in e2a (default: the one e2a was
+                        installed for, cpu when it cannot be used)
+
+examples:
+  check_audiobook_hallucinations.py audiobooks/cli/book.m4b
+  check_audiobook_hallucinations.py audiobooks/cli/book.m4b --language fra --device cuda
+  check_audiobook_hallucinations.py audiobooks/cli
 ```
 
 <a id="cloned-voices"></a>
@@ -804,6 +876,7 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] ChatTTS (https://github.com/2noise/ChatTTS)
 - [x] Spark-TTS (https://github.com/sparkaudio/spark-tts)
 - [x] MeloTTS (https://github.com/myshell-ai/MeloTTS)
+- [x] KittenTTS (https://github.com/KittenML/KittenTTS)
 - [x] CSM (https://github.com/SesameAILabs/csm)
 
 #### Ìtumọ̀ Readme
