@@ -418,6 +418,7 @@ legends = {
     'msg_zeroshot_loaded': 'ZeroShot {model} লোড হয়েছে!',
     'msg_converting_builtin_voice': 'অন্তর্নির্মিত ইংরেজি কণ্ঠস্বর {lang}-এ রূপান্তর করা হচ্ছে…',
     'error_translated_default_text': 'অনূদিত {file} পাওয়া যায়নি! ভয়েস ক্লোনিং ফাইল ইংরেজিতেই থাকবে।',
+    'error_voice_translation': 'ভয়েসটি {voice} {language}-এ রূপান্তর করা যায়নি!',
     'error_sml_not_recognized': 'এই SML চেনা যায়নি',
     'msg_input_valid': 'ইনপুট ফাইল বৈধ',
     'msg_convert_wav': 'WAV-এ রূপান্তর করা হচ্ছে…',

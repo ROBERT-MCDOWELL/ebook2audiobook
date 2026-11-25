@@ -418,6 +418,7 @@ legends = {
     'msg_zeroshot_loaded': 'ZeroShot {model} wis dimuat!',
     'msg_converting_builtin_voice': 'Ngowahi swara gawan basa Inggris dadi {lang}…',
     'error_translated_default_text': 'Berkas terjemahan {file} ora ditemokake! Berkas kloning swara tetep nganggo basa Inggris.',
+    'error_voice_translation': 'Swara {voice} ora bisa diowahi dadi {language}!',
     'error_sml_not_recognized': 'SML iki ora dikenali',
     'msg_input_valid': 'Berkas input valid',
     'msg_convert_wav': 'Ngowahi dadi WAV…',

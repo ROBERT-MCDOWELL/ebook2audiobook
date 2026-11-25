@@ -418,6 +418,7 @@ legends = {
     'msg_zeroshot_loaded': 'تم تحميل ZeroShot {model}!',
     'msg_converting_builtin_voice': 'جارٍ تحويل الصوت الإنجليزي المدمج إلى {lang}…',
     'error_translated_default_text': 'تعذّر العثور على الملف المترجم {file}! سيبقى ملف استنساخ الصوت بالإنجليزية.',
+    'error_voice_translation': 'تعذّر تحويل الصوت {voice} إلى {language}!',
     'error_sml_not_recognized': 'وسم SML هذا غير معروف',
     'msg_input_valid': 'ملف الإدخال صالح',
     'msg_convert_wav': 'جارٍ التحويل إلى WAV…',

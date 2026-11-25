@@ -418,6 +418,7 @@ legends = {
     'msg_zeroshot_loaded': 'ZeroShot {model} を読み込みました！',
     'msg_converting_builtin_voice': '組み込みの英語音声を {lang} に変換中…',
     'error_translated_default_text': '翻訳済みの {file} が見つかりません！音声クローン用ファイルは英語のままになります。',
+    'error_voice_translation': '音声{voice}を{language}に変換できませんでした！',
     'error_sml_not_recognized': 'この SML は認識できません',
     'msg_input_valid': '入力ファイルは有効です',
     'msg_convert_wav': 'WAV に変換中…',

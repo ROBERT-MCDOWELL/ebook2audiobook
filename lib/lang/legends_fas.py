@@ -418,6 +418,7 @@ legends = {
     'msg_zeroshot_loaded': 'ZeroShot {model} بارگیری شد!',
     'msg_converting_builtin_voice': 'در حال تبدیل صدای داخلی انگلیسی به {lang}…',
     'error_translated_default_text': 'فایل ترجمه‌شده {file} پیدا نشد! فایل شبیه‌سازی صدا به انگلیسی باقی می‌ماند.',
+    'error_voice_translation': 'صدا {voice} را نمی‌توان به {language} تبدیل کرد!',
     'error_sml_not_recognized': 'این SML شناخته نشد',
     'msg_input_valid': 'فایل ورودی معتبر است',
     'msg_convert_wav': 'در حال تبدیل به WAV…',

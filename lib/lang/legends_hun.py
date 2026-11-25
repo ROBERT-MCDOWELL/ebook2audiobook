@@ -418,6 +418,7 @@ legends = {
     'msg_zeroshot_loaded': 'A(z) {model} ZeroShot betöltve!',
     'msg_converting_builtin_voice': 'A beépített angol hang átalakítása erre: {lang}…',
     'error_translated_default_text': 'A lefordított {file} fájl nem található! A hangklónozási fájl angol marad.',
+    'error_voice_translation': 'A(z) {voice} hangot nem sikerült átalakítani a következőre: {language}!',
     'error_sml_not_recognized': 'Ez az SML nem ismerhető fel',
     'msg_input_valid': 'A bemeneti fájl érvényes',
     'msg_convert_wav': 'Átalakítás WAV-ba…',

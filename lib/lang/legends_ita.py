@@ -418,6 +418,7 @@ legends = {
     'msg_zeroshot_loaded': 'ZeroShot {model} caricato!',
     'msg_converting_builtin_voice': 'Conversione della voce inglese integrata in {lang}…',
     'error_translated_default_text': 'Il file tradotto {file} non è stato trovato! Il file di clonazione vocale resterà in inglese.',
+    'error_voice_translation': 'Impossibile convertire la voce {voice} in {language}!',
     'error_sml_not_recognized': 'Questo SML non è riconosciuto',
     'msg_input_valid': 'Il file di input è valido',
     'msg_convert_wav': 'Conversione in WAV…',

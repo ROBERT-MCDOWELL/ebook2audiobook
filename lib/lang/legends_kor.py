@@ -418,6 +418,7 @@ legends = {
     'msg_zeroshot_loaded': 'ZeroShot {model}을(를) 불러왔습니다!',
     'msg_converting_builtin_voice': '기본 제공 영어 음성을 {lang}(으)로 변환하는 중…',
     'error_translated_default_text': '번역된 {file}을(를) 찾을 수 없습니다! 음성 복제 파일은 영어로 유지됩니다.',
+    'error_voice_translation': '음성 {voice}을(를) {language}(으)로 변환할 수 없습니다!',
     'error_sml_not_recognized': '이 SML은 인식되지 않습니다',
     'msg_input_valid': '입력 파일이 유효합니다',
     'msg_convert_wav': 'WAV로 변환하는 중…',

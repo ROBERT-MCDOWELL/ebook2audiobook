@@ -418,6 +418,7 @@ legends = {
     'msg_zeroshot_loaded': 'ZeroShot {model} लोड हो गया!',
     'msg_converting_builtin_voice': 'अंतर्निहित अंग्रेज़ी आवाज़ को {lang} में बदला जा रहा है…',
     'error_translated_default_text': 'अनुवादित {file} नहीं मिली! वॉइस क्लोनिंग फ़ाइल अंग्रेज़ी में ही रहेगी।',
+    'error_voice_translation': 'वॉइस {voice} को {language} में कनवर्ट नहीं किया जा सका!',
     'error_sml_not_recognized': 'यह SML पहचाना नहीं गया',
     'msg_input_valid': 'इनपुट फ़ाइल मान्य है',
     'msg_convert_wav': 'WAV में बदला जा रहा है…',
