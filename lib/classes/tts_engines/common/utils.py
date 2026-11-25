@@ -179,6 +179,8 @@ class TTSUtils:
     engine_zs = None
     tts_zs_key = None
     vc_alerted = False
+    # voice file -> the one _check_xtts_builtin_speakers() gave for it, per engine instance (set by _set_voice())
+    converted_voices = None
 
     def _alert_vc(self, vc_model:str)->None:
         # a voice file on an engine without built-in voice cloning: a TTS_VOICE_CONVERSION model clones it on every sentence
@@ -960,11 +962,16 @@ class TTSUtils:
                                     error = 'normalize_audio() error:'
                             else:
                                 error = f'No audio waveform found in _check_xtts_builtin_speakers() result: {result}'
+                        else:
+                            error = f'_check_xtts_builtin_speakers() error: invalid audio for {speaker} in {self.language}'
                     else:
                         error = f'_check_xtts_builtin_speakers() error: {xtts} is False'
-                else:
-                    error = legends['error_translated_default_text'].format(file=default_text_file)
+                    print(error)
+                    return False
+                # no translated default.txt: the voice stays in english, as the message says, not a failed conversion
+                error = legends['error_translated_default_text'].format(file=default_text_file)
                 print(error)
+                return current_voice
             else:
                 return current_voice
         except Exception as e:
@@ -1031,14 +1038,29 @@ class TTSUtils:
                 current_voice = os.path.join(self.session['custom_model'], voice_file)
         else:
             speaker = Path(current_voice).stem
+            xtts = TTS_ENGINES['XTTS']
+            # an engine's own speakers (bark npz, piper onnx...) are not voice files to convert. The XTTS built-in ones
+            # are, for every engine but XTTS (it clones them in any language itself): voices/eng holds them in english
+            # only, _check_xtts_builtin_speakers() speaks them in the TTS language from speakers_xtts.pth
+            engine_speakers = {k for engine, settings in default_engine_settings.items() if engine != xtts for k in settings['voices']}
+            if self.session['tts_engine'] == xtts:
+                engine_speakers.update(default_engine_settings[xtts]['voices'].keys())
             if(
-                (speaker not in {k for engine in default_engine_settings.values() for k in engine['voices']}) and 
+                (speaker not in engine_speakers) and
                 (self.session['custom_model_dir'] not in current_voice)
             ):
-                current_voice = self._check_xtts_builtin_speakers(current_voice, speaker)
-                if not current_voice:
-                    error = f"_set_voice() error: Could not create the builtin speaker selected voice in {self.language}"
-                    return None, error
+                # once per voice and engine: a block without its own voice falls back to session['voice'] on every
+                # sentence, which core.py convert_chapters2audio() does not rewrite to the converted file
+                if self.converted_voices is None:
+                    self.converted_voices = {}
+                converted_voice = self.converted_voices.get(current_voice)
+                if converted_voice is None:
+                    converted_voice = self._check_xtts_builtin_speakers(current_voice, speaker)
+                    if not converted_voice:
+                        error = f"_set_voice() error: Could not create the builtin speaker selected voice in {self.language}"
+                        return None, error
+                    self.converted_voices[current_voice] = converted_voice
+                current_voice = converted_voice
         return current_voice, None
 
     def _coqui_speakable(self, text:str)->bool:
