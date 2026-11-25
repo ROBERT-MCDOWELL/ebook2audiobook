@@ -3402,14 +3402,32 @@ def text_hash(text:str)->str:
     # block_hash() cannot be used here since a fresh parse has empty sentences and default voice/engine.
     return hashlib.sha1(' '.join((text or '').split()).encode('utf-8')).hexdigest()
 
+def file_in_use(e:BaseException)->bool:
+    # Windows' sharing violation (WinError 32) or lock violation (33): another program holds the file open
+    return isinstance(e, PermissionError) and getattr(e, 'winerror', None) in (32, 33)
+
+def remove_path(path:str, attempts:int=10, delay:float=0.5)->None:
+    # a file or a folder tree, gone when this returns. On Windows a file another program holds open cannot be deleted
+    # (WinError 32): an antivirus or Windows Search reading a sentence file e2a just wrote lets go within a second or
+    # two, an audio player or Explorer's preview pane holds it until closed (crash report 37f7ed23c768f51c: a resumed
+    # conversion resetting a block, 25.flac in use). Retried for about 5 s, a tree going on from where it stopped,
+    # then the last error is raised for the caller to tell the user (file_in_use())
+    for attempt in range(attempts):
+        try:
+            if os.path.isdir(path) and not os.path.islink(path):
+                shutil.rmtree(path)
+            elif os.path.lexists(path):
+                os.unlink(path)
+            return
+        except PermissionError as e:
+            if attempt == attempts - 1 or not file_in_use(e):
+                raise
+            time.sleep(delay)
+
 def purge_block_audio(session:dict, block_id:str)->None:
     try:
-        ch_file = os.path.join(session['chapters_dir'], f'{block_id}.{default_audio_proc_format}')
-        if os.path.exists(ch_file):
-            os.unlink(ch_file)
-        block_dir = os.path.join(session['sentences_dir'], block_id)
-        if os.path.isdir(block_dir):
-            shutil.rmtree(block_dir)
+        remove_path(os.path.join(session['chapters_dir'], f'{block_id}.{default_audio_proc_format}'))
+        remove_path(os.path.join(session['sentences_dir'], block_id))
     except Exception as e:
         error = f'purge_block_audio() error: {e}'
         print(error)
@@ -3687,12 +3705,8 @@ def convert_chapters2audio(session_id:str)->bool:
     progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
 
     def _reset_chapter_file(block_id:str)->None:
-        ch_file = os.path.join(session['chapters_dir'], f'{block_id}.{default_audio_proc_format}')
-        if os.path.exists(ch_file):
-            os.unlink(ch_file)
-        block_dir = os.path.join(session['sentences_dir'], block_id)
-        if os.path.isdir(block_dir):
-            shutil.rmtree(block_dir)
+        remove_path(os.path.join(session['chapters_dir'], f'{block_id}.{default_audio_proc_format}'))
+        remove_path(os.path.join(session['sentences_dir'], block_id))
 
     def _check_block_sentences(block_id:str, sentences:list)->set:
         block_dir = os.path.join(session['sentences_dir'], block_id)
@@ -3854,8 +3868,8 @@ def convert_chapters2audio(session_id:str)->bool:
                     show_alert(session_id, {'type': 'info', 'msg': legends['msg_chapter_changed'].format(chapter=ch_num, block=x)})
                     _reset_chapter_file(block_id)
                 elif x == block_resume and not block_changed:
-                    if sentence_resume == 0 and os.path.isdir(block_dir):
-                        shutil.rmtree(block_dir)
+                    if sentence_resume == 0:
+                        remove_path(block_dir)
                     start_sentence = sentence_resume
                 show_alert(session_id, {'type': 'info', 'msg': legends['msg_chapter_containing'].format(chapter=ch_num, block=x, count=block_len)})
                 os.makedirs(block_dir, exist_ok=True)
@@ -3917,6 +3931,13 @@ def convert_chapters2audio(session_id:str)->bool:
             conversion = True
             return True
     except Exception as e:
+        if file_in_use(e):
+            # another program kept a file of this conversion open past remove_path()'s retries: the user's to close,
+            # not a bug. The conversion resumes from here once it is
+            session['status'] = status_tags['READY']
+            error = legends['error_file_in_use'].format(file=e.filename)
+            show_alert(session_id, {'type': 'error', 'msg': error})
+            return False
         DependencyError(e)
         exception_alert(session_id, f'convert_chapters2audio() error: {e}')
         return False
