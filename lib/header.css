@@ -312,10 +312,7 @@ span[data-testid="block-info"] {
 	transform: scale(1.2) !important;
 }
 .gr-convert-btn {
-	gap: 10px !important;
-	font-size: 18px !important;
-	font-weight: 600 !important;
-	letter-spacing: 0.02em !important;
+	font-size: 30px !important;
 }
 .gr-convert-btn:hover { background-color: #34d058 !important; }
 .gr-convert-btn:active{
@@ -338,10 +335,7 @@ span[data-testid="block-info"] {
 	color: var(--body-background-fill) !important;
 }
 .gr-abs-upload-btn {
-	gap: 10px !important;
-	font-size: 18px !important;
-	font-weight: 600 !important;
-	letter-spacing: 0.02em !important;
+	font-size: 30px !important;
 }
 .gr-abs-upload-btn:hover { background-color: #34d058 !important; }
 .gr-abs-upload-btn:active{
@@ -453,26 +447,28 @@ span[data-testid="block-info"] {
 #gr_audiobook_sentence textarea.interlude-cue{
 	font-style: italic !important;
 }
-#gr_audiobook_sentence .cue-position-row{
-	display: flex !important;
-	align-items: center !important;
+/* block and sentence of the cue playing (header.js show_cue_position): one line under the sentence. Its room is kept
+   even empty or not created yet, the section does not move when a cue shows or goes */
+#gr_audiobook_sentence :has(> textarea){
+	position: relative !important;
+	padding-bottom: 18px !important;
 }
 #gr_audiobook_sentence .cue-position{
-	flex: 0 0 auto;
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
 	padding: 0 10px;
 	font-size: 11px;
-	line-height: 15px;
-	text-align: right;
+	line-height: 16px;
+	text-align: center;
 	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	opacity: 0.7;
-	border-right: 1px solid var(--border-color-primary);
 }
 #gr_audiobook_sentence .cue-position[hidden]{
 	display: none !important;
-}
-#gr_audiobook_sentence .cue-position-row textarea{
-	flex: 1 1 auto;
-	min-width: 0;
 }
 #gr_session textarea, #gr_progress textarea, #gr_audiobook_sentence textarea {
 	overflow: hidden !important;
@@ -488,12 +484,6 @@ span[data-testid="block-info"] {
 	min-height: 100px !important;
 	max-height: 100px !important;
 	resize: none;
-}
-/* idle (no message, no task running): one line, a message or a running task gives it back its 100px.
-   :placeholder-shown needs the placeholder gr_progress has (a space) */
-#gr_progress:has(textarea:placeholder-shown):not(:has([data-testid="status-tracker"]:not(.hide))) {
-	height: auto !important;
-	min-height: 0 !important;
 }
 #gr_session textarea::-webkit-scrollbar, #gr_progress textarea::-webkit-scrollbar {
 	display: none !important; 
@@ -873,7 +863,7 @@ audio:-moz-read-only {
 button[data-icon], .confirm-buttons .btn[data-icon] {
 	font-size: 0 !important;
 }
-button[data-icon]::before, .confirm-buttons .btn[data-icon]::before, .gr-convert-btn::before, .gr-abs-upload-btn::before {
+button[data-icon]::before, .confirm-buttons .btn[data-icon]::before {
 	content: "" !important;
 	display: inline-block !important;
 	flex: 0 0 auto !important;
@@ -891,11 +881,13 @@ button[data-icon]::before, .confirm-buttons .btn[data-icon]::before, .gr-convert
 	width: 18px !important;
 	height: 18px !important;
 }
-.gr-convert-btn {
-	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 16v-4a8 8 0 0 1 16 0v4'/><rect x='3' y='15' width='4' height='6' rx='1.5'/><rect x='17' y='15' width='4' height='6' rx='1.5'/></svg>");
+.gr-convert-btn[data-icon]::before, .gr-abs-upload-btn[data-icon]::before {
+	width: 34px !important;
+	height: 34px !important;
 }
-.gr-abs-upload-btn {
-	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 20V9M7 14l5-5 5 5M5 4h14'/></svg>");
+/* the e2a logo (tools/icons/appLogo.png) as a line icon: open book, text on a page, level bars on the other */
+[data-icon="logo"] {
+	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='M12 6.5C10 5 7 4.4 2.5 4.8v13.6c4.5-.4 7.5.2 9.5 1.6 2-1.4 5-2 9.5-1.6V4.8C17 4.4 14 5 12 6.5zM12 6.5V20'/><path d='M5 9h4.5M5 12h4.5M5 15h3.5'/><path d='M14.5 16v-2.5M17 16v-4.5M19.5 16V9'/></svg>");
 }
 [data-icon="play"] {
 	--e2a-icon: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7 4.5v15l12-7.5z'/></svg>");

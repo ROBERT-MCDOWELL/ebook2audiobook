@@ -211,7 +211,7 @@ def build_interface(args:dict)->gr.Blocks:
 
                         with gr.Group(elem_id='gr_group_progress', elem_classes=['gr-group-no-col']):
                             gr_progress_markdown = gr.Markdown(elem_id='gr_progress_markdown', elem_classes=['gr-markdown'], value=legends['gr_progress_markdown'])
-                            gr_progress = gr.Textbox(elem_id='gr_progress', label='', placeholder=' ', interactive=False, visible=True)
+                            gr_progress = gr.Textbox(elem_id='gr_progress', label='', interactive=False, visible=True)
                             gr_progress_bar = gr.Progress(track_tqdm=True)
 
                         with gr.Group(elem_id='gr_group_audiobook_list', elem_classes=['gr-group-no-col'], visible=True) as gr_group_audiobook_list:
@@ -239,7 +239,7 @@ def build_interface(args:dict)->gr.Blocks:
                             gr_audiobook_files_state = gr.State(False)
 
                         with gr.Group(elem_id='gr_group_convert_btn', elem_classes=['gr-group-convert-btn']) as gr_group_convert_btn:
-                            gr_convert_btn = gr.Button(elem_id='gr_convert_btn', value=legends['gr_convert_btn'], elem_classes='gr-convert-btn', variant='primary', interactive=False)
+                            gr_convert_btn = gr.Button(elem_id='gr_convert_btn', value='📚', elem_classes='gr-convert-btn', variant='primary', interactive=False)
 
                     with gr.Tab(legends['gr_tab_xtts_params'], elem_id='gr_tab_xtts_params', elem_classes='gr-tab', visible=False) as gr_tab_xtts_params:
                         with gr.Group(elem_id='gr_group_xtts_params', elem_classes=['gr-group']):
@@ -633,7 +633,7 @@ def build_interface(args:dict)->gr.Blocks:
                         with gr.Group(elem_id='gr_group_abs_upload_btn', elem_classes=['gr-group-abs-upload-btn']):
                             gr_abs_audiobook = gr.Textbox(elem_id='gr_abs_audiobook', label=legends['gr_abs_audiobook'], lines=1, max_lines=1, interactive=False, visible=True)
                             gr_abs_status = gr.Textbox(elem_id='gr_abs_status', label=legends['gr_abs_status'], lines=1, max_lines=1, interactive=False, visible=True)
-                            gr_abs_upload_btn = gr.Button(elem_id='gr_abs_upload_btn', value=legends['gr_abs_upload_btn'], elem_classes=['gr-abs-upload-btn'], variant='secondary', interactive=False)
+                            gr_abs_upload_btn = gr.Button(elem_id='gr_abs_upload_btn', value='🡅', elem_classes=['gr-abs-upload-btn'], variant='secondary', interactive=False)
 
             gr_blocks_page = gr.Number(value=0, visible=False, precision=0)
             gr_blocks_data = gr.State([])
@@ -1290,8 +1290,6 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(label=legends['gr_abs_api_token']),
                             gr.update(label=legends['gr_abs_audiobook']),
                             gr.update(label=legends['gr_abs_status']),
-                            gr.update(value=legends['gr_convert_btn']),
-                            gr.update(value=legends['gr_abs_upload_btn']),
                             gr.update(value=session.get('ui_language') or system_language),
                             gr.update(label=legends['gr_theme']),
                             gr.update(label=legends['gr_tooltips'], value=bool(session.get('tooltips'))),
@@ -4029,7 +4027,7 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_markdown_tab_sparktts_params, gr_sparktts_temperature, gr_sparktts_top_k, gr_sparktts_top_p,
                 gr_markdown_tab_chattts_params, gr_chattts_temperature, gr_chattts_top_k, gr_chattts_top_p, gr_chattts_repetition_penalty, gr_chattts_speed,
                 gr_markdown_tab_csm_params, gr_csm_temperature, gr_csm_top_k,
-                gr_abs_url, gr_abs_api_token, gr_abs_audiobook, gr_abs_status, gr_convert_btn, gr_abs_upload_btn, gr_ui_language,
+                gr_abs_url, gr_abs_api_token, gr_abs_audiobook, gr_abs_status, gr_ui_language,
                 gr_theme, gr_tooltips, gr_tooltips_data
             ]
             tooltips_buttons = [
