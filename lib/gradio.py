@@ -1,5 +1,6 @@
 from lib.core import *
 from lib.conf_themes import themes, themes_dark_set, default_theme, theme_storage_key
+from PIL import ImageDraw
 
 theme = gr.themes.Origin(
     primary_hue='green',
@@ -10,6 +11,7 @@ theme = gr.themes.Origin(
 )
 header_css = os.path.join(root_dir, 'header.css')
 themes_css = os.path.join(root_dir, 'themes.css')
+app_logo_svg = os.path.join(os.path.dirname(root_dir), 'tools', 'icons', 'appLogo.svg')
 progress_bar = gr.Progress(track_tqdm=False)
 
 def build_themes_head()->str:
@@ -102,7 +104,44 @@ def build_themes_head()->str:
         print(error)
     return ''
 
+def build_logo_head()->str:
+    # launch(head=...) html: the e2a logo of tools/icons/appLogo.svg on the convert button ([data-icon="logo"]), read at
+    # each start so a new logo shows. appLogo.svg is a jpeg on an A4 canvas that crops it: the jpeg is taken whole, its
+    # white around the rounded logo made transparent, cropped to the logo and scaled to 128px (sharp at 34px on a 3x
+    # screen). A vector svg is taken as is. In a layer: its !important wins over the line icon of header.css, which
+    # stays when the file cannot be read
+    try:
+        svg = Path(app_logo_svg).read_text(encoding='utf-8')
+        found = re.search(r'href="data:image/(?:jpeg|jpg|png);base64,([^"]+)"', svg)
+        if found:
+            img = Image.open(io.BytesIO(base64.b64decode(re.sub(r'\s+', '', found.group(1))))).convert('RGBA')
+            for corner in [(0, 0), (img.width - 1, 0), (0, img.height - 1), (img.width - 1, img.height - 1)]:
+                ImageDraw.floodfill(img, corner, (0, 0, 0, 0), thresh=40)
+            box = img.getchannel('A').getbbox()
+            if box:
+                img = img.crop(box)
+            img.thumbnail((128, 128), Image.LANCZOS)
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG', optimize=True)
+            logo_uri = f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode('ascii')}"
+        else:
+            logo_uri = f"data:image/svg+xml;base64,{base64.b64encode(svg.encode('utf-8')).decode('ascii')}"
+        return f'''<style id="e2a_logo">
+@layer e2a_logo {{
+    [data-icon="logo"]::before {{
+        background: url("{logo_uri}") center / contain no-repeat !important;
+        -webkit-mask: none !important;
+        mask: none !important;
+    }}
+}}
+</style>'''
+    except Exception as e:
+        error = f'build_logo_head(): {e}'
+        print(error)
+    return ''
+
 themes_head = build_themes_head()
+logo_head = build_logo_head()
 
 def build_interface(args:dict)->gr.Blocks:
     from lib.classes.tts_engines.common.preset_loader import load_engine_presets

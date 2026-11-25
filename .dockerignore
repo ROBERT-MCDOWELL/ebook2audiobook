@@ -13,7 +13,11 @@ audiobooks/cli/*
 audiobooks/gui/gradio/*
 audiobooks/gui/host/*
 models/*
-tools
+# tools stay out but the logo the GUI shows on its convert button (lib/gradio.py build_logo_head)
+tools/*
+!tools/icons
+tools/icons/*
+!tools/icons/appLogo.svg
 tmp/*
 run/*
 .installed

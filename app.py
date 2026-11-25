@@ -809,7 +809,7 @@ valence, arousal (-1 to 1).""")
             if passed_args_set.issubset(allowed_arguments):
                 app = None
                 try:
-                    from lib.gradio import theme, header_css, themes_head, build_interface
+                    from lib.gradio import theme, header_css, themes_head, logo_head, build_interface
                     app = build_interface(args)
                     # checked at start too, but before the installs, the model loading and this page: another instance
                     # or another program (7860 is every gradio app's default) may hold the port by now
@@ -825,7 +825,7 @@ valence, arousal (-1 to 1).""")
                             "max_file_size": max_upload_size,
                             "theme": theme,
                             "css_paths": header_css,
-                            "head": themes_head,
+                            "head": themes_head + logo_head,
                             "footer_links": ["settings"]
                         }
                         app.queue(default_concurrency_limit=interface_concurrency_limit)
