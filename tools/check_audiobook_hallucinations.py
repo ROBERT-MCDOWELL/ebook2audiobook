@@ -92,7 +92,7 @@ def parse_time(stamp:str)->float:
 
 def parse_vtt(path:str)->list[dict]:
     # sentence cues, named "block <block index> sentence <sentence index>" by e2a (none in older audiobooks). Interlude
-    # cues ("interlude <block index>") are music, left out
+    # cues ("interlude <block index>") are music and ("chapter <block index>") are seek-bar markers, left out
     cues = []
     with open(path, encoding='utf-8-sig') as f:
         blocks = f.read().replace('\r\n', '\n').split('\n\n')
@@ -101,7 +101,7 @@ def parse_vtt(path:str)->list[dict]:
         for i, line in enumerate(lines):
             if '-->' in line:
                 cue_id = lines[i - 1].strip() if i else ''
-                if re.match(r'^interlude \d+$', cue_id):
+                if re.match(r'^(interlude|chapter) \d+$', cue_id):
                     break
                 ids = re.match(r'^block (\d+) sentence (\d+)$', cue_id)
                 start, end = line.split('-->')[:2]

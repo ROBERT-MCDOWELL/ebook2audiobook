@@ -198,6 +198,16 @@ class TTSUtils:
     engine_zs = None
     tts_zs_key = None
     vc_alerted = False
+
+    def _build_vtt_file(self, all_sentences:list)->bool:
+        # create_vtt() in the engine classes builds the per-preview vtt from the sentences
+        # just synthesized into session['sentences_dir'] (the audiobook-wide vtt with chapter
+        # markers is written by core.py calling build_vtt_file() directly)
+        built, error = build_vtt_file(self.session, block_indices=None, offsets=None, durations=None)
+        if not built:
+            print(error)
+        return bool(built)
+
     # voice file -> the one _check_xtts_builtin_speakers() gave for it, per engine instance (set by _set_voice())
     converted_voices = None
 
