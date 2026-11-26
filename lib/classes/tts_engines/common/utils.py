@@ -58,11 +58,13 @@ def format_timestamp(seconds:float)->str:
     h, m = divmod(m, 60)
     return f'{int(h):02}:{int(m):02}:{s:06.3f}'
 
-def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None, offsets:dict=None)->tuple:
+def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None, offsets:dict=None, durations:dict=None)->tuple:
     try:
         from tqdm import tqdm
         if offsets is None:
             offsets = {}
+        if durations is None:
+            durations = {}
         progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
         msg = legends['msg_vtt_started']
         print(msg)
@@ -100,11 +102,17 @@ def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None, offs
         audio_files_length = len(audio_files)
         sentences_total_time = 0.0
         vtt_blocks = []
+        chapter_cues = {}
+        first_sentence_by_block = {}
         msg = legends['msg_get_durations']
         print(msg)
         if progress_bar is not None:
             progress_bar(0.0, desc=msg)
-        durations = get_audiolist_duration([str(p) for p in audio_files])
+        # durations may be passed (all sentence files of the book, measured once by combine_audio_chapters());
+        # only what is missing from it gets probed here
+        missing_durations = [str(p) for p in audio_files if os.path.realpath(p) not in durations]
+        if missing_durations:
+            durations = {**durations, **get_audiolist_duration(missing_durations)}
         msg = legends['msg_create_vtt_blocks']
         print(msg)
         if progress_bar is not None:
@@ -127,6 +135,10 @@ def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None, offs
                 # WebVTT cue id "block <block index> sentence <sentence index>": where the sentence is in e2a, for
                 # tools/check_audiobook_hallucinations.py. Players and the audiobook editor read it as a plain cue id
                 vtt_blocks.append(f'block {block_idx} sentence {sentence_indices[idx]}\n{start} --> {end}\n{text}\n')
+                # first spoken sentence of each block: remembered to write a chapter marker cue after the loop
+                # (header.js marks these on the player seek bar; they match the embedded chapter tags of m4b/mp3 exports)
+                if block_idx not in chapter_cues:
+                    first_sentence_by_block[block_idx] = (idx, start_time, end_time)
                 if session['is_gui_process']:
                     total_progress = (t.n + 1) / audio_files_length
                     progress_bar(
@@ -134,6 +146,11 @@ def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None, offs
                         desc=f'Writing vtt idx {idx}'
                     )
                 t.update(1)
+        for block_idx, (idx, start_time, end_time) in first_sentence_by_block.items():
+            block_offset = offsets.get(block_idx, 0.0)
+            title = re.sub(r'\s+', ' ', SML_TAG_PATTERN.sub('', str(sentences_to_use[idx]))).strip()
+            # 0.5s span so the binary search in header.js findCue() catches it while seeking over its exact start
+            chapter_cues[block_idx] = f'chapter {block_idx}\n{format_timestamp(start_time + block_offset)} --> {format_timestamp(end_time + block_offset + 0.5)}\n{title}\n'
         msg = legends['msg_write_vtt']
         print(msg)
         if progress_bar is not None:
@@ -141,6 +158,8 @@ def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None, offs
         with open(vtt_path, 'w', encoding='utf-8') as f:
             f.write('WEBVTT\n\n')
             f.write('\n'.join(vtt_blocks))
+            if chapter_cues:
+                f.write('\n' + '\n'.join(chapter_cues[i] for i in sorted(chapter_cues)))
         return True, None
     except Exception as e:
         error = f'build_vtt_file(): {e}'
