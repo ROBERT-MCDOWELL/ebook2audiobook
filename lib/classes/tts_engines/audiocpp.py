@@ -60,11 +60,11 @@ class AudioCpp(TTSUtils):
             self.language_code = languages[self.language]
             # built-in voice for this language (engines that do not clone)
             self.voice_id = self.family_cfg['voice_ids'].get(self.language, self.family_cfg['voice_ids'].get('*', ''))
-            # one package per language (PocketTTS), with its load options
+            # one package per language (PocketTTS), with its load options; a language may live in another repo (greek)
             model_files = model_cfg.get('files_by_language', {}).get(self.language, model_cfg['files'])
             self.load_options = {**self.family_cfg['load'], **self.family_cfg['load_by_language'].get(self.language, {})}
             self.params['samplerate'] = model_cfg['samplerate']
-            self.model_repo = model_cfg['repo']
+            self.model_repo = model_cfg.get('repo_by_language', {}).get(self.language, model_cfg['repo'])
             self.xtts_speakers = self._load_xtts_builtin_list()
             self.device = devices['CUDA']['proc'] if self.session['device'] in [devices['CUDA']['proc'], devices['ROCM']['proc'], devices['JETSON']['proc']] else self.session['device']
             # --- the audiocpp_server package for this machine (VoiceConversion: shared with the VC stage of the built-in voice engines) ---
