@@ -1,0 +1,23 @@
+title: ""
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your donation, even $1 is important for us to continue to maintain the project
+
+        [job](https://secure.job-currency.com/_spec/short_r.php/0BJCp4)
+        [ko-fi.com/athomasson2](https://ko-fi.com/athomasson2)
+
+        **BEFORE OPENING A NEW DISCUSSION, MAKE SURE IT HASN'T ALREADY BEEN CREATED. :)**
+        **Check it with the Discussions search field**
+
+        **IMPORTANT: DON'T COPY/PASTE ANY A.I. SOLUTION OR YOUR DISCUSSION WILL BE IMMEDIATELY CLOSED WITHOUT NOTICE**
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of your question, idea, or topic.
+      placeholder: Write your message here...
+    validations:
+      required: true
