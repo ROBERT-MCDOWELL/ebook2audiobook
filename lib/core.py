@@ -2476,7 +2476,7 @@ def natural_sort_key(path:str)->list:
 
 def get_sanitized(str:str, replacement:str='_')->str:
     str = str.replace('&', 'And')
-    forbidden_chars = r'[<>:"/\\|?*\x00-\x1F ()]'
+    forbidden_chars = r'[<>:"/\\|?*\x00-\x1F ().,;]'
     sanitized = re.sub(r'\s+', replacement, str)
     sanitized = re.sub(forbidden_chars, replacement, sanitized)
     sanitized = sanitized.strip('_')
@@ -3800,7 +3800,7 @@ def convert_chapters2audio(session_id:str)->bool:
                 if session['cancellation_requested']:
                     return False
                 ch_num += 1
-                block_id = block['id']
+                block_id = get_sanitized(str(block['id']))
                 sentences = block['sentences']
                 block_len = len(sentences)
                 valid_idx = {i for i,s in enumerate(sentences) if any(c.isalnum() for c in s.strip())}
@@ -4247,7 +4247,7 @@ def combine_audio_chapters(session_id:str)->list[str]|None:
                 error = legends['error_block_no_sentences'].format(block=x, id=block['id'])
                 print(error)
                 return None
-            block_id = block['id']
+            block_id = get_sanitized(str(block['id']))
             fname = f'{block_id}.{default_audio_proc_format}'
             fpath = os.path.join(session['chapters_dir'], fname)
             if not os.path.exists(fpath):
@@ -4317,6 +4317,10 @@ def combine_audio_chapters(session_id:str)->list[str]|None:
             mix_dir = os.path.join(concat_dir, f'interludes_mix{part_suffix}')
             shutil.rmtree(mix_dir, ignore_errors=True)
             os.makedirs(mix_dir, exist_ok=True)
+            if not ffprobe:
+                error = legends['error_ffmpeg_not_found']
+                print(error)
+                return None
             probe = subprocess.run([ffprobe, '-v', 'error', '-select_streams', 'a:0', '-show_entries', 'stream=codec_name,sample_rate,channels,sample_fmt,bits_per_raw_sample', '-of', 'json', os.path.join(session['chapters_dir'], chapter_files[indices[0]])], capture_output=True, text=True, errors='replace')
             stream = (json.loads(probe.stdout or '{}').get('streams') or [{}])[0]
             voice_rate = int(stream.get('sample_rate', default_audio_proc_samplerate))

@@ -2032,7 +2032,7 @@ def build_interface(args:dict)->gr.Blocks:
                                                 if not any(c.isalnum() for c in str(s)):
                                                     continue
                                                 if cue_count == target_idx:
-                                                    block_id, sentence_idx, sentence = block['id'], j, str(s)
+                                                    block_id, sentence_idx, sentence = get_sanitized(str(block['id'])), j, str(s)
                                                     break
                                                 cue_count += 1
                                         session['audiobook_edit_pending'] = os.path.exists(os.path.join(session['process_dir'], f"__edit_pending_{session['final_name']}"))

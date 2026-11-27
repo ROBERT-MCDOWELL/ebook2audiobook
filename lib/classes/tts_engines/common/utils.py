@@ -82,7 +82,7 @@ def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None, offs
                 continue
             if block_indices is not None and i not in block_indices:
                 continue
-            block_dir = audio_sentences_dir / str(block['id'])
+            block_dir = audio_sentences_dir / getattr(sys.modules.get('lib.core'), 'get_sanitized', str)(str(block['id']))
             if not block_dir.is_dir():
                 error = legends['error_missing_audio_dir'].format(block=i, id=block['id'], dir=block_dir)
                 return False, error
