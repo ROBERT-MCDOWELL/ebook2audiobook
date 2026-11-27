@@ -133,7 +133,7 @@ class BackgroundDetector:
         return None, None, None
 
     @staticmethod
-    def _measure_levels(y:Any, sr:int, annotation:Any)->dict[str, float|None]:
+    def _measure_levels(y:Any, sr:int, annotation:Any, win_sec:float=10.0, step_sec:float=2.5)->dict[str, float|None]:
         '''VAD tells when someone speaks, not whether something else plays
         under the voice: a music bed under continuous speech is one long
         speech segment, and a pause filled with music has the same duration
@@ -145,13 +145,25 @@ class BackgroundDetector:
                     percentile over per-bin mean power, 60-7000 Hz. Speech
                     is sparse in time-frequency so its floor stays low, a
                     continuous bed lifts it even when VAD finds no pause.
+        Both are taken over the whole file and over every win_sec window
+        (step_sec hop), and the highest is kept: a bed that only plays under
+        part of the clip (music coming in halfway) is diluted to nothing by
+        a whole-file median or percentile. A 112 s clip with music from 51 s
+        read gap -39 dB / floor -29 dB whole-file, -21 dB / -20 dB in its
+        worst window. The whole-file value is also the only one for clips
+        shorter than a window, so nothing it caught is lost.
+        A window needs 1.5 s of pause for its gap and 3 s of speech for its
+        floor: fewer frames let a breath or a word tail read as a bed.
         Digital silence (padding, fades to zero) is left out so it neither
         hides a bed nor counts as a pause.
         '''
         import numpy as np, librosa
         n_fft = 512
         hop = int(sr * 0.010)
-        min_frames = int(0.5 * sr / hop)
+        fps = sr / hop
+        min_frames = int(0.5 * fps)
+        min_win_pause = int(1.5 * fps)
+        min_win_voiced = int(3.0 * fps)
         levels = dict(speech_db=None, gap_db=None, floor_db=None)
         spec = np.abs(librosa.stft(y, n_fft=n_fft, hop_length=hop, win_length=int(sr * 0.025))) ** 2
         frame_db = 10 * np.log10(spec.mean(axis=0) + 1e-12)
@@ -166,19 +178,49 @@ class BackgroundDetector:
         speech_db = float(np.percentile(frame_db[voiced], 95))
         levels['speech_db'] = speech_db
         pauses = ~speech & live
-        if pauses.sum() >= min_frames:
-            levels['gap_db'] = float(np.median(frame_db[pauses])) - speech_db
         freqs = librosa.fft_frequencies(sr=sr, n_fft=n_fft)
-        band = (freqs >= 60.0) & (freqs < 7000.0)
-        voiced_spec = spec[band][:, voiced]
-        floor = np.percentile(voiced_spec, 10, axis=1).sum()
-        mean = voiced_spec.mean(axis=1).sum()
-        levels['floor_db'] = float(10 * np.log10(floor / (mean + 1e-20) + 1e-12))
+        band_spec = spec[(freqs >= 60.0) & (freqs < 7000.0)]
+
+        def gap_db(span:slice, min_count:int)->float|None:
+            mask = pauses[span]
+            if mask.sum() < min_count:
+                return None
+            return float(np.median(frame_db[span][mask])) - speech_db
+
+        def floor_db(span:slice, min_count:int)->float|None:
+            mask = voiced[span]
+            if mask.sum() < min_count:
+                return None
+            voiced_spec = band_spec[:, span][:, mask]
+            floor = np.percentile(voiced_spec, 10, axis=1).sum()
+            mean = voiced_spec.mean(axis=1).sum()
+            return float(10 * np.log10(floor / (mean + 1e-20) + 1e-12))
+
+        whole = slice(None)
+        gaps = [gap_db(whole, min_frames)]
+        floors = [floor_db(whole, min_frames)]
+        total = frame_db.shape[0]
+        win = int(win_sec * fps)
+        if total > win:
+            step = int(step_sec * fps)
+            starts = list(range(0, total - win + 1, step))
+            if starts[-1] + win < total:
+                # last window flush with the end: the outro is measured on a full window too
+                starts.append(total - win)
+            for start in starts:
+                span = slice(start, start + win)
+                gaps.append(gap_db(span, min_win_pause))
+                floors.append(floor_db(span, min_win_voiced))
+        gaps = [v for v in gaps if v is not None]
+        floors = [v for v in floors if v is not None]
+        levels['gap_db'] = max(gaps) if gaps else None
+        levels['floor_db'] = max(floors) if floors else None
         return levels
 
     def detect(self, gap_thresh_db:float=-27.0, floor_thresh_db:float=-28.0)->tuple[bool, dict[str, float|bool|None]]:
         # thresholds: no false positive on clean LibriSpeech read speech, music bed
-        # caught down to ~-18 dB under the voice, pink noise down to ~-20 dB
+        # caught down to ~-24 dB under the voice whether it plays under the whole
+        # clip or only its last half or third, pink noise down to ~-18 dB
         import gc, torch
         pipeline, waveform, sr = self._get_props()
         try:
