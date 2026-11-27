@@ -7,6 +7,11 @@ assignees: ''
 
 ---
 
+Thanks for your donation, even $1 is important for us to continue to maintain the project
+
+[job](https://secure.job-currency.com/_spec/short_r.php/0BJCp4)
+[ko-fi.com/athomasson2]
+
 **BEFORE TO OPEN A SECURITY REPORT, READ [SECURITY.md](https://github.com/DrewThomasson/ebook2audiobook/blob/main/SECURITY.md) AND MAKE SURE IT HASN'T ALREADY BEEN REPORTED. :)**
 
 **IMPORTANT: DON'T COPY/PASTE ANY A.I. OR SCANNER REPORT WITHOUT A VERIFIED, REPRODUCIBLE IMPACT OR YOUR ISSUE WILL BE IMMEDIATELY CLOSED WITHOUT NOTICE**

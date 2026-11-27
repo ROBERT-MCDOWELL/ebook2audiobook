@@ -7,6 +7,11 @@ assignees: ''
 
 ---
 
+Thanks for your donation, even $1 is important for us to continue to maintain the project
+
+[job](https://secure.job-currency.com/_spec/short_r.php/0BJCp4)
+[ko-fi.com/athomasson2]
+
 **To report an issue here, thanks to respect strictly the process 
 **or this issue will become too big and unreadable.
 
