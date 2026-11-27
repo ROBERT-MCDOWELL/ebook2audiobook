@@ -429,6 +429,7 @@ legends = {
     'msg_no_background': 'No background detected',
     'msg_extracting_voice': 'Extracting voice…',
     'msg_voice_isolator_fallback': 'Voice Isolator could not remove the background ({error}): demucs removes it instead.',
+    'msg_voice_isolator_cpu': 'Voice Isolator runs on GPU only (on CPU it takes many times longer than demucs): demucs removes the background.',
     'msg_done': 'Completed',
     'msg_removing_empty_audio': 'Removing empty audio…',
     'msg_removing_long_pauses': 'Removing long pauses…',

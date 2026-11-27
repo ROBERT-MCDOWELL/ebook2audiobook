@@ -214,8 +214,10 @@ class VoiceExtractor:
         # Inworld Voice Isolator (default_voice_isolator_model) on audio.cpp's native server, driven by
         # workers/audiocpp_worker.py (--vc-only --vc-task s2s): the audiocpp_server packages of the audio.cpp engines
         # (VoiceConversion.packages() / install()), on the device selected when audio.cpp runs there (CUDA, Vulkan, Metal),
-        # else on the next GPU package, else on CPU. One request for the whole file, then the worker stops: its memory goes
-        # back to the TTS engine
+        # else on the next GPU package. GPU only: on CPU its 64M band-split network (46 bands x 100 frames/s, width 512,
+        # f32) costs seconds per second of audio, many times demucs, so no CPU package (extract_voice() sends a CPU
+        # device to demucs, a GPU none of the packages starts on falls back to it). One request for the whole file, then
+        # the worker stops: its memory goes back to the TTS engine
         from lib.classes.tts_engines.common.voice_conversion import VoiceConversion
         error = '_isolate_voice() error'
         worker = None
@@ -226,7 +228,7 @@ class VoiceExtractor:
                 self.progress_bar(0.0, desc=msg)
             model = default_voice_isolator_model
             # the packages first: no model download on a machine where none runs it (demucs takes over)
-            attempts, gpu_wanted = VoiceConversion.packages(self.session['device'], model['family'], cpu_fallback=True, min_version=model['min_version'])
+            attempts, gpu_wanted = VoiceConversion.packages(self.session['device'], model['family'], min_version=model['min_version'])
             # a real file under models/tts/audiocpp/<repo>/, not a Hugging Face cache symlink (reason in AudioCpp.__init__)
             model_path = hf_download(self.progress_bar if self.is_gui_process else None, msg, repo_id=model['repo'], filename=model['file'], revision=model['revision'], cache_dir=tts_dir, local_dir=os.path.join(tts_dir, 'audiocpp', model['repo'].replace('/', '--')))
             worker_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tts_engines', 'workers', 'audiocpp_worker.py')
@@ -524,16 +526,22 @@ class VoiceExtractor:
                     self.progress_bar(int(result), desc=msg)
                 if result and status:
                     self.voice_track = os.path.join(self.demucs_dir, 'vocals.wav')
-                    if default_voice_separation_engine == 'voice_isolator':
+                    if default_voice_separation_engine == 'voice_isolator' and str(self.session['device']).lower() != devices['CPU']['proc']:
                         result, msg = self._isolate_voice()
                         if not result:
-                            # no audio.cpp package for this machine, a download or a server that failed: demucs instead
+                            # no audio.cpp GPU package for this machine, a download or a server that failed: demucs instead
                             msg = legends['msg_voice_isolator_fallback'].format(error=msg)
                             print(msg)
                             if self.is_gui_process:
                                 self.progress_bar(0.0, desc=msg)
                             result, msg = self._demucs_voice()
                     else:
+                        if default_voice_separation_engine == 'voice_isolator':
+                            # GPU only (_isolate_voice()): on a CPU device demucs, many times faster there
+                            msg = legends['msg_voice_isolator_cpu']
+                            print(msg)
+                            if self.is_gui_process:
+                                self.progress_bar(0.0, desc=msg)
                         result, msg = self._demucs_voice()
                     print(msg)
                     if self.is_gui_process:

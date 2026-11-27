@@ -263,23 +263,45 @@ class SubprocessPipe:
 
     def _busy_notices(self, done:threading.Event)->None:
         # a reply can take minutes (a long sentence on CPU): every busy_notice_seconds tell the user the worker is still
-        # on it and how many cores it keeps busy, so a slow worker (cores busy) and a stuck one (idle) read apart in a log
+        # on it and how many cores it keeps busy, so a slow worker (cores busy) and a stuck one (idle) read apart in a log.
+        # The cores of its whole process tree: the audio.cpp worker only waits on HTTP while its audiocpp_server child
+        # does the work, so the worker alone always read 0.0
         import time
+        procs = {}
         try:
             import psutil
             worker = psutil.Process(self.process.pid)
-            worker.cpu_percent(None)
             total = psutil.cpu_count() or '?'
         except Exception:
             worker, total = None, '?'
+
+        def tree_cores()->str:
+            # cpu_percent(None) is the share since the previous call on the same Process object: one object per pid,
+            # kept from one notice to the next (a child seen for the first time reads 0.0, then its real share)
+            nonlocal worker
+            try:
+                members = [worker] + worker.children(recursive=True)
+            except Exception:
+                worker = None
+                return '?'
+            usage = 0.0
+            alive = set()
+            for member in members:
+                proc = procs.setdefault(member.pid, member)
+                try:
+                    usage += proc.cpu_percent(None)
+                    alive.add(member.pid)
+                except Exception:
+                    pass
+            for pid in set(procs) - alive:
+                del procs[pid]
+            return f'{usage / 100:.1f}'
+
+        if worker is not None:
+            tree_cores()
         start = time.monotonic()
         while not done.wait(self.busy_notice_seconds):
-            cores = '?'
-            if worker is not None:
-                try:
-                    cores = f'{worker.cpu_percent(None) / 100:.1f}'
-                except Exception:
-                    worker = None
+            cores = tree_cores() if worker is not None else '?'
             msg = legends['msg_worker_busy'].format(seconds=int(time.monotonic() - start), cores=cores, total=total)
             print(msg)
 
