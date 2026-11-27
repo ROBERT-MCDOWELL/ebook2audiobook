@@ -4,7 +4,7 @@ from typing import Callable
 root_dir = str(Path(__file__).resolve().parents[1])
 os.chdir(root_dir)
 sys.path.insert(0, root_dir)
-categories = ['common', 'xtts', 'bark', 'tortoise', 'vits', 'fairseq', 'glowtts', 'tacotron', 'yourtts', 'piper', 'zonos2', 'zonos3', 'audiocpp', 'audiocpp_server', 'gptsovits', 'f5tts', 'zipvoice', 'omnivoice', 'orpheus', 'sparktts', 'chattts', 'csm', 'kittentts', 'openvoice', 'melotts', 'phonon', 'stanza', 'pyannote', 'demucs', 'interlude', 'argos', 'tessdata', 'jieba', 'voices']
+categories = ['common', 'xtts', 'bark', 'tortoise', 'vits', 'fairseq', 'glowtts', 'tacotron', 'yourtts', 'piper', 'zonos2', 'zonos3', 'audiocpp', 'audiocpp_server', 'gptsovits', 'f5tts', 'zipvoice', 'omnivoice', 'orpheus', 'sparktts', 'chattts', 'csm', 'kittentts', 'openvoice', 'melotts', 'phonon', 'stanza', 'pyannote', 'demucs', 'voice_isolator', 'interlude', 'argos', 'tessdata', 'jieba', 'voices']
 parser = argparse.ArgumentParser(description='Download every model e2a uses into one folder laid out exactly like ./models (i.e. a USB key for offline installs).')
 parser.add_argument('models_dir', type=str, help='Target folder, i.e. /media/user/KEY/models or E:\\models')
 parser.add_argument('--only', type=str, default='', help=f"Comma list of categories: {','.join(categories)}")
@@ -26,7 +26,7 @@ os.makedirs(tts_dir, exist_ok=True)
 if not os.environ.get('HF_TOKEN'):
     from cryptography.fernet import Fernet
     os.environ['HF_TOKEN'] = Fernet(conf.fernet_key.encode('utf-8')).decrypt(conf.fernet_data).decode('utf-8')
-from lib.conf_models import TTS_ENGINES, TTS_VOICE_CONVERSION, default_engine_settings, default_voice_detection_model, audiocpp_engines, audiocpp_packages, audiocpp_repo, audiocpp_asr
+from lib.conf_models import TTS_ENGINES, TTS_VOICE_CONVERSION, default_engine_settings, default_voice_detection_model, default_voice_isolator_model, audiocpp_engines, audiocpp_packages, audiocpp_repo, audiocpp_asr
 from lib.conf_lang import year_to_decades_languages
 from lib.conf_interlude import interlude_classifier_repo
 languages = {lang.strip().lower() for lang in args.languages.split(',') if lang.strip()}
@@ -305,10 +305,12 @@ xtts_repo = default_engine_settings[TTS_ENGINES['XTTS']]['repo']
 add('common', f'{xtts_repo}/speakers_xtts.pth', lambda: hf_file(xtts_repo, 'speakers_xtts.pth'))
 acpp_dir = os.path.join(tts_dir, 'audiocpp', audiocpp_repo.replace('/', '--'))
 # the voice conversions (TTS_VOICE_CONVERSION) of every built-in voice engine (coqui ones, piper, orpheus and audio.cpp's):
-# the ones with their own files here (seed_vc, the default); those taking an engine's preset are with the audio.cpp ones
+# the ones with their own files here (seed_vc, the default, soulx_singer_svc in its own repo); those taking an engine's
+# preset are with the audio.cpp ones
 for vc_cfg in TTS_VOICE_CONVERSION.values():
+    vc_repo = vc_cfg.get('repo', audiocpp_repo)
     for file in vc_cfg.get('files', []):
-        add('common', f'{audiocpp_repo}/{file}', lambda file=file: hf_file(audiocpp_repo, file, acpp_dir))
+        add('common', f'{vc_repo}/{file}', lambda repo=vc_repo, file=file: hf_file(repo, file, os.path.join(tts_dir, 'audiocpp', repo.replace('/', '--'))))
 for name, cfg in load_presets('xtts').items():
     if not engine_wanted(TTS_ENGINES['XTTS']) or (name != 'internal' and languages and cfg['lang'] not in languages):
         continue
@@ -381,12 +383,16 @@ if 'audiocpp_server' in selected:
         vc_spec = importlib.util.spec_from_file_location('e2a_voice_conversion', os.path.join(root_dir, 'lib', 'classes', 'tts_engines', 'common', 'voice_conversion.py'))
         vc_module = importlib.util.module_from_spec(vc_spec)
         vc_spec.loader.exec_module(vc_module)
+        # every package version an engine asks for (min_version): the newest families may need another package
+        from lib.conf_models import audiocpp_families
+        min_versions = sorted({cfg['min_version'] for cfg in audiocpp_families.values()} | {cfg.get('min_version', '0.0') for cfg in TTS_VOICE_CONVERSION.values()} | {default_voice_isolator_model['min_version']}, key=vc_module.VoiceConversion.version)
         acpp_packages = []
         for device in (conf.devices['CPU']['proc'], conf.devices['CUDA']['proc'], conf.devices['VULKAN']['proc']):
-            try:
-                acpp_packages += vc_module.VoiceConversion.packages({'device': device, 'id': None}, 'audiocpp')[0]
-            except ValueError as e:
-                print(f'audiocpp_server ({device}): {e}', flush=True)
+            for min_version in min_versions:
+                try:
+                    acpp_packages += vc_module.VoiceConversion.packages(device, 'audiocpp', min_version=min_version)[0]
+                except ValueError as e:
+                    print(f'audiocpp_server ({device}, audio.cpp {min_version}+): {e}', flush=True)
         acpp_packages = list(dict.fromkeys(acpp_packages))
     else:
         acpp_packages = [name.strip() for name in args.audiocpp_packages.split(',') if name.strip()]
@@ -516,6 +522,9 @@ if 'stanza' in selected:
             add('stanza', f'stanza {lang}', lambda iso1=Lang(lang).pt1: stanza_lang(iso1))
 add('pyannote', default_voice_detection_model, pyannote_model)
 add('demucs', 'htdemucs', demucs_model)
+# the other background removal of an uploaded voice (lib/conf.py default_voice_separation_engine), where VoiceExtractor reads it
+vi = default_voice_isolator_model
+add('voice_isolator', f"{vi['repo']}/{vi['file']}", lambda: hf_file(vi['repo'], vi['file'], os.path.join(tts_dir, 'audiocpp', vi['repo'].replace('/', '--')), vi['revision']))
 for repo in [interlude_classifier_repo] + [f'facebook/musicgen-{stereo}{size}' for stereo in ('', 'stereo-') for size in ('small', 'medium')]:
     add('interlude', repo, lambda repo=repo: hf_cache_repo(repo))
 add('argos', f"argos-translate packages ({','.join(sorted(languages)) or 'all'})", argos_packages)

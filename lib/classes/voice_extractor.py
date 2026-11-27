@@ -1,4 +1,4 @@
-import os, subprocess, shutil, tempfile, gradio as gr
+import os, sys, subprocess, shutil, tempfile, gradio as gr
 
 from typing import Any
 from pydub import AudioSegment, silence
@@ -8,8 +8,8 @@ from pathlib import Path
 from lib.classes.tts_engines.common.audio import get_audio_duration
 from lib.classes.tts_engines.common.hf_download import hf_download
 from lib.classes.subprocess_pipe import SubprocessPipe
-from lib.conf import systems, devices, voice_formats, default_audio_proc_samplerate, tts_dir
-from lib.conf_models import TTS_ENGINES, default_voice_separation_model
+from lib.conf import systems, devices, voice_formats, default_audio_proc_samplerate, default_voice_separation_engine, tts_dir
+from lib.conf_models import TTS_ENGINES, default_voice_separation_model, default_voice_isolator_model, audiocpp_packages
 from lib.lang import legends
 
 class VoiceExtractor:
@@ -209,6 +209,67 @@ class VoiceExtractor:
             error = f'_demucs_voice() error: {str(e)}'
         return False, error
 
+
+    def _isolate_voice(self)->tuple[bool, str]:
+        # Inworld Voice Isolator (default_voice_isolator_model) on audio.cpp's native server, driven by
+        # workers/audiocpp_worker.py (--vc-only --vc-task s2s): the audiocpp_server packages of the audio.cpp engines
+        # (VoiceConversion.packages() / install()), on the device selected when audio.cpp runs there (CUDA, Vulkan, Metal),
+        # else on the next GPU package, else on CPU. One request for the whole file, then the worker stops: its memory goes
+        # back to the TTS engine
+        from lib.classes.tts_engines.common.voice_conversion import VoiceConversion
+        error = '_isolate_voice() error'
+        worker = None
+        try:
+            msg = legends['msg_extracting_voice']
+            print(msg)
+            if self.is_gui_process:
+                self.progress_bar(0.0, desc=msg)
+            model = default_voice_isolator_model
+            # a real file under models/tts/audiocpp/<repo>/, not a Hugging Face cache symlink (reason in AudioCpp.__init__)
+            model_path = hf_download(self.progress_bar if self.is_gui_process else None, msg, repo_id=model['repo'], filename=model['file'], revision=model['revision'], cache_dir=tts_dir, local_dir=os.path.join(tts_dir, 'audiocpp', model['repo'].replace('/', '--')))
+            attempts, gpu_wanted = VoiceConversion.packages(self.session['device'], model['family'], cpu_fallback=True, min_version=model['min_version'])
+            worker_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tts_engines', 'workers', 'audiocpp_worker.py')
+            # the worker is stdlib only. conf.py's OMP_NUM_THREADS=1 is for e2a's torch: the server (OpenMP build) sizes its own pool
+            worker_env = {k: v for k, v in os.environ.items() if k not in ('PYTHONHOME', 'PYTHONPATH', 'PYTHONSTARTUP', '__PYVENV_LAUNCHER__', 'OMP_NUM_THREADS')}
+            worker_env['PYTHONUNBUFFERED'] = '1'
+            for attempt, package_name in enumerate(attempts):
+                package = audiocpp_packages[package_name]
+                backend = package.get('backend', 'cpu') if package['gpu'] and gpu_wanted else 'cpu'
+                try:
+                    server_bin = VoiceConversion.install(package_name, model['family'], worker_env)
+                    cmd = [sys.executable, '-u', worker_script, '--server', server_bin, '--model', model_path, '--family', model['family'], '--backend', backend, '--vc-task', model['task'], '--vc-only']
+                    msg = legends['msg_worker_starting'].format(engine=model['family'], model=os.path.basename(model_path), device=f'{package_name}, {backend}')
+                    print(msg)
+                    worker = SubprocessPipe(cmd, is_gui_process=self.is_gui_process, total_duration=0, msg=msg, keep_alive=True, env=worker_env)
+                    if not worker.result:
+                        error = legends['error_worker_failed'].format(engine=model['family'], error=worker.ready_info.get('error'))
+                        raise RuntimeError(error)
+                    break
+                except Exception as e:
+                    if worker is not None:
+                        worker.stop()
+                        worker = None
+                    if attempt + 1 >= len(attempts):
+                        raise
+                    print(f'_isolate_voice() {package_name} failed to start: {e}')
+            msg = legends['msg_extracting_voice']
+            if self.is_gui_process:
+                self.progress_bar(0.0, desc=msg)
+            reply = worker.send({'op': 's2s', 'source': os.path.abspath(self.wav_file), 'file': os.path.abspath(self.voice_track)})
+            if not reply.get('ok'):
+                raise RuntimeError(reply.get('error'))
+            if not os.path.exists(self.voice_track) or os.path.getsize(self.voice_track) == 0:
+                raise RuntimeError(f'{self.voice_track} was not created or is empty')
+            if self.is_gui_process:
+                self.progress_bar(1.0, desc=msg)
+            msg = legends['msg_done']
+            return True, msg
+        except Exception as e:
+            error = f'_isolate_voice() error: {e}'
+        finally:
+            if worker is not None:
+                worker.stop()
+        return False, error
 
     def _remove_silences(self, audio:AudioSegment, silence_threshold:int, min_silence_len:int=200, keep_silence:int=300)->AudioSegment:
         msg = legends['msg_removing_empty_audio']
@@ -462,7 +523,18 @@ class VoiceExtractor:
                     self.progress_bar(int(result), desc=msg)
                 if result and status:
                     self.voice_track = os.path.join(self.demucs_dir, 'vocals.wav')
-                    result, msg = self._demucs_voice()
+                    if default_voice_separation_engine == 'voice_isolator':
+                        result, msg = self._isolate_voice()
+                        if not result:
+                            # no audio.cpp package for this machine, a download or a server that failed: demucs instead
+                            print(msg)
+                            msg = legends['msg_voice_isolator_fallback'].format(error=msg)
+                            print(msg)
+                            if self.is_gui_process:
+                                self.progress_bar(0.0, desc=msg)
+                            result, msg = self._demucs_voice()
+                    else:
+                        result, msg = self._demucs_voice()
                     print(msg)
                     if self.is_gui_process:
                         self.progress_bar(int(result), desc=msg)

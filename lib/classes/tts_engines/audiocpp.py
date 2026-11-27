@@ -67,8 +67,6 @@ class AudioCpp(TTSUtils):
             self.model_repo = model_cfg['repo']
             self.xtts_speakers = self._load_xtts_builtin_list()
             self.device = devices['CUDA']['proc'] if self.session['device'] in [devices['CUDA']['proc'], devices['ROCM']['proc'], devices['JETSON']['proc']] else self.session['device']
-            # --- the audiocpp_server package for this machine (VoiceConversion: shared with the VC stage of the built-in voice engines) ---
-            attempts, gpu_wanted = VoiceConversion.packages(self.session['device'], tts_engine)
             # --- GGUF weights through e2a's Hugging Face cache (tts_dir), byte progress in the terminal and the GUI ---
             # cloning engines taking a reference transcript also get the ASR model, loaded by the worker only for a voice it
             # has never transcribed, then unloaded. Built-in voice engines get default_vc_model for a picked voice file, run in
@@ -78,8 +76,12 @@ class AudioCpp(TTSUtils):
             self.vc_model = default_vc_model.rsplit('/', 1)[-1]
             self.vc_model = self.vc_model if TTS_VOICE_CONVERSION[self.vc_model]['task'] == 'vc' else TTS_VOICE_CONVERSION[self.vc_model]['fallback']
             self.vc_cfg = TTS_VOICE_CONVERSION[self.vc_model]
-            vc_preset = load_engine_presets(self.vc_cfg['engine'])['internal'] if self.vc_cfg.get('engine') else {'repo': audiocpp_repo, 'files': self.vc_cfg['files']}
+            vc_preset = load_engine_presets(self.vc_cfg['engine'])['internal'] if self.vc_cfg.get('engine') else {'repo': self.vc_cfg.get('repo', audiocpp_repo), 'files': self.vc_cfg['files']}
             vc_files = vc_preset['files'] if not self.family_cfg['clone'] else []
+            # --- the audiocpp_server package for this machine (VoiceConversion: shared with the VC stage of the built-in voice engines),
+            # holding this family and, for a built-in voice engine, the VC model's ---
+            min_version = max(self.family_cfg['min_version'], self.vc_cfg.get('min_version', '0.0') if vc_files else '0.0', key=VoiceConversion.version)
+            attempts, gpu_wanted = VoiceConversion.packages(self.session['device'], tts_engine, min_version=min_version)
             msg = legends['msg_zonos2_models'].format(engine=tts_engine, files=', '.join(os.path.basename(f) for f in model_files + asr_files + vc_files))
             print(msg)
             if progress_bar is not None:
@@ -138,7 +140,8 @@ class AudioCpp(TTSUtils):
                 sys.executable, '-u', self.worker_script, '--server', self.server_bin, '--model', self.model_path, '--family', self.family, '--backend', self.backend,
                 '--load-options', json.dumps(self.load_options), '--session-options', json.dumps(self.family_cfg['session']), '--request-options', json.dumps(self.family_cfg['request']),
                 '--ref-min', str(self.family_cfg['ref_min']), '--ref-max', str(self.family_cfg['ref_max'] if self.family_cfg['clone'] else self.vc_cfg['ref_max']), '--ref-text', self.family_cfg['ref_text'] or 'none', '--ref-fallback', json.dumps(self.family_cfg['ref_fallback']),
-                '--asr-model', self.asr_path, '--asr-family', audiocpp_asr['family'], '--vc-model', self.vc_path, '--vc-family', self.vc_cfg['family'], '--vc-route', self.vc_cfg.get('route', ''), '--samplerate', str(self.params['samplerate'])
+                '--asr-model', self.asr_path, '--asr-family', audiocpp_asr['family'], '--vc-model', self.vc_path, '--vc-family', self.vc_cfg['family'], '--vc-route', self.vc_cfg.get('route', ''),
+                '--vc-task', self.vc_cfg.get('server_task', 'vc'), '--vc-options', json.dumps(self.vc_cfg.get('options', {})), '--samplerate', str(self.params['samplerate'])
             ] + (['--language-option'] if self.family_cfg['language_option'] else []) + (['--clone'] if self.family_cfg['clone'] else []) + (['--speaker-label'] if self.family_cfg['speaker_label'] else [])
             engine = loaded_tts.get(self.tts_key)
             if isinstance(engine, SubprocessPipe) and (engine.cmd != cmd or engine.process is None or engine.process.poll() is not None):

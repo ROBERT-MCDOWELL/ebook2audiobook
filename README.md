@@ -119,7 +119,7 @@ https://github.com/user-attachments/assets/81c4baad-117e-4db5-ac86-efc2b7fea921
 
 <a id="features"></a>
 ## Features
-- 🔧 **TTS Engines supported**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos2, Zonos3, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, VibeVoice, VoxCPM2, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS, ZipVoice (LuxTTS), KittenTTS`
+- 🔧 **TTS Engines supported**: `XTTSv2, Bark, Fairseq, VITS, Tacotron2, Tortoise, GlowTTS, YourTTS, Piper, Zonos2, Zonos3, GPT-SoVITS, OmniVoice, Breeze TTS, Chatterbox, Confucius4 TTS, CosyVoice3, Dots TTS, DramaBox, FireRed Audio, FireRedTTS3, Fish Audio, Higgs Audio TTS, Index TTS2, Irodori TTS, Kokoro TTS, KugelAudio, M5-TTS, Magpie TTS, Maya1, MioTTS, Moss TTS Local, Moss TTS Nano, NeuTTS, Pocket TTS, Qwen3 TTS, Supertonic, Tiny Voca, VibeVoice, VoxCPM2, VoxMel TTS, Voxtral TTS, F5-TTS, Orpheus-TTS, ChatTTS, Spark-TTS, OpenVoice, MeloTTS, ZipVoice (LuxTTS), KittenTTS`
 - 📚 **Convert multiple file formats**: `.epub`, `.mobi`, `.azw3`, `.fb2`, `.lrf`, `.rb`, `.snb`, `.tcr`, `.pdf`, `.txt`, `.rtf`, `.doc`, `.docx`, `.html`, `.odt`, `.azw`, `.tiff`, `.tif`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.zip`
 - 💻 **TextArea** to convert directly a short text in audio
 - 🔍 **OCR scanning** for files with text pages as images
@@ -535,7 +535,7 @@ Standalone tools, run with e2a's own Python (`python_env`, created by the first 
 <a id="preload-models"></a>
 ### Preload models for offline installs: `tools/preload_models.py`
 Downloads every model e2a uses (TTS engines and their fine-tunes, voice conversion, stanza, pyannote, demucs,
-music interludes, argos-translate packages, tesseract data, jieba, and the voices) into one folder laid out
+voice isolator, music interludes, argos-translate packages, tesseract data, jieba, and the voices) into one folder laid out
 exactly like `./models`, i.e. a USB key. On the offline machine, copy that folder into e2a's `./models`
 and the `voices` folder written beside it into e2a's `./voices`.
 Every finished job is recorded in `<models_dir>/.e2a_downloads.json`: a rerun skips what is done and starts
@@ -566,7 +566,7 @@ options:
   --only ONLY           Comma list of categories: common,xtts,bark,tortoise,vits,fairseq,glowtts,tacotron,yo
                         urtts,piper,zonos2,zonos3,audiocpp,audiocpp_server,gptsovits,f5tts,zipvoice,omnivoic
                         e,orpheus,sparktts,chattts,csm,kittentts,openvoice,melotts,phonon,stanza,pyannote,de
-                        mucs,interlude,argos,tessdata,jieba,voices
+                        mucs,voice_isolator,interlude,argos,tessdata,jieba,voices
   --skip SKIP           Comma list of categories to leave out
   --languages LANGUAGES
                         Comma list of e2a ISO-639-3 codes (eng,fra,ita...): single-language models and fine-
@@ -748,6 +748,8 @@ examples:
 ## Cloned Voices
 You can upload any voice audio in any of the supported audio formats, the ideal duration is around 1 to 5 mn.
 It doesn't matter if the recording has a noisy background or music playing over it — E2A will clean up the voice for you.
+The background is removed by demucs (htdemucs) by default, or by the [Inworld Voice Isolator](https://huggingface.co/inworld/voice-isolator)
+on audio.cpp with `default_voice_separation_engine = 'voice_isolator'` in `lib/conf.py` (demucs takes over if it cannot run).
 
 The built-in cloned voices list is mainly in English. If you need voices in other languages to be officially
 added to the list, please contact us and we'll add them after review.
@@ -842,6 +844,9 @@ git checkout tags/VERSION_NUM # Locally/Compose -> Example: git checkout tags/v2
 - [x] Qwen3-TTS (https://huggingface.co/spaces/Qwen/Qwen3-TTS)[cite: 1]
 - [x] VibeVoice (https://github.com/vibevoice-community/VibeVoice)[cite: 1]
 - [x] VoxCPM2 (https://github.com/voxcpm/voxcpm)[cite: 1]
+- [x] VoxMel TTS (https://github.com/VoxDance-Lab/VoxMel)
+- [x] M5-TTS (https://github.com/ASLP-lab/M5-TTS)
+- [x] Tiny Voca (https://huggingface.co/n4ze3m/tiny-voca)
 - [x] Voxtral TTS (https://github.com/voxtral/voxtral-tts)[cite: 1]
 - [x] Chatterbox (https://github.com/resemble-ai/chatterbox)[cite: 1]
 - [x] CosyVoice / CosyVoice3 (https://github.com/FunAudioLLM/CosyVoice)[cite: 1]

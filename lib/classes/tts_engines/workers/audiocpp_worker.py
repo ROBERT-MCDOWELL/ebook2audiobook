@@ -13,6 +13,7 @@
 #             file converts its output with the --vc-model (Seed-VC)
 #   stdin  -> --vc-only (the VC stage of e2a's built-in voice engines, VoiceConversion): --model/--family is the VC model
 #             and the only op is {"op": "vc", "source" (the wav to convert), "voice" (the voice file), "file"}
+#             --vc-task s2s (the voice isolator of VoiceExtractor): no voice, the only op is {"op": "s2s", "source", "file"}
 #   stdout <- {"ok": true, "file": "..."}
 #             {"ok": false, "error": "...", "oom": bool, "server_exited": bool}
 #   EOF on stdin -> the server is stopped, exit 0
@@ -45,6 +46,9 @@ def main()->int:
     parser.add_argument('--vc-model', default='')
     parser.add_argument('--vc-family', default='seed_vc')
     parser.add_argument('--vc-route', default='')
+    # the VC model's task in the server: vc (Seed-VC, Chatterbox), svc (SoulX-Singer), s2s (voice isolator, no voice)
+    parser.add_argument('--vc-task', choices=['vc', 'svc', 's2s'], default='vc')
+    parser.add_argument('--vc-options', default='{}')
     parser.add_argument('--vc-only', action='store_true')
     parser.add_argument('--samplerate', type=int, default=24000)
     args = parser.parse_args()
@@ -60,7 +64,7 @@ def main()->int:
     # ggml's CPU pool (also the CPU side of GPU backends): physical cores on x86 (SMT siblings slow ggml down), all elsewhere
     threads = max(1, (os.cpu_count() or 2) // (2 if platform.machine().lower() in ('x86_64', 'amd64') else 1))
     # --vc-only: the model is the VC one (same id as the lazy VC entry below), resident before the server listens
-    models = [{'id': 'e2a-vc' if args.vc_only else 'e2a', 'family': args.family, 'path': os.path.abspath(args.model), 'task': 'vc' if args.vc_only else 'tts', 'mode': 'offline'}]
+    models = [{'id': 'e2a-vc' if args.vc_only else 'e2a', 'family': args.family, 'path': os.path.abspath(args.model), 'task': args.vc_task if args.vc_only else 'tts', 'mode': 'offline'}]
     for key, value in (('load_options', json.loads(args.load_options)), ('session_options', json.loads(args.session_options)), ('default_request_options', json.loads(args.request_options))):
         if value:
             models[0][key] = value
@@ -69,7 +73,7 @@ def main()->int:
         models.append({'id': 'e2a-asr', 'family': args.asr_family, 'path': os.path.abspath(args.asr_model), 'task': 'asr', 'mode': 'offline', 'lazy': True})
     if vc_wanted:
         # lazy: loaded with the first sentence spoken in a picked voice, then kept for the session
-        models.append({'id': 'e2a-vc', 'family': args.vc_family, 'path': os.path.abspath(args.vc_model), 'task': 'vc', 'mode': 'offline', 'lazy': True})
+        models.append({'id': 'e2a-vc', 'family': args.vc_family, 'path': os.path.abspath(args.vc_model), 'task': args.vc_task, 'mode': 'offline', 'lazy': True})
     # max_loaded_models 0: loading the ASR or VC model must not evict the TTS one. busy_timeout_ms 0: this worker sends one
     # request at a time, nothing to wait for
     config = {'host': '127.0.0.1', 'port': 0, 'backend': args.backend, 'threads': threads, 'lazy_load': False, 'max_loaded_models': 0, 'busy_timeout_ms': 0, 'models': models}
@@ -289,8 +293,13 @@ def main()->int:
                     raise RuntimeError(f'no transcript for the reference clip of {voice}: {args.family} cannot clone without one')
             refs[key] = (dst, text)
             return refs[key]
-        # no route = the family's default (seed_vc: v2_vc)
+        # no route = the family's default (seed_vc: v2_vc); options: the VC model's request options (SoulX-Singer:
+        # auto_pitch_shift)
         vc_route = {'route': args.vc_route} if args.vc_route else {}
+        vc_options = json.loads(args.vc_options)
+        if vc_options:
+            vc_route['options'] = vc_options
+        vc_op = 's2s' if args.vc_task == 's2s' else 'vc'
         proto.write(json.dumps({'ready': True, 'samplerate': args.samplerate, 'backend': args.backend, 'port': config['port']}) + '\n')
         while True:
             raw = sys.stdin.buffer.readline()
@@ -301,12 +310,22 @@ def main()->int:
             except Exception as e:
                 proto.write(json.dumps({'ok': False, 'error': f'bad request: {e}', 'oom': False}) + '\n')
                 continue
-            if req.get('op') != ('vc' if args.vc_only else 'tts'):
+            if req.get('op') != (vc_op if args.vc_only else 'tts'):
                 proto.write(json.dumps({'ok': False, 'error': f"unknown op {req.get('op')!r}", 'oom': False}) + '\n')
                 continue
             try:
                 if server.poll() is not None:
                     raise RuntimeError(f'audiocpp_server exited ({server.poll()}): ' + ' | '.join(state['tail'][-5:]))
+                if args.vc_only and vc_op == 's2s':
+                    # the whole source file in one request (any rate and channels: the model resamples it), so a long
+                    # upload on CPU gets more time than a sentence
+                    result = json.loads(post('/v1/tasks/run', {'model': 'e2a-vc', 'request': {'audio': os.path.abspath(req['source'])}}, 7200))
+                    if not result.get('audio'):
+                        raise RuntimeError(f"{args.family} returned no audio: {str(result)[:200]}")
+                    with open(req['file'], 'wb') as f:
+                        f.write(base64.b64decode(result['audio']))
+                    proto.write(json.dumps({'ok': True, 'file': req['file']}) + '\n')
+                    continue
                 if args.vc_only:
                     # the source file -> the voice file's reference clip (Seed-VC resamples both itself)
                     clip, _ = reference(req['voice'])

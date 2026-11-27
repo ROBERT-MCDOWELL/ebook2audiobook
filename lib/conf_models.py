@@ -45,6 +45,7 @@ TTS_ENGINES = {
     "IRODORI_TTS": "irodori_tts",
     "KOKORO_TTS": "kokoro_tts",
     "KUGELAUDIO": "kugelaudio",
+    "M5_TTS": "m5_tts",
     "MAGPIE_TTS": "magpie_tts",
     "MAYA1": "maya1",
     "MIOTTS": "miotts",
@@ -54,8 +55,10 @@ TTS_ENGINES = {
     "POCKET_TTS": "pocket_tts",
     "QWEN3_TTS": "qwen3_tts",
     "SUPERTONIC": "supertonic",
+    "TINY_VOCA": "tiny_voca",
     "VIBEVOICE": "vibevoice",
     "VOXCPM2": "voxcpm2",
+    "VOXMEL_TTS": "voxmel_tts",
     "VOXTRAL_TTS": "voxtral_tts"
 }
 
@@ -63,18 +66,24 @@ TTS_ENGINES = {
 # phonon, kittentts' mini / nano / pico models and the audio.cpp ones with clone False) turns its output into that voice, on audio.cpp's server (common/voice_conversion.py).
 # default_vc_model below picks one; the last part of its path is the zero-shot engine's tts_zs_key (loaded_tts, model_zs_cache).
 # task "vc": voice to voice. task "tts": the engine's voice clone speaks the sentence text again (no voice to voice).
-# files: GGUF in audiocpp_repo; engine: the files of that engine's "internal" preset instead (one download for both).
+# files: GGUF in audiocpp_repo (repo: another Hugging Face repo); engine: the files of that engine's "internal" preset instead
+# (one download for both). server_task: the model's task in audiocpp_server ("vc" when absent); options: request options
+# sent with each conversion; min_version: the oldest audio.cpp release with the model (audiocpp_packages "version").
 # ref_max: the reference clip cut from the voice file, seconds (task "tts": the engine's own ref_min / ref_max)
 #   seed_vc: Seed-VC V1 route, Whisper-small content + BigVGAN 22 kHz (the server default v2_vc reads content from
 #     HuBERT-large, pretrained on English only). V1 shares a 30 s DiT window between the reference and each source
 #     chunk: 15 s keeps a sentence in one window (no chunk crossfade)
 #   chatterbox_vc: Chatterbox's S3Gen conditioned on the reference
+#   soulx_singer_svc: SoulX-Singer's singing voice conversion (audio.cpp task "svc": Whisper-base content, RMVPE F0).
+#     Trained on singing, it converts speech too; auto_pitch_shift moves the source's median pitch onto the reference's
+#     (a male built-in voice to a female voice file)
 #   qwen3_tts: Qwen3-TTS has no voice to voice: its Base clone speaks the text in the voice, in its own languages only
 #     (fallback for the others); the built-in engine is not run for those sentences. The audio.cpp engines take the
 #     fallback always (speaking their text again would only replace them)
 TTS_VOICE_CONVERSION = {
     "seed_vc": {"path": "audiocpp/seed_vc", "task": "vc", "family": "seed_vc", "files": ["SeedVC-MLX-GGUF/seed-vc-mlx-q8_0.gguf"], "route": "v1_whisper_bigvgan_vc", "ref_max": 15.0},
     "chatterbox_vc": {"path": "audiocpp/chatterbox_vc", "task": "vc", "family": "chatterbox", "engine": TTS_ENGINES['CHATTERBOX'], "ref_max": 10.0},
+    "soulx_singer_svc": {"path": "audiocpp/soulx_singer_svc", "task": "vc", "server_task": "svc", "family": "soulx_singer", "repo": "audio-cpp/SoulX-Singer-GGUF", "files": ["SoulX-Singer-SVC-GGUF/soulx-singer-svc-q8_0.gguf"], "options": {"auto_pitch_shift": True}, "ref_max": 10.0, "min_version": "0.9.6"},
     "qwen3_tts": {"path": "audiocpp/qwen3_tts", "task": "tts", "family": "qwen3_tts", "engine": TTS_ENGINES['QWEN3_TTS'], "fallback": "seed_vc"}
 }
 
@@ -134,6 +143,10 @@ default_voice_detection_model = 'drewThomasson/segmentation'
 # demucs voice separation checkpoint mirrored on HF (the official dl.fbaipublicfiles.com host is not reliable).
 # file keeps its demucs name: <signature>-<sha256 prefix>.th, the prefix is checked again at load
 default_voice_separation_model = dict(repo='drewThomasson/htdemucs', name='htdemucs', file='955717e8-8726e21a.th')
+# Inworld Voice Isolator v1, the other background removal of an uploaded voice (lib/conf.py default_voice_separation_engine),
+# run on audiocpp_server (family voice_isolator, task s2s): the offline checkpoint (two-sided, 12 s windows overlapping 2 s),
+# 48 kHz mono out. At the revision audio.cpp's model_specs/voice_isolator.json pins
+default_voice_isolator_model = dict(repo='Etherll/voice-isolator-GGUF', revision='488f02f87199e3f24ad195b5b2d4b44705aca545', family='voice_isolator', task='s2s', file='voice-isolator-offline-f32.gguf', min_version='0.9.6')
 default_speaker = os.path.join(voices_dir, 'eng', 'adult', 'male', 'KumarDahl.wav')
 
 tts_engines_from_coqui = [TTS_ENGINES['XTTS'], TTS_ENGINES['BARK'], TTS_ENGINES['TORTOISE'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]
@@ -145,10 +158,10 @@ tts_engines_with_custom_model = (TTS_ENGINES['PIPER'], TTS_ENGINES['XTTS'], TTS_
 # workers/audiocpp_worker.py. No torch, no venv (as ZONOS2).
 # Release pinned for the official packages: asset names carry the tag and releases/latest points at side releases
 # (v0.9.2-drama3-base-small). Bumping it re-downloads them once (a package whose install record names other urls)
-audiocpp_version = '0.9.5'
+audiocpp_version = '0.9.6'
 audiocpp_release = f'https://github.com/0xShug0/audio.cpp/releases/download/v{audiocpp_version}/audio-v{audiocpp_version}'
 audiocpp_packages = {
-    # official release assets. Linux ones of v0.9.5 are built on Ubuntu 26.04 (GCC 15.2): glibc 2.43 (log10f, sqrtf...)
+    # official release assets. Linux ones of v0.9.5 and v0.9.6 are built on Ubuntu 26.04 (GCC 15.2): glibc 2.43 (log10f, sqrtf...)
     # / GLIBCXX_3.4.32 / libgomp.so.1 floor, so never on the trixie Docker image (glibc 2.41), which failed with
     # "GLIBC_2.43 not found" (a host missing the last two fails to start them and falls through to the next package);
     # portable = runtime CPU dispatch (libggml-cpu-<arch> picked at start, sse42 up to zen4 / sapphirerapids)
@@ -199,6 +212,13 @@ audiocpp_packages = {
     "windows-arm64-cpu-v82": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-windows-arm64-cpu-v82.zip"], "gpu": False, "cpu_flags": ["asimddp", "asimdhp"], "enabled": False},
     "windows-arm64-cpu": {"urls": ["https://github.com/ROBERT-MCDOWELL/py-pkg/releases/download/audiocpp/audiocpp-server-windows-arm64-cpu.zip"], "gpu": False, "enabled": False}
 }
+# the audio.cpp release each package holds ("version"), so an engine needing a newer one (min_version: families added by
+# that release) skips the older packages: audiocpp_version for the official ones, audiocpp_own_version for e2a's own
+# builds, whose urls carry no version. Bump audiocpp_own_version once they are republished from a newer tag: the
+# install record names the version, so the copies already installed are downloaded again
+audiocpp_own_version = '0.9.2'
+for _acpp_package in audiocpp_packages.values():
+    _acpp_package.setdefault('version', audiocpp_version if _acpp_package['urls'][0].startswith(audiocpp_release) else audiocpp_own_version)
 # reference transcripts for the engines whose cloning takes one (ref_text below): transcribed once per voice clip by this
 # ASR model, loaded in the same server only when needed and unloaded right after
 audiocpp_asr = {"family": "qwen3_asr", "files": ["Qwen3-ASR-0.6B-GGUF/qwen3-asr-0.6b-q8_0.gguf"]}
@@ -1167,7 +1187,8 @@ default_engine_settings = {
         "rating": {"VRAM": 1, "CPU": 5, "RAM": 1, "Realism": 2}
     }
 }
-# audio.cpp engines, values from audio.cpp v0.9.2 (model_specs/<family>.json and the family's session code).
+# audio.cpp engines, values from audio.cpp v0.9.2, v0.9.6 for m5_tts, tiny_voca and voxmel_tts (model_specs/<family>.json and
+# the family's session code).
 # languages: e2a iso-639-3 -> what the family reads as the text language ("" = the model detects it);
 # language_option: also sent as the "language" request option (the family ignores the text language);
 # clone: True = clones the voice file picked in e2a, False = built-in voice (voice_ids) converted by Seed-VC when a
@@ -1176,6 +1197,8 @@ default_engine_settings = {
 # options sent instead when a required transcript is empty; load / session / request: the server config's load_options /
 # session_options / default_request_options; load_by_language: load options per language (one package per language);
 # speaker_label: VibeVoice reads only "Speaker N:" script lines; espeak: Kokoro phonemizes through e2a's eSpeak-ng;
+# devices: the e2a devices it runs on (native_devices when absent); min_version: the oldest audio.cpp release with the
+# family (audiocpp_packages "version");
 # samplerate: initial value only, the first reply sets the real one; rating: estimates from the model sizes
 audiocpp_families = {
     TTS_ENGINES['BREEZE_TTS']: {"family": "breeze_tts", "languages": {"zho": "zh", "eng": "en"}, "clone": True, "ref_text": "required", "ref_fallback": {}, "samplerate": 24000, "rating": {"VRAM": 4, "CPU": 2, "RAM": 6, "Realism": 4}},
@@ -1202,6 +1225,9 @@ audiocpp_families = {
     TTS_ENGINES['KOKORO_TTS']: {"family": "kokoro_tts", "languages": {"eng": "en-us", "spa": "es", "fra": "fr-fr", "hin": "hi", "ita": "it", "por": "pt-br", "zho": "zh"}, "clone": False, "voice_ids": {"eng": "af_heart", "spa": "ef_dora", "fra": "ff_siwis", "hin": "hf_alpha", "ita": "if_sara", "por": "pf_dora", "zho": "zf_xiaobei"}, "espeak": True, "samplerate": 24000, "rating": {"VRAM": 1, "CPU": 5, "RAM": 2, "Realism": 4}},
     # the model reads the language from the text; "default" is a German voice, english_female a British one
     TTS_ENGINES['KUGELAUDIO']: {"family": "kugelaudio", "languages": {"eng": "", "deu": "", "fra": "", "spa": "", "ita": "", "por": "", "nld": "", "pol": "", "rus": "", "ukr": "", "ces": "", "ron": "", "hun": "", "swe": "", "dan": "", "fin": "", "nob": "", "nor": "", "ell": "", "bul": "", "slk": "", "hrv": "", "srp": "", "tur": ""}, "clone": False, "voice_ids": {"eng": "english_female", "*": "default"}, "samplerate": 24000, "rating": {"VRAM": 6, "CPU": 1, "RAM": 8, "Realism": 4}},
+    # VoiceClone packages only (CustomVoice speaks its one trained speaker): the clone needs the transcript; yue = Cantonese.
+    # Native text normalization for Chinese and English only, e2a's own for the others
+    TTS_ENGINES['M5_TTS']: {"family": "m5_tts", "languages": {"zho": "zh", "yue": "yue", "eng": "en", "deu": "de", "fra": "fr", "jpn": "ja", "kor": "ko"}, "clone": True, "ref_text": "required", "ref_fallback": {}, "min_version": "0.9.6", "samplerate": 24000, "rating": {"VRAM": 2, "CPU": 3, "RAM": 3, "Realism": 4}},
     TTS_ENGINES['MAGPIE_TTS']: {"family": "magpie_tts", "languages": {"ara": "ar-MSA", "deu": "de", "eng": "en", "spa": "es", "fra": "fr", "hin": "hi", "ita": "it", "kor": "ko", "por": "pt-BR", "vie": "vi", "zho": "zh"}, "clone": False, "voice_ids": {"*": "Aria"}, "samplerate": 22050, "rating": {"VRAM": 2, "CPU": 3, "RAM": 4, "Realism": 4}},
     # voice designed from a description (required by the model), converted by Seed-VC when a voice file is picked
     TTS_ENGINES['MAYA1']: {"family": "maya1", "languages": {"eng": "en"}, "clone": False, "request": {"instruct": "Calm adult narrator with a neutral American accent, warm timbre and steady audiobook pacing."}, "samplerate": 24000, "rating": {"VRAM": 6, "CPU": 1, "RAM": 8, "Realism": 5}},
@@ -1214,16 +1240,20 @@ audiocpp_families = {
     TTS_ENGINES['POCKET_TTS']: {"family": "pocket_tts", "languages": {"eng": "en", "fra": "fr", "deu": "de", "ell": "el", "ita": "it", "por": "pt", "spa": "es"}, "clone": True, "ref_text": None, "ref_fallback": {}, "load_by_language": {"eng": {"language": "english"}, "fra": {"language": "french"}, "deu": {"language": "german"}, "ell": {"language": "greek"}, "ita": {"language": "italian"}, "por": {"language": "portuguese"}, "spa": {"language": "spanish"}}, "samplerate": 24000, "rating": {"VRAM": 1, "CPU": 5, "RAM": 2, "Realism": 4}},
     TTS_ENGINES['QWEN3_TTS']: {"family": "qwen3_tts", "languages": {"zho": "zh", "eng": "en", "jpn": "ja", "kor": "ko", "deu": "de", "fra": "fr", "rus": "ru", "por": "pt", "spa": "es", "ita": "it"}, "clone": True, "ref_text": "required", "ref_fallback": {"x_vector_only_mode": True}, "samplerate": 24000, "rating": {"VRAM": 4, "CPU": 2, "RAM": 6, "Realism": 5}},
     TTS_ENGINES['SUPERTONIC']: {"family": "supertonic", "languages": {"eng": "en", "kor": "ko", "jpn": "ja", "ara": "ar", "bul": "bg", "ces": "cs", "dan": "da", "deu": "de", "ell": "el", "spa": "es", "est": "et", "fin": "fi", "fra": "fr", "hin": "hi", "hrv": "hr", "hun": "hu", "ind": "id", "ita": "it", "lit": "lt", "lav": "lv", "nld": "nl", "pol": "pl", "por": "pt", "ron": "ro", "rus": "ru", "slk": "sk", "sln": "sl", "swe": "sv", "tur": "tr", "ukr": "uk", "vie": "vi"}, "clone": False, "voice_ids": {"*": "M1"}, "samplerate": 44100, "rating": {"VRAM": 1, "CPU": 5, "RAM": 2, "Realism": 4}},
+    # 4.5M parameters, its own phonemizer (dizione) inside the GGUF; FP32, made for and tested on CPU only by audio.cpp
+    TTS_ENGINES['TINY_VOCA']: {"family": "tiny_voca", "languages": {"eng": "en"}, "clone": False, "voice_ids": {"*": "M2"}, "devices": [devices['CPU']['proc']], "min_version": "0.9.6", "samplerate": 24000, "rating": {"VRAM": 1, "CPU": 5, "RAM": 1, "Realism": 2}},
     TTS_ENGINES['VIBEVOICE']: {"family": "vibevoice", "languages": {"eng": "", "zho": ""}, "clone": True, "ref_text": None, "ref_fallback": {}, "speaker_label": True, "samplerate": 24000, "rating": {"VRAM": 4, "CPU": 1, "RAM": 8, "Realism": 5}},
     TTS_ENGINES['VOXCPM2']: {"family": "voxcpm2", "languages": {"ara": "ar", "mya": "my", "zho": "zh", "dan": "da", "nld": "nl", "eng": "en", "fin": "fi", "fra": "fr", "deu": "de", "ell": "el", "heb": "he", "hin": "hi", "ind": "id", "ita": "it", "jpn": "ja", "khm": "km", "kor": "ko", "lao": "lo", "zlm": "ms", "nob": "no", "nor": "no", "pol": "pl", "por": "pt", "rus": "ru", "spa": "es", "swh": "sw", "swe": "sv", "tgl": "tl", "fil": "tl", "tha": "th", "tur": "tr", "vie": "vi"}, "clone": True, "ref_text": None, "ref_fallback": {}, "samplerate": 48000, "rating": {"VRAM": 4, "CPU": 2, "RAM": 6, "Realism": 5}},
+    # the model reads the language from the text; reference audio and its transcript go together (no audio-only clone)
+    TTS_ENGINES['VOXMEL_TTS']: {"family": "voxmel_tts", "languages": {"eng": "", "zho": ""}, "clone": True, "ref_text": "required", "ref_fallback": {}, "min_version": "0.9.6", "samplerate": 24000, "rating": {"VRAM": 3, "CPU": 2, "RAM": 4, "Realism": 4}},
     TTS_ENGINES['VOXTRAL_TTS']: {"family": "voxtral_tts", "languages": {"eng": "en", "fra": "fr", "spa": "es", "deu": "de", "ita": "it", "por": "pt", "nld": "nl", "ara": "ar", "hin": "hi"}, "clone": False, "voice_ids": {"eng": "casual_male", "fra": "fr_male", "spa": "es_male", "deu": "de_male", "ita": "it_male", "por": "pt_male", "nld": "nl_male", "ara": "ar_male", "hin": "hi_male"}, "samplerate": 24000, "rating": {"VRAM": 8, "CPU": 1, "RAM": 10, "Realism": 5}}
 }
 audiocpp_engines = list(audiocpp_families)
 for _acpp_engine, _acpp_cfg in audiocpp_families.items():
-    _acpp_cfg = {"language_option": False, "voice_ids": {}, "ref_text": None, "ref_fallback": {}, "ref_min": 3.2, "ref_max": 10.0, "load": {}, "session": {}, "request": {}, "load_by_language": {}, "speaker_label": False, "espeak": False, **_acpp_cfg}
+    _acpp_cfg = {"language_option": False, "voice_ids": {}, "ref_text": None, "ref_fallback": {}, "ref_min": 3.2, "ref_max": 10.0, "load": {}, "session": {}, "request": {}, "load_by_language": {}, "speaker_label": False, "espeak": False, "devices": native_devices, "min_version": "0.0", **_acpp_cfg}
     audiocpp_families[_acpp_engine] = _acpp_cfg
     default_engine_settings[_acpp_engine] = {
-        "devices": native_devices,
+        "devices": _acpp_cfg['devices'],
         "audiocpp": _acpp_cfg,
         "languages": _acpp_cfg['languages'],
         "samplerate": _acpp_cfg['samplerate'],

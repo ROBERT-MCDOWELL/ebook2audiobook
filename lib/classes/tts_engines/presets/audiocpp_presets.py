@@ -3,7 +3,8 @@ from lib.conf_models import TTS_ENGINES, default_engine_settings, audiocpp_repo
 # audio.cpp GGUF packages per engine (Hugging Face audio-cpp/audio.cpp-gguf unless "repo" says otherwise), files as in
 # audio.cpp's model_specs/<family>.json packages[].files: the first file is the model path given to audiocpp_server, the
 # others are sidecars the Hugging Face snapshot keeps beside it. "internal" is audio.cpp's default package (IndexTTS2:
-# 2.5, for its five languages). files_by_language: one package per language (PocketTTS). languages: a preset speaking
+# 2.5, for its five languages), q8_0 where audio.cpp's default is a larger one (M5-TTS, VoxMel: f16). repo: the package's
+# own Hugging Face repo (tiny-voca: its author's). files_by_language: one package per language (PocketTTS). languages: a preset speaking
 # fewer languages than its engine (IndexTTS2 v2), listed only for those
 packages = {
     TTS_ENGINES['BREEZE_TTS']: [("internal", ["Breeze-TTS-2-GGUF/breeze-tts-2-q8_0.gguf"]), ("q4_0", ["Breeze-TTS-2-GGUF/breeze-tts-2-q4_0.gguf"]), ("bf16", ["Breeze-TTS-2-GGUF/breeze-tts-2-bf16.gguf"])],
@@ -20,6 +21,7 @@ packages = {
     TTS_ENGINES['IRODORI_TTS']: [("internal", ["Irodori-TTS-v4-Small-GGUF/irodori-tts-v4-small-q8_0.gguf"]), ("f16", ["Irodori-TTS-v4-Small-GGUF/irodori-tts-v4-small-f16.gguf"]), ("anime", ["Irodori-TTS-v4-Small-GGUF/irodori-tts-v4.1-anime-q8_0.gguf"]), ("v3_500m", ["Irodori-TTS-500M-v3-GGUF/irodori-tts-500m-v3-q8_0.gguf"]), ("v3_500m_f16", ["Irodori-TTS-500M-v3-GGUF/irodori-tts-500m-v3-f16.gguf"])],
     TTS_ENGINES['KOKORO_TTS']: [("internal", ["Kokoro-82M-GGUF/kokoro-82m-q8_0.gguf"]), ("bf16", ["Kokoro-82M-GGUF/kokoro-82m-bf16.gguf"])],
     TTS_ENGINES['KUGELAUDIO']: [("internal", ["KugelAudio-0-Open-GGUF/kugelaudio-0-open-q8_0.gguf"]), ("bf16", ["KugelAudio-0-Open-GGUF/kugelaudio-0-open-bf16.gguf"]), ("q4_k", ["KugelAudio-0-Open-GGUF/kugelaudio-0-open-q4_k.gguf"])],
+    TTS_ENGINES['M5_TTS']: [("internal", ["M5-TTS-GGUF/m5-tts-50m-voiceclone-q8_0.gguf"]), ("f16", ["M5-TTS-GGUF/m5-tts-50m-voiceclone-f16.gguf"])],
     TTS_ENGINES['MAGPIE_TTS']: [("internal", ["MagpieTTS-Multilingual-357M-GGUF/magpie-tts-multilingual-357m-q8_0.gguf"]), ("orig", ["MagpieTTS-Multilingual-357M-GGUF/magpie-tts-multilingual-357m-orig.gguf"])],
     TTS_ENGINES['MAYA1']: [("internal", ["Maya1-GGUF/maya1-orig.gguf"]), ("q8_0", ["Maya1-GGUF/maya1-q8_0.gguf"])],
     TTS_ENGINES['MIOTTS']: [("internal", ["MioTTS-1.7B-GGUF/miotts-1.7b-q8_0.gguf"]), ("bf16", ["MioTTS-1.7B-GGUF/miotts-1.7b-bf16.gguf"]), ("orig", ["MioTTS-1.7B-GGUF/miotts-1.7b-orig.gguf"])],
@@ -32,8 +34,10 @@ packages = {
     ],
     TTS_ENGINES['QWEN3_TTS']: [("internal", ["Qwen3-TTS-12Hz-1.7B-Base-GGUF/qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf"]), ("bf16", ["Qwen3-TTS-12Hz-1.7B-Base-GGUF/qwen3-tts-12hz-1.7b-base-bf16.gguf"]), ("0_6b", ["Qwen3-TTS-12Hz-0.6B-Base-GGUF/qwen3-tts-12hz-0.6b-base-q8_0.gguf"]), ("0_6b_bf16", ["Qwen3-TTS-12Hz-0.6B-Base-GGUF/qwen3-tts-12hz-0.6b-base-bf16.gguf"])],
     TTS_ENGINES['SUPERTONIC']: [("internal", ["Supertonic-3-GGUF/supertonic-3-orig.gguf"]), ("q8_0", ["Supertonic-3-GGUF/supertonic-3-q8_0.gguf"]), ("f16", ["Supertonic-3-GGUF/supertonic-3-f16.gguf"])],
+    TTS_ENGINES['TINY_VOCA']: [("internal", ["gguf/tiny-voca-orig.gguf"], {"repo": "n4ze3m/tiny-voca"})],
     TTS_ENGINES['VIBEVOICE']: [("internal", ["VibeVoice-1.5B-GGUF/vibevoice-1.5b-q8_0.gguf"]), ("bf16", ["VibeVoice-1.5B-GGUF/vibevoice-1.5b-bf16.gguf"]), ("7b", ["vibevoice-7b-q8_0.gguf"], {"repo": "audio-cpp/VibeVoice-7B-GGUF"})],
     TTS_ENGINES['VOXCPM2']: [("internal", ["VoxCPM2-GGUF/voxcpm2-q8_0.gguf"]), ("bf16", ["VoxCPM2-GGUF/voxcpm2-bf16.gguf"]), ("orig", ["VoxCPM2-GGUF/voxcpm2-orig.gguf"])],
+    TTS_ENGINES['VOXMEL_TTS']: [("internal", ["VoxMel-TTS-GGUF/voxmel-tts-0.6b-q8_0.gguf"]), ("f16", ["VoxMel-TTS-GGUF/voxmel-tts-0.6b-f16.gguf"])],
     TTS_ENGINES['VOXTRAL_TTS']: [("internal", ["Voxtral-4B-TTS-2603-GGUF/voxtral-4b-tts-2603-bf16.gguf"]), ("q8_0", ["Voxtral-4B-TTS-2603-GGUF/voxtral-4b-tts-2603-q8_0.gguf"])]
 }
 models = {

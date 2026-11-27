@@ -50,10 +50,11 @@ class VoiceConversion(SubprocessPipe):
             self.languages = settings['languages'] if self.resynthesis else None
             family_cfg = settings['audiocpp'] if settings else {}
             engine_name = cfg.get('engine') or cfg['family']
-            attempts, gpu_wanted = VoiceConversion.packages(session['device'], engine_name, cpu_fallback=True)
+            min_version = max(cfg.get('min_version', '0.0'), family_cfg.get('min_version', '0.0'), key=VoiceConversion.version)
+            attempts, gpu_wanted = VoiceConversion.packages(session['device'], engine_name, cpu_fallback=True, min_version=min_version)
             # the GGUF of the engine's internal preset (Chatterbox, Qwen3-TTS: the very file their engine uses) or the listed
             # one, real files under models/tts/audiocpp/<repo>/ for the reason given in AudioCpp.__init__
-            preset = load_engine_presets(cfg['engine'])['internal'] if cfg.get('engine') else {'repo': audiocpp_repo, 'files': cfg['files']}
+            preset = load_engine_presets(cfg['engine'])['internal'] if cfg.get('engine') else {'repo': cfg.get('repo', audiocpp_repo), 'files': cfg['files']}
             asr_files = audiocpp_asr['files'] if self.resynthesis and family_cfg.get('ref_text') else []
             msg = legends['msg_zonos2_models'].format(engine=engine_name, files=', '.join(os.path.basename(f) for f in preset['files'] + asr_files))
             print(msg)
@@ -79,7 +80,7 @@ class VoiceConversion(SubprocessPipe):
                             '--asr-model', asr_path, '--asr-family', audiocpp_asr['family'], '--samplerate', str(settings['samplerate']), '--clone'
                         ] + (['--language-option'] if family_cfg['language_option'] else []) + (['--speaker-label'] if family_cfg['speaker_label'] else [])
                     else:
-                        cmd += ['--ref-max', str(cfg['ref_max']), '--vc-route', cfg.get('route', ''), '--vc-only']
+                        cmd += ['--ref-max', str(cfg['ref_max']), '--vc-route', cfg.get('route', ''), '--vc-task', cfg.get('server_task', 'vc'), '--vc-options', json.dumps(cfg.get('options', {})), '--vc-only']
                     msg = legends['msg_worker_starting'].format(engine=engine_name, model=os.path.basename(self.model_path), device=f'{self.package_name}, {self.backend}')
                     print(msg)
                     if progress_bar is not None:
@@ -130,9 +131,15 @@ class VoiceConversion(SubprocessPipe):
         return SubprocessPipe.send(self, request)
 
     @staticmethod
-    def packages(device:str, engine_name:str, cpu_fallback:bool=False)->tuple:
-        # the audiocpp_server packages to try on this machine for device, best first. Returns (attempts, gpu_wanted);
-        # raises when no package fits the machine, or no GPU package on a GPU device without cpu_fallback
+    def version(text:str)->tuple:
+        # '0.9.6' -> (0, 9, 6), for comparisons
+        return tuple(int(x) for x in re.findall(r'\d+', text))
+
+    @staticmethod
+    def packages(device:str, engine_name:str, cpu_fallback:bool=False, min_version:str='0.0')->tuple:
+        # the audiocpp_server packages to try on this machine for device, best first, holding audio.cpp min_version or newer
+        # (the families an engine needs). Returns (attempts, gpu_wanted); raises when no package fits the machine, or no GPU
+        # package on a GPU device without cpu_fallback
         machine = platform.machine().lower()
         gpu_wanted = device != devices['CPU']['proc']
         # CUDA packages for NVIDIA devices only: ROCm and XPU go to Vulkan, MPS to Metal
@@ -185,6 +192,12 @@ class VoiceConversion(SubprocessPipe):
             and glibc_version >= tuple(int(x) for x in packages[k].get('glibc_min', '0.0').split('.'))
             and mac_version >= tuple(int(x) for x in packages[k].get('macos_min', '0.0').split('.'))
         ]
+        # older audio.cpp releases (e2a's own builds until republished) lack the families added since
+        recent = [k for k in usable if VoiceConversion.version(packages[k].get('version', '0.0')) >= VoiceConversion.version(min_version)]
+        if usable and not recent:
+            error = legends['error_audiocpp_min_version'].format(engine=engine_name, version=min_version, machine=machine_desc, packages=', '.join(f"{k} ({packages[k].get('version')})" for k in usable))
+            raise ValueError(error)
+        usable = recent
         if not usable:
             if sys.platform == systems['MACOS'] and any(k in packages and packages[k].get('enabled', True) for k in candidates):
                 error = legends['error_zonos2_macos_min'].format(engine=engine_name, min=min(packages[k].get('macos_min', '0') for k in candidates if k in packages and packages[k].get('enabled', True)), version=platform.mac_ver()[0])
@@ -218,12 +231,16 @@ class VoiceConversion(SubprocessPipe):
         marker_file = os.path.join(package_dir, '.e2a_installed.json')
         # downloaded once: a package folder with its install record is used as it is from then on; a record
         # naming other urls (version bump, package moved to another build) is downloaded again
+        # the record names the version too (e2a's own builds keep their urls from one release to the next); a record
+        # without one was written before, for an own build of 0.9.2 (the official urls carry their version)
         try:
             with open(marker_file, 'r', encoding='utf-8') as f:
-                installed_urls = json.load(f).get('urls')
+                installed = json.load(f)
+            installed_urls = installed.get('urls')
+            installed_version = installed.get('version', '0.9.2')
         except Exception:
-            installed_urls = None
-        if installed_urls != package['urls']:
+            installed_urls = installed_version = None
+        if installed_urls != package['urls'] or installed_version != package.get('version'):
             # an archive tools/preload_models.py put in models/tts/audiocpp/packages/<package>/ (offline installs) is taken
             # from there, no network
             offline_dir = os.path.join(tts_dir, 'audiocpp', 'packages', package_name)
@@ -265,7 +282,7 @@ class VoiceConversion(SubprocessPipe):
                 error = legends['error_zonos2_download'].format(engine=engine_name, package=package_name, error=e)
                 raise RuntimeError(error)
             with open(marker_file, 'w', encoding='utf-8') as f:
-                json.dump({'urls': package['urls']}, f, indent=2)
+                json.dump({'urls': package['urls'], 'version': package.get('version')}, f, indent=2)
         server_name = 'audiocpp_server.exe' if sys.platform == systems['WINDOWS'] else 'audiocpp_server'
         server_bin = next((os.path.join(root, server_name) for root, _, files in os.walk(package_dir) if server_name in files), None)
         if server_bin is None:
