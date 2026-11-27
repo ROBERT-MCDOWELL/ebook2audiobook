@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': 'بلوک‌های بعدی',
     'tooltip_gr_blocks_cancel_btn': 'لغو پیش‌نمایش فصل‌ها',
     'tooltip_gr_blocks_confirm_btn': 'تبدیل بلوک‌های انتخاب‌شده',
+    'gr_upload_drop_file': 'فایل را اینجا رها کنید',
+    'gr_upload_or': 'یا',
+    'gr_upload_click_to_upload': 'برای بارگذاری کلیک کنید',
 }

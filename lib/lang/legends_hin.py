@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': 'अगले ब्लॉक',
     'tooltip_gr_blocks_cancel_btn': 'अध्याय पूर्वावलोकन रद्द करें',
     'tooltip_gr_blocks_confirm_btn': 'चुने गए ब्लॉक रूपांतरित करें',
+    'gr_upload_drop_file': 'फ़ाइल यहाँ छोड़ें',
+    'gr_upload_or': 'या',
+    'gr_upload_click_to_upload': 'अपलोड करने के लिए क्लिक करें',
 }

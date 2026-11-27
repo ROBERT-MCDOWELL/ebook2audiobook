@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': 'తదుపరి బ్లాక్‌లు',
     'tooltip_gr_blocks_cancel_btn': 'అధ్యాయాల ప్రివ్యూను రద్దు చేయండి',
     'tooltip_gr_blocks_confirm_btn': 'ఎంచుకున్న బ్లాక్‌లను మార్చండి',
+    'gr_upload_drop_file': 'ఫైల్‌ను ఇక్కడ వదలండి',
+    'gr_upload_or': 'లేదా',
+    'gr_upload_click_to_upload': 'అప్‌లోడ్ చేయడానికి క్లిక్ చేయండి',
 }

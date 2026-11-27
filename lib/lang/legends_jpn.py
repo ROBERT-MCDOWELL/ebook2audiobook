@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': '次のブロック',
     'tooltip_gr_blocks_cancel_btn': '章プレビューをキャンセル',
     'tooltip_gr_blocks_confirm_btn': '選択したブロックを変換',
+    'gr_upload_drop_file': 'ファイルをここにドロップ',
+    'gr_upload_or': 'または',
+    'gr_upload_click_to_upload': 'クリックしてアップロード',
 }

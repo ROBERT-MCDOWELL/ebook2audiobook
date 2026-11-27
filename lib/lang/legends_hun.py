@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': 'Következő blokkok',
     'tooltip_gr_blocks_cancel_btn': 'Fejezet-előnézet megszakítása',
     'tooltip_gr_blocks_confirm_btn': 'A kiválasztott blokkok konvertálása',
+    'gr_upload_drop_file': 'Húzza ide a fájlt',
+    'gr_upload_or': 'vagy',
+    'gr_upload_click_to_upload': 'Kattintson a feltöltéshez',
 }

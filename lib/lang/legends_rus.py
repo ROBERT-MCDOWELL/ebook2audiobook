@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': 'Следующие блоки',
     'tooltip_gr_blocks_cancel_btn': 'Отменить предпросмотр глав',
     'tooltip_gr_blocks_confirm_btn': 'Сконвертировать выбранные блоки',
+    'gr_upload_drop_file': 'Перетащите файл сюда',
+    'gr_upload_or': 'или',
+    'gr_upload_click_to_upload': 'Нажмите для загрузки',
 }

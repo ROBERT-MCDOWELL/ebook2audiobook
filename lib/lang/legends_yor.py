@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': 'Àwọn àkójọ tó kàn',
     'tooltip_gr_blocks_cancel_btn': 'Fagilé àwòtẹ́lẹ̀ àwọn orí',
     'tooltip_gr_blocks_confirm_btn': 'Yí àwọn àkójọ tí ẹ yàn padà',
+    'gr_upload_drop_file': 'Fi Fáìlì Sílẹ̀ Níbí',
+    'gr_upload_or': 'tàbí',
+    'gr_upload_click_to_upload': 'Tẹ̀ láti Gbé Sókè',
 }

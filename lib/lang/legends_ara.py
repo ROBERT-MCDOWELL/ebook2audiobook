@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': 'الكتل التالية',
     'tooltip_gr_blocks_cancel_btn': 'إلغاء معاينة الفصول',
     'tooltip_gr_blocks_confirm_btn': 'تحويل الكتل المحددة',
+    'gr_upload_drop_file': 'أسقط الملف هنا',
+    'gr_upload_or': 'أو',
+    'gr_upload_click_to_upload': 'انقر للرفع',
 }

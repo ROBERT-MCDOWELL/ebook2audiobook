@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': '다음 블록',
     'tooltip_gr_blocks_cancel_btn': '챕터 미리보기 취소',
     'tooltip_gr_blocks_confirm_btn': '선택한 블록 변환',
+    'gr_upload_drop_file': '파일을 여기에 드롭',
+    'gr_upload_or': '또는',
+    'gr_upload_click_to_upload': '클릭하여 업로드',
 }

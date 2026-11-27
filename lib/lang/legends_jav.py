@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': 'Blok sabanjuré',
     'tooltip_gr_blocks_cancel_btn': 'Batalake pratinjau bab',
     'tooltip_gr_blocks_confirm_btn': 'Konversi blok sing dipilih',
+    'gr_upload_drop_file': 'Selehna Berkas ing Kene',
+    'gr_upload_or': 'utawa',
+    'gr_upload_click_to_upload': 'Klik kanggo Ngunggah',
 }

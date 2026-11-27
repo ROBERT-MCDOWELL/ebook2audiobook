@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': 'Sonraki bloklar',
     'tooltip_gr_blocks_cancel_btn': 'Bölüm önizlemesini iptal et',
     'tooltip_gr_blocks_confirm_btn': 'Seçilen blokları dönüştür',
+    'gr_upload_drop_file': 'Dosyayı buraya bırakın',
+    'gr_upload_or': 'veya',
+    'gr_upload_click_to_upload': 'Yüklemek için tıklayın',
 }

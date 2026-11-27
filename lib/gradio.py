@@ -805,6 +805,7 @@ def build_interface(args:dict)->gr.Blocks:
             gr_session_update = gr.State({'hash': None})
             gr_save_session = gr.JSON(elem_id='gr_save_session', visible='hidden')
             gr_tooltips_data = gr.JSON(elem_id='gr_tooltips_data', visible='hidden')
+            gr_upload_text_data = gr.JSON(elem_id='gr_upload_text_data', visible='hidden')
             
             gr_event = gr.Number(value=0, visible=False, precision=0)
             gr_blocks_event = gr.Number(value=0, visible=False, precision=0)
@@ -1338,6 +1339,7 @@ def build_interface(args:dict)->gr.Blocks:
                             gr.update(label=legends['gr_theme']),
                             gr.update(label=legends['gr_tooltips'], value=bool(session.get('tooltips'))),
                             gr.update(value={elem_id: legends[f'tooltip_{elem_id}'] for elem_id in tooltips_buttons}),
+                            gr.update(value={'ids': upload_text_files, 'drop_file': legends['gr_upload_drop_file'], 'or': legends['gr_upload_or'], 'click_to_upload': legends['gr_upload_click_to_upload']}),
                         )
                 except Exception as e:
                     error = f'_restore_ui_language(): {e}'
@@ -4072,7 +4074,7 @@ def build_interface(args:dict)->gr.Blocks:
                 gr_markdown_tab_chattts_params, gr_chattts_temperature, gr_chattts_top_k, gr_chattts_top_p, gr_chattts_repetition_penalty, gr_chattts_speed,
                 gr_markdown_tab_csm_params, gr_csm_temperature, gr_csm_top_k,
                 gr_abs_url, gr_abs_api_token, gr_abs_audiobook, gr_abs_status, gr_ui_language,
-                gr_theme, gr_tooltips, gr_tooltips_data
+                gr_theme, gr_tooltips, gr_tooltips_data, gr_upload_text_data
             ]
             tooltips_buttons = [
                 'gr_voice_play', 'gr_voice_del_btn', 'gr_custom_model_del_btn', 'gr_session_switch_btn',
@@ -4147,6 +4149,67 @@ def build_interface(args:dict)->gr.Blocks:
                 },true);
                 window.addEventListener('scroll',hide);
                 window.addEventListener('resize',hide);
+            }'''
+            # gradio translates its upload prompt with the browser locale, so it is rewritten in the DOM with the legends of the session ui_language
+            upload_text_files = ['gr_ebook_src', 'gr_voice_file', 'gr_custom_model_file']
+            upload_text_js = r'''(data)=>{
+                window.gr_upload_text_state=data||null;
+                const set=(node,text)=>{
+                    if(!node||typeof text!=='string'){return;}
+                    const target=node.nodeType===Node.TEXT_NODE?node:(node.childNodes.length===1&&node.firstChild.nodeType===Node.TEXT_NODE?node.firstChild:null);
+                    if(target){
+                        if(target.nodeValue!==text){target.nodeValue=text;}
+                    }else if(node.textContent!==text){
+                        node.textContent=text;
+                    }
+                };
+                window.gr_upload_text_apply=()=>{
+                    const state=window.gr_upload_text_state;
+                    if(!state||!Array.isArray(state.ids)){return;}
+                    for(const id of state.ids){
+                        const root=document.getElementById(id);
+                        if(!root){continue;}
+                        root.querySelectorAll('[data-testid="upload-text"]').forEach((wrap)=>{
+                            const prompt=wrap.querySelector('.prompt');
+                            if(prompt){
+                                if(prompt.querySelector('h2,p')){return;}
+                                const or=prompt.querySelector('.or');
+                                const spans=[...prompt.children].filter((el)=>el.tagName==='SPAN'&&el!==or);
+                                set(spans[0],state.drop_file);
+                                if(or){
+                                    set(or,state.or);
+                                    set(spans[1],state.click_to_upload);
+                                }
+                            }else{
+                                const or=wrap.querySelector('.or');
+                                let drop=null,click=null,after=false;
+                                for(const node of wrap.childNodes){
+                                    if(node===or){after=true;continue;}
+                                    if(node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim()){
+                                        if(after){click=click||node;}else{drop=node;}
+                                    }
+                                }
+                                set(drop,`${state.drop_file} `);
+                                if(or){
+                                    set(or,`- ${state.or} -`);
+                                    set(click,` ${state.click_to_upload}`);
+                                }
+                            }
+                        });
+                    }
+                };
+                window.gr_upload_text_apply();
+                if(window.gr_upload_text_ready){return;}
+                window.gr_upload_text_ready=true;
+                let queued=false;
+                new MutationObserver(()=>{
+                    if(queued){return;}
+                    queued=true;
+                    requestAnimationFrame(()=>{
+                        queued=false;
+                        window.gr_upload_text_apply?.();
+                    });
+                }).observe(document.body,{childList:true,subtree:true});
             }'''
             outputs_refresh_interface = [
                 gr_modal, gr_group_main, gr_tab_xtts_params, gr_tab_bark_params, gr_tab_zonos_params, gr_tab_gptsovits_params, gr_tab_orpheus_params, gr_tab_sparktts_params, gr_tab_chattts_params, gr_tab_csm_params, gr_tab_abs_params, gr_convert_btn,
@@ -5151,6 +5214,12 @@ def build_interface(args:dict)->gr.Blocks:
                 inputs=[gr_tooltips, gr_tooltips_data],
                 outputs=None,
                 js=tooltips_js
+            )
+            gr_upload_text_data.change(
+                fn=None,
+                inputs=[gr_upload_text_data],
+                outputs=None,
+                js=upload_text_js
             )
             # browser side only: the theme is saved in localStorage by the switcher of themes_head
             gr_theme.input(

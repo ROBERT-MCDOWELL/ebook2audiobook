@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': 'Blocs suivants',
     'tooltip_gr_blocks_cancel_btn': 'Annuler l\'aperçu des chapitres',
     'tooltip_gr_blocks_confirm_btn': 'Convertir les blocs sélectionnés',
+    'gr_upload_drop_file': 'Déposez le fichier ici',
+    'gr_upload_or': 'ou',
+    'gr_upload_click_to_upload': 'Cliquez pour importer',
 }

@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': 'அடுத்த தொகுதிகள்',
     'tooltip_gr_blocks_cancel_btn': 'அத்தியாய முன்னோட்டத்தை ரத்துசெய்',
     'tooltip_gr_blocks_confirm_btn': 'தேர்ந்தெடுத்த தொகுதிகளை மாற்று',
+    'gr_upload_drop_file': 'கோப்பை இங்கே விடவும்',
+    'gr_upload_or': 'அல்லது',
+    'gr_upload_click_to_upload': 'பதிவேற்ற கிளிக் செய்யவும்',
 }

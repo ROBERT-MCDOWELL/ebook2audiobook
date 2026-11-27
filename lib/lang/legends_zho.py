@@ -677,4 +677,7 @@ legends = {
     'tooltip_gr_blocks_next_btn': '下一页区块',
     'tooltip_gr_blocks_cancel_btn': '取消章节预览',
     'tooltip_gr_blocks_confirm_btn': '转换所选区块',
+    'gr_upload_drop_file': '将文件拖放到此处',
+    'gr_upload_or': '或',
+    'gr_upload_click_to_upload': '点击上传',
 }
