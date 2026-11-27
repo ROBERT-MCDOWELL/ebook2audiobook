@@ -58,7 +58,8 @@ def format_timestamp(seconds:float)->str:
     h, m = divmod(m, 60)
     return f'{int(h):02}:{int(m):02}:{s:06.3f}'
 
-def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None, offsets:dict=None)->tuple:
+def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None, offsets:dict=None, durations:dict=None)->tuple:
+    # durations: pre-measured {realpath: seconds} from get_audiolist_duration(), to skip re-probing the files
     try:
         from tqdm import tqdm
         if offsets is None:
@@ -100,11 +101,13 @@ def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None, offs
         audio_files_length = len(audio_files)
         sentences_total_time = 0.0
         vtt_blocks = []
+        chapter_cues = set()
         msg = legends['msg_get_durations']
         print(msg)
         if progress_bar is not None:
             progress_bar(0.0, desc=msg)
-        durations = get_audiolist_duration([str(p) for p in audio_files])
+        if durations is None:
+            durations = get_audiolist_duration([str(p) for p in audio_files])
         msg = legends['msg_create_vtt_blocks']
         print(msg)
         if progress_bar is not None:
@@ -126,6 +129,12 @@ def build_vtt_file(session:dict, vtt_path:str=None, block_indices:set=None, offs
                 ).strip()
                 # WebVTT cue id "block <block index> sentence <sentence index>": where the sentence is in e2a, for
                 # tools/check_audiobook_hallucinations.py. Players and the audiobook editor read it as a plain cue id
+                if block_idx not in chapter_cues:
+                    # one marker cue per block/chapter: the player draws clickable ticks from these (see render_chapter_marks()
+                    # in lib/header.js); they match the embedded chapter tags of the m4b/mp3 exports. The 0.5s span keeps
+                    # findCue()'s binary search able to catch them right after a seek; the title is the block's first sentence
+                    chapter_cues.add(block_idx)
+                    vtt_blocks.append(f'chapter {block_idx}\n{start} --> {format_timestamp(min(start_time + block_offset + 0.5, sentences_total_time + block_offset))}\n{text[:80]}\n')
                 vtt_blocks.append(f'block {block_idx} sentence {sentence_indices[idx]}\n{start} --> {end}\n{text}\n')
                 if session['is_gui_process']:
                     total_progress = (t.n + 1) / audio_files_length
@@ -199,6 +208,15 @@ class TTSUtils:
             show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
         else:
             print(msg)
+
+    def _build_vtt_file(self, all_sentences:list)->bool:
+        # create_vtt() in the engine classes builds the per-preview vtt from the sentences just
+        # synthesized into session['sentences_dir'] (the audiobook-wide vtt with chapter markers
+        # is written by core.py calling build_vtt_file() directly)
+        built, error = build_vtt_file(self.session)
+        if not built:
+            print(error)
+        return bool(built)
 
     def cleanup_memory(self)->None:
         import torch
