@@ -225,9 +225,10 @@ class VoiceExtractor:
             if self.is_gui_process:
                 self.progress_bar(0.0, desc=msg)
             model = default_voice_isolator_model
+            # the packages first: no model download on a machine where none runs it (demucs takes over)
+            attempts, gpu_wanted = VoiceConversion.packages(self.session['device'], model['family'], cpu_fallback=True, min_version=model['min_version'])
             # a real file under models/tts/audiocpp/<repo>/, not a Hugging Face cache symlink (reason in AudioCpp.__init__)
             model_path = hf_download(self.progress_bar if self.is_gui_process else None, msg, repo_id=model['repo'], filename=model['file'], revision=model['revision'], cache_dir=tts_dir, local_dir=os.path.join(tts_dir, 'audiocpp', model['repo'].replace('/', '--')))
-            attempts, gpu_wanted = VoiceConversion.packages(self.session['device'], model['family'], cpu_fallback=True, min_version=model['min_version'])
             worker_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tts_engines', 'workers', 'audiocpp_worker.py')
             # the worker is stdlib only. conf.py's OMP_NUM_THREADS=1 is for e2a's torch: the server (OpenMP build) sizes its own pool
             worker_env = {k: v for k, v in os.environ.items() if k not in ('PYTHONHOME', 'PYTHONPATH', 'PYTHONSTARTUP', '__PYVENV_LAUNCHER__', 'OMP_NUM_THREADS')}
@@ -527,7 +528,6 @@ class VoiceExtractor:
                         result, msg = self._isolate_voice()
                         if not result:
                             # no audio.cpp package for this machine, a download or a server that failed: demucs instead
-                            print(msg)
                             msg = legends['msg_voice_isolator_fallback'].format(error=msg)
                             print(msg)
                             if self.is_gui_process:
