@@ -221,14 +221,19 @@ class TTSUtils:
         # a voice file on an engine without built-in voice cloning: a TTS_VOICE_CONVERSION model clones it on every sentence
         # (task "vc" converts the engine's output, task "tts" speaks the sentence again). Told once per conversion
         # (core.py convert_chapters2audio() resets session['vc_alert']), once per session for the sentence previews, each
-        # of which loads a new engine. The engine's own flag spares the session proxy on later sentences
+        # of which loads a new engine. The engine's own flag spares the session proxy on later sentences.
+        # kNN-VC (a CPU device, or a GPU one no audio.cpp package runs on): the cloned voice loses quality, the user is
+        # advised to keep the engine's own voice (the voice list's Internal entry) as much as possible
         if self.vc_alerted:
             return
         self.vc_alerted = True
         if self.session.get('vc_alert'):
             return
         self.session['vc_alert'] = True
-        msg = legends['msg_vc_slower'].format(engine=self.session['tts_engine'], vc_model=vc_model)
+        if vc_model == default_vc_model_cpu.rsplit('/', 1)[-1]:
+            msg = legends['msg_vc_knnvc_degraded'].format(engine=self.session['tts_engine'], vc_model=vc_model, internal=legends['gr_voice_list_default'])
+        else:
+            msg = legends['msg_vc_slower'].format(engine=self.session['tts_engine'], vc_model=vc_model)
         show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
         if show_alert is not None:
             show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
@@ -775,7 +780,18 @@ class TTSUtils:
 
     def _load_engine_zs(self, device:str)->Any:
         try:
-            msg = legends['msg_loading_zeroshot'].format(model=self.tts_zs_key)
+            # a CPU device: kNN-VC (default_vc_model_cpu, common/knnvc.py), the audio.cpp models take seconds per second of
+            # speech there. Else the model this language gets: one that speaks the text (task "tts") only in its engine's
+            # languages, its fallback for the others (VoiceConversion falls back the same way)
+            on_cpu = device == devices['CPU']['proc']
+            if on_cpu:
+                vc_model = default_vc_model_cpu.rsplit('/', 1)[-1]
+                # told before the load: kNN-VC's first start downloads WavLM-Large (1.2 GB)
+                self._alert_vc(vc_model)
+            else:
+                vc_cfg = TTS_VOICE_CONVERSION[self.tts_zs_key]
+                vc_model = self.tts_zs_key if vc_cfg['task'] == 'vc' or getattr(self, 'language', None) in default_engine_settings[vc_cfg['engine']]['languages'] else vc_cfg['fallback']
+            msg = legends['msg_loading_zeroshot'].format(model=vc_model)
             print(msg)
             progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
             if progress_bar is not None:
@@ -784,28 +800,36 @@ class TTSUtils:
             # under the load lock: two threads of one engine reaching their first voice file at once start one worker
             with _lock:
                 engine_zs = loaded_tts.get(self.tts_zs_key, False)
-                # a CPU device: kNN-VC (default_vc_model_cpu, common/knnvc.py), the audio.cpp models take seconds per second
-                # of speech there. Else the model this language gets: one that speaks the text (task "tts") only in its
-                # engine's languages, its fallback for the others (VoiceConversion falls back the same way)
-                on_cpu = device == devices['CPU']['proc']
-                if on_cpu:
-                    vc_model = default_vc_model_cpu.rsplit('/', 1)[-1]
-                else:
-                    vc_cfg = TTS_VOICE_CONVERSION[self.tts_zs_key]
-                    vc_model = self.tts_zs_key if vc_cfg['task'] == 'vc' or getattr(self, 'language', None) in default_engine_settings[vc_cfg['engine']]['languages'] else vc_cfg['fallback']
-                # every engine with a voice conversion stage loads it here, on its first sentence that needs it
-                self._alert_vc(vc_model)
                 # a VC worker that died (server crash, killed), or one running another model for this key (the cached one
-                # fell back for another language): started again below
-                if isinstance(engine_zs, SubprocessPipe) and (engine_zs.process is None or engine_zs.process.poll() is not None or getattr(engine_zs, 'vc_model', vc_model) != vc_model):
+                # fell back for another language): started again below. A kNN-VC that took over from this GPU device is kept
+                serves = getattr(engine_zs, 'vc_model', vc_model) == vc_model or (isinstance(engine_zs, KnnVC) and engine_zs.device_wanted == self.session['device'])
+                if isinstance(engine_zs, SubprocessPipe) and (engine_zs.process is None or engine_zs.process.poll() is not None or not serves):
                     loaded_tts.pop(self.tts_zs_key, None)
                     engine_zs.stop()
                     engine_zs = False
                 if not engine_zs:
-                    # kNN-VC's torch worker on CPU, else default_vc_model on audio.cpp's server (common/voice_conversion.py).
-                    # Always cached, whatever the free VRAM: unload_tts_manager() / cleanup_models_cache() stop it through loaded_tts
-                    engine_zs = KnnVC(self.session) if on_cpu else VoiceConversion(self.session)
+                    # kNN-VC's torch worker on CPU, else default_vc_model on audio.cpp's server (common/voice_conversion.py),
+                    # kNN-VC again when no GPU package runs it on this machine: the audio.cpp model on CPU would take seconds
+                    # per second of speech. Always cached, whatever the free VRAM: unload_tts_manager() / cleanup_models_cache()
+                    # stop it through loaded_tts
+                    if on_cpu:
+                        engine_zs = KnnVC(self.session)
+                    else:
+                        try:
+                            engine_zs = VoiceConversion(self.session)
+                        except VoiceConversion.GpuUnavailable as e:
+                            print(f'VoiceConversion: {e}')
+                            engine_zs = KnnVC(self.session)
+                            msg = legends['msg_vc_knnvc_fallback'].format(engine=self.session['tts_engine'], vc_model=vc_model, device=self.session['device'].upper(), new_vc_model=engine_zs.vc_model)
+                            show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
+                            if show_alert is not None:
+                                show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
+                            else:
+                                print(msg)
                     loaded_tts[self.tts_zs_key] = engine_zs
+                # every engine with a voice conversion stage loads it here, on its first sentence that needs it: told with
+                # the model it really runs (a GPU device that fell back to kNN-VC included; a CPU one was told above)
+                self._alert_vc(getattr(engine_zs, 'vc_model', vc_model))
             if engine_zs:
                 self.session['model_zs_cache'] = self.tts_zs_key
                 msg = legends['msg_zeroshot_loaded'].format(model=self.tts_zs_key)

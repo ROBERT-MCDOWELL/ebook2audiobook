@@ -636,6 +636,8 @@ legends = {
     'msg_vc_cpu_slow': 'Using a voice other than the {engine} built-in voices: the {vc_model} voice conversion runs on CPU on every sentence, so the ebook conversion is much slower than with a built-in voice.',
     'msg_vc_device_switch': 'Using a voice other than the {engine} built-in voices: the {vc_model} voice conversion cannot run on {device} and switches to {new_device}, so the ebook conversion is slightly slower than with a built-in voice.',
     'msg_vc_device_switch_cpu': 'Using a voice other than the {engine} built-in voices: the {vc_model} voice conversion cannot run on {device} and switches to {new_device}, so the ebook conversion is much slower than with a built-in voice.',
+    'msg_vc_knnvc_fallback': 'Using a voice other than the {engine} built-in voices: the {vc_model} voice conversion cannot run on {device}, so {new_vc_model} converts the voice on CPU instead, a lighter model that runs faster than real time there.',
+    'msg_vc_knnvc_degraded': '{engine} has no built-in voice cloning: on CPU, {vc_model} converts the selected voice on every sentence with a lighter model, so the cloned voice loses quality. Select the "{internal}" voice as much as possible for a faster conversion and the best quality.',
     'msg_zonos2_models': 'Getting the {engine} model files ({files}), the first download takes a while…',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan Torch selected',
     'msg_vulkan_docker_image': 'Vulkan Torch image: runs on the CPU, and on a GPU passed to the container once the device is set to vulkan',

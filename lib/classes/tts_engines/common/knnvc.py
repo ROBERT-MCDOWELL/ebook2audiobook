@@ -14,7 +14,8 @@ class KnnVC(SubprocessPipe):
     # either one from TTSUtils._load_engine_zs(). A SubprocessPipe itself, cached in loaded_tts under the engine's
     # tts_zs_key, so unload_tts_manager() / cleanup_models_cache() stop it like any worker.
     # The worker runs on e2a's python without conf.py's OMP_NUM_THREADS=1 (that one is for e2a's own torch): torch takes
-    # every physical core for it
+    # every physical core for it. It serves a CPU device, and a GPU device none of whose audio.cpp packages runs the voice
+    # conversion (VoiceConversion.GpuUnavailable): device_wanted
     def __init__(self, session:DictProxy)->None:
         try:
             self.session = session
@@ -25,6 +26,8 @@ class KnnVC(SubprocessPipe):
             self.languages = None
             self.backend = 'cpu'
             self.package_name = 'torch'
+            # the session device it serves (a GPU one when it took over from VoiceConversion): kept for that device only
+            self.device_wanted = session['device']
             progress_bar = getattr(sys.modules.get('lib.gradio'), 'progress_bar', None)
             worker_script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workers', 'knnvc_worker.py')
             worker_env = {k: v for k, v in os.environ.items() if k != 'OMP_NUM_THREADS'}
