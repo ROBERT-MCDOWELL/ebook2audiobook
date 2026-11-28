@@ -584,7 +584,7 @@ options:
 ### Tafsiri vitabu pepe nje ya e2a: `tools/translate_ebook.sh` / `tools/translate_ebook.cmd`
 Hutafsiri faili za EPUB/AZW3, folda nzima (`-r` kwa folda zake ndogo) au orodha ya njia (`@list.txt`)
 kuwa vitabu pepe vilivyotafsiriwa, nje ya mtandao, kwa programu-jalizi ya calibre ya Argos Translate inayokuja ndani ya
-`tools/argostranslate-calibre-plugin.zip`. Inajitegemea kutoka kwa ubadilishaji wa kitabu cha sauti: huandika vitabu pepe tu.
+`tools/translate_ebook/argostranslate-calibre-plugin.zip`. Inajitegemea kutoka kwa ubadilishaji wa kitabu cha sauti: huandika vitabu pepe tu.
 Inahitaji calibre (ambayo e2a tayari inaihitaji) na huendeshwa kwa `python_env` na vifurushi vya argos-translate vya e2a:
 jozi ya lugha ambayo e2a tayari inaitumia haipakuliwi tena, inayokosekana hupakuliwa inapotumika mara ya kwanza.
 Programu-jalizi husakinishwa inapotumika mara ya kwanza kwenye wasifu wa calibre wa e2a yenyewe (`./run`), calibre yako haiguswi.
@@ -621,7 +621,7 @@ usage: translate_ebook.py [-h] [-t LANG[,LANG...]] [-f LANG] [-r] [-o OUTPUT] [-
                           [books ...]
 
 Translate ebooks offline, out of e2a, with the Argos Translate calibre plugin
-(tools/argostranslate-calibre-plugin.zip). EPUB/AZW3 are translated as they are, the other formats
+(tools/translate_ebook/argostranslate-calibre-plugin.zip). EPUB/AZW3 are translated as they are, the other formats
 calibre's ebook-convert reads (PDF, DOCX, MOBI, ...) are converted to EPUB once, before the first
 language, and their translations saved as EPUB. It runs on e2a's python_env and argos-translate packages
 (models/argos-translate): a language pair e2a already uses is not downloaded again, a missing one is

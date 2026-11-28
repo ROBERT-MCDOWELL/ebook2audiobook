@@ -584,7 +584,7 @@ options:
 ### E-Books aus e2a übersetzen: `tools/translate_ebook.sh`/`tools/translate_ebook.cmd`
 Übersetzt EPUB/AZW3-Dateien, einen ganzen Ordner (`-r` für seine Unterordner) oder eine Liste von Pfaden (`@list.txt`)
 in übersetzte E-Books, offline, mit dem calibre-Plugin Argos Translate aus
-`tools/argostranslate-calibre-plugin.zip`. Unabhängig von der Hörbuchkonvertierung: Es schreibt nur E-Books.
+`tools/translate_ebook/argostranslate-calibre-plugin.zip`. Unabhängig von der Hörbuchkonvertierung: Es schreibt nur E-Books.
 Es benötigt calibre (von e2a bereits benötigt) und läuft mit dem `python_env` und den argos-translate-Paketen von e2a:
 ein Sprachpaar, das e2a bereits verwendet, wird nicht erneut heruntergeladen, ein fehlendes wird bei der ersten Verwendung heruntergeladen.
 Das Plugin wird bei der ersten Verwendung in das e2a-eigene calibre-Profil (`./run`) installiert, Ihr calibre bleibt unberührt.
@@ -621,7 +621,7 @@ usage: translate_ebook.py [-h] [-t LANG[,LANG...]] [-f LANG] [-r] [-o OUTPUT] [-
                           [books ...]
 
 Translate ebooks offline, out of e2a, with the Argos Translate calibre plugin
-(tools/argostranslate-calibre-plugin.zip). EPUB/AZW3 are translated as they are, the other formats
+(tools/translate_ebook/argostranslate-calibre-plugin.zip). EPUB/AZW3 are translated as they are, the other formats
 calibre's ebook-convert reads (PDF, DOCX, MOBI, ...) are converted to EPUB once, before the first
 language, and their translations saved as EPUB. It runs on e2a's python_env and argos-translate packages
 (models/argos-translate): a language pair e2a already uses is not downloaded again, a missing one is

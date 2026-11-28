@@ -19,7 +19,7 @@ examples = '''examples:
   translate_ebook.py --list
   translate_ebook.py --list --from eng'''
 description = '''Translate ebooks offline, out of e2a, with the Argos Translate calibre plugin
-(tools/argostranslate-calibre-plugin.zip). EPUB/AZW3 are translated as they are, the other formats
+(tools/translate_ebook/argostranslate-calibre-plugin.zip). EPUB/AZW3 are translated as they are, the other formats
 calibre's ebook-convert reads (PDF, DOCX, MOBI, ...) are converted to EPUB once, before the first
 language, and their translations saved as EPUB. It runs on e2a's python_env and argos-translate packages
 (models/argos-translate): a language pair e2a already uses is not downloaded again, a missing one is
@@ -134,7 +134,7 @@ argos_tuning = {key: os.environ[key] for key in ('ARGOS_INTRA_THREADS', 'ARGOS_C
 # e2a's paths and calibre profile: CALIBRE_CONFIG_DIRECTORY, CALIBRE_CACHE_DIRECTORY and CALIBRE_TEMP_DIR on run/
 import lib.conf as conf
 plugin_name = 'Argos Translate'
-plugin_zip = os.path.join(root_dir, 'tools', 'argostranslate-calibre-plugin.zip')
+plugin_zip = os.path.join(root_dir, 'tools', 'translate_ebook', 'argostranslate-calibre-plugin.zip')
 
 def calibre_env()->dict:
     # as convert2epub() in lib/core.py: calibre must not run with python_env's interpreter or libraries

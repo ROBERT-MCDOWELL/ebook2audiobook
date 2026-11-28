@@ -584,7 +584,7 @@ options:
 ### Túmọ̀ àwọn ebook ní ìta e2a: `tools/translate_ebook.sh` / `tools/translate_ebook.cmd`
 Ó ń túmọ̀ àwọn fáìlì EPUB/AZW3, odindi fódà kan (`-r` fún àwọn fódà abẹ́ rẹ̀) tàbí àtòjọ àwọn ọ̀nà (`@list.txt`)
 sí àwọn ebook tí a ti túmọ̀, láìsí ìntánẹ́ẹ̀tì, pẹ̀lú plugin calibre Argos Translate tí ó wà nínú
-`tools/argostranslate-calibre-plugin.zip`. Ó yàtọ̀ sí ìyípadà ìwé ohùn (audiobook): ebook nìkan ni ó ń kọ.
+`tools/translate_ebook/argostranslate-calibre-plugin.zip`. Ó yàtọ̀ sí ìyípadà ìwé ohùn (audiobook): ebook nìkan ni ó ń kọ.
 Ó nílò calibre (tí e2a ti nílò tẹ́lẹ̀), ó sì ń ṣiṣẹ́ lórí `python_env` àti àwọn package argos-translate ti e2a:
 a kì í tún ṣe ìgbàsílẹ̀ èdè méjì (language pair) tí e2a ti ń lò tẹ́lẹ̀, a máa ń ṣe ìgbàsílẹ̀ èyí tí kò sí nígbà ìlò àkọ́kọ́.
 A máa ń fi plugin náà sori ẹ̀rọ nígbà ìlò àkọ́kọ́ sínú profaili calibre ti e2a fúnra rẹ̀ (`./run`), a kò fọwọ́ kan calibre tìrẹ.
@@ -621,7 +621,7 @@ usage: translate_ebook.py [-h] [-t LANG[,LANG...]] [-f LANG] [-r] [-o OUTPUT] [-
                           [books ...]
 
 Translate ebooks offline, out of e2a, with the Argos Translate calibre plugin
-(tools/argostranslate-calibre-plugin.zip). EPUB/AZW3 are translated as they are, the other formats
+(tools/translate_ebook/argostranslate-calibre-plugin.zip). EPUB/AZW3 are translated as they are, the other formats
 calibre's ebook-convert reads (PDF, DOCX, MOBI, ...) are converted to EPUB once, before the first
 language, and their translations saved as EPUB. It runs on e2a's python_env and argos-translate packages
 (models/argos-translate): a language pair e2a already uses is not downloaded again, a missing one is
