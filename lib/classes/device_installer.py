@@ -102,6 +102,13 @@ class DeviceInstaller():
     # its own wheels/indexes (a PyPI torchvision would drag a CPU torch in), finalize_exclusive_packages() swaps the
     # onnxruntime builds, demucs-simple replaces demucs, remove_obsolete_packages() takes unidic out on purpose
     dependency_skip_re = re.compile(r'^(?:torch|torchaudio|torchcodec|torchvision|onnxruntime(?:-[a-z0-9]+)?|nvidia-.*|triton|pytorch-triton.*|rocm.*|intel-.*|demucs|unidic)$')
+    # the device step's packages, pinned as installed on every resolve of the requirements (torch_family_pins())
+    torch_family = ['torch', 'torchaudio', 'torchcodec']
+    # the CUDA runtime wheels a torch build depends on: CUDA 12's carry a -cu12 suffix, CUDA 13's toolkit ones none
+    # (nvidia-cuda-runtime 13.2, through the cuda-toolkit metapackage, cuda-bindings with torch >= 2.11). Wheels of two
+    # CUDA majors share folders: nvidia-cudnn-cu13 and nvidia-cudnn-cu12 both unpack nvidia/cudnn/lib/libcudnn.so.9,
+    # nvidia-nccl-cu13 and -cu12 nvidia/nccl/lib/libnccl.so.2 (repair_gpu_runtimes())
+    gpu_runtime_re = re.compile(r'^(?:nvidia-(?:cuda-[a-z-]+|cublas|cudla|cudnn|cufft|cufile|curand|cusolver|cusparse|cusparselt|nccl|npp|nvfatbin|nvjitlink|nvjpeg|nvshmem|nvtx|nvvm)(?:-cu\d+)?|cuda-(?:toolkit|bindings|pathfinder))$')
     pip_cache_dir = os.environ.get('E2A_PIP_CACHE_DIR') or os.path.join(tempfile.gettempdir(), 'e2a_pip_cache')
     # seconds the GPU choice waits for an answer before taking the system's GPU 0, so an unattended install never hangs
     gpu_choice_timeout = 60
@@ -2086,7 +2093,7 @@ class DeviceInstaller():
                 base_cmd = self._uv_pip('install', '--cache-dir', self.pip_cache_dir)
                 if self.system == systems['MACOS'] and platform.machine().lower() in ('x86_64', 'amd64'):
                     base_cmd += ['--only-binary', 'llvmlite,numba,pymupdf']
-                pins = [spec for spec in overrides.values() if spec]
+                pins = [spec for spec in overrides.values() if spec] + self.torch_family_pins()
                 for dpkg in self.device_pkgs:
                     try:
                         pin = self.select_pkg(dpkg)
@@ -2211,13 +2218,82 @@ class DeviceInstaller():
             error = f'remove_torchvision(): {e}'
             print(error)
 
+    def torch_family_pins(self)->list:
+        # the device step's torch family as installed, pinned on every resolve of the requirements. Unpinned, a
+        # requirement whose newest release floors torch above it (pyannote-audio 4: torch>=2.8) had uv swap PyPI's
+        # CUDA 13 torch in for torch 2.5.1+cu121, its CUDA runtime wheels with it (repair_gpu_runtimes()). Pinned, uv
+        # takes the release that runs on it (pyannote-audio 3.4.0). The exact installed version, local tag included:
+        # uv reads it from the env, no index has to carry it (+cu121, nightly builds)
+        pins = []
+        for pkg in self.torch_family:
+            installed = self.get_package_version(pkg)
+            if installed:
+                pins.append(f'{pkg}=={installed}')
+        return pins
+
+    def gpu_runtime_orphans(self)->list:
+        # the CUDA runtime wheels (gpu_runtime_re) no requirement of the rest of the env leads to any longer. Every
+        # Requires-Dist counts, marker and extra included: torch asks for cuda-toolkit[cublas,cudart,...], whose
+        # libraries hang off those extras. Erring that way keeps a wheel, never removes one in use
+        dists = {}
+        for dist in distributions():
+            name = self.pkg_head(dist.metadata['Name'] or '')
+            if name and name not in dists:
+                dists[name] = dist
+        runtimes = {name for name in dists if self.gpu_runtime_re.match(name)}
+        if not runtimes:
+            return []
+        reached = {name for name in dists if name not in runtimes}
+        stack = list(reached)
+        while stack:
+            for req in dists[stack.pop()].requires or []:
+                m = re.match(r'\s*([A-Za-z0-9][A-Za-z0-9._-]*)', req)
+                head = self.pkg_head(m.group(1)) if m else ''
+                if head in dists and head not in reached:
+                    reached.add(head)
+                    stack.append(head)
+        return sorted(runtimes - reached)
+
+    def repair_gpu_runtimes(self)->int:
+        # CUDA runtime wheels left by another torch build. A requirement swapped PyPI's CUDA 13 torch in, the device
+        # step put torch 2.5.1+cu121 back, and nvidia-cudnn-cu13 stayed with its libcudnn.so.9 (cuDNN 9.26, CUDA 13:
+        # driver >= 580, no Pascal) unpacked over the cu12 one torch loads: every cuDNN convolution failed with
+        # CUDNN_STATUS_NOT_INITIALIZED (bug report a0b81438513a4c90, GTX 1050 on driver 535). The same happens with a
+        # torch moved to another CUDA major (a driver update). The wheels nothing needs are removed, the files they
+        # share with torch's go with them, and torch's wheels left short of files are reinstalled at their version
+        if not self.get_package_version('torch'):
+            return 0
+        try:
+            orphans = self.gpu_runtime_orphans()
+            if orphans:
+                msg = legends['msg_removing_orphan_gpu_runtimes'].format(pkgs=', '.join(orphans), torch=self.get_package_version('torch'))
+                print(msg)
+                subprocess.call(self._uv_pip('uninstall', *orphans))
+                importlib.invalidate_caches()
+            # nvidia/__init__.py left out: every older nvidia wheel ships the same one, uninstalling any takes it away,
+            # and nvidia imports as a namespace package without it. Counted, the cu11 wheels would all be downloaded
+            # again after the cu12 ones go
+            incomplete = {}
+            for dist in distributions():
+                name = self.pkg_head(dist.metadata['Name'] or '')
+                if name and name not in incomplete and self.gpu_runtime_re.match(name):
+                    missing = [path for path in self.missing_record_files(dist) if path != 'nvidia/__init__.py']
+                    if missing:
+                        incomplete[name] = dist.version
+        except Exception as e:
+            error = f'repair_gpu_runtimes(): {e}'
+            print(error)
+            return 0
+        return self.reinstall_incomplete(incomplete)
+
     def missing_record_files(self, dist:Any)->list:
         # the code files RECORD lists that are gone. RECORD itself: Distribution.files leaves out the entries whose
-        # file is gone (python >= 3.12)
-        code_suffixes = ('.py', '.so', '.pyd', '.dll', '.dylib')
+        # file is gone (python >= 3.12). Versioned shared libraries count: the CUDA runtime wheels ship nothing else
+        # (nvidia/cudnn/lib/libcudnn.so.9, torch/lib/libgomp-*.so.1)
+        code_file_re = re.compile(r'\.(?:py|pyd|dll|dylib|so(?:\.\d+)*)$')
         missing = []
         for row in csv.reader((dist.read_text('RECORD') or '').splitlines()):
-            if row and row[0].endswith(code_suffixes) and not os.path.exists(dist.locate_file(row[0])):
+            if row and code_file_re.search(row[0]) and not os.path.exists(dist.locate_file(row[0])):
                 missing.append(row[0])
         return missing
 
@@ -2254,6 +2330,10 @@ class DeviceInstaller():
             error = f'repair_incomplete_packages(): {e}'
             print(error)
             return 0
+        return self.reinstall_incomplete(incomplete)
+
+    def reinstall_incomplete(self, incomplete:dict)->int:
+        # incomplete: {pkg: installed version} whose files are gone, reinstalled at that version
         if not incomplete:
             return 0
         msg = legends['msg_reinstalling_incomplete'].format(pkgs=', '.join(incomplete))
@@ -2372,9 +2452,10 @@ class DeviceInstaller():
             msg = legends['msg_upgrading_outdated_deps'].format(pkgs=', '.join(outdated))
             print(msg)
         missing = missing + outdated
-        # a missing device package (transformers) comes back with its cap; the other pins stay out, they are not missing
+        # a missing device package (transformers) comes back with its cap; the other pins stay out, they are not missing.
+        # The torch family stays as installed, whatever the dependency asks (torch_family_pins())
         heads = {self.pkg_head(req) for req in missing}
-        pins = []
+        pins = self.torch_family_pins()
         for dpkg in self.device_pkgs:
             try:
                 pin = self.select_pkg(dpkg)
@@ -3598,6 +3679,10 @@ class DeviceInstaller():
                             error = legends['error_torch_install'].format(e=e)
                             print(error)
                             return 1
+                    # every start, torch in place or not reinstalled: an env already holding another CUDA major's
+                    # wheels is repaired before the GPU probe and the first torch import
+                    if self.repair_gpu_runtimes() == 1:
+                        return 1
                     self.link_os_libgomp('python_env', device_info)
                     # an inherited one would make sitecustomize.py answer 0 for torch in the probe too: it asks torch
                     # itself, and the verdict below sets it again

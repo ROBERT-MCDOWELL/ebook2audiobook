@@ -190,6 +190,31 @@ class TTSUtils:
     vc_alerted = False
     # voice file -> the one _check_xtts_builtin_speakers() gave for it, per engine instance (set by _set_voice())
     converted_voices = None
+    # _cudnn_usable()'s verdict, once per process: None until probed
+    cudnn_usable = None
+
+    def _cudnn_usable(self, torch:Any)->bool:
+        # cuDNN loads lazily: a libcudnn the driver or the GPU cannot run (a CUDA 13 build on a 535 driver, an arch a
+        # newer cuDNN dropped) imports fine and fails at the first convolution with CUDNN_STATUS_NOT_INITIALIZED (bug
+        # report a0b81438513a4c90: XTTS get_conditioning_latents -> torchaudio resample -> conv1d). torch's own CUDA
+        # kernels still run them, slower, on the GPU. Probed on a tiny conv1d; another failure (out of memory, a sticky
+        # CUDA error) is not cuDNN's and leaves it on, probed again at the next load
+        if TTSUtils.cudnn_usable is None:
+            try:
+                torch.backends.cudnn.enabled = True
+                torch.nn.functional.conv1d(torch.randn(1, 1, 256, device='cuda'), torch.randn(1, 1, 16, device='cuda')).sum().item()
+                TTSUtils.cudnn_usable = True
+            except RuntimeError as e:
+                if not re.search(r'cudnn', str(e), re.IGNORECASE):
+                    return True
+                TTSUtils.cudnn_usable = False
+                try:
+                    cudnn_version = torch.backends.cudnn.version()
+                except Exception:
+                    cudnn_version = '?'
+                msg = legends['msg_cudnn_unusable'].format(version=cudnn_version, e=str(e).strip().splitlines()[0])
+                print(msg)
+        return TTSUtils.cudnn_usable
 
     def _alert_vc(self, vc_model:str)->None:
         # a voice file on an engine without built-in voice cloning: a TTS_VOICE_CONVERSION model clones it on every sentence
@@ -398,10 +423,11 @@ class TTSUtils:
             # Pascal have no safe reduced-precision path for that loop, so the CUDA
             # branch stays fp32 unless a caller opts in per-engine.
             amp_dtype = torch.float32
-            # cuDNN base config — benchmark=True is bad for TTS (variable-length inputs)
+            # cuDNN base config — benchmark=True is bad for TTS (variable-length inputs).
+            # NVIDIA only: on ROCm torch.backends.cudnn is MIOpen, its JIT failures are another matter
             if hasattr(torch.backends, 'cudnn'):
                 try:
-                    torch.backends.cudnn.enabled = True
+                    torch.backends.cudnn.enabled = self._cudnn_usable(torch) if is_cuda else True
                     torch.backends.cudnn.benchmark = False
                     torch.backends.cudnn.deterministic = False
                 except Exception:
