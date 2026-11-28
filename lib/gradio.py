@@ -2711,15 +2711,14 @@ def build_interface(args:dict)->gr.Blocks:
                                     wav_path = str(f.with_suffix('.wav'))
                                     piper_options.append((display_name, wav_path))
                         options = builtin_options + eng_options + bark_options + piper_options
-                        session['voice_dir'] = os.path.join(voices_dir, '__sessions', f'voice-{session_id}', language)
-                        os.makedirs(session['voice_dir'], exist_ok=True)
-                        if session['voice_dir'] is not None:
-                            session_voice_dir = Path(session['voice_dir'])
-                            options += [
-                                (os.path.splitext(f.name)[0], str(f))
-                                for f in session_voice_dir.rglob(file_pattern)
-                                if f.is_file()
-                            ]
+                        voice_dir = os.path.join(voices_dir, '__sessions', f'voice-{session_id}', language)
+                        session['voice_dir'] = voice_dir
+                        os.makedirs(voice_dir, exist_ok=True)
+                        options += [
+                            (os.path.splitext(f.name)[0], str(f))
+                            for f in Path(voice_dir).rglob(file_pattern)
+                            if f.is_file()
+                        ]
                         if session.get('custom_model_dir'):
                             options.extend(
                                 (f.stem, str(f))
@@ -2737,10 +2736,14 @@ def build_interface(args:dict)->gr.Blocks:
                                 if default_voice and os.path.isfile(default_voice):
                                     options = [(os.path.splitext(os.path.basename(default_voice))[0], default_voice)]
                                     default_fallback = default_voice
-                        if session['voice'] is not None and isinstance(session.get('voice'), str):
-                            if session['voice_dir'] not in session['voice']:
-                                if not any(v[1] == session['voice'] for v in options):
-                                    voice_path = Path(session['voice'])
+                        # one read: session is a Manager proxy, every session['voice'] is a round trip and a concurrent
+                        # event (_change_gr_voice_list, _change_gr_tts_engine_list, voice deletion) can set it to None
+                        # between the check and its use (the any() below reads it once per option)
+                        voice = session.get('voice')
+                        if isinstance(voice, str):
+                            if voice_dir not in voice:
+                                if not any(v[1] == voice for v in options):
+                                    voice_path = Path(voice)
                                     parts = list(voice_path.parts)
                                     if "voices" in parts:
                                         idx = parts.index("voices")
