@@ -636,6 +636,8 @@ legends = {
     'msg_vc_cpu_slow': 'Usar uma voz diferente das {engine} vozes integradas: a conversão de voz {vc_model} é executada na CPU em cada frase, portanto, a conversão do e-book é muito mais lenta do que com uma voz integrada.',
     'msg_vc_device_switch': 'Usando uma voz diferente das {engine} vozes integradas: a conversão de voz {vc_model} não pode ser executada no {device} e muda para {new_device}, portanto, a conversão do e-book é um pouco mais lenta do que com uma voz integrada.',
     'msg_vc_device_switch_cpu': 'Usar uma voz diferente das {engine} vozes integradas: a conversão de voz {vc_model} não pode ser executada no {device} e muda para {new_device}, portanto, a conversão do e-book é muito mais lenta do que com uma voz integrada.',
+    'msg_vc_knnvc_fallback': 'Usar uma voz diferente das {engine} vozes integradas: a conversão de voz {vc_model} não pode ser executada no {device}, portanto, o {new_vc_model} converte a voz na CPU, um modelo mais leve que é executado mais rapidamente do que em tempo real lá.',
+    'msg_vc_knnvc_degraded': 'O {engine} não tem clonagem de voz integrada: na CPU, o {vc_model} converte a voz selecionada em cada frase com um modelo mais leve, então a voz clonada perde qualidade. Selecione a voz "{internal}" sempre que possível para obter uma conversão mais rápida e a melhor qualidade.',
     'msg_zonos2_models': 'Obtendo os {engine} arquivos de modelo ({files}), o primeiro download demora um pouco...',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Tocha Vulkan seleccionada',
     'msg_vulkan_docker_image': 'Imagem do Vulkan Torch: é executada na CPU e em uma GPU passada para o contêiner assim que o dispositivo é configurado para Vulkan.',

@@ -636,6 +636,8 @@ legends = {
     'msg_vc_cpu_slow': '使用{engine}内置语音以外的语音：{vc_model}语音转换在每句话上都由 CPU 运行，因此电子书的转换速度比使用内置语音慢得多。',
     'msg_vc_device_switch': '使用非{engine}内置语音：{vc_model}语音转换无法在{device}上运行，因此将切换至{new_device}，所以电子书转换速度比使用内置语音时略慢。',
     'msg_vc_device_switch_cpu': '使用非{engine}内置语音：{vc_model}语音转换无法在{device}上运行，并切换到{new_device}，因此电子书转换的速度比使用内置语音慢得多。',
+    'msg_vc_knnvc_fallback': '使用非{engine}内置语音：{vc_model}语音转换无法在{device}上运行，因此{new_vc_model}改在 CPU 上进行语音转换，这是一种更轻量的模型，运行速度比实时更快。',
+    'msg_vc_knnvc_degraded': '{engine}没有内置语音克隆功能：在 CPU 上，{vc_model}使用更轻量的模型对每个句子的所选语音进行转换，因此克隆的语音会失去质量。尽可能多地选择"{internal}"语音，以实现更快的转换和最佳音质。',
     'msg_zonos2_models': '是让大家 {engine} 模型文件（{files}） ，第一次下载需要一段时间……',
     'msg_vulkan_selected': 'Vulkan GPU {gpu} ：已选择Vulkan Torch',
     'msg_vulkan_docker_image': 'Vulkan Torch 图像：在 CPU 上运行，并在设备设置为 Vulkan 后在传递给容器的 GPU 上运行',

@@ -636,6 +636,8 @@ legends = {
     'msg_vc_cpu_slow': 'Lílo ohùn mìíràn yàtọ̀ sí àwọn ohùn {engine} tí ó wà tẹ́lẹ̀: ìyípadà ohùn {vc_model} ń ṣiṣẹ́ lórí CPU lórí gbogbo gbolohun, nítorí náà ìyípadà ìwé-kọ̀m̀pútà náà lọ́ra gan-an ju ti ohùn tí ó wà tẹ́lẹ̀ lọ.',
     'msg_vc_device_switch': 'Lílo ohùn mìíràn yàtọ̀ sí àwọn ohùn {engine} tí ó wà tẹ́lẹ̀: ìyípadà ohùn {vc_model} kò lè ṣiṣẹ́ lórí {device} ó sì yí padà sí {new_device}, nítorí náà ìyípadà ìwé-ẹlẹ́kìtrónìkì náà lọ́ra díẹ̀ ju ti ohùn tí ó wà tẹ́lẹ̀ lọ.',
     'msg_vc_device_switch_cpu': 'Lílo ohùn mìíràn tí kì í ṣe àwọn ohùn {engine} tí a fi sí inú rẹ̀: àyípadà ohùn {vc_model} kò lè ṣiṣẹ́ lórí {device} ó sì yí padà sí {new_device}, nítorí náà àyípadà ìwé-apoti-olódì ò lọ́ra jù bí ó ṣe ń lọ pẹ̀lú ohùn tí a fi sí inú rẹ̀.',
+    'msg_vc_knnvc_fallback': 'Lílo ohùn mìíràn yàtọ̀ sí àwọn ohùn {engine} tí ó wà nínú rẹ̀: àyípadà ohùn {vc_model} kò lè ṣiṣẹ́ lórí {device}, nítorí náà {new_vc_model} yóò ṣe àyípadà ohùn náà lórí CPU dípò bẹ́ẹ̀, èyí tí ó jẹ́ àpẹẹrẹ tí ó fúyẹ́ tí ó sì ń ṣiṣẹ́ kíákíá ju àkókò gidi lọ níbẹ̀.',
+    'msg_vc_knnvc_degraded': '{engine} kò ní ìdá ohùn tí a kọ́ sí inú rẹ̀: lórí CPU, {vc_model} yí ohùn tí a yàn padà lórí gbogbo gbolohun pẹ̀lú àwòrán tí ó fúyẹ́, nítorí náà ohùn tí a dá padà náà máa pàdánù didùn. Yan ohùn "{internal}" bí ó ti ṣeé ṣe fún ìyípadà tí ó yára àti didara tí ó dára jùlọ.',
     'msg_zonos2_models': 'Gbígba àwọn fáìlì àwòṣe {engine} ({files}), ìmúṣẹ àkọ́kọ́ gba ìgbà díẹ̀...',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan Torch yàn',
     'msg_vulkan_docker_image': 'Àwòrán Vulkan Torch: ń ṣiṣẹ́ lórí CPU, àti lórí GPU tí a fi ránṣẹ́ sí àpótí náà ní kété tí a bá ti ṣètò ẹ̀rọ náà sí vulkan',

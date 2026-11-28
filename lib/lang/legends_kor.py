@@ -636,6 +636,8 @@ legends = {
     'msg_vc_cpu_slow': '{engine} 내장 음성 이외의 음성 사용: {vc_model} 음성 변환은 모든 문장에 대해 CPU에서 실행되므로 전자책 변환 속도가 내장 음성을 사용할 때보다 훨씬 느립니다.',
     'msg_vc_device_switch': '{engine} 내장 음성 이외의 음성 사용: {vc_model} 음성 변환을 {device}에서 실행할 수 없어 {new_device}(으)로 전환되므로, 전자책 변환 속도가 내장 음성을 사용할 때보다 약간 느립니다.',
     'msg_vc_device_switch_cpu': '{engine} 내장 음성 이외의 음성 사용: {vc_model} 음성 변환을 {device}에서 실행할 수 없어 {new_device}(으)로 전환되므로, 전자책 변환 속도가 내장 음성을 사용할 때보다 훨씬 느립니다.',
+    'msg_vc_knnvc_fallback': '{engine} 내장 음성 이외의 음성 사용: {vc_model} 음성 변환은 {device}에서 실행할 수 없으므로 {new_vc_model}은 대신 CPU에서 음성을 변환합니다. CPU에서는 실시간보다 빠르게 실행되는 더 가벼운 모델이 사용됩니다.',
+    'msg_vc_knnvc_degraded': '{engine}에는 내장된 음성 복제 기능이 없습니다. CPU에서 {vc_model}은(는) 더 가벼운 모델을 사용하여 모든 문장에서 선택한 음성을 변환하므로 복제된 음성의 품질이 저하됩니다. 더 빠른 변환과 최고의 품질을 위해 가능한 한 "{internal}" 음성을 선택하세요.',
     'msg_zonos2_models': '받기 {engine} 모델 파일 ({files}), 첫 번째 다운로드는 시간이 걸립니다...',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan Torch 선택됨',
     'msg_vulkan_docker_image': 'Vulkan Torch 이미지: 장치가 Vulkan으로 설정되면 컨테이너로 전달된 GPU와 CPU에서 실행됩니다.',

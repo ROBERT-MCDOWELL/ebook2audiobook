@@ -636,6 +636,8 @@ legends = {
     'msg_vc_cpu_slow': 'Nggunakake swara liyane kajaba {engine} swara sing wis ana: konversi swara {vc_model} mlaku ing CPU saben ukara, mula konversi ebook luwih alon tinimbang nggunakake swara sing wis ana.',
     'msg_vc_device_switch': 'Nggunakake swara liya kajaba {engine} swara bawaan: konversi swara {vc_model} ora bisa digunakake ing {device} lan ganti dadi {new_device}, mula konversi ebook rada luwih alon tinimbang nggunakake swara bawaan.',
     'msg_vc_device_switch_cpu': 'Nggunakake swara liyane kajaba {engine} swara sing wis ana: konversi swara {vc_model} ora bisa dilakokake ing {device} lan ganti dadi {new_device}, mula konversi ebook luwih alon tinimbang nggunakake swara sing wis ana.',
+    'msg_vc_knnvc_fallback': 'Nggunakake swara liya kajaba {engine} swara sing wis ana: konversi swara {vc_model} ora bisa dilakokake ing {device}, mula {new_vc_model} ngowahi swara ing CPU, model sing luwih entheng sing mlaku luwih cepet tinimbang wektu nyata ing kana.',
+    'msg_vc_knnvc_degraded': '{engine} ora duwe kloning swara sing dibangun ing sistem: ing CPU, {vc_model} ngowahi swara sing dipilih ing saben ukara nganggo model sing luwih entheng, supaya swara sing dikloning dadi kurang apik kualitasé. Pilih swara "{internal}" sembada bisa kanggo konversi sing luwih cepet lan kualitas paling apik.',
     'msg_zonos2_models': 'Njaluk file model {engine} ({files}), download pisanan njupuk sawetara wektu...',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan Torch',
     'msg_vulkan_docker_image': 'Gambar Vulkan Torch: mlaku ing CPU, lan ing GPU sing dikirim menyang kontainer sawise piranti disetel menyang vulkan',

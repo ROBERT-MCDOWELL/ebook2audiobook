@@ -636,6 +636,8 @@ legends = {
     'msg_vc_cpu_slow': '{engine} yerleşik ses dışında bir ses kullanma: {vc_model} ses dönüştürme işlemi her cümlede CPU üzerinde çalışır, bu nedenle e-kitap dönüştürme işlemi yerleşik bir sese göre çok daha yavaştır.',
     'msg_vc_device_switch': '{engine} yerleşik ses dışında bir ses kullanma: {vc_model} ses dönüştürme işlemi {device} üzerinde çalışamaz ve {new_device} sesine geçer, bu nedenle e-kitap dönüştürme işlemi yerleşik bir sese göre biraz daha yavaştır.',
     'msg_vc_device_switch_cpu': '{engine} yerleşik ses dışında bir ses kullanma: {vc_model} ses dönüştürme işlemi {device} üzerinde çalışamaz ve {new_device} sesine geçer, bu nedenle e-kitap dönüştürme işlemi yerleşik bir sese göre çok daha yavaştır.',
+    'msg_vc_knnvc_fallback': '{engine} yerleşik ses dışında bir ses kullanma: {vc_model} ses dönüştürme işlemi {device} üzerinde çalıştırılamaz, bu nedenle {new_vc_model} sesi bunun yerine CPU üzerinde dönüştürür; bu, orada gerçek zamandan daha hızlı çalışan daha hafif bir modeldir.',
+    'msg_vc_knnvc_degraded': '{engine} yerleşik ses klonlamasına sahip değildir: CPU\'da {vc_model}, seçilen sesi her cümlede daha hafif bir modelle dönüştürür, böylece klonlanan ses kalitesini kaybeder. Daha hızlı dönüştürme ve en iyi kalite için mümkün olduğunca "{internal}" sesini seçin.',
     'msg_zonos2_models': '{engine} model dosyasını ({files}) almak, ilk indirme biraz zaman alır…',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan Meşalesi seçildi',
     'msg_vulkan_docker_image': 'Vulkan Torch görüntüsü: Cihaz vulkan olarak ayarlandığında konteynere aktarılan bir GPU\'da ve CPU\'da çalışır.',

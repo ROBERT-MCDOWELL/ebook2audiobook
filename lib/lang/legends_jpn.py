@@ -636,6 +636,8 @@ legends = {
     'msg_vc_cpu_slow': '{engine}の組み込み音声以外の音声を使用する場合：{vc_model}音声変換はすべての文でCPU上で実行されるため、電子書籍の変換は組み込み音声の場合よりもはるかに遅くなります。',
     'msg_vc_device_switch': '{engine}の組み込み音声以外の音声を使用する場合：{vc_model}音声変換は{device}では実行できず、{new_device}に切り替わるため、電子書籍の変換は組み込み音声の場合よりも若干遅くなります。',
     'msg_vc_device_switch_cpu': '{engine}の組み込み音声以外の音声を使用する場合：{vc_model}の音声変換は{device}では実行できず、{new_device}に切り替わるため、電子書籍の変換は組み込み音声の場合よりもはるかに遅くなります。',
+    'msg_vc_knnvc_fallback': '{engine}の組み込み音声以外の音声を使用する場合：{vc_model}の音声変換は{device}では実行できないため、代わりに{new_vc_model}がCPUで音声を変換します。これはより軽量なモデルであり、そこでリアルタイムよりも速く実行されます。',
+    'msg_vc_knnvc_degraded': '{engine}には、組み込みの音声クローニング機能がありません。CPUでは、{vc_model}がより軽量なモデルを使用してすべての文で選択した音声を変換するため、クローン音声の品質が低下します。変換を高速化し、最高の品質を得るために、できるだけ"{internal}"の音声を選択してください。',
     'msg_zonos2_models': 'コードを入手 {engine} モデルファイル（{files}）、最初のダウンロードにはしばらく時間がかかります…',
     'msg_vulkan_selected': 'Vulkan GPU {gpu} ： Vulkan Torchが選択されました',
     'msg_vulkan_docker_image': 'Vulkan Torchの画像：デバイスがVulkanに設定されると、CPUとコンテナに渡されたGPUで実行されます。',

@@ -636,6 +636,8 @@ legends = {
     'msg_vc_cpu_slow': 'Menggunakan suara selain {engine} suara bawaan: konversi suara {vc_model} berjalan di CPU untuk setiap kalimat, sehingga konversi ebook jauh lebih lambat dibandingkan dengan suara bawaan.',
     'msg_vc_device_switch': 'Menggunakan suara selain {engine} suara bawaan: konversi suara {vc_model} tidak dapat berjalan di {device} dan beralih ke {new_device}, sehingga konversi ebook sedikit lebih lambat dibandingkan dengan suara bawaan.',
     'msg_vc_device_switch_cpu': 'Menggunakan suara selain {engine} suara bawaan: konversi suara {vc_model} tidak dapat dijalankan di {device} dan beralih ke {new_device}, sehingga konversi ebook jauh lebih lambat dibandingkan dengan suara bawaan.',
+    'msg_vc_knnvc_fallback': 'Menggunakan suara selain {engine} suara bawaan: konversi suara {vc_model} tidak dapat dijalankan di {device}, jadi {new_vc_model} mengonversi suara di CPU, model yang lebih ringan yang berjalan lebih cepat daripada waktu nyata di sana.',
+    'msg_vc_knnvc_degraded': '{engine} tidak memiliki kloning suara bawaan: di CPU, {vc_model} mengonversi suara yang dipilih pada setiap kalimat dengan model yang lebih ringan, sehingga suara yang dikloning kehilangan kualitas. Pilih suara "{internal}" sebanyak mungkin untuk konversi yang lebih cepat dan kualitas terbaik.',
     'msg_zonos2_models': 'Mendapatkan {engine} file model ({files}), unduhan pertama membutuhkan waktu…',
     'msg_vulkan_selected': 'GPU Vulkan {gpu}: Obor Vulkan dipilih',
     'msg_vulkan_docker_image': 'Gambar Vulkan Torch: berjalan di CPU, dan di GPU yang diteruskan ke kontainer setelah perangkat diatur ke vulkan',

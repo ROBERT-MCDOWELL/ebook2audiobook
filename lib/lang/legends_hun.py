@@ -636,6 +636,8 @@ legends = {
     'msg_vc_cpu_slow': 'A(z) {engine} beépített hangtól eltérő hang használata: a(z) {vc_model} hangkonverzió a CPU-n fut minden mondatnál, így az e-könyv konverziója sokkal lassabb, mint a beépített hanggal.',
     'msg_vc_device_switch': 'A(z) {engine} beépített hangtól eltérő hang használata: a(z) {vc_model} hangkonverzió nem futtatható a(z) {device} rendszeren, és átvált a(z) {new_device} hangra, így az e-könyv konverziója valamivel lassabb, mint a beépített hang használata esetén.',
     'msg_vc_device_switch_cpu': 'A(z) {engine} beépített hangtól eltérő hang használata: a(z) {vc_model} hangkonverzió nem futtatható a(z) {device} rendszeren, és átvált a(z) {new_device} rendszerre, így az e-könyv konverziója sokkal lassabb, mint a beépített hanggal.',
+    'msg_vc_knnvc_fallback': 'A(z) {engine} beépített hangtól eltérő hang használata: a(z) {vc_model} hangátalakítás nem futtatható a(z) {device} eszközön, ezért a(z) {new_vc_model} a hangot inkább a CPU-n alakítja át, ami egy könnyebb modell, amely ott gyorsabban fut, mint valós időben.',
+    'msg_vc_knnvc_degraded': 'A(z) {engine} nem rendelkezik beépített hangklónozási funkcióval: a processzoron a(z) {vc_model} minden mondatnál egy egyszerűbb modellel konvertálja a kiválasztott hangot, így a klónozott hang minősége romlik. A lehető leggyakrabban válassza a(z) "{internal}" hangot a gyorsabb konvertálás és a legjobb minőség érdekében.',
     'msg_zonos2_models': 'A {engine} modellfájl ({files}) beszerzése, az első letöltés eltart egy ideig...',
     'msg_vulkan_selected': 'Vulkan GPU {gpu}: Vulkan zseblámpa kiválasztva',
     'msg_vulkan_docker_image': 'Vulkan Torch kép: a CPU-n fut, és a GPU-n, amelyet a konténernek ad át, miután az eszközt Vulkanra állították',
