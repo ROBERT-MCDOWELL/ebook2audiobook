@@ -5,7 +5,7 @@ from lib.classes.subprocess_pipe import SubprocessPipe
 from lib.classes.bug_reporter import bug_reporter
 from lib.classes.tts_engines.common.voice_conversion import VoiceConversion
 from lib.classes.tts_engines.common.hf_download import hf_download
-from lib.conf_models import TTS_VOICE_CONVERSION, default_vc_model, audiocpp_packages, audiocpp_asr, audiocpp_engines, audiocpp_repo
+from lib.conf_models import TTS_VOICE_CONVERSION, default_vc_model, default_vc_model_cpu, audiocpp_packages, audiocpp_asr, audiocpp_engines, audiocpp_repo
 from lib.lang import legends
 
 class AudioCpp(TTSUtils):
@@ -71,13 +71,18 @@ class AudioCpp(TTSUtils):
             # cloning engines taking a reference transcript also get the ASR model, loaded by the worker only for a voice it
             # has never transcribed, then unloaded. Built-in voice engines get default_vc_model for a picked voice file, run in
             # the same server; one that speaks the text again (task "tts") would only replace this engine, so they take its
-            # fallback then
+            # fallback then. On a CPU device they take kNN-VC instead (default_vc_model_cpu, its own torch worker through
+            # _load_engine_zs()): the server speaks its own voice only, no VC model in it
             asr_files = audiocpp_asr['files'] if self.family_cfg['clone'] and self.family_cfg['ref_text'] else []
+            self.knnvc = not self.family_cfg['clone'] and self.session['device'] == devices['CPU']['proc']
+            self.tts_zs_key = default_vc_model.rsplit('/', 1)[-1] if self.knnvc else None
             self.vc_model = default_vc_model.rsplit('/', 1)[-1]
             self.vc_model = self.vc_model if TTS_VOICE_CONVERSION[self.vc_model]['task'] == 'vc' else TTS_VOICE_CONVERSION[self.vc_model]['fallback']
             self.vc_cfg = TTS_VOICE_CONVERSION[self.vc_model]
             vc_preset = load_engine_presets(self.vc_cfg['engine'])['internal'] if self.vc_cfg.get('engine') else {'repo': self.vc_cfg.get('repo', audiocpp_repo), 'files': self.vc_cfg['files']}
-            vc_files = vc_preset['files'] if not self.family_cfg['clone'] else []
+            vc_files = vc_preset['files'] if not self.family_cfg['clone'] and not self.knnvc else []
+            if self.knnvc:
+                self.vc_model = default_vc_model_cpu.rsplit('/', 1)[-1]
             # --- the audiocpp_server package for this machine (VoiceConversion: shared with the VC stage of the built-in voice engines),
             # holding this family and, for a built-in voice engine, the VC model's ---
             min_version = max(self.family_cfg['min_version'], self.vc_cfg.get('min_version', '0.0') if vc_files else '0.0', key=VoiceConversion.version)
@@ -201,14 +206,16 @@ class AudioCpp(TTSUtils):
                     else:
                         trim_audio_buffer = 0.002
                         # only the voice path crosses the pipe: the worker cuts one reference clip per voice file and keeps it.
-                        # Built-in voice engines: voice None = their own voice (voice_id), a voice file = converted to it
+                        # Built-in voice engines: voice None = their own voice (voice_id), a voice file = converted to it, in the
+                        # server, or by kNN-VC after it on a CPU device (knnvc_voice)
+                        knnvc_voice = self.params['current_voice'] if self.knnvc else None
                         if not self.family_cfg['clone'] and self.params['current_voice'] is not None:
                             self._alert_vc(self.vc_model)
                         reply = self.engine.send({
                             'op': 'tts',
                             'text': part,
                             'language': self.language_code,
-                            'voice': self.params['current_voice'],
+                            'voice': None if self.knnvc else self.params['current_voice'],
                             'voice_id': self.voice_id,
                             'file': part_file
                         })
@@ -236,6 +243,27 @@ class AudioCpp(TTSUtils):
                             error = f"convert() error: {reply.get('error')} segment: {part}"
                             print(error)
                             return False, error
+                        if knnvc_voice is not None:
+                            # the built-in voice -> the voice file, written back at the server's samplerate
+                            if not self.engine_zs:
+                                self.engine_zs = self._load_engine_zs(self.device)
+                            vc_file = f'{os.path.splitext(part_file)[0]}.vc.wav'
+                            reply = self.engine_zs.send({
+                                'op': 'vc',
+                                'source': os.path.abspath(part_file),
+                                'voice': os.path.abspath(knnvc_voice),
+                                'file': os.path.abspath(vc_file),
+                                'text': part,
+                                'language': self.language
+                            })
+                            if not reply.get('ok'):
+                                # no retry: core.py unloads the engine, which stops both workers
+                                if os.path.exists(vc_file):
+                                    os.unlink(vc_file)
+                                error = f"convert() error: {reply.get('error')} segment: {part}"
+                                print(error)
+                                return False, error
+                            os.replace(vc_file, part_file)
                         audio_part, samplerate = sf.read(part_file, dtype='float32')
                         os.unlink(part_file)
                         if audio_part.ndim > 1:

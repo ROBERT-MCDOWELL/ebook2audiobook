@@ -65,6 +65,7 @@ TTS_ENGINES = {
 # voice conversion: a voice file picked for a built-in voice engine (piper, vits, fairseq, glowtts, tacotron, orpheus, melotts,
 # phonon, kittentts' mini / nano / pico models and the audio.cpp ones with clone False) turns its output into that voice, on audio.cpp's server (common/voice_conversion.py).
 # default_vc_model below picks one; the last part of its path is the zero-shot engine's tts_zs_key (loaded_tts, model_zs_cache).
+# On a CPU device default_vc_model_cpu runs instead (knnvc, common/knnvc.py): the audio.cpp ones take seconds per second of speech there.
 # task "vc": voice to voice. task "tts": the engine's voice clone speaks the sentence text again (no voice to voice).
 # files: GGUF in audiocpp_repo (repo: another Hugging Face repo); engine: the files of that engine's "internal" preset instead
 # (one download for both). server_task: the model's task in audiocpp_server ("vc" when absent); options: request options
@@ -80,11 +81,19 @@ TTS_ENGINES = {
 #   qwen3_tts: Qwen3-TTS has no voice to voice: its Base clone speaks the text in the voice, in its own languages only
 #     (fallback for the others); the built-in engine is not run for those sentences. The audio.cpp engines take the
 #     fallback always (speaking their text again would only replace them)
+#   knnvc: kNN-VC (bshall/knn-vc, coqui-tts' model) in its own torch worker (workers/knnvc_worker.py), the voice conversion
+#     of a CPU device: WavLM-Large layer 6 frames of the source, each one replaced by the mean of its topk nearest frames
+#     of the voice file, spoken by the prematched HiFi-GAN (16 kHz, written back at the source's samplerate). No
+#     diffusion steps: faster than real time on CPU.
+#     The matching set is the whole voice file, no clip cut from it (kNN-VC's timbre and intelligibility grow with the
+#     reference length), WavLM run on window seconds pieces of it, VAD trimmed at both ends (vad: knn-vc's trigger level).
+#     mix: the cloned voice's share in the features the vocoder speaks, 1.0 = 100% cloned voice, nothing of the built-in one
 TTS_VOICE_CONVERSION = {
     "seed_vc": {"path": "audiocpp/seed_vc", "task": "vc", "family": "seed_vc", "files": ["SeedVC-MLX-GGUF/seed-vc-mlx-q8_0.gguf"], "route": "v1_whisper_bigvgan_vc", "ref_max": 15.0},
     "chatterbox_vc": {"path": "audiocpp/chatterbox_vc", "task": "vc", "family": "chatterbox", "engine": TTS_ENGINES['CHATTERBOX'], "ref_max": 10.0},
     "soulx_singer_svc": {"path": "audiocpp/soulx_singer_svc", "task": "vc", "server_task": "svc", "family": "soulx_singer", "repo": "audio-cpp/SoulX-Singer-GGUF", "files": ["SoulX-Singer-SVC-GGUF/soulx-singer-svc-q8_0.gguf"], "options": {"auto_pitch_shift": True}, "ref_max": 10.0, "min_version": "0.9.6"},
-    "qwen3_tts": {"path": "audiocpp/qwen3_tts", "task": "tts", "family": "qwen3_tts", "engine": TTS_ENGINES['QWEN3_TTS'], "fallback": "seed_vc"}
+    "qwen3_tts": {"path": "audiocpp/qwen3_tts", "task": "tts", "family": "qwen3_tts", "engine": TTS_ENGINES['QWEN3_TTS'], "fallback": "seed_vc"},
+    "knnvc": {"path": "voice_conversion_models/multilingual/multi-dataset/knnvc", "task": "vc", "family": "knnvc", "topk": 4, "mix": 1.0, "vad": 7.0, "window": 30.0}
 }
 
 TTS_SML = {
@@ -139,6 +148,7 @@ IPA_REMAINING_PATTERN = re.compile(
 default_tts_engine = TTS_ENGINES['XTTS']
 default_fine_tuned = 'internal'
 default_vc_model = TTS_VOICE_CONVERSION['seed_vc']['path']
+default_vc_model_cpu = TTS_VOICE_CONVERSION['knnvc']['path']
 default_voice_detection_model = 'drewThomasson/segmentation'
 # demucs voice separation checkpoint mirrored on HF (the official dl.fbaipublicfiles.com host is not reliable).
 # file keeps its demucs name: <signature>-<sha256 prefix>.th, the prefix is checked again at load

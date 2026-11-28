@@ -26,7 +26,7 @@ os.makedirs(tts_dir, exist_ok=True)
 if not os.environ.get('HF_TOKEN'):
     from cryptography.fernet import Fernet
     os.environ['HF_TOKEN'] = Fernet(conf.fernet_key.encode('utf-8')).decrypt(conf.fernet_data).decode('utf-8')
-from lib.conf_models import TTS_ENGINES, TTS_VOICE_CONVERSION, default_engine_settings, default_voice_detection_model, default_voice_isolator_model, audiocpp_engines, audiocpp_packages, audiocpp_repo, audiocpp_asr
+from lib.conf_models import TTS_ENGINES, TTS_VOICE_CONVERSION, default_vc_model_cpu, default_engine_settings, default_voice_detection_model, default_voice_isolator_model, audiocpp_engines, audiocpp_packages, audiocpp_repo, audiocpp_asr
 from lib.conf_lang import year_to_decades_languages
 from lib.conf_interlude import interlude_classifier_repo
 languages = {lang.strip().lower() for lang in args.languages.split(',') if lang.strip()}
@@ -161,6 +161,12 @@ def coqui_model(name:str)->None:
     manager.download_model(name)
     if vocoder:
         manager.download_model(vocoder)
+
+def wavlm()->None:
+    # kNN-VC's WavLM-Large, where coqui's get_wavlm() looks for it (workers/knnvc_worker.py fetches it the same way)
+    from TTS.vc.layers.freevc.wavlm import model_uri
+    from trainer.io import get_user_data_dir
+    url_file(model_uri, os.path.join(get_user_data_dir('tts'), 'wavlm', 'WavLM-Large.pt'))
 
 def bark_extras(bark_repo:str)->None:
     from transformers import BertTokenizer, EncodecModel, AutoProcessor, HubertModel
@@ -311,6 +317,9 @@ for vc_cfg in TTS_VOICE_CONVERSION.values():
     vc_repo = vc_cfg.get('repo', audiocpp_repo)
     for file in vc_cfg.get('files', []):
         add('common', f'{vc_repo}/{file}', lambda repo=vc_repo, file=file: hf_file(repo, file, os.path.join(tts_dir, 'audiocpp', repo.replace('/', '--'))))
+# kNN-VC, the voice conversion of a CPU device (default_vc_model_cpu): coqui's knnvc with its prematched HiFi-GAN, and WavLM-Large
+add('common', default_vc_model_cpu, lambda: coqui_model(default_vc_model_cpu))
+add('common', 'WavLM-Large.pt', wavlm)
 for name, cfg in load_presets('xtts').items():
     if not engine_wanted(TTS_ENGINES['XTTS']) or (name != 'internal' and languages and cfg['lang'] not in languages):
         continue
