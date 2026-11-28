@@ -1275,6 +1275,9 @@ for _acpp_engine, _acpp_cfg in audiocpp_families.items():
     }
 # built-in voice engines: e2a offers their own voice as "default" (voice None), as for Piper
 tts_engines_with_inner_speaker += [_acpp_engine for _acpp_engine, _acpp_cfg in audiocpp_families.items() if not _acpp_cfg['clone']]
+# the engines with a built-in voice ("Internal") whose voice file goes through the voice conversion (TTS_VOICE_CONVERSION,
+# kNN-VC on CPU): YourTTS and OpenVoice clone it themselves, KittenTTS only on its mini / nano / pico models
+tts_engines_with_vc = [_engine for _engine in tts_engines_with_inner_speaker if _engine not in (TTS_ENGINES['YOURTTS'], TTS_ENGINES['OPENVOICE'])]
 # engine order (gradio's engine list follows default_engine_settings, the CLI help TTS_ENGINES): most realistic first,
 # then the fastest on CPU, then the smallest VRAM, then the smallest RAM; ties by name. When a language change rules
 # out the current engine, gradio picks the first compatible one, so the best rated

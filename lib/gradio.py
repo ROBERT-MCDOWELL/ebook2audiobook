@@ -1742,6 +1742,26 @@ def build_interface(args:dict)->gr.Blocks:
                     exception_alert(session_id, error)
                 return gr.update()
 
+            def _alert_vc_cpu(session_id:str, session:DictProxy, voice:str|None)->None:
+                # a voice other than Internal on CPU, for an engine that converts it (tts_engines_with_vc): kNN-VC runs on
+                # every sentence and the cloned voice loses quality (TTSUtils._alert_vc() tells it again at conversion time).
+                # As the engines decide: not for their own speakers, a custom model's voice file, nor KittenTTS 2 (clones it)
+                engine = session.get('tts_engine')
+                if voice is None or session.get('device') != devices['CPU']['proc'] or engine not in tts_engines_with_vc:
+                    return
+                custom_model = session.get('custom_model')
+                if custom_model is None and Path(voice).stem in default_engine_settings[engine].get('voices', {}):
+                    return
+                if custom_model is not None and Path(voice).stem == os.path.basename(custom_model):
+                    return
+                if engine == TTS_ENGINES['KITTENTTS']:
+                    language = session['translate'] if session.get('translate_enabled') and session.get('translate') else session.get('language')
+                    checkpoint = load_engine_presets(engine).get(session.get('fine_tuned'), {}).get('checkpoints', {}).get(language)
+                    if checkpoint is None or checkpoint['family'] == 'kitten2':
+                        return
+                msg = legends['msg_vc_knnvc_degraded'].format(engine=engine, vc_model=default_vc_model_cpu.rsplit('/', 1)[-1], internal=legends['gr_voice_list_default'])
+                show_alert(session_id, {'type': 'warning', 'msg': msg})
+
             def _change_gr_voice_list(session_id:str, selected:str|None)->tuple:
                 try:
                     session = context.get_session(session_id)
@@ -1760,6 +1780,7 @@ def build_interface(args:dict)->gr.Blocks:
                             session['voice_map'] = voice_map
                         else:
                             session['voice'] = new_voice
+                        _alert_vc_cpu(session_id, session, new_voice)
                         visible_voice_buttons = new_voice is not None
                         return gr.update(value=new_voice), gr.update(visible=visible_voice_buttons), gr.update(visible=visible_voice_buttons)
                 except Exception as e:
@@ -2934,11 +2955,12 @@ def build_interface(args:dict)->gr.Blocks:
                     exception_alert(session_id, error)
                 return gr.update()
 
-            def _change_gr_device(session_id:str, selected:str)->None:
+            def _change_gr_device(session_id:str, selected:str, voice:str|None)->None:
                 session = context.get_session(session_id)
                 if session and session.get('id', False):
                     if session.get('device') != selected:
                         session['device'] = selected
+                        _alert_vc_cpu(session_id, session, voice)
                 return
 
             def _change_gr_language(session_id:str, selected:str)->tuple:
@@ -4339,7 +4361,7 @@ def build_interface(args:dict)->gr.Blocks:
             )
             gr_device.change(
                 fn=_change_gr_device,
-                inputs=[gr_session, gr_device],
+                inputs=[gr_session, gr_device, gr_voice_list],
                 outputs=None
             )
             gr_language.change(
