@@ -233,7 +233,7 @@ class TTSUtils:
         if vc_model == default_vc_model_cpu.rsplit('/', 1)[-1]:
             msg = legends['msg_vc_knnvc_degraded'].format(engine=self.session['tts_engine'], vc_model=vc_model, internal=legends['gr_voice_list_default'])
         else:
-            msg = legends['msg_vc_slower'].format(engine=self.session['tts_engine'], vc_model=vc_model)
+            msg = legends['msg_vc_slower'].format(engine=self.session['tts_engine'], vc_model=vc_model, internal=legends['gr_voice_list_default'])
         show_alert = getattr(sys.modules.get('lib.core'), 'show_alert', None)
         if show_alert is not None:
             show_alert(self.session['id'], {'type': 'warning', 'msg': msg})
