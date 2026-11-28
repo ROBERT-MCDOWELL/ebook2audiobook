@@ -596,7 +596,7 @@ Los demás formatos que lee `ebook-convert` de calibre (PDF, DOCX, MOBI, TXT, ..
 primer idioma, y se traducen como EPUB: `--from` es necesario cuando no indican idioma, como suele pasar con PDF y TXT.
 Sin `-o` ni `--output_dir`, cada traducción se guarda junto a su libro como `<name>.<lang>.<ext>`,
 y se omite un libro cuya traducción ya existe (`--overwrite` para volver a traducirlo).
-Los lanzadores de la carpeta `tools/` ejecutan `tools/translate_ebook.py` con `python_env`, sin nada que activar,
+Los lanzadores de la carpeta `tools/` ejecutan `tools/translate_ebook/translate_ebook.py` con `python_env`, sin nada que activar,
 desde cualquier carpeta (las rutas relativas se toman desde donde se inicia):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ desde cualquier carpeta (las rutas relativas se toman desde donde se inicia):
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - O directamente con el Python de `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Si se inicia con cualquier otro Python,
+   - O directamente con el Python de `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Si se inicia con cualquier otro Python,
      el script se vuelve a iniciar con el de `python_env`.
-   - **Docker**: ejecútelo dentro del contenedor e2a, p. ej. `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: ejecútelo dentro del contenedor e2a, p. ej. `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      con las rutas vistas desde el contenedor.
    - **Velocidad**: argostranslate usa sus propios valores por defecto (CTranslate2 elige los hilos y el tipo de cálculo más rápido,
      int8 en CPU), no el hilo único en float32 de e2a. Defina `ARGOS_INTRA_THREADS` o `ARGOS_COMPUTE_TYPE` para cambiarlos.

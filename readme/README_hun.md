@@ -596,7 +596,7 @@ A calibre `ebook-convert` eszköze által olvasott egyéb formátumok (PDF, DOCX
 első nyelv előtt, és EPUB-ként fordítódnak: a `--from` akkor szükséges, ha nincs megadva nyelvük, ami PDF és TXT esetén gyakori.
 `-o` vagy `--output_dir` nélkül minden fordítás a könyve mellé kerül `<name>.<lang>.<ext>` néven,
 és az a könyv, amelynek fordítása már létezik, kimarad (`--overwrite` az újrafordításhoz).
-A `tools/` mappában lévő indítók a `python_env` segítségével futtatják a `tools/translate_ebook.py` fájlt, semmit sem kell aktiválni,
+A `tools/` mappában lévő indítók a `python_env` segítségével futtatják a `tools/translate_ebook/translate_ebook.py` fájlt, semmit sem kell aktiválni,
 bármelyik mappából (a relatív útvonalak az indítás helyétől számítanak):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ bármelyik mappából (a relatív útvonalak az indítás helyétől számítana
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Vagy közvetlenül a `python_env` Pythonjával: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Ha más Pythonnal indítják,
+   - Vagy közvetlenül a `python_env` Pythonjával: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Ha más Pythonnal indítják,
      a szkript újraindítja magát a `python_env` Pythonjával.
-   - **Docker**: futtassa az e2a konténeren belül, pl. `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: futtassa az e2a konténeren belül, pl. `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      a konténerből látható útvonalakkal.
    - **Sebesség**: az argostranslate a saját alapértelmezéseivel fut (a CTranslate2 választja ki a szálakat és a leggyorsabb számítási típust,
      CPU-n int8), nem az e2a egyszálas float32 beállításával. Felülírásukhoz állítsa be az `ARGOS_INTRA_THREADS` vagy `ARGOS_COMPUTE_TYPE` változót.

@@ -596,7 +596,7 @@ calibre의 `ebook-convert`가 읽을 수 있는 다른 형식(PDF, DOCX, MOBI, T
 한 번만 EPUB으로 변환된 뒤 EPUB으로 번역됩니다. 언어 정보가 없는 경우(PDF와 TXT에서 흔함) `--from`이 필요합니다.
 `-o` 또는 `--output_dir`이 없으면 각 번역본은 원본 책 옆에 `<name>.<lang>.<ext>`로 저장되고,
 번역본이 이미 있는 책은 건너뜁니다(다시 번역하려면 `--overwrite`).
-`tools/` 폴더의 실행기는 `python_env`로 `tools/translate_ebook.py`를 실행하므로 따로 활성화할 필요가 없으며,
+`tools/` 폴더의 실행기는 `python_env`로 `tools/translate_ebook/translate_ebook.py`를 실행하므로 따로 활성화할 필요가 없으며,
 어느 폴더에서든 실행할 수 있습니다(상대 경로는 실행한 위치 기준):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ calibre의 `ebook-convert`가 읽을 수 있는 다른 형식(PDF, DOCX, MOBI, T
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - 또는 `python_env`의 Python으로 직접 실행: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). 다른 Python으로 실행하면
+   - 또는 `python_env`의 Python으로 직접 실행: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). 다른 Python으로 실행하면
      스크립트가 `python_env`의 Python으로 스스로 다시 시작합니다.
-   - **Docker**: e2a 컨테이너 안에서 실행합니다. 예: `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: e2a 컨테이너 안에서 실행합니다. 예: `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      경로는 컨테이너 기준으로 지정합니다.
    - **속도**: argostranslate는 자체 기본값으로 실행됩니다(CTranslate2가 스레드 수와 가장 빠른 연산 유형을 선택하며,
      CPU에서는 int8). e2a의 단일 스레드 float32가 아닙니다. 재정의하려면 `ARGOS_INTRA_THREADS` 또는 `ARGOS_COMPUTE_TYPE`을 설정하세요.

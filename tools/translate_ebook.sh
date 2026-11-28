@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs tools/translate_ebook.py with e2a's python_env, every argument forwarded (--help lists the options).
+# Runs tools/translate_ebook/translate_ebook.py with e2a's python_env, every argument forwarded (--help lists the options).
 # Paths are taken from the folder it is started from.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" >/dev/null 2>&1 && pwd -P)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." >/dev/null 2>&1 && pwd -P)"
@@ -8,4 +8,4 @@ if [[ ! -x "$PY_CMD" ]]; then
 	echo "$ROOT_DIR/python_env not found: run $ROOT_DIR/ebook2audiobook.command once to install ebook2audiobook." >&2
 	exit 1
 fi
-exec "$PY_CMD" "$SCRIPT_DIR/translate_ebook.py" "$@"
+exec "$PY_CMD" "$SCRIPT_DIR/translate_ebook/translate_ebook.py" "$@"

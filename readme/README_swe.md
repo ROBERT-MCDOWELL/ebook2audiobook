@@ -596,7 +596,7 @@ Andra format som calibres `ebook-convert` läser (PDF, DOCX, MOBI, TXT, ...) kon
 första språket, och översätts som EPUB: `--from` behövs när de inte anger något språk, vilket PDF och TXT ofta inte gör.
 Utan `-o` eller `--output_dir` sparas varje översättning bredvid sin bok som `<name>.<lang>.<ext>`,
 och en bok vars översättning redan finns hoppas över (`--overwrite` för att översätta den igen).
-Startskripten i mappen `tools/` kör `tools/translate_ebook.py` med `python_env`, inget behöver aktiveras,
+Startskripten i mappen `tools/` kör `tools/translate_ebook/translate_ebook.py` med `python_env`, inget behöver aktiveras,
 från valfri mapp (relativa sökvägar utgår från där det startas):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ från valfri mapp (relativa sökvägar utgår från där det startas):
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Eller direkt med Python från `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Startas det med någon annan Python,
+   - Eller direkt med Python från `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Startas det med någon annan Python,
      startar skriptet om sig självt med den från `python_env`.
-   - **Docker**: kör det i e2a-containern, t.ex. `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: kör det i e2a-containern, t.ex. `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      med sökvägar som containern ser dem.
    - **Hastighet**: argostranslate körs med sina egna standardinställningar (CTranslate2 väljer trådar och den snabbaste beräkningstypen,
      int8 på CPU), inte med e2a:s enda tråd i float32. Ange `ARGOS_INTRA_THREADS` eller `ARGOS_COMPUTE_TYPE` för att åsidosätta dem.

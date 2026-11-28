@@ -596,7 +596,7 @@ calibre-এর `ebook-convert` যে অন্যান্য ফরম্য�
 একবার EPUB-এ রূপান্তরিত হয় এবং EPUB হিসেবে অনূদিত হয়: যখন তাতে কোনো ভাষা উল্লেখ থাকে না, যেমন PDF ও TXT-এ প্রায়ই হয়, তখন `--from` প্রয়োজন।
 `-o` বা `--output_dir` ছাড়া প্রতিটি অনুবাদ তার বইয়ের পাশে `<name>.<lang>.<ext>` নামে সংরক্ষিত হয়,
 এবং যে বইয়ের অনুবাদ আগে থেকেই আছে তা বাদ দেওয়া হয় (আবার অনুবাদ করতে `--overwrite`)।
-`tools/` ফোল্ডারের লঞ্চারগুলো `python_env` দিয়ে `tools/translate_ebook.py` চালায়, কিছু সক্রিয় করতে হয় না,
+`tools/` ফোল্ডারের লঞ্চারগুলো `python_env` দিয়ে `tools/translate_ebook/translate_ebook.py` চালায়, কিছু সক্রিয় করতে হয় না,
 যেকোনো ফোল্ডার থেকে (আপেক্ষিক পাথ যেখান থেকে চালু করা হয় সেখান থেকে ধরা হয়):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ calibre-এর `ebook-convert` যে অন্যান্য ফরম্য�
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - অথবা সরাসরি `python_env`-এর Python দিয়ে: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`)। অন্য কোনো Python দিয়ে চালু করলে,
+   - অথবা সরাসরি `python_env`-এর Python দিয়ে: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`)। অন্য কোনো Python দিয়ে চালু করলে,
      স্ক্রিপ্টটি নিজেকে `python_env`-এর Python দিয়ে আবার চালু করে।
-   - **Docker**: এটি e2a কন্টেইনারের ভেতরে চালান, যেমন `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: এটি e2a কন্টেইনারের ভেতরে চালান, যেমন `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      কন্টেইনার থেকে দেখা পাথসহ।
    - **গতি**: argostranslate নিজস্ব ডিফল্ট সেটিংসে চলে (CTranslate2 থ্রেড ও দ্রুততম কম্পিউট টাইপ বেছে নেয়,
      CPU-তে int8), e2a-এর float32-এ 1 থ্রেডে নয়। এগুলো বদলাতে `ARGOS_INTRA_THREADS` বা `ARGOS_COMPUTE_TYPE` সেট করুন।

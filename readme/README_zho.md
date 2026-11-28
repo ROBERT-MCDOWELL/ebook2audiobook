@@ -596,7 +596,7 @@ calibre 的 `ebook-convert` 可读取的其他格式（PDF、DOCX、MOBI、TXT �
 先转换为 EPUB（仅一次），再按 EPUB 翻译：当文件未标明语言时（PDF 和 TXT 常常如此）需要 `--from`。
 未指定 `-o` 或 `--output_dir` 时，每个译本都会以 `<name>.<lang>.<ext>` 保存在原书旁边，
 已有译本的书会被跳过（使用 `--overwrite` 重新翻译）。
-`tools/` 文件夹中的启动脚本会用 `python_env` 运行 `tools/translate_ebook.py`，无需激活任何环境，
+`tools/` 文件夹中的启动脚本会用 `python_env` 运行 `tools/translate_ebook/translate_ebook.py`，无需激活任何环境，
 可在任意文件夹中运行（相对路径以启动位置为准）：
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ calibre 的 `ebook-convert` 可读取的其他格式（PDF、DOCX、MOBI、TXT �
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - 或直接使用 `python_env` 的 Python：`./python_env/bin/python tools/translate_ebook.py ...`
-     （Windows：`python_env\Scripts\python.exe tools\translate_ebook.py ...`）。如果用其他 Python 启动，
+   - 或直接使用 `python_env` 的 Python：`./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     （Windows：`python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`）。如果用其他 Python 启动，
      脚本会自动改用 `python_env` 的 Python 重新启动。
-   - **Docker**：在 e2a 容器内运行，例如 `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**：在 e2a 容器内运行，例如 `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      路径需使用容器内可见的路径。
    - **速度**：argostranslate 使用其自身的默认设置（由 CTranslate2 选择线程数和最快的计算类型，
      CPU 上为 int8），而不是 e2a 的单线程 float32。可设置 `ARGOS_INTRA_THREADS` 或 `ARGOS_COMPUTE_TYPE` 进行覆盖。

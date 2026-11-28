@@ -596,7 +596,7 @@ Andere formaten die `ebook-convert` van calibre leest (PDF, DOCX, MOBI, TXT, ...
 eerste taal, en als EPUB vertaald: `--from` is nodig wanneer ze geen taal vermelden, zoals vaak bij PDF en TXT.
 Zonder `-o` of `--output_dir` wordt elke vertaling naast het boek opgeslagen als `<name>.<lang>.<ext>`,
 en een boek waarvan de vertaling al bestaat wordt overgeslagen (`--overwrite` om het opnieuw te vertalen).
-De launchers in de map `tools/` voeren `tools/translate_ebook.py` uit met `python_env`, niets te activeren,
+De launchers in de map `tools/` voeren `tools/translate_ebook/translate_ebook.py` uit met `python_env`, niets te activeren,
 vanuit elke map (relatieve paden gelden vanaf de plek waar het wordt gestart):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ vanuit elke map (relatieve paden gelden vanaf de plek waar het wordt gestart):
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Of rechtstreeks met de Python van `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Wordt het met een andere Python gestart,
+   - Of rechtstreeks met de Python van `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Wordt het met een andere Python gestart,
      dan herstart het script zichzelf met die van `python_env`.
-   - **Docker**: voer het uit in de e2a-container, bijv. `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: voer het uit in de e2a-container, bijv. `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      met paden zoals de container ze ziet.
    - **Snelheid**: argostranslate draait op zijn eigen standaardinstellingen (CTranslate2 kiest de threads en het snelste rekentype,
      int8 op CPU), niet op de enkele thread in float32 van e2a. Stel `ARGOS_INTRA_THREADS` of `ARGOS_COMPUTE_TYPE` in om ze te overschrijven.

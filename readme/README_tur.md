@@ -596,7 +596,7 @@ calibre'nin `ebook-convert` aracının okuduğu diğer biçimler (PDF, DOCX, MOB
 EPUB'a dönüştürülür ve EPUB olarak çevrilir: dil bilgisi taşımadıklarında (PDF ve TXT'de sık görülür) `--from` gerekir.
 `-o` veya `--output_dir` olmadan her çeviri kitabının yanına `<name>.<lang>.<ext>` olarak kaydedilir
 ve çevirisi zaten bulunan kitap atlanır (yeniden çevirmek için `--overwrite`).
-`tools/` klasöründeki başlatıcılar `tools/translate_ebook.py` dosyasını `python_env` ile çalıştırır, etkinleştirilecek bir şey yoktur,
+`tools/` klasöründeki başlatıcılar `tools/translate_ebook/translate_ebook.py` dosyasını `python_env` ile çalıştırır, etkinleştirilecek bir şey yoktur,
 herhangi bir klasörden çalışır (göreli yollar başlatıldığı yere göre alınır):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ herhangi bir klasörden çalışır (göreli yollar başlatıldığı yere göre
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Veya doğrudan `python_env` içindeki Python ile: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Başka bir Python ile başlatılırsa
+   - Veya doğrudan `python_env` içindeki Python ile: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Başka bir Python ile başlatılırsa
      betik kendini `python_env` içindeki Python ile yeniden başlatır.
-   - **Docker**: e2a konteyneri içinde çalıştırın, örneğin `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: e2a konteyneri içinde çalıştırın, örneğin `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      yolları konteynerin gördüğü şekilde vererek.
    - **Hız**: argostranslate kendi varsayılanlarıyla çalışır (CTranslate2 iş parçacıklarını ve en hızlı hesaplama türünü seçer,
      CPU'da int8), e2a'nın float32'deki tek iş parçacığıyla değil. Bunları geçersiz kılmak için `ARGOS_INTRA_THREADS` veya `ARGOS_COMPUTE_TYPE` ayarlayın.

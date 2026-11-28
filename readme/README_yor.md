@@ -596,7 +596,7 @@ orísun mìíràn).
 èdè àkọ́kọ́, a sì máa ń túmọ̀ wọn gẹ́gẹ́ bí EPUB: a nílò `--from` nígbà tí wọn kò bá sọ èdè kankan, bí PDF àti TXT ṣe sábà máa ń rí.
 Láìsí `-o` tàbí `--output_dir`, a máa ń fi ìtúmọ̀ kọ̀ọ̀kan pamọ́ sí ẹ̀gbẹ́ ìwé rẹ̀ gẹ́gẹ́ bí `<name>.<lang>.<ext>`,
 a sì máa ń fo ìwé tí ìtúmọ̀ rẹ̀ ti wà tẹ́lẹ̀ (`--overwrite` láti tún un túmọ̀).
-Àwọn launcher inú fódà `tools/` ń ṣiṣẹ́ `tools/translate_ebook.py` pẹ̀lú `python_env`, kò sí ohun tí a nílò láti mú ṣiṣẹ́,
+Àwọn launcher inú fódà `tools/` ń ṣiṣẹ́ `tools/translate_ebook/translate_ebook.py` pẹ̀lú `python_env`, kò sí ohun tí a nílò láti mú ṣiṣẹ́,
 láti inú fódà èyíkéyìí (a máa ń ka àwọn ọ̀nà ìbátan láti ibi tí a ti bẹ̀rẹ̀ rẹ̀):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ láti inú fódà èyíkéyìí (a máa ń ka àwọn ọ̀nà ìbátan láti ib
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Tàbí ní tààrà pẹ̀lú Python ti `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Tí a bá bẹ̀rẹ̀ rẹ̀ pẹ̀lú Python mìíràn,
+   - Tàbí ní tààrà pẹ̀lú Python ti `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Tí a bá bẹ̀rẹ̀ rẹ̀ pẹ̀lú Python mìíràn,
      script náà máa tún ara rẹ̀ bẹ̀rẹ̀ pẹ̀lú Python ti `python_env`.
-   - **Docker**: ṣiṣẹ́ rẹ̀ nínú container e2a, fún àpẹẹrẹ `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: ṣiṣẹ́ rẹ̀ nínú container e2a, fún àpẹẹrẹ `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      pẹ̀lú àwọn ọ̀nà bí container ṣe ń rí wọn.
    - **Iyára**: argostranslate ń ṣiṣẹ́ lórí àwọn ètò àìyípadà tirẹ̀ (CTranslate2 ló ń yan àwọn thread àti irú ìṣirò tó yára jù lọ,
      int8 lórí CPU), kì í ṣe lórí thread 1 ti e2a ní float32. Ṣètò `ARGOS_INTRA_THREADS` tàbí `ARGOS_COMPUTE_TYPE` láti yí wọn padà.

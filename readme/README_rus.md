@@ -596,7 +596,7 @@ options:
 первым языком и переводятся как EPUB: `--from` нужен, если в них не указан язык, что часто бывает с PDF и TXT.
 Без `-o` или `--output_dir` каждый перевод сохраняется рядом со своей книгой как `<name>.<lang>.<ext>`,
 а книга, перевод которой уже существует, пропускается (`--overwrite`, чтобы перевести её заново).
-Лаунчеры в папке `tools/` запускают `tools/translate_ebook.py` через `python_env`, ничего активировать не нужно,
+Лаунчеры в папке `tools/` запускают `tools/translate_ebook/translate_ebook.py` через `python_env`, ничего активировать не нужно,
 из любой папки (относительные пути отсчитываются от места запуска):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ options:
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Или напрямую через Python из `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). При запуске любым другим Python
+   - Или напрямую через Python из `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). При запуске любым другим Python
      скрипт перезапускает себя с Python из `python_env`.
-   - **Docker**: запускайте его внутри контейнера e2a, например `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: запускайте его внутри контейнера e2a, например `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      с путями, видимыми из контейнера.
    - **Скорость**: argostranslate работает со своими настройками по умолчанию (CTranslate2 выбирает число потоков и самый быстрый тип вычислений,
      int8 на CPU), а не с одним потоком в float32, как e2a. Задайте `ARGOS_INTRA_THREADS` или `ARGOS_COMPUTE_TYPE`, чтобы переопределить их.

@@ -596,7 +596,7 @@ options:
 نخستین زبان به EPUB تبدیل و به صورت EPUB ترجمه می‌شوند: وقتی زبانی مشخص نکرده باشند، که در PDF و TXT رایج است، `--from` لازم است.
 بدون `-o` یا `--output_dir`، هر ترجمه کنار کتاب خود با نام `<name>.<lang>.<ext>` ذخیره می‌شود،
 و کتابی که ترجمه‌اش از قبل وجود دارد رد می‌شود (`--overwrite` برای ترجمه دوباره).
-اجراکننده‌های پوشه `tools/` فایل `tools/translate_ebook.py` را با `python_env` اجرا می‌کنند، بدون نیاز به فعال‌سازی،
+اجراکننده‌های پوشه `tools/` فایل `tools/translate_ebook/translate_ebook.py` را با `python_env` اجرا می‌کنند، بدون نیاز به فعال‌سازی،
 از هر پوشه‌ای (مسیرهای نسبی از محل اجرا محاسبه می‌شوند):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ options:
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - یا مستقیماً با پایتون `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). اگر با پایتون دیگری اجرا شود،
+   - یا مستقیماً با پایتون `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). اگر با پایتون دیگری اجرا شود،
      اسکریپت خودش را دوباره با پایتون `python_env` اجرا می‌کند.
-   - **Docker**: آن را داخل کانتینر e2a اجرا کنید، مثلاً `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: آن را داخل کانتینر e2a اجرا کنید، مثلاً `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      با مسیرهایی که از داخل کانتینر دیده می‌شوند.
    - **سرعت**: argostranslate با پیش‌فرض‌های خودش اجرا می‌شود (CTranslate2 تعداد رشته‌ها و سریع‌ترین نوع محاسبه را انتخاب می‌کند،
      int8 روی CPU)، نه با یک رشته float32 مانند e2a. برای تغییر آن‌ها `ARGOS_INTRA_THREADS` یا `ARGOS_COMPUTE_TYPE` را تنظیم کنید.

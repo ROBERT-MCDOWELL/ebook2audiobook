@@ -596,7 +596,7 @@ Les autres formats lus par `ebook-convert` de calibre (PDF, DOCX, MOBI, TXT, ...
 première langue, puis traduits en EPUB : `--from` est nécessaire quand ils n'indiquent aucune langue, comme souvent les PDF et TXT.
 Sans `-o` ni `--output_dir`, chaque traduction est enregistrée à côté de son livre sous `<name>.<lang>.<ext>`,
 et un livre dont la traduction existe déjà est ignoré (`--overwrite` pour le traduire à nouveau).
-Les lanceurs du dossier `tools/` exécutent `tools/translate_ebook.py` avec `python_env`, rien à activer,
+Les lanceurs du dossier `tools/` exécutent `tools/translate_ebook/translate_ebook.py` avec `python_env`, rien à activer,
 depuis n'importe quel dossier (les chemins relatifs partent de l'endroit où il est lancé) :
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ depuis n'importe quel dossier (les chemins relatifs partent de l'endroit où il 
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Ou directement avec le Python de `python_env` : `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows : `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Lancé avec un autre Python,
+   - Ou directement avec le Python de `python_env` : `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows : `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Lancé avec un autre Python,
      le script se relance lui-même avec celui de `python_env`.
-   - **Docker** : exécutez-le dans le conteneur e2a, par ex. `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker** : exécutez-le dans le conteneur e2a, par ex. `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      avec les chemins vus depuis le conteneur.
    - **Vitesse** : argostranslate utilise ses propres réglages par défaut (CTranslate2 choisit les threads et le type de calcul le plus rapide,
      int8 sur CPU), et non le thread unique en float32 d'e2a. Définissez `ARGOS_INTRA_THREADS` ou `ARGOS_COMPUTE_TYPE` pour les remplacer.

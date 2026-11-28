@@ -15,7 +15,7 @@ app_tree_items = [
     'uninstall.command', 'uninstall.sh', 'uninstall.cmd',
     'Dockerfile', '.dockerignore', 'docker-compose.yml', 'podman-compose.yml',
     'lib', 'components', 'ext', 'voices', 'models', 'ebooks', 'audiobooks', 'tmp', 'run',
-    'tools/icons', 'tools/preload_models.py', 'tools/translate_ebook.py', 'tools/translate_ebook.sh', 'tools/translate_ebook.cmd',
+    'tools/icons', 'tools/preload_models.py', 'tools/translate_ebook', 'tools/translate_ebook.sh', 'tools/translate_ebook.cmd',
     'tools/argostranslate-calibre-plugin.zip',
 ]
 # folders e2a fills at runtime: only their .gitkeep ships, never what a local run left in them

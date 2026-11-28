@@ -596,7 +596,7 @@ Gli altri formati letti da `ebook-convert` di calibre (PDF, DOCX, MOBI, TXT, ...
 prima lingua, e tradotti come EPUB: `--from` è necessario quando non indicano alcuna lingua, come spesso accade per PDF e TXT.
 Senza `-o` o `--output_dir`, ogni traduzione viene salvata accanto al suo libro come `<name>.<lang>.<ext>`,
 e un libro la cui traduzione esiste già viene saltato (`--overwrite` per tradurlo di nuovo).
-I launcher nella cartella `tools/` eseguono `tools/translate_ebook.py` con `python_env`, nulla da attivare,
+I launcher nella cartella `tools/` eseguono `tools/translate_ebook/translate_ebook.py` con `python_env`, nulla da attivare,
 da qualsiasi cartella (i percorsi relativi vengono presi da dove viene avviato):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ da qualsiasi cartella (i percorsi relativi vengono presi da dove viene avviato):
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Oppure direttamente con il Python di `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Avviato con qualsiasi altro Python,
+   - Oppure direttamente con il Python di `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Avviato con qualsiasi altro Python,
      lo script si riavvia da solo con quello di `python_env`.
-   - **Docker**: eseguirlo all'interno del container e2a, ad es. `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: eseguirlo all'interno del container e2a, ad es. `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      con percorsi visti dal container.
    - **Velocità**: argostranslate viene eseguito in base alle proprie impostazioni predefinite (CTranslate2 sceglie i thread e il tipo di calcolo più veloce,
      int8 sulla CPU), non sul thread 1 di e2a in float32. Impostare `ARGOS_INTRA_THREADS` o `ARGOS_COMPUTE_TYPE` per sovrascriverli.

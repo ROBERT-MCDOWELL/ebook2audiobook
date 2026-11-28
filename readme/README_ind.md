@@ -596,7 +596,7 @@ Format lain yang dibaca `ebook-convert` milik calibre (PDF, DOCX, MOBI, TXT, ...
 bahasa pertama, lalu diterjemahkan sebagai EPUB: `--from` diperlukan jika file tidak menyertakan bahasa, seperti yang sering terjadi pada PDF dan TXT.
 Tanpa `-o` atau `--output_dir`, setiap terjemahan disimpan di sebelah bukunya sebagai `<name>.<lang>.<ext>`,
 dan buku yang terjemahannya sudah ada akan dilewati (`--overwrite` untuk menerjemahkannya lagi).
-Peluncur di folder `tools/` menjalankan `tools/translate_ebook.py` dengan `python_env`, tidak ada yang perlu diaktifkan,
+Peluncur di folder `tools/` menjalankan `tools/translate_ebook/translate_ebook.py` dengan `python_env`, tidak ada yang perlu diaktifkan,
 dari folder mana pun (path relatif dihitung dari lokasi peluncuran):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ dari folder mana pun (path relatif dihitung dari lokasi peluncuran):
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Atau langsung dengan Python dari `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Jika dijalankan dengan Python lain,
+   - Atau langsung dengan Python dari `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Jika dijalankan dengan Python lain,
      skrip akan menjalankan ulang dirinya dengan Python dari `python_env`.
-   - **Docker**: jalankan di dalam kontainer e2a, misalnya `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: jalankan di dalam kontainer e2a, misalnya `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      dengan path sebagaimana terlihat dari kontainer.
    - **Kecepatan**: argostranslate berjalan dengan pengaturan bawaannya sendiri (CTranslate2 memilih jumlah thread dan jenis komputasi tercepat,
      int8 di CPU), bukan dengan 1 thread float32 milik e2a. Atur `ARGOS_INTRA_THREADS` atau `ARGOS_COMPUTE_TYPE` untuk menimpanya.

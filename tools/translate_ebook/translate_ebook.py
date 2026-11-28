@@ -1,6 +1,6 @@
 import os, re, sys, glob, shutil, filecmp, argparse, tempfile, subprocess
 from pathlib import Path
-root_dir = str(Path(__file__).resolve().parents[1])
+root_dir = str(Path(__file__).resolve().parents[2])
 python_env_dir = os.path.join(root_dir, 'python_env')
 python_env_exec = os.path.join(python_env_dir, 'Scripts', 'python.exe') if sys.platform == 'win32' else os.path.join(python_env_dir, 'bin', 'python')
 # runs on e2a's python_env (argostranslate, iso639): started by another interpreter, it starts again with python_env's

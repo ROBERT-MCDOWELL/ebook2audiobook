@@ -596,7 +596,7 @@ Các định dạng khác mà `ebook-convert` của calibre đọc được (PDF
 ngôn ngữ đầu tiên, và được dịch dưới dạng EPUB: cần `--from` khi chúng không ghi ngôn ngữ, như PDF và TXT thường gặp.
 Nếu không có `-o` hoặc `--output_dir`, mỗi bản dịch được lưu cạnh cuốn sách của nó dưới tên `<name>.<lang>.<ext>`,
 và sách đã có bản dịch sẽ bị bỏ qua (`--overwrite` để dịch lại).
-Các trình khởi chạy trong thư mục `tools/` chạy `tools/translate_ebook.py` bằng `python_env`, không cần kích hoạt gì,
+Các trình khởi chạy trong thư mục `tools/` chạy `tools/translate_ebook/translate_ebook.py` bằng `python_env`, không cần kích hoạt gì,
 từ bất kỳ thư mục nào (đường dẫn tương đối được tính từ nơi khởi chạy):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ từ bất kỳ thư mục nào (đường dẫn tương đối được tính t
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Hoặc chạy trực tiếp bằng Python của `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Nếu được khởi chạy bằng Python khác,
+   - Hoặc chạy trực tiếp bằng Python của `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Nếu được khởi chạy bằng Python khác,
      script sẽ tự khởi động lại bằng Python của `python_env`.
-   - **Docker**: chạy bên trong container e2a, ví dụ `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: chạy bên trong container e2a, ví dụ `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      với đường dẫn nhìn từ bên trong container.
    - **Tốc độ**: argostranslate chạy với mặc định riêng của nó (CTranslate2 chọn số luồng và kiểu tính toán nhanh nhất,
      int8 trên CPU), không phải 1 luồng float32 của e2a. Đặt `ARGOS_INTRA_THREADS` hoặc `ARGOS_COMPUTE_TYPE` để ghi đè.

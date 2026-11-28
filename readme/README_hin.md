@@ -596,7 +596,7 @@ calibre का `ebook-convert` जिन अन्य फ़ॉर्मैट (
 एक बार EPUB में बदले जाते हैं और EPUB के रूप में अनुवादित होते हैं: जब उनमें कोई भाषा दर्ज न हो, जैसा PDF और TXT में अक्सर होता है, तब `--from` आवश्यक है।
 `-o` या `--output_dir` के बिना, हर अनुवाद उसकी पुस्तक के बगल में `<name>.<lang>.<ext>` नाम से सहेजा जाता है,
 और जिस पुस्तक का अनुवाद पहले से मौजूद है उसे छोड़ दिया जाता है (दोबारा अनुवाद के लिए `--overwrite`)।
-`tools/` फ़ोल्डर में मौजूद लॉन्चर `tools/translate_ebook.py` को `python_env` के साथ चलाते हैं, कुछ भी सक्रिय करने की ज़रूरत नहीं,
+`tools/` फ़ोल्डर में मौजूद लॉन्चर `tools/translate_ebook/translate_ebook.py` को `python_env` के साथ चलाते हैं, कुछ भी सक्रिय करने की ज़रूरत नहीं,
 किसी भी फ़ोल्डर से (सापेक्ष पथ वहीं से लिए जाते हैं जहाँ से इसे शुरू किया गया):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ calibre का `ebook-convert` जिन अन्य फ़ॉर्मैट (
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - या सीधे `python_env` के Python से: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`)। किसी अन्य Python से शुरू करने पर,
+   - या सीधे `python_env` के Python से: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`)। किसी अन्य Python से शुरू करने पर,
      स्क्रिप्ट खुद को `python_env` के Python से फिर से शुरू कर लेती है।
-   - **Docker**: इसे e2a कंटेनर के अंदर चलाएँ, जैसे `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: इसे e2a कंटेनर के अंदर चलाएँ, जैसे `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      कंटेनर से दिखने वाले पथों के साथ।
    - **गति**: argostranslate अपनी डिफ़ॉल्ट सेटिंग्स पर चलता है (CTranslate2 थ्रेड और सबसे तेज़ कंप्यूट टाइप चुनता है,
      CPU पर int8), e2a के float32 वाले 1 थ्रेड पर नहीं। इन्हें बदलने के लिए `ARGOS_INTRA_THREADS` या `ARGOS_COMPUTE_TYPE` सेट करें।

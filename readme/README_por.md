@@ -596,7 +596,7 @@ Outros formatos lidos pelo `ebook-convert` do calibre (PDF, DOCX, MOBI, TXT, ...
 primeiro idioma, e traduzidos como EPUB: `--from` é necessário quando não indicam idioma, como costuma acontecer com PDF e TXT.
 Sem `-o` ou `--output_dir`, cada tradução é salva ao lado do seu livro como `<name>.<lang>.<ext>`,
 e um livro cuja tradução já existe é ignorado (`--overwrite` para traduzi-lo novamente).
-Os lançadores na pasta `tools/` executam `tools/translate_ebook.py` com `python_env`, nada para ativar,
+Os lançadores na pasta `tools/` executam `tools/translate_ebook/translate_ebook.py` com `python_env`, nada para ativar,
 de qualquer pasta (os caminhos relativos são retirados de onde é iniciado):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ de qualquer pasta (os caminhos relativos são retirados de onde é iniciado):
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Ou diretamente com o Python do `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Iniciado com qualquer outro Python,
+   - Ou diretamente com o Python do `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Iniciado com qualquer outro Python,
      o script se reinicia com o do `python_env`.
-   - **Docker**: executá-lo dentro do contêiner do e2a, por exemplo, `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: executá-lo dentro do contêiner do e2a, por exemplo, `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      com caminhos vistos a partir do contentor.
    - **Velocidade**: o argostranslate é executado em seus próprios padrões (o CTranslate2 escolhe os threads e o tipo de computação mais rápido,
      int8 na CPU), não no 1 thread do e2a no float32. Defina `ARGOS_INTRA_THREADS` ou `ARGOS_COMPUTE_TYPE` para substituí-los.

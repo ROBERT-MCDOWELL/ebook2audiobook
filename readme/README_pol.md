@@ -596,7 +596,7 @@ Inne formaty odczytywane przez `ebook-convert` z calibre (PDF, DOCX, MOBI, TXT, 
 pierwszym językiem, i tłumaczone jako EPUB: `--from` jest potrzebny, gdy nie mają określonego języka, co często zdarza się w PDF i TXT.
 Bez `-o` lub `--output_dir` każde tłumaczenie jest zapisywane obok swojej książki jako `<name>.<lang>.<ext>`,
 a książka, której tłumaczenie już istnieje, jest pomijana (`--overwrite`, aby przetłumaczyć ją ponownie).
-Skrypty uruchamiające w folderze `tools/` uruchamiają `tools/translate_ebook.py` z `python_env`, nic do aktywowania,
+Skrypty uruchamiające w folderze `tools/` uruchamiają `tools/translate_ebook/translate_ebook.py` z `python_env`, nic do aktywowania,
 z dowolnego folderu (ścieżki względne są pobierane z miejsca, w którym są uruchamiane):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ z dowolnego folderu (ścieżki względne są pobierane z miejsca, w którym są 
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Lub bezpośrednio za pomocą Pythona z `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Uruchamiany z dowolnym innym Pythonem,
+   - Lub bezpośrednio za pomocą Pythona z `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Uruchamiany z dowolnym innym Pythonem,
      skrypt uruchamia się ponownie z tym z `python_env`.
-   - **Docker**: uruchom go wewnątrz kontenera e2a, np. `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: uruchom go wewnątrz kontenera e2a, np. `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      ze ścieżkami widocznymi z kontenera.
    - **Prędkość**: argostranslate działa zgodnie z własnymi ustawieniami domyślnymi (CTranslate2 wybiera wątki i najszybszy typ obliczeniowy,
      int8 na CPU), a nie na 1 wątku e2a w float32. Ustaw `ARGOS_INTRA_THREADS` lub `ARGOS_COMPUTE_TYPE`, aby je zastąpić.

@@ -596,7 +596,7 @@ Miundo mingine ambayo `ebook-convert` ya calibre husoma (PDF, DOCX, MOBI, TXT, .
 lugha ya kwanza, na kutafsiriwa kama EPUB: `--from` inahitajika zisipobainisha lugha, kama ilivyo mara nyingi kwa PDF na TXT.
 Bila `-o` au `--output_dir`, kila tafsiri huhifadhiwa kando ya kitabu chake kama `<name>.<lang>.<ext>`,
 na kitabu ambacho tafsiri yake tayari ipo huachwa (`--overwrite` ili kukitafsiri tena).
-Vizinduzi vilivyo kwenye folda ya `tools/` huendesha `tools/translate_ebook.py` kwa `python_env`, hakuna cha kuamilisha,
+Vizinduzi vilivyo kwenye folda ya `tools/` huendesha `tools/translate_ebook/translate_ebook.py` kwa `python_env`, hakuna cha kuamilisha,
 kutoka folda yoyote (njia za jamaa huchukuliwa kutoka mahali kilipoanzishwa):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ kutoka folda yoyote (njia za jamaa huchukuliwa kutoka mahali kilipoanzishwa):
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Au moja kwa moja kwa Python ya `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Kikianzishwa kwa Python nyingine yoyote,
+   - Au moja kwa moja kwa Python ya `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Kikianzishwa kwa Python nyingine yoyote,
      hati hujianzisha upya kwa Python ya `python_env`.
-   - **Docker**: iendeshe ndani ya kontena la e2a, kwa mfano `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: iendeshe ndani ya kontena la e2a, kwa mfano `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      kwa njia kama zinavyoonekana kutoka ndani ya kontena.
    - **Kasi**: argostranslate huendeshwa kwa chaguo-msingi zake (CTranslate2 huchagua nyuzi na aina ya hesabu iliyo ya haraka zaidi,
      int8 kwenye CPU), si kwa uzi 1 wa float32 wa e2a. Weka `ARGOS_INTRA_THREADS` au `ARGOS_COMPUTE_TYPE` ili kuzibadilisha.

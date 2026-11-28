@@ -596,7 +596,7 @@ Ostatné formáty, ktoré číta `ebook-convert` z calibre (PDF, DOCX, MOBI, TXT
 prvým jazykom, a preložia sa ako EPUB: `--from` je potrebný, keď neuvádzajú žiadny jazyk, čo sa pri PDF a TXT často stáva.
 Bez `-o` alebo `--output_dir` sa každý preklad uloží vedľa svojej knihy ako `<name>.<lang>.<ext>`,
 a kniha, ktorej preklad už existuje, sa preskočí (`--overwrite` na nový preklad).
-Spúšťače v priečinku `tools/` spúšťajú `tools/translate_ebook.py` s `python_env`, netreba nič aktivovať,
+Spúšťače v priečinku `tools/` spúšťajú `tools/translate_ebook/translate_ebook.py` s `python_env`, netreba nič aktivovať,
 z ľubovoľného priečinka (relatívne cesty sa berú od miesta spustenia):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ z ľubovoľného priečinka (relatívne cesty sa berú od miesta spustenia):
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - Alebo priamo s Pythonom z `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). Ak sa spustí iným Pythonom,
+   - Alebo priamo s Pythonom z `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). Ak sa spustí iným Pythonom,
      skript sa sám znova spustí s tým z `python_env`.
-   - **Docker**: spustite ho vnútri kontajnera e2a, napr. `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: spustite ho vnútri kontajnera e2a, napr. `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      s cestami, ako ich vidí kontajner.
    - **Rýchlosť**: argostranslate beží na vlastných predvolených nastaveniach (CTranslate2 volí vlákna a najrýchlejší typ výpočtu,
      int8 na CPU), nie na jednom vlákne e2a vo float32. Na prepísanie nastavte `ARGOS_INTRA_THREADS` alebo `ARGOS_COMPUTE_TYPE`.

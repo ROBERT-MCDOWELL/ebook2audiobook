@@ -596,7 +596,7 @@ options:
 اللغة الأولى، وتُترجَم بصيغة EPUB: يلزم `--from` عندما لا تحمل أي لغة، كما هو الحال غالبًا مع PDF وTXT.
 بدون `-o` أو `--output_dir`، تُحفظ كل ترجمة بجانب كتابها باسم `<name>.<lang>.<ext>`،
 ويُتخطّى الكتاب الذي توجد ترجمته مسبقًا (`--overwrite` لترجمته مرة أخرى).
-المشغّلات في المجلد `tools/` تشغّل `tools/translate_ebook.py` باستخدام `python_env`، دون أي تفعيل،
+المشغّلات في المجلد `tools/` تشغّل `tools/translate_ebook/translate_ebook.py` باستخدام `python_env`، دون أي تفعيل،
 من أي مجلد (تُحسب المسارات النسبية من مكان التشغيل):
    - **Linux/MacOS**
      ```bash
@@ -606,10 +606,10 @@ options:
      ```bash
      tools\translate_ebook.cmd C:\books -r --to fra,spa --output_dir C:\books_translated
      ```
-   - أو مباشرة باستخدام Python الخاص بـ `python_env`: `./python_env/bin/python tools/translate_ebook.py ...`
-     (Windows: `python_env\Scripts\python.exe tools\translate_ebook.py ...`). إذا شُغّل بأي Python آخر،
+   - أو مباشرة باستخدام Python الخاص بـ `python_env`: `./python_env/bin/python tools/translate_ebook/translate_ebook.py ...`
+     (Windows: `python_env\Scripts\python.exe tools\translate_ebook\translate_ebook.py ...`). إذا شُغّل بأي Python آخر،
      يعيد السكربت تشغيل نفسه باستخدام Python الخاص بـ `python_env`.
-   - **Docker**: شغّله داخل حاوية e2a، مثلًا `docker exec -it <container> python3 tools/translate_ebook.py ...`
+   - **Docker**: شغّله داخل حاوية e2a، مثلًا `docker exec -it <container> python3 tools/translate_ebook/translate_ebook.py ...`
      مع المسارات كما تُرى من داخل الحاوية.
    - **السرعة**: يعمل argostranslate بإعداداته الافتراضية (يختار CTranslate2 عدد الخيوط وأسرع نوع حساب،
      int8 على CPU)، وليس بخيط واحد بدقة float32 كما في e2a. اضبط `ARGOS_INTRA_THREADS` أو `ARGOS_COMPUTE_TYPE` لتغييرها.
