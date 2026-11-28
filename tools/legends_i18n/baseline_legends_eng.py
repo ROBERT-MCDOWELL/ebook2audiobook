@@ -531,6 +531,8 @@ legends = {
     'error_import_missing_restart': 'The install step could not put {module} back while this start has its packages open (Windows locks the files a running program uses).\nClose every ebook2audiobook window, then start it again: the install step runs before anything is loaded.',
     'msg_removing_unusable_torchcodec': 'Removing torchcodec {version}: no torchcodec runs with torch {torch} (below 2.9), pyannote works without it.',
     'msg_removing_torchvision': 'Removing torchvision {version}: ebook2audiobook does not use it, and one built for another torch breaks transformers.',
+    'msg_removing_orphan_gpu_runtimes': 'Removing CUDA runtime packages left by another torch build, which nothing installed needs: {pkgs}. Their libraries can replace the ones torch {torch} loads (cuDNN, NCCL).',
+    'msg_cudnn_unusable': 'WARNING: cuDNN {version} cannot initialize on this GPU ({e}). Convolutions run on torch\'s own CUDA kernels instead, slower. Restart ebook2audiobook: its install step repairs the CUDA runtime packages.',
     'msg_removing_obsolete': 'Removing obsolete package {pkg}…',
     'msg_remove_obsolete_failed': 'Failed to remove obsolete package {pkg} (non-fatal): {e}',
     'error_numpy_install_failed': 'Failed to install numpy package: {e}',
