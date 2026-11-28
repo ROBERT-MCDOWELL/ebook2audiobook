@@ -5043,6 +5043,9 @@ def convert_ebook(args:dict)->tuple:
                 # no voice given (headless without --voice): the engine's default one, set before the resume prompt
                 # compares it with the last conversion's and before the first step speaks it in the XTTS language
                 session['voice'] = engine_default_voice(session_id)
+            if not session['is_gui_process']:
+                # headless: the GUI's voice list warning, before the ebook is extracted
+                alert_vc_cpu(session_id, session, session['voice'])
             session['xtts_temperature'] = float(args['xtts_temperature']) if args.get('xtts_temperature') not in (None, '') else default_engine_settings[TTS_ENGINES['XTTS']]['temperature']
             session['xtts_codec_temperature'] = float(args['xtts_codec_temperature']) if args.get('xtts_codec_temperature') not in (None, '') else default_engine_settings[TTS_ENGINES['XTTS']]['codec_temperature']
             session['xtts_length_penalty'] = float(args['xtts_length_penalty']) if args.get('xtts_length_penalty') not in (None, '') else default_engine_settings[TTS_ENGINES['XTTS']]['length_penalty']
@@ -5908,6 +5911,28 @@ def show_alert(session_id:str|None, state:dict|None)->None:
                                 gr.Info(state['msg'])
                             elif state['type'] == 'success':
                                 gr.Success(state['msg'])
+
+def alert_vc_cpu(session_id:str, session:DictProxy, voice:str|None)->None:
+    # a voice other than Internal on CPU, for an engine that converts it (tts_engines_with_vc): kNN-VC runs on every
+    # sentence and the cloned voice loses quality. Told when the voice or the device changes in the GUI, at the start of a
+    # headless conversion, and again by TTSUtils._alert_vc() at the first converted sentence. As the engines decide: not
+    # for their own speakers, a custom model's voice file (headless: the model still its zip, named as its folder will
+    # be), nor KittenTTS 2 (clones it itself)
+    engine = session.get('tts_engine')
+    if voice is None or session.get('device') != devices['CPU']['proc'] or engine not in tts_engines_with_vc:
+        return
+    custom_model = session.get('custom_model')
+    if custom_model is None and Path(voice).stem in default_engine_settings[engine].get('voices', {}):
+        return
+    if custom_model is not None and Path(voice).stem in (os.path.basename(custom_model), Path(custom_model).stem):
+        return
+    if engine == TTS_ENGINES['KITTENTTS']:
+        language = session['translate'] if session.get('translate_enabled') and session.get('translate') else session.get('language')
+        checkpoint = load_engine_presets(engine).get(session.get('fine_tuned'), {}).get('checkpoints', {}).get(language)
+        if checkpoint is None or checkpoint['family'] == 'kitten2':
+            return
+    msg = legends['msg_vc_knnvc_degraded'].format(engine=engine, vc_model=default_vc_model_cpu.rsplit('/', 1)[-1], internal=legends['gr_voice_list_default'])
+    show_alert(session_id, {'type': 'warning', 'msg': msg})
 
 def exception_alert(session_id:str|None, error:str|None)->None:
     if error is not None:
