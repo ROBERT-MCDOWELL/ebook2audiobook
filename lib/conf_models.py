@@ -144,9 +144,10 @@ default_voice_detection_model = 'drewThomasson/segmentation'
 # file keeps its demucs name: <signature>-<sha256 prefix>.th, the prefix is checked again at load
 default_voice_separation_model = dict(repo='drewThomasson/htdemucs', name='htdemucs', file='955717e8-8726e21a.th')
 # Inworld Voice Isolator v1, the other background removal of an uploaded voice (lib/conf.py default_voice_separation_engine),
-# run on audiocpp_server (family voice_isolator, task s2s): the offline checkpoint (two-sided, 12 s windows overlapping 2 s),
-# 48 kHz mono out. At the revision audio.cpp's model_specs/voice_isolator.json pins
-default_voice_isolator_model = dict(repo='Etherll/voice-isolator-GGUF', revision='488f02f87199e3f24ad195b5b2d4b44705aca545', family='voice_isolator', task='s2s', file='voice-isolator-offline-f32.gguf', min_version='0.9.6')
+# run on audiocpp_server (family voice_isolator, task s2s): the offline checkpoint (two-sided, 12 s windows overlapping 2 s,
+# sent one per request by the worker so the progress bar follows them), 48 kHz mono out. At the revision audio.cpp's
+# model_specs/voice_isolator.json pins
+default_voice_isolator_model = dict(repo='Etherll/voice-isolator-GGUF', revision='488f02f87199e3f24ad195b5b2d4b44705aca545', family='voice_isolator', task='s2s', file='voice-isolator-offline-f32.gguf', samplerate=48000, chunk_sec=12.0, overlap_sec=2.0, min_version='0.9.6')
 default_speaker = os.path.join(voices_dir, 'eng', 'adult', 'male', 'KumarDahl.wav')
 
 tts_engines_from_coqui = [TTS_ENGINES['XTTS'], TTS_ENGINES['BARK'], TTS_ENGINES['TORTOISE'], TTS_ENGINES['VITS'], TTS_ENGINES['FAIRSEQ'], TTS_ENGINES['GLOWTTS'], TTS_ENGINES['TACOTRON'], TTS_ENGINES['YOURTTS']]

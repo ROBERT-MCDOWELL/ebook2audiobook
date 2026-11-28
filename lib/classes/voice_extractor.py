@@ -216,8 +216,8 @@ class VoiceExtractor:
         # (VoiceConversion.packages() / install()), on the device selected when audio.cpp runs there (CUDA, Vulkan, Metal),
         # else on the next GPU package. GPU only: on CPU its 64M band-split network (46 bands x 100 frames/s, width 512,
         # f32) costs seconds per second of audio, many times demucs, so no CPU package (extract_voice() sends a CPU
-        # device to demucs, a GPU none of the packages starts on falls back to it). One request for the whole file, then
-        # the worker stops: its memory goes back to the TTS engine
+        # device to demucs, a GPU none of the packages starts on falls back to it). One request per 12 s window of the file
+        # (the bar follows them, isolator_progress), then the worker stops: its memory goes back to the TTS engine
         from lib.classes.tts_engines.common.voice_conversion import VoiceConversion
         error = '_isolate_voice() error'
         worker = None
@@ -240,7 +240,10 @@ class VoiceExtractor:
                 backend = package.get('backend', 'cpu') if package['gpu'] and gpu_wanted else 'cpu'
                 try:
                     server_bin = VoiceConversion.install(package_name, model['family'], worker_env)
-                    cmd = [sys.executable, '-u', worker_script, '--server', server_bin, '--model', model_path, '--family', model['family'], '--backend', backend, '--vc-task', model['task'], '--vc-only']
+                    cmd = [
+                        sys.executable, '-u', worker_script, '--server', server_bin, '--model', model_path, '--family', model['family'], '--backend', backend, '--vc-task', model['task'],
+                        '--samplerate', str(model['samplerate']), '--s2s-chunk', str(model['chunk_sec']), '--s2s-overlap', str(model['overlap_sec']), '--vc-only'
+                    ]
                     msg = legends['msg_worker_starting'].format(engine=model['family'], model=os.path.basename(model_path), device=f'{package_name}, {backend}')
                     print(msg)
                     worker = SubprocessPipe(cmd, is_gui_process=self.is_gui_process, total_duration=0, msg=msg, keep_alive=True, env=worker_env)
@@ -258,7 +261,15 @@ class VoiceExtractor:
             msg = legends['msg_extracting_voice']
             if self.is_gui_process:
                 self.progress_bar(0.0, desc=msg)
-            reply = worker.send({'op': 's2s', 'source': os.path.abspath(self.wav_file), 'file': os.path.abspath(self.voice_track)})
+
+            def isolator_progress(fraction:float)->None:
+                # one step per window the worker renders, as demucs_callback
+                print(f'\r[Voice Isolator] {fraction * 100:.2f}%', end='', flush=True)
+                if self.is_gui_process:
+                    self.progress_bar(fraction, desc=msg)
+
+            reply = worker.send({'op': 's2s', 'source': os.path.abspath(self.wav_file), 'file': os.path.abspath(self.voice_track)}, on_progress=isolator_progress)
+            print()
             if not reply.get('ok'):
                 raise RuntimeError(reply.get('error'))
             if not os.path.exists(self.voice_track) or os.path.getsize(self.voice_track) == 0:

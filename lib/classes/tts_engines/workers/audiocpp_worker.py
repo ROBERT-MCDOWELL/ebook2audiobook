@@ -13,7 +13,8 @@
 #             file converts its output with the --vc-model (Seed-VC)
 #   stdin  -> --vc-only (the VC stage of e2a's built-in voice engines, VoiceConversion): --model/--family is the VC model
 #             and the only op is {"op": "vc", "source" (the wav to convert), "voice" (the voice file), "file"}
-#             --vc-task s2s (the voice isolator of VoiceExtractor): no voice, the only op is {"op": "s2s", "source", "file"}
+#             --vc-task s2s (the voice isolator of VoiceExtractor): no voice, the only op is {"op": "s2s", "source", "file"},
+#             sent in --s2s-chunk windows: {"progress": done / total} lines (0..1) come before its reply
 #   stdout <- {"ok": true, "file": "..."}
 #             {"ok": false, "error": "...", "oom": bool, "server_exited": bool}
 #   EOF on stdin -> the server is stopped, exit 0
@@ -49,6 +50,9 @@ def main()->int:
     # the VC model's task in the server: vc (Seed-VC, Chatterbox), svc (SoulX-Singer), s2s (voice isolator, no voice)
     parser.add_argument('--vc-task', choices=['vc', 'svc', 's2s'], default='vc')
     parser.add_argument('--vc-options', default='{}')
+    # s2s: the window and overlap of the model's own offline rendering (voice isolator: 12 s, 2 s), --samplerate its rate
+    parser.add_argument('--s2s-chunk', type=float, default=12.0)
+    parser.add_argument('--s2s-overlap', type=float, default=2.0)
     parser.add_argument('--vc-only', action='store_true')
     parser.add_argument('--samplerate', type=int, default=24000)
     args = parser.parse_args()
@@ -300,6 +304,60 @@ def main()->int:
         if vc_options:
             vc_route['options'] = vc_options
         vc_op = 's2s' if args.vc_task == 's2s' else 'vc'
+
+        def read_pcm(path:str, dst:str)->array.array:
+            # any audio (float WAV included) -> mono 16-bit at --samplerate, as samples
+            run = subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-i', path, '-ac', '1', '-ar', str(args.samplerate), '-sample_fmt', 's16', dst], capture_output=True, text=True, errors='replace')
+            if run.returncode != 0:
+                raise RuntimeError(f'ffmpeg cannot read {path}: {run.stderr.strip()[-300:]}')
+            with wave.open(dst, 'rb') as w:
+                pcm = array.array('h', w.readframes(w.getnframes()))
+            if sys.byteorder == 'big':
+                pcm.byteswap()
+            return pcm
+
+        def write_pcm(pcm:array.array, dst:str)->None:
+            if sys.byteorder == 'big':
+                pcm = array.array('h', pcm)
+                pcm.byteswap()
+            with wave.open(dst, 'wb') as w:
+                w.setnchannels(1)
+                w.setsampwidth(2)
+                w.setframerate(args.samplerate)
+                w.writeframes(pcm.tobytes())
+
+        def s2s(source:str, dst:str)->None:
+            # the offline voice isolator renders --s2s-chunk windows overlapping --s2s-overlap: the same windows go one per
+            # request, so e2a's bar follows them, and are joined with a linear crossfade over each overlap
+            src = read_pcm(source, os.path.join(work_dir, 's2s_source.wav'))
+            size = max(1, int(args.s2s_chunk * args.samplerate))
+            overlap = min(size - 1, max(0, int(args.s2s_overlap * args.samplerate)))
+            starts = [0]
+            while starts[-1] + size < len(src):
+                starts.append(starts[-1] + size - overlap)
+            out = array.array('h')
+            chunk_in = os.path.join(work_dir, 's2s_chunk_in.wav')
+            chunk_out = os.path.join(work_dir, 's2s_chunk_out.wav')
+            for done, start in enumerate(starts, 1):
+                write_pcm(src[start:start + size], chunk_in)
+                result = json.loads(post('/v1/tasks/run', {'model': 'e2a-vc', 'request': {'audio': chunk_in}}, 1800))
+                if not result.get('audio'):
+                    raise RuntimeError(f"{args.family} returned no audio: {str(result)[:200]}")
+                with open(chunk_out, 'wb') as f:
+                    f.write(base64.b64decode(result['audio']))
+                part = read_pcm(chunk_out, os.path.join(work_dir, 's2s_chunk_pcm.wav'))
+                # the window's length exactly, so the next one still lines up
+                expected = min(size, len(src) - start)
+                part = part[:expected]
+                if len(part) < expected:
+                    part.extend([0] * (expected - len(part)))
+                fade = min(len(out) - start, len(part))
+                for i in range(fade):
+                    t = (i + 1) / (fade + 1)
+                    out[start + i] = int(round(out[start + i] * (1.0 - t) + part[i] * t))
+                out.extend(part[fade:])
+                proto.write(json.dumps({'progress': round(done / len(starts), 4)}) + '\n')
+            write_pcm(out, dst)
         proto.write(json.dumps({'ready': True, 'samplerate': args.samplerate, 'backend': args.backend, 'port': config['port']}) + '\n')
         while True:
             raw = sys.stdin.buffer.readline()
@@ -317,13 +375,7 @@ def main()->int:
                 if server.poll() is not None:
                     raise RuntimeError(f'audiocpp_server exited ({server.poll()}): ' + ' | '.join(state['tail'][-5:]))
                 if args.vc_only and vc_op == 's2s':
-                    # the whole source file in one request (any rate and channels: the model resamples it), so a long
-                    # upload on CPU gets more time than a sentence
-                    result = json.loads(post('/v1/tasks/run', {'model': 'e2a-vc', 'request': {'audio': os.path.abspath(req['source'])}}, 7200))
-                    if not result.get('audio'):
-                        raise RuntimeError(f"{args.family} returned no audio: {str(result)[:200]}")
-                    with open(req['file'], 'wb') as f:
-                        f.write(base64.b64decode(result['audio']))
+                    s2s(os.path.abspath(req['source']), req['file'])
                     proto.write(json.dumps({'ok': True, 'file': req['file']}) + '\n')
                     continue
                 if args.vc_only:

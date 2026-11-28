@@ -305,9 +305,10 @@ class SubprocessPipe:
             msg = legends['msg_worker_busy'].format(seconds=int(time.monotonic() - start), cores=cores, total=total)
             print(msg)
 
-    def send(self, request:dict)->dict:
+    def send(self, request:dict, on_progress:Callable[[float], None]|None=None)->dict:
         # one request line out, one reply line back. The lock serializes callers
-        # (one worker = one model in memory), so threads take turns.
+        # (one worker = one model in memory), so threads take turns. A long request may
+        # be preceded by {"progress": 0..1} lines (no "ok"): to on_progress, else the bar.
         with self._lock:
             try:
                 if not self.keep_alive or self.process is None or self.process.poll() is not None:
@@ -317,7 +318,15 @@ class SubprocessPipe:
                 done = threading.Event()
                 threading.Thread(target=self._busy_notices, args=(done,), daemon=True).start()
                 try:
-                    line = self.process.stdout.readline()
+                    while True:
+                        line = self.process.stdout.readline()
+                        reply = json.loads(line) if line else None
+                        if not (isinstance(reply, dict) and 'progress' in reply and 'ok' not in reply):
+                            break
+                        if on_progress is not None:
+                            on_progress(float(reply['progress']))
+                        else:
+                            self._emit_progress(float(reply['progress']) * 100.0)
                 finally:
                     done.set()
                 if not line:
@@ -326,6 +335,6 @@ class SubprocessPipe:
                     except Exception:
                         pass
                     return {'ok': False, 'error': legends['error_worker_exited'].format(code=self.process.poll())}
-                return json.loads(line)
+                return reply
             except Exception as e:
                 return {'ok': False, 'error': legends['error_subprocess'].format(e=e)}
